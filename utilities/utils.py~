@@ -1,0 +1,10 @@
+import glob
+import os
+
+
+
+def get_runs(path, language):
+    dir_, base = os.path.split(path)
+    dir = os.path.basename(dir_)
+    data = [sorted(glob.glob(join(path, '{}_{}_run*.txt'.format(dir, base))))]
+    return data

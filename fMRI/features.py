@@ -17,6 +17,7 @@ scans = Scans()
 
 
 def process_raw_features(run, tr, nscans):
+    # compute convolution of raw_features with hrf kernel
     df = pd.read_csv(run)
     conditions = np.vstack((df.onset, df.duration, df.amplitude))
     result = compute_regressor(exp_condition=conditions,
@@ -40,12 +41,15 @@ if __name =='__main__':
     for model_ in args.models[0]:
 
         data_type = 'raw_features'
+        extension = '.csv'
         data = get_data(args.language, data_type, model_, source='fMRI', args.test)
             
         for i, run in enumerate(data):
-            name = os.path.basename(run)
+            name = os.path.basename(os.path.splitext(run)[0])
             run_name = name.split('_')[-1]
-            path2output = join(paths.path2derivatives, "features/{0}/{1}/features_{0}_{1}_{2}".format(args.language, model_, run_name))
             nscans = scans.get_nscans(run_name)
+            
             df = process_raw_features(run, agrs.tr, nscans)
-            df.to_csv(path2output, index=False, header=False)
+
+            path2output = join(paths.path2derivatives, "features/{0}/{1}/features_{0}_{1}_{2}".format(args.language, model_, run_name)+extension)
+            df.to_csv(path2output, index=False, header=False) # saving features.csv

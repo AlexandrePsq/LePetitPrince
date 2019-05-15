@@ -7,6 +7,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from ..utilities.settings import Paths
+import pandas as pd
 
 paths = Paths()
 
@@ -29,15 +30,18 @@ if __name__ == '__main__':
             data_type = 'wave'
         else:
             data_type = 'text'
-        data = get_data(args.language, data_type, model_, source='fMRI', args.test)
+        extension = '.csv'
+        data = get_data(args.language, data_type, model_, source='fMRI', args.test) # retrieve the data to transform
 
         for i, run in enumerate(data):
+            name = os.path.basename(os.path.splitext(run)[0])
+            run_name = name.split('_')[-1] # extract the name of the run
+            
             raw_features = model.generate(run) # generate raw_features from model's predictions
 
             if len(list(raw_features.columns)) < 3:
+                raw_features['onsets'] = pd.read_csv(join(paths.path2data, data_type, args.language, 'onsets-offsets', '{}_{}_onsets-offsets_{}'.format(data_type, args.language, run_name)+extension))['onsets']
                 raw_features['duration'] = 0
 
-            name = os.path.basename(run)
-            name = name.split('_')[-1]
-            path2output = join(paths.path2derivatives, 'raw_features/{0}/{1}/raw_features_{0}_{1}_{2}'.format(args.language, model_, name))
-            raw_features.to_csv(path2output, index=False)
+            path2output = join(paths.path2derivatives, 'raw_features/{0}/{1}/raw_features_{0}_{1}_{2}'.format(args.language, model_, run_name) + extension)
+            raw_features.to_csv(path2output, index=False) # saving raw_features.csv

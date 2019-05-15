@@ -6,6 +6,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from ..utilities.settings import Paths
+from ..utilities.utils import *
 import pandas as pd
 
 paths = Paths()
@@ -16,6 +17,7 @@ if __name__ == '__main__':
     parser.add_argument("--test", type=bool, default=False, action='store_true', help="Precise if we are running a test.")
     parser.add_argument("--language", type=str, default='en', help="Language of the text and the model.")
     parser.add_argument("--models", nargs='+', action='append', default=[], help="Name of the models to use to generate the raw features.")
+    parser.add_argument("--overwrite", type=bool, default=False, action='store_true', help="Precise if we overwrite existing files")
 
 
     args = parser.parse_args()
@@ -24,6 +26,9 @@ if __name__ == '__main__':
         module = importlib.import_module("..models.{}.{}.py".format(args.language, model_)) # import the right module depending on the model we want to use
         model = module.create_model() # initialized the model
         model.load() # load an already trained model
+
+        output_parent_folder = join(paths.path2derivatives, 'raw_features/{0}/{1}'.format(args.language, model_))
+        check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
         if model_ in ['rms', 'f0']:
             data_type = 'wave'
@@ -35,12 +40,13 @@ if __name__ == '__main__':
         for i, run in enumerate(data):
             name = os.path.basename(os.path.splitext(run)[0])
             run_name = name.split('_')[-1] # extract the name of the run
+            path2output = join(output_parent_folder, 'raw_features_{0}_{1}_{2}'.format(args.language, model_, run_name) + extension)
             
-            raw_features = model.generate(run) # generate raw_features from model's predictions
+            if compute(path2output, args.overwrite):
+                raw_features = model.generate(run) # generate raw_features from model's predictions
 
-            if len(list(raw_features.columns)) < 3:
-                raw_features['onsets'] = pd.read_csv(join(paths.path2data, data_type, args.language, 'onsets-offsets', '{}_{}_onsets-offsets_{}'.format(data_type, args.language, run_name)+extension))['onsets']
-                raw_features['duration'] = 0
+                if len(list(raw_features.columns)) < 3:
+                    raw_features['onsets'] = pd.read_csv(join(paths.path2data, data_type, args.language, 'onsets-offsets', '{}_{}_onsets-offsets_{}'.format(data_type, args.language, run_name)+extension))['onsets']
+                    raw_features['duration'] = 0
 
-            path2output = join(paths.path2derivatives, 'raw_features/{0}/{1}/raw_features_{0}_{1}_{2}'.format(args.language, model_, run_name) + extension)
-            raw_features.to_csv(path2output, index=False) # saving raw_features.csv
+                raw_features.to_csv(path2output, index=False) # saving raw_features.csv

@@ -6,7 +6,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from ..utilities.settings import Paths, Scans
-from ..utilities.utils import get_data
+from ..utilities.utils import *
 import pandas as pd
 import numpy as np
 from nistats.hemodynamic_models import compute_regressor
@@ -35,10 +35,14 @@ if __name =='__main__':
     parser.add_argument("--models", nargs="+", action="append", default=[], help="Names of the models used to generate the raw features")
     parser.add_argument("--language", type=str, default='en', help="Language of the models studied.")
     parser.add_argument("--test", type=bool, default=False, action="store_true", help="Precise if we are running a test.")
+    parser.add_argument("--overwrite", type=bool, default=False, action='store_true', help="Precise if we overwrite existing files")
 
     args = parser.parse_args()
 
     for model_ in args.models[0]:
+
+        output_parent_folder = join(paths.path2derivatives, 'features/{0}/{1}'.format(args.language, model_))
+        check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
         data_type = 'raw_features'
         extension = '.csv'
@@ -46,10 +50,10 @@ if __name =='__main__':
             
         for i, run in enumerate(data):
             name = os.path.basename(os.path.splitext(run)[0])
-            run_name = name.split('_')[-1]
-            nscans = scans.get_nscans(run_name)
+            run_name = name.split('_')[-1] # extract the name of the run
+            nscans = scans.get_nscans(run_name) # retrieve the number of scans for the run
+            path2output = join(output_parent_folder, "features_{0}_{1}_{2}".format(args.language, model_, run_name)+extension)
             
-            df = process_raw_features(run, agrs.tr, nscans)
-
-            path2output = join(paths.path2derivatives, "features/{0}/{1}/features_{0}_{1}_{2}".format(args.language, model_, run_name)+extension)
-            df.to_csv(path2output, index=False, header=False) # saving features.csv
+            if compute(path2output, agrs.overwrite):
+                df = process_raw_features(run, agrs.tr, nscans)
+                df.to_csv(path2output, index=False, header=False) # saving features.csv

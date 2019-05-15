@@ -1,6 +1,5 @@
 import argparse
 from os.path import join
-import glob
 import importlib
 
 import warnings

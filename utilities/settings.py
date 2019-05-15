@@ -29,7 +29,8 @@ class Extensions:
         self.extensions = {'wave':'wav',
                            'text':'txt',
                            'raw_features':'csv',
-                           'features':'csv'
+                           'features':'csv',
+                           'fMRI':'.nii'
         }
 
     def get_extension(self, data_type):
@@ -58,7 +59,7 @@ class Scans:
                              'run8':294,
                              'run9':336,
         }
-
+        }
     def get_nscans(self, language, run):
                        return self.nscans[language][run]
         
@@ -71,7 +72,7 @@ class Subjects:
         self.subject_test = {'en': 69,
                              'fr': ''
         }
-
+        
     def get_subject(self, subject_number):
         if subject_number < 10:
             return 'sub-00{}'.format(subject_number)
@@ -80,6 +81,13 @@ class Subjects:
         else:
             return 'sub-{}'.format(subject_number)
 
+    def get_all(self, language):
+        result = []
+        for subj in self.subject_lists[language]:
+            result.append(self.get_subject(subj))
+        return result
+
+        
 class Rois:
     def __init__(self):
         # ROIs

@@ -9,6 +9,7 @@ from ..utilities.settings import Paths, Scans
 from ..utilities.utils import *
 import pandas as pd
 import numpy as np
+from joblib import Parallel, delayed
 from nistats.hemodynamic_models import compute_regressor
 
 
@@ -26,6 +27,15 @@ def process_raw_features(run, tr, nscans):
                                oversampling=10)
     return pd.DataFrame(result[0], columns=['hrf'])
 
+def compute_features(run, output_parent_folder, output_data_type, language, model, extension, tr, overwrite):
+    name = os.path.basename(os.path.splitext(run)[0])
+    run_name = name.split('_')[-1] # extract the name of the run
+    nscans = scans.get_nscans(run_name) # retrieve the number of scans for the run
+    path2output = get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension)
+    
+    if compute(path2output, overwrite=overwrite):
+        df = process_raw_features(run, tr, nscans)
+        df.to_csv(path2output, index=False, header=False) # saving features.csv
 
 
 if __name =='__main__':
@@ -36,6 +46,7 @@ if __name =='__main__':
     parser.add_argument("--language", type=str, default='en', help="Language of the models studied.")
     parser.add_argument("--test", type=bool, default=False, action="store_true", help="Precise if we are running a test.")
     parser.add_argument("--overwrite", type=bool, default=False, action='store_true', help="Precise if we overwrite existing files")
+    parser.add_argument("--parallel", type=bool, default=False, action='store_true', help="Precise if we want to run code in parallel")
 
     args = parser.parse_args()
 
@@ -50,13 +61,12 @@ if __name =='__main__':
         check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
         raw_features = get_data(args.language, input_data_type, model=model_, source='fMRI', test=args.test)
-            
-        for i, run in enumerate(raw_features):
-            name = os.path.basename(os.path.splitext(run)[0])
-            run_name = name.split('_')[-1] # extract the name of the run
-            nscans = scans.get_nscans(run_name) # retrieve the number of scans for the run
-            path2output = get_path2output(output_parent_folder, output_data_type, args.language, model_, run_name, extension)
-            
-            if compute(path2output, overwrite=agrs.overwrite):
-                df = process_raw_features(run, agrs.tr, nscans)
-                df.to_csv(path2output, index=False, header=False) # saving features.csv
+        
+        if not args.parallel:
+            for i, run in enumerate(raw_features):
+                compute_features(run, output_parent_folder, output_data_type, args.language, model_, extension, args.tr, args.overwrite)
+        else:
+            Parallel(n_jobs=-2)(delayed(compute_features) \
+                        (run, output_parent_folder, output_data_type, args.language, model_, extension, args.tr, args.overwrite) for run in raw_features)
+
+

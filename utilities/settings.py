@@ -81,9 +81,13 @@ class Subjects:
         else:
             return 'sub-{}'.format(subject_number)
 
-    def get_all(self, language):
+    def get_all(self, language, test=False):
         result = []
-        for subj in self.subject_lists[language]:
+        if test:
+            sub_list = self.subject_test[language]
+        else:
+            sub_list = self.subject_lists[language]
+        for subj in sub_list:
             result.append(self.get_subject(subj))
         return result
 

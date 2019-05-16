@@ -25,27 +25,29 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    data_list = []
+    features_list = []
     models = sorted(args.models[0])
+    input_data_type = 'features'
+    output_data_type = 'design-matrices'
+    extension = '.csv'
+    source = 'fMRI'
 
     for model_ in models:
-        data_type = 'features'
-        extension = '.csv'
-        data_list.append(get_data(args.language, data_type, model_, source='fMRI', args.test)) # retrieve the data to transform and append the list of runs (features data) to data_list) 
+        features_list.append(get_data(args.language, input_data_type, model=model_, source='fMRI', test=args.test)) # retrieve the data to transform and append the list of runs (features data) to features_list) 
 
-    runs = list(zip(*data_list)) # list of 9 tuples (1 for each run), each tuple containing the features for all the specified models
+    runs = list(zip(*features_list)) # list of 9 tuples (1 for each run), each tuple containing the features for all the specified models
     # e.g.: [(path2run1_model1, path2run1_model2), (path2run2_model1, path2run2_model2)]
 
     for i in range(len(runs)):
         # create the design matrix for each run
         model_name = '_'.join(models)
-        output_parent_folder = join(paths.path2derivatives, 'design-matrices/{0}/{1}'.format(args.language, model_name))
+        output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model_name)
         check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
         name = os.path.basename(os.path.splitext(runs[i][0])[0])
         run_name = name.split('_')[-1] # extract the name of the run
-        path2output = join(output_parent_folder, 'design-matrices_{0}_{1}_{2}'.format(args.language, model_name, run_name) + extension)
+        path2output = get_path2output(output_parent_folder, output_data_type, args.language, model_name, run_name, extension)
 
-        if compute(path2output, args.overwrite):
+        if compute(path2output, overwrite=args.overwrite):
             merge = pd.concat([pd.read_csv(path2features, header=None) for path2features in runs[i]], axis=1) # concatenate horizontaly the read csv files of a run
             merge.columns = models
             merge.to_csv(path2output, index=False)

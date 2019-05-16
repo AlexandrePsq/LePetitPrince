@@ -16,7 +16,7 @@ extensions = Extensions()
 ############ Data retrieving ############
 #########################################
 
-def get_data(language, data_type, source='', model='', test=False, subject):
+def get_data(language, data_type, subject=None, source='', model='', test=False):
     # General function for data retrieving
     # Output: list of path to the different data files
     extension = extensions.get_extension(data_type)
@@ -35,6 +35,12 @@ def get_data(language, data_type, source='', model='', test=False, subject):
     else:
         data = [sorted(glob.glob(join(base_path, '{0}/{1}/{2}'.format(data_type, language, model), file_pattern)))]
     return data
+
+def get_output_parent_folder(source, output_data_type, language, model):
+    return join(paths.path2derivatives, '{0}/{1}/{2}/{3}'.format(source, output_data_type, language, model))
+
+def get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension):
+    return join(output_parent_folder, '{0}_{1}_{2}_{3}'.format(output_data_type, language, model, run_name) + extension)
 
 
 #########################################
@@ -58,15 +64,14 @@ def check_folder(path):
 ################ Figures ################
 #########################################
 
-def get_r2_maps(masker, r2, stage, subject, output_parent_folder):
+def create_r2_maps(masker, r2, stage, subject, output_parent_folder):
     model = op.basename(output_parent_folder)
     language = op.basename(op.dirname(output_parent_folder))
     data_type = op.basename(op.dirname(op.dirname(output_parent_folder)))
-    source = op.base_path(op.dirname(op.dirname(op.dirname(output_parent_folder))))
 
     r2_img = masker.inverse_transform(r2)
-    path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, args.language, model_, stage, subject)+'.nii.gz')
-    path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, args.language, model_, stage, subject)+'.png')
+    path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, language, model, stage, subject)+'.nii.gz')
+    path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, language, model, stage, subject)+'.png')
 
     nib.save(r2_img, path2output_raw)
 

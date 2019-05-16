@@ -81,8 +81,8 @@ def do_single_subject(subject, fmri_runs, matrices, masker, output_parent_folder
 
     # compute r2 maps and save them under .nii.gz and .png formats
     r2_train, r2_test = compute_crossvalidated_r2(fmri_runs, matrices, subject)
-    get_r2_maps(masker, r2_train, 'train', subject, output_parent_folder) # r2 train
-    get_r2_maps(masker, r2_test, 'test', subject, output_parent_folder) # r2 test
+    create_r2_maps(masker, r2_train, 'train', subject, output_parent_folder) # r2 train
+    create_r2_maps(masker, r2_test, 'test', subject, output_parent_folder) # r2 test
     
 
 
@@ -97,14 +97,15 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     source = 'fMRI'
-    data_type = 'glm-indiv'
+    input_data_type = 'design-matrices'
+    output_data_type = 'glm-indiv'
 
     for model_ in args.models[0]:
         subjects = subjects_list.get_all(args.language, args.test)
-        dm = get_data(args.language, 'design-matrices', model_, source='fMRI', args.test)
+        dm = get_data(args.language, input_data_type, model=model_, source='fMRI', test=args.test)
         fmri_runs = {subject: get_data(args.language, data_type=source, test=args.test, subject=subject) for subject in subjects}
 
-        output_parent_folder = join(paths.path2derivatives, '{0}/{1}/{2}/{3}'.format(source, data_type, args.language, model_))
+        output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model_)
         check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
         matrices = [transform_design_matrices(run) for run in dm] # list of design matrices (dataframes) where we added a constant column equal to 1

@@ -14,6 +14,7 @@ warnings.simplefilter(action='ignore' )
 
 from ..utilities.settings import Paths, Subjects
 from ..utilities.utils import *
+from ..utilities.splitter import Splitter
 import pandas as pd
 from nilearn.masking import compute_epi_mask
 import numpy as np
@@ -21,7 +22,7 @@ from nilearn.input_data import MultiNiftiMasker
 
 from sklearn.metrics import r2_score
 from sklearn.model_selection import LeaveOneGroupOut
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import RidgeCV
 from nilearn.image import math_img, mean_img
 from joblib import Parallel, delayed
 
@@ -30,45 +31,27 @@ subjects_list = Subjects()
 
 
 
-def compute_crossvalidated_r2(fmri_runs, design_matrices, subject):
-
-    r2_train = None  # array to contain the r2 values (1 row per fold, 1 column per voxel)
-    r2_test = None
-
-    logo = LeaveOneGroupOut() # leave on run out !
-    for train, test in logo.split(fmri_runs, groups=range(1, 10)):
-        fmri_data_train = np.vstack([fmri_runs[i] for i in train]) # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
-        predictors_train = np.vstack([design_matrices[i] for i in train])
-        model = LinearRegression().fit(predictors_train, fmri_data_train)
-
-        # return the R2_score for each voxel (=list)
-        r2_train_ = get_r2_score(model, fmri_data_train, predictors_train)
-        r2_test_ = get_r2_score(model, fmri_runs[test[0]], design_matrices[test[0]])
-
-        # log the results
-        log(subject, 'train', r2_train_)
-        log(subject, 'test', r2_test_)
-
-        r2_train = rsquares_training if r2_train is None else np.vstack([r2_train, r2_train_])
-        r2_test = rsquares_test if r2_test is None else np.vstack([r2_test, r2_test_])
-
-    return (np.mean(r2_train, axis=0), np.mean(r2_test, axis=0)) # compute mean vertically (in time)
-
-
-def do_single_subject(subject, fmri_runs, matrices, masker, output_parent_folder):
-    # Compute r2 maps for all subject for a given model
-    #   - subject : e.g. : 'sub-060'
-    #   - fmri_runs: list of fMRI data runs (1 for each run)
-    #   - matrices: list of design matrices (1 for each run)
-    #   - masker: MultiNiftiMasker object
-
-    fmri_runs = [masker.transform(f) for f in fmri_filenames] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
-
-    # compute r2 maps and save them under .nii.gz and .png formats
-    r2_train, r2_test = compute_crossvalidated_r2(fmri_runs, matrices, subject)
-    create_r2_maps(masker, r2_train, 'train', subject, output_parent_folder) # r2 train
-    create_r2_maps(masker, r2_test, 'test', subject, output_parent_folder) # r2 test
-    
+def compute_alpha(model, fmri_runs, design_matrices, subject, voxel_wised):
+    nb_voxels = fmri_runs[0].shape[1]
+    nb_runs = len(fmri_runs)
+    alphas = np.zeros(nb_voxels) if voxel_wised else np.zeros(1)
+    scores = np.zeros(nb_voxels) if voxel_wised else np.zeros(1)
+    nb_samples = np.cumsum([0] + [fmri_runs[i].shape[0] for i in range(nb_runs)]) # list of cumulative lenght
+    indexes = {'run{}'.format(i+1): [nb_samples[i], nb_samples[i+1]] for i in range(nb_runs)}
+    dm = np.vstack(design_matrices)
+    fmri = np.vstack(fmri_runs)
+    if voxel_wised:
+        for voxel in range(nb_voxels):
+            X = dm[:,voxel].reshape((dm.shape[0],1))
+            y = fmri[:,voxel].reshape((fmri.shape[0],1))
+            model_fitted = model.fit(X, y)
+            alphas[voxel] = model_fitted.alpha_
+            scores[voxel] = model_fitted.score(X, y) # cross-validated r2_score
+    else:
+        model_fitted = model.fit(dm, fmri)
+        alphas[0] = model_fitted.alpha_
+        scores[0] = get_r2_score(model_fitted, fmri, dm) # cross-validated r2_score
+    return alphas, scores
 
 
 if __name__ == '__main__':
@@ -79,11 +62,14 @@ if __name__ == '__main__':
     parser.add_argument("--models", nargs='+', action='append', default=[], help="Name of the models to use to generate the raw features.")
     parser.add_argument("--overwrite", type=bool, default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", type=bool, default=True, help="Precise if we run the code in parallel")
+    parser.add_argument("--voxel_wised", type=bool, default=False, action='store_true', help="Precise if we compute voxel-wised")
 
     args = parser.parse_args()
     source = 'fMRI'
     input_data_type = 'design-matrices'
-    output_data_type = 'ridge-indiv'
+    output_data_type = 'glm-indiv'
+    alphas = np.logspace(-3, -1, 30)
+    model = RidgeCV(alphas=alphas, scoring='r2', cv=Splitter())
 
     for model_ in args.models[0]:
         subjects = subjects_list.get_all(args.language, args.test)
@@ -97,8 +83,8 @@ if __name__ == '__main__':
         masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object ... computation is sloow
 
         if args.parallel:
-                Parallel(n_jobs=-1)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder) for sub in subjects)
+                Parallel(n_jobs=-1)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, ridge=True, voxel_wised=args.voxel_wised) for sub in subjects)
             else:
                 for sub in subjects:
                     print(f'Processing subject {}...'.format(sub))
-                    do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder)
+                    do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, ridge=True, voxel_wised=args.voxel_wised)

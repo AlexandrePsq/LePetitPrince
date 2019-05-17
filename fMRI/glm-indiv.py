@@ -29,23 +29,8 @@ paths = Paths()
 subjects_list = Subjects()
 
 
-def transform_design_matrices(path):
-    # Read design matrice csv file and add a column with only 1
-    dm = pd.read_csv(path, header=0)
-    # add the constant
-    const = np.ones((dm.shape[0], 1))
-    dm = np.hstack((dm, const))
-    return dm 
 
-def compute_global_masker(files): # [[path, path2], [path3, path4]]
-    # return a MultiNiftiMasker object
-    masks = [compute_epi_mask(f) for f in files]
-    global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
-    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
-    masker.fit()
-    return masker
-
-def compute_crossvalidated_r2(fmri_runs, design_matrices, subject):
+def compute_crossvalidated_r2(model, fmri_runs, design_matrices, subject):
 
     r2_train = None  # array to contain the r2 values (1 row per fold, 1 column per voxel)
     r2_test = None
@@ -54,11 +39,11 @@ def compute_crossvalidated_r2(fmri_runs, design_matrices, subject):
     for train, test in logo.split(fmri_runs, groups=range(1, 10)):
         fmri_data_train = np.vstack([fmri_runs[i] for i in train]) # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
         predictors_train = np.vstack([design_matrices[i] for i in train])
-        model = LinearRegression().fit(predictors_train, fmri_data_train)
+        model_fitted = model.fit(predictors_train, fmri_data_train)
 
         # return the R2_score for each voxel (=list)
-        r2_train_ = get_r2_score(model, fmri_data_train, predictors_train)
-        r2_test_ = get_r2_score(model, fmri_runs[test[0]], design_matrices[test[0]])
+        r2_train_ = get_r2_score(model_fitted, fmri_data_train, predictors_train)
+        r2_test_ = get_r2_score(model_fitted, fmri_runs[test[0]], design_matrices[test[0]])
 
         # log the results
         log(subject, 'train', r2_train_)
@@ -70,25 +55,9 @@ def compute_crossvalidated_r2(fmri_runs, design_matrices, subject):
     return (np.mean(r2_train, axis=0), np.mean(r2_test, axis=0)) # compute mean vertically (in time)
 
 
-def do_single_subject(subject, fmri_runs, matrices, masker, output_parent_folder):
-    # Compute r2 maps for all subject for a given model
-    #   - subject : e.g. : 'sub-060'
-    #   - fmri_runs: list of fMRI data runs (1 for each run)
-    #   - matrices: list of design matrices (1 for each run)
-    #   - masker: MultiNiftiMasker object
-
-    fmri_runs = [masker.transform(f) for f in fmri_filenames] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
-
-    # compute r2 maps and save them under .nii.gz and .png formats
-    r2_train, r2_test = compute_crossvalidated_r2(fmri_runs, matrices, subject)
-    create_r2_maps(masker, r2_train, 'train', subject, output_parent_folder) # r2 train
-    create_r2_maps(masker, r2_test, 'test', subject, output_parent_folder) # r2 test
-    
-
-
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description="""Objective:\nGenerate design matrices from features in a given language.\n\nInput:\nLanguage and models.""")
+    parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--test", type=bool, default=False, action='store_true', help="Precise if we are running a test.")
     parser.add_argument("--language", type=str, default='en', help="Language of the text and the model.")
     parser.add_argument("--models", nargs='+', action='append', default=[], help="Name of the models to use to generate the raw features.")
@@ -99,6 +68,7 @@ if __name__ == '__main__':
     source = 'fMRI'
     input_data_type = 'design-matrices'
     output_data_type = 'glm-indiv'
+    model = LinearRegression()
 
     for model_ in args.models[0]:
         subjects = subjects_list.get_all(args.language, args.test)
@@ -112,8 +82,8 @@ if __name__ == '__main__':
         masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object ... computation is sloow
 
         if args.parallel:
-                Parallel(n_jobs=-1)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder) for sub in subjects)
+                Parallel(n_jobs=-1)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model) for sub in subjects)
             else:
                 for sub in subjects:
                     print(f'Processing subject {}...'.format(sub))
-                    do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder)
+                    do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model)

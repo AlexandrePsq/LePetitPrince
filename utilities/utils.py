@@ -7,6 +7,7 @@ from nilearn.input_data import MultiNiftiMasker
 from nilearn.plotting import plot_glass_brain
 import nibabel as nib
 import csv
+from sklearn.metrics import r2_score
 
 
 paths = Paths()
@@ -41,6 +42,13 @@ def get_output_parent_folder(source, output_data_type, language, model):
 
 def get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension):
     return join(output_parent_folder, '{0}_{1}_{2}_{3}'.format(output_data_type, language, model, run_name) + extension)
+
+
+def withdram(dataframe, run, run_indexes_dict):
+    """Return the dataframe made of the runs data concatenation without the specified run."""
+    beg, end = run_indexes_dict[run]
+    result = np.vstack([dataframe[:beg, :], dataframe[end:,:]])
+    return result
 
 
 #########################################
@@ -104,3 +112,36 @@ def get_r2_score(model, y_true, y2predict, r2_min=0., r2_max=0.99):
     rsquares_training = clean_rscores(r2, r2_min, r2_max)
     # remove values with are too low and values too good to be true (e.g. voxels without variation)
     return np.array([0 if (x < r2min or x >= r2max) else x for x in rscores])
+
+def transform_design_matrices(path):
+    # Read design matrice csv file and add a column with only 1
+    dm = pd.read_csv(path, header=0)
+    # add the constant
+    const = np.ones((dm.shape[0], 1))
+    dm = np.hstack((dm, const))
+    return dm 
+
+def compute_global_masker(files): # [[path, path2], [path3, path4]]
+    # return a MultiNiftiMasker object
+    masks = [compute_epi_mask(f) for f in files]
+    global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
+    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
+    masker.fit()
+    return masker
+
+def do_single_subject(subject, fmri_runs, matrices, masker, output_parent_folder, voxel_wised=False):
+    # Compute r2 maps for all subject for a given model
+    #   - subject : e.g. : 'sub-060'
+    #   - fmri_runs: list of fMRI data runs (1 for each run)
+    #   - matrices: list of design matrices (1 for each run)
+    #   - masker: MultiNiftiMasker object
+
+    fmri_runs = [masker.transform(f) for f in fmri_filenames] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
+
+    # compute r2 maps and save them under .nii.gz and .png formats
+    if voxel_wised:
+        alphas, r2_train, r2_test = compute_alpha(model, fmri_runs, design_matrices, subject, voxel_wised)
+    else:
+        r2_train, r2_test = compute_crossvalidated_r2(model, fmri_runs, matrices, subject)
+    create_r2_maps(masker, r2_train, 'train', subject, output_parent_folder) # r2 train
+    create_r2_maps(masker, r2_test, 'test', subject, output_parent_folder) # r2 test

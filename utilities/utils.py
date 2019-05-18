@@ -72,18 +72,19 @@ def check_folder(path):
 ################ Figures ################
 #########################################
 
-def create_r2_maps(masker, r2, stage, subject, output_parent_folder):
+def create_maps(masker, distribution, distribution_name, subject, output_parent_folder):
     model = op.basename(output_parent_folder)
     language = op.basename(op.dirname(output_parent_folder))
     data_type = op.basename(op.dirname(op.dirname(output_parent_folder)))
 
-    r2_img = masker.inverse_transform(r2)
-    path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, language, model, stage, subject)+'.nii.gz')
-    path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, language, model, stage, subject)+'.png')
+    img = masker.inverse_transform(distribution)
+    
+    path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, language, model, distribution_name, subject)+'.nii.gz')
+    path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, language, model, distribution_name, subject)+'.png')
 
-    nib.save(r2_img, path2output_raw)
+    nib.save(img, path2output_raw)
 
-    display = plot_glass_brain(r2_img, display_mode='lzry', threshold=0, colorbar=True)
+    display = plot_glass_brain(img, display_mode='lzry', threshold=0, colorbar=True)
     display.savefig(path2output_png)
     display.close()
 
@@ -140,8 +141,9 @@ def do_single_subject(subject, fmri_runs, matrices, masker, output_parent_folder
 
     # compute r2 maps and save them under .nii.gz and .png formats
     if voxel_wised:
-        alphas, r2_train, r2_test = compute_alpha(model, fmri_runs, design_matrices, subject, voxel_wised)
+        alphas, r2_train, r2_test = compute_alpha(fmri_runs, design_matrices, subject, voxel_wised)
+        create_maps(masker, alphas, 'alphas', subject, output_parent_folder) # r2 train
     else:
         r2_train, r2_test = compute_crossvalidated_r2(model, fmri_runs, matrices, subject)
-    create_r2_maps(masker, r2_train, 'train', subject, output_parent_folder) # r2 train
-    create_r2_maps(masker, r2_test, 'test', subject, output_parent_folder) # r2 test
+    create_maps(masker, r2_train, 'r2_train', subject, output_parent_folder) # r2 train
+    create_maps(masker, r2_test, 'r2_test', subject, output_parent_folder) # r2 test

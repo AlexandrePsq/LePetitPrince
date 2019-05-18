@@ -3,12 +3,13 @@ from sklearn.model_selection import KFold
 
 class Splitter(KFold):
     
-    def __init__(self, n_splits=9, shuffle=False,
+    def __init__(self, indexes_dict={}, n_splits=9, shuffle=False,
                  random_state=None):
         n_splits = n_splits
+        self.indexes_dict = indexes_dict
         super().__init__(n_splits, shuffle, random_state)
     
-    def split(self, X, y, indexes_dict, groups=None):
+    def split(self, X, y, groups=None):
         """Generate indices to split data into training and test set.
         Parameters
         ----------
@@ -31,11 +32,11 @@ class Splitter(KFold):
             index_train = []
             index_test = []
             for i in train_index:
-                beg, end = indexes_dict['run{}'.format(i+1)]
+                beg, end = self.indexes_dict['run{}'.format(i+1)]
                 index_train.append(np.arange(beg, end))
             list_indexes_train = np.hstack(index_train)
             for i in test_index:
-                beg, end = indexes_dict['run{}'.format(i+1)]
+                beg, end = self.indexes_dict['run{}'.format(i+1)]
                 index_test.append(np.arange(beg, end))
             list_indexes_test = np.hstack(index_test)
             yield list_indexes_train, list_indexes_test

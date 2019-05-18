@@ -31,13 +31,15 @@ subjects_list = Subjects()
 
 
 
-def compute_alpha(model, fmri_runs, design_matrices, subject, voxel_wised):
+def compute_alpha(fmri_runs, design_matrices, subject, voxel_wised):
+    # compute alphas and test score with cross validation
     nb_voxels = fmri_runs[0].shape[1]
     nb_runs = len(fmri_runs)
     alphas = np.zeros(nb_voxels) if voxel_wised else np.zeros(1)
     scores = np.zeros(nb_voxels) if voxel_wised else np.zeros(1)
     nb_samples = np.cumsum([0] + [fmri_runs[i].shape[0] for i in range(nb_runs)]) # list of cumulative lenght
     indexes = {'run{}'.format(i+1): [nb_samples[i], nb_samples[i+1]] for i in range(nb_runs)}
+    model = RidgeCV(alphas=alphas, scoring='r2', cv=Splitter(indexes=indexes, n_splits=nb_runs))
     dm = np.vstack(design_matrices)
     fmri = np.vstack(fmri_runs)
     if voxel_wised:
@@ -51,7 +53,7 @@ def compute_alpha(model, fmri_runs, design_matrices, subject, voxel_wised):
         model_fitted = model.fit(dm, fmri)
         alphas[0] = model_fitted.alpha_
         scores[0] = get_r2_score(model_fitted, fmri, dm) # cross-validated r2_score
-    return alphas, scores
+    return alphas, scores  # !!!! les r2 sont ils bien cross validés et le résultat est le résultat de test??
 
 
 if __name__ == '__main__':

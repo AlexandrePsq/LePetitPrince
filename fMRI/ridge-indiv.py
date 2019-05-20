@@ -31,47 +31,6 @@ subjects_list = Subjects()
 
 
 
-def per_voxel_analysis(model, fmri_runs, design_matrices, subject):
-    # compute alphas and test score with cross validation
-    #   - fmri_runs: list of fMRI data runs (1 for each run)
-    #   - design_matrices: list of design matrices (1 for each run)
-    #   - nb_voxels: number of voxels
-    #   - indexes: dict specifying row indexes for each run
-    alphas = np.zeros(nb_voxels)
-    scores = np.zeros((nb_voxels, nb_runs))
-    nb_voxels = fmri_runs[0].shape[1]
-    nb_runs = len(fmri_runs)
-    count = 0
-
-    logo = LeaveOneGroupOut() # leave on run out !
-    for train, test in logo.split(fmri_runs, groups=range(nb_runs)): # loop for r2 computation
-
-        fmri_data_train = [fmri_runs[i] for i in train] # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
-        predictors_train = [design_matrices[i] for i in train]
-        nb_samples = np.cumsum([0] + [fmri_data_train[i].shape[0] for i in range(len(fmri_data_train))]) # list of cumulative lenght
-        indexes = {'run{}'.format(run+1): [nb_samples[i], nb_samples[i+1]] for i, run in enumerate(train)}
-
-        model.cv = Splitter(indexes=indexes, n_splits=nb_runs)
-        dm = np.vstack(predictors_train)
-        fmri = np.vstack(fmri_data_train)
-
-        for voxel in range(nb_voxels):
-            X = dm[:,voxel].reshape((dm.shape[0],1))
-            y = fmri[:,voxel].reshape((fmri.shape[0],1))
-            # fit the model for a given voxel
-            model_fitted = model.fit(X,y)
-            # retrieve the best alpha and compute the r2 score for this voxel
-            alphas[voxel] = model.alpha_
-            scores[voxel, count] = get_r2_score(model_fitted, 
-                                                fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
-                                                design_matrices[test[0]][:,voxel].reshape((design_matrices[test[0]].shape[0],1)))
-            # log the results
-            log(subject, voxel=voxel, alpha=model_fitted.alpha_, r2=r2_test)
-        count += 1
-        
-    return alphas, np.mean(scores, axis=0) # compute mean vertically (in time)
-
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")

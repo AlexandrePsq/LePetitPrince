@@ -1,3 +1,11 @@
+import sys
+import os
+
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if root not in sys.path:
+    sys.path.append(root)
+
+
 import argparse
 from os.path import join
 import importlib
@@ -5,8 +13,8 @@ import importlib
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-from ..utilities.settings import Paths
-from ..utilities.utils import *
+from utilities.settings import Paths
+from utilities.utils import *
 import pandas as pd
 from joblib import Parallel, delayed
 
@@ -15,6 +23,7 @@ paths = Paths()
 
 
 def compute_raw_features(model, run, output_parent_folder, input_data_type, output_data_type, language, model_name, extension, overwrite):
+    #run = run[0]
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     path2output = get_path2output(output_parent_folder, output_data_type, language, model_name, run_name, extension)
@@ -32,11 +41,11 @@ def compute_raw_features(model, run, output_parent_folder, input_data_type, outp
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate raw features from raw data for a given model in a given language.\n\nInput:\nLanguage and models.""")
-    parser.add_argument("--test", type=bool, default=False, action='store_true', help="Precise if we are running a test.")
+    parser.add_argument("--test", default=False, action='store_true', help="Precise if we are running a test.")
     parser.add_argument("--language", type=str, default='en', help="Language of the text and the model.")
-    parser.add_argument("--model", type=str, help="Name of the model to use to generate the raw features.")
-    parser.add_argument("--overwrite", type=bool, default=False, action='store_true', help="Precise if we overwrite existing files")
-    parser.add_argument("--parallel", type=bool, default=False, action='store_true', help="Precise if we want to run code in parallel")
+    parser.add_argument("--model_name", type=str, help="Name of the model to use to generate the raw features.")
+    parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
+    parser.add_argument("--parallel", default=False, action='store_true', help="Precise if we want to run code in parallel")
 
 
     args = parser.parse_args()
@@ -44,27 +53,27 @@ if __name__ == '__main__':
     extension = '.csv'
     output_data_type = 'raw_features'
     source = 'fMRI'
-    model = args.model
+    model_name = args.model_name
 
-    if model in ['rms', 'f0']:
+    if model_name in ['rms', 'f0']:
         input_data_type = 'wave'
     else:
         input_data_type = 'text'
 
-    module = importlib.import_module("..models.{}.{}".format(args.language, model)) # import the right module depending on the model we want to use
+    module = importlib.import_module("models.{}.{}".format(args.language, model_name)) # import the right module depending on the model we want to use
     model = module.create_model() # initialized the model
     model.load() # load an already trained model
 
-    output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model)
+    output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model_name)
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
-    raw_data = get_data(args.language, input_data_type, model=model, source='fMRI', test=args.test) # retrieve the data to transform
+    raw_data = get_data(args.language, input_data_type, model=model_name, source='fMRI', test=args.test) # retrieve the data to transform
 
     if not args.parallel:
         for i, run in enumerate(raw_data):
-            compute_raw_features(model, run, output_parent_folder, input_data_type, output_data_type, args.language, model, extension, args.overwrite)
+            compute_raw_features(model, run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, extension, args.overwrite)
     else:
         Parallel(n_jobs=-2)(delayed(compute_raw_features) \
-                    (model, run, output_parent_folder, input_data_type, output_data_type, args.language, model, extension, args.overwrite) for run in raw_data)
+                    (model, run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, extension, args.overwrite) for run in raw_data)
 
 

@@ -4,6 +4,12 @@
 #
 ############################################
 
+import sys
+import os
+
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if root not in sys.path:
+    sys.path.append(root)
 
 import argparse
 from os.path import join
@@ -12,9 +18,9 @@ import os.path as op
 import warnings
 warnings.simplefilter(action='ignore' )
 
-from ..utilities.settings import Paths, Subjects
-from ..utilities.utils import *
-from ..utilities.splitter import Splitter
+from utilities.settings import Paths, Subjects
+from utilities.utils import *
+from utilities.splitter import Splitter
 import pandas as pd
 from nilearn.masking import compute_epi_mask
 import numpy as np
@@ -34,12 +40,12 @@ subjects_list = Subjects()
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
-    parser.add_argument("--test", type=bool, default=False, action='store_true', help="Precise if we are running a test.")
+    parser.add_argument("--test", default=False, action='store_true', help="Precise if we are running a test.")
     parser.add_argument("--language", type=str, default='en', help="Language of the model.")
     parser.add_argument("--model_name", type=str, help="Name of the model to use to generate the raw features.")
-    parser.add_argument("--overwrite", type=bool, default=False, action='store_true', help="Precise if we overwrite existing files")
-    parser.add_argument("--parallel", type=bool, default=True, help="Precise if we run the code in parallel")
-    parser.add_argument("--voxel_wised", type=bool, default=False, action='store_true', help="Precise if we compute voxel-wised")
+    parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
+    parser.add_argument("--parallel", default=True, action='store_true', help="Precise if we run the code in parallel")
+    parser.add_argument("--voxel_wised", default=False, action='store_true', help="Precise if we compute voxel-wised")
 
     args = parser.parse_args()
     source = 'fMRI'
@@ -61,7 +67,7 @@ if __name__ == '__main__':
 
     if args.parallel:
             Parallel(n_jobs=-1)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, ridge=True, voxel_wised=args.voxel_wised) for sub in subjects)
-        else:
-            for sub in subjects:
-                print(f'Processing subject {}...'.format(sub))
-                do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, ridge=True, voxel_wised=args.voxel_wised)
+    else:
+        for sub in subjects:
+            print('Processing subject {}...'.format(sub))
+            do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, ridge=True, voxel_wised=args.voxel_wised)

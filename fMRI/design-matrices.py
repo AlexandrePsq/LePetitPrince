@@ -3,14 +3,21 @@
 #
 ########
 
+import sys
+import os
+
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if root not in sys.path:
+    sys.path.append(root)
+
 import argparse
 from os.path import join
 
 import warnings
 warnings.simplefilter(action='ignore' )
 
-from ..utilities.settings import Paths
-from ..utilities.utils import *
+from utilities.settings import Paths
+from utilities.utils import *
 import pandas as pd
 
 paths = Paths()
@@ -18,10 +25,10 @@ paths = Paths()
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate design matrices from features in a given language.\n\nInput:\nLanguage and models.""")
-    parser.add_argument("--test", type=bool, default=False, action='store_true', help="Precise if we are running a test.")
+    parser.add_argument("--test", default=False, action='store_true', help="Precise if we are running a test.")
     parser.add_argument("--language", type=str, default='en', help="Language of the text and the model.")
     parser.add_argument("--models", nargs='+', action='append', default=[], help="Name of the models to use to generate the raw features.")
-    parser.add_argument("--overwrite", type=bool, default=False, action='store_true', help="Precise if we overwrite existing files")
+    parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
 
     args = parser.parse_args()
 

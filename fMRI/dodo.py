@@ -1,6 +1,21 @@
+import sys
+import os
+
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if root not in sys.path:
+    sys.path.append(root)
+
+
 from utilities.settings import Subjects, Rois, Paths
 from utilities.utils import *
 from itertools import combinations, product
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore', category=DeprecationWarning)
+warnings.simplefilter(action='ignore', category=ResourceWarning)
+warnings.simplefilter(action='ignore', category=ImportWarning)
+
 
 from os.path import join
 
@@ -16,17 +31,17 @@ language = 'en' # languages = ['en', 'fr']
 subjects = Subjects() # for subject in subjects.subject_lists[language]:
 
 # FMRI sampling period
-tr = None
+tr = 2.0
 
 # Number of runs
-nb_runs = 9
-run_names = ['run{}'.format(i) for i in range(1,10)]
+nb_runs = 1
+run_names = ['run{}'.format(i) for i in range(1,nb_runs + 1)]
 
 # Models
-models = sorted([])
+models = sorted(['test'])
 
 # Aggregated models (for design matrices contruction)
-aggregated_models = [' '.join(item) for i in range(1, len(models)) for item in combinations(models, i)]
+aggregated_models = [' '.join(item) for i in range(1, len(models)+1) for item in combinations(models, i)]
 
 # Testing
 test = False 
@@ -39,7 +54,7 @@ parallel = True
 
 optional = '--test ' if test else ''
 optional += '--overwrite ' if overwrite else ''
-optional += '--parallel ' if parallel else ''
+optional_parallel = '--parallel ' if parallel else ''
 
 
 ############################################################################
@@ -66,7 +81,7 @@ def task_raw_features():
             'name': model,
             'file_dep': ['raw_features.py'],
             'targets': targets,
-            'actions': ['python raw_features.py --language {} --model {} '.format(language, model) + optional],
+            'actions': ['python raw_features.py --language {} --model {} '.format(language, model) + optional + optional_parallel],
         }
 
 
@@ -86,7 +101,7 @@ def task_features():
             'name': model,
             'file_dep': ['features.py'] + dependencies,
             'targets': targets,
-            'actions': ['python features.py --language {} --model {} '.format(language, model) + optional],
+            'actions': ['python features.py --tr {} --language {} --model {} '.format(tr, language, model) + optional + optional_parallel],
         }
 
 
@@ -96,6 +111,7 @@ def task_design_matrices():
     output_data_type = 'design-matrices'
     extension = '.csv'
     source = 'fMRI'
+    test=True
 
     for models in aggregated_models:
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
@@ -117,18 +133,18 @@ def task_glm_indiv():
     source = 'fMRI'
     input_data_type = 'design-matrices'
     output_data_type = 'glm-indiv'
-
+    extension = '.csv'
     for models in aggregated_models:
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
         input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-        dependencies = [get_path2output(input_parent_folder, input_data_type, language, model, run_name, extension) for run_name in run_names]
-        targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language)] \
-                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language)]
+        dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
+        targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language, test)]
         yield {
             'name': models,
             'file_dep': ['glm-indiv.py'] + dependencies,
             'targets': targets,
-            'actions': ['python glm-indiv.py --language {} --model_name {} '.format(language, models) + optional],
+            'actions': ['python glm-indiv.py --language {} --model_name {} '.format(language, models) + optional + optional_parallel],
         }
 
 
@@ -137,11 +153,12 @@ def task_ridge_indiv():
     source = 'fMRI'
     input_data_type = 'design-matrices'
     output_data_type = 'ridge-indiv'
+    extension = '.csv'
 
     for models in aggregated_models:
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
         input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-        dependencies = [get_path2output(input_parent_folder, input_data_type, language, model, run_name, extension) for run_name in run_names]
+        dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
         targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language)] \
                 + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language)] \
                 + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.nii.gz') for subject in subjects.get_all(language)] \
@@ -150,7 +167,7 @@ def task_ridge_indiv():
             'name': models,
             'file_dep': ['ridge-indiv.py'] + dependencies,
             'targets': targets,
-            'actions': ['python ridge-indiv.py --language {} --model_name {} '.format(language, models) + optional],
+            'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised'.format(language, models) + optional + optional_parallel],
         }
 
 

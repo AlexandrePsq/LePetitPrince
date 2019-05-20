@@ -31,29 +31,45 @@ subjects_list = Subjects()
 
 
 
-def compute_alpha(fmri_runs, design_matrices, subject, voxel_wised):
+def per_voxel_analysis(model, fmri_runs, design_matrices, subject):
     # compute alphas and test score with cross validation
+    #   - fmri_runs: list of fMRI data runs (1 for each run)
+    #   - design_matrices: list of design matrices (1 for each run)
+    #   - nb_voxels: number of voxels
+    #   - indexes: dict specifying row indexes for each run
+    alphas = np.zeros(nb_voxels)
+    scores = np.zeros((nb_voxels, nb_runs))
     nb_voxels = fmri_runs[0].shape[1]
     nb_runs = len(fmri_runs)
-    alphas = np.zeros(nb_voxels) if voxel_wised else np.zeros(1)
-    scores = np.zeros(nb_voxels) if voxel_wised else np.zeros(1)
-    nb_samples = np.cumsum([0] + [fmri_runs[i].shape[0] for i in range(nb_runs)]) # list of cumulative lenght
-    indexes = {'run{}'.format(i+1): [nb_samples[i], nb_samples[i+1]] for i in range(nb_runs)}
-    model = RidgeCV(alphas=alphas, scoring='r2', cv=Splitter(indexes=indexes, n_splits=nb_runs))
-    dm = np.vstack(design_matrices)
-    fmri = np.vstack(fmri_runs)
-    if voxel_wised:
+    count = 0
+
+    logo = LeaveOneGroupOut() # leave on run out !
+    for train, test in logo.split(fmri_runs, groups=range(nb_runs)): # loop for r2 computation
+
+        fmri_data_train = [fmri_runs[i] for i in train] # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
+        predictors_train = [design_matrices[i] for i in train]
+        nb_samples = np.cumsum([0] + [fmri_data_train[i].shape[0] for i in range(len(fmri_data_train))]) # list of cumulative lenght
+        indexes = {'run{}'.format(run+1): [nb_samples[i], nb_samples[i+1]] for i, run in enumerate(train)}
+
+        model.cv = Splitter(indexes=indexes, n_splits=nb_runs)
+        dm = np.vstack(predictors_train)
+        fmri = np.vstack(fmri_data_train)
+
         for voxel in range(nb_voxels):
             X = dm[:,voxel].reshape((dm.shape[0],1))
             y = fmri[:,voxel].reshape((fmri.shape[0],1))
-            model_fitted = model.fit(X, y)
-            alphas[voxel] = model_fitted.alpha_
-            scores[voxel] = model_fitted.score(X, y) # cross-validated r2_score
-    else:
-        model_fitted = model.fit(dm, fmri)
-        alphas[0] = model_fitted.alpha_
-        scores[0] = get_r2_score(model_fitted, fmri, dm) # cross-validated r2_score
-    return alphas, scores  # !!!! les r2 sont ils bien cross validés et le résultat est le résultat de test??
+            # fit the model for a given voxel
+            model_fitted = model.fit(X,y)
+            # retrieve the best alpha and compute the r2 score for this voxel
+            alphas[voxel] = model.alpha_
+            scores[voxel, count] = get_r2_score(model_fitted, 
+                                                fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
+                                                design_matrices[test[0]][:,voxel].reshape((design_matrices[test[0]].shape[0],1)))
+            # log the results
+            log(subject, voxel=voxel, alpha=model_fitted.alpha_, r2=r2_test)
+        count += 1
+        
+    return alphas, np.mean(scores, axis=0) # compute mean vertically (in time)
 
 
 if __name__ == '__main__':

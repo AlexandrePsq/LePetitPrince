@@ -20,39 +20,12 @@ import numpy as np
 from nilearn.input_data import MultiNiftiMasker
 
 from sklearn.metrics import r2_score
-from sklearn.model_selection import LeaveOneGroupOut
 from sklearn.linear_model import LinearRegression
 from nilearn.image import math_img, mean_img
 from joblib import Parallel, delayed
 
 paths = Paths()
 subjects_list = Subjects()
-
-
-
-def compute_crossvalidated_r2(model, fmri_runs, design_matrices, subject):
-
-    r2_train = None  # array to contain the r2 values (1 row per fold, 1 column per voxel)
-    r2_test = None
-
-    logo = LeaveOneGroupOut() # leave on run out !
-    for train, test in logo.split(fmri_runs, groups=range(1, 10)):
-        fmri_data_train = np.vstack([fmri_runs[i] for i in train]) # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
-        predictors_train = np.vstack([design_matrices[i] for i in train])
-        model_fitted = model.fit(predictors_train, fmri_data_train)
-
-        # return the R2_score for each voxel (=list)
-        r2_train_ = get_r2_score(model_fitted, fmri_data_train, predictors_train)
-        r2_test_ = get_r2_score(model_fitted, fmri_runs[test[0]], design_matrices[test[0]])
-
-        # log the results
-        log(subject, 'train', r2_train_)
-        log(subject, 'test', r2_test_)
-
-        r2_train = rsquares_training if r2_train is None else np.vstack([r2_train, r2_train_])
-        r2_test = rsquares_test if r2_test is None else np.vstack([r2_test, r2_test_])
-
-    return (np.mean(r2_train, axis=0), np.mean(r2_test, axis=0)) # compute mean vertically (in time)
 
 
 if __name__ == '__main__':

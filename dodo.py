@@ -1,5 +1,5 @@
-from ..utilities.settings import Subjects, Rois, Paths
-from ..utilities.utils import *
+from utilities.settings import Subjects, Rois, Paths
+from utilities.utils import *
 from itertools import combinations, product
 
 from os.path import join
@@ -48,9 +48,6 @@ optional += '--parallel ' if parallel else ''
 
 paths = Paths()
 
-{0}_{1}_{2}_{3}_{4}".format(data_type, language, model, distribution_name, subject)+'.nii.gz'
-get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension)
-get_output_parent_folder(source, output_data_type, language, model)
 
 def task_raw_features():
     """Step 1: Generate raw features from raw data (text, wave) model predictions."""
@@ -125,7 +122,7 @@ def task_glm_indiv():
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
         input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
         dependencies = [get_path2output(input_parent_folder, input_data_type, language, model, run_name, extension) for run_name in run_names]
-        targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language)] 
+        targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language)] \
                 + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language)]
         yield {
             'name': models,
@@ -145,9 +142,9 @@ def task_ridge_indiv():
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
         input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
         dependencies = [get_path2output(input_parent_folder, input_data_type, language, model, run_name, extension) for run_name in run_names]
-        targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language)] 
-                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language)]
-                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.nii.gz') for subject in subjects.get_all(language)] 
+        targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language)] \
+                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language)] \
+                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.nii.gz') for subject in subjects.get_all(language)] \
                 + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.png') for subject in subjects.get_all(language)]
         yield {
             'name': models,

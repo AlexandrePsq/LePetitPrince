@@ -51,7 +51,7 @@ if __name__ == '__main__':
     else:
         input_data_type = 'text'
 
-    module = importlib.import_module("..models.{}.{}.py".format(args.language, model)) # import the right module depending on the model we want to use
+    module = importlib.import_module("..models.{}.{}".format(args.language, model)) # import the right module depending on the model we want to use
     model = module.create_model() # initialized the model
     model.load() # load an already trained model
 

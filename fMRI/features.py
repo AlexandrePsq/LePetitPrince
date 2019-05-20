@@ -42,8 +42,8 @@ if __name =='__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate features (=fMRI regressors) from raw_features (csv file with 3 columns onset-amplitude-duration) by convolution with an hrf kernel.\n\nInput:\nTime resolution of the scans, language and models.""")
     parser.add_argument("--tr", type=int, default=None, help="TR in sec (=sampling period for scans)")
-    parser.add_argument("--models", nargs="+", action="append", default=[], help="Names of the models used to generate the raw features")
-    parser.add_argument("--language", type=str, default='en', help="Language of the models studied.")
+    parser.add_argument("--model", type=str, help="Names of the model used to generate the raw features")
+    parser.add_argument("--language", type=str, default='en', help="Language of the model studied.")
     parser.add_argument("--test", type=bool, default=False, action="store_true", help="Precise if we are running a test.")
     parser.add_argument("--overwrite", type=bool, default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", type=bool, default=False, action='store_true', help="Precise if we want to run code in parallel")
@@ -54,19 +54,18 @@ if __name =='__main__':
     output_data_type = 'features'
     extension = '.csv'
     source = 'fMRI'
+    model = args.model
 
-    for model_ in args.models[0]:
+    output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model)
+    check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
-        output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model_)
-        check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
-
-        raw_features = get_data(args.language, input_data_type, model=model_, source='fMRI', test=args.test)
-        
-        if not args.parallel:
-            for i, run in enumerate(raw_features):
-                compute_features(run, output_parent_folder, output_data_type, args.language, model_, extension, args.tr, args.overwrite)
-        else:
-            Parallel(n_jobs=-2)(delayed(compute_features) \
-                        (run, output_parent_folder, output_data_type, args.language, model_, extension, args.tr, args.overwrite) for run in raw_features)
+    raw_features = get_data(args.language, input_data_type, model=model, source='fMRI', test=args.test)
+    
+    if not args.parallel:
+        for i, run in enumerate(raw_features):
+            compute_features(run, output_parent_folder, output_data_type, args.language, model, extension, args.tr, args.overwrite)
+    else:
+        Parallel(n_jobs=-2)(delayed(compute_features) \
+                    (run, output_parent_folder, output_data_type, args.language, model, extension, args.tr, args.overwrite) for run in raw_features)
 
 

@@ -14,7 +14,8 @@ from os.path import join
 class Paths:
     def __init__(self):
         # Paths
-        self.path2root = '/neurospin/unicog/protocols/IRMf/LePetitPrince'
+        # self.path2root = '/neurospin/unicog/protocols/IRMf/LePetitPrince'
+        self.path2root = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince'
         self.path2data = join(self.path2root, 'data')
         self.path2derivatives = join(self.path2root, 'derivatives')
         self.path2code = join(self.path2root, 'code')
@@ -26,11 +27,12 @@ class Paths:
 class Extensions:
     def __init__(self):
         # Retrieve extensions
-        self.extensions = {'wave':'wav',
-                           'text':'txt',
-                           'raw_features':'csv',
-                           'features':'csv',
-                           'fMRI':'.nii'
+        self.extensions = {'wave':'.wav',
+                           'text':'.txt',
+                           'raw_features':'.csv',
+                           'features':'.csv',
+                           'fMRI':'.nii.nii',
+                           'design-matrices':'.csv'
         }
 
     def get_extension(self, data_type):
@@ -69,8 +71,8 @@ class Subjects:
         self.subject_lists = {'en': [57, 58, 59, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 103, 104, 105, 106, 108, 109, 110, 113, 114, 115],
                               'fr': []
         }
-        self.subject_test = {'en': 69,
-                             'fr': ''
+        self.subject_test = {'en': [57],
+                             'fr': []
         }
         
     def get_subject(self, subject_number):

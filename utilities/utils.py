@@ -6,8 +6,11 @@ from .settings import Paths, Extensions
 from nilearn.input_data import MultiNiftiMasker
 from nilearn.plotting import plot_glass_brain
 from sklearn.model_selection import LeaveOneGroupOut
+from nilearn.masking import compute_epi_mask
+from nilearn.image import math_img, mean_img
 import nibabel as nib
 import numpy as np
+import pandas as pd
 import csv
 from sklearn.metrics import r2_score
 
@@ -20,7 +23,7 @@ extensions = Extensions()
 ############ Data retrieving ############
 #########################################
 
-def get_data(language, data_type, subject=None, source='', model='', test=False):
+def get_data(language, data_type, subject=None, source='', model=''):
     # General function for data retrieving
     # Output: list of path to the different data files
     extension = extensions.get_extension(data_type)
@@ -34,10 +37,7 @@ def get_data(language, data_type, subject=None, source='', model='', test=False)
     else:
         base_path = join(paths.path2derivatives, source)
         file_pattern = '{}_{}'.format(data_type, language) + '_' + model + '_run*' + extension
-    if test:
-        data = [join(base_path, '{0}/{1}/test/{2}'.format(data_type, language, data_type)+extension)]
-    else:
-        data = [sorted(glob.glob(join(base_path, '{0}/{1}/{2}'.format(data_type, language, model), file_pattern)))]
+    data = sorted(glob.glob(join(base_path, '{0}/{1}/{2}'.format(data_type, language, model), file_pattern)))
     return data
 
 
@@ -150,7 +150,7 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     return masker
 
 
-def do_single_subject(subject, fmri_runs, matrices, masker, output_parent_folder, model, voxel_wised=False):
+def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_parent_folder, model, voxel_wised=False):
     # Compute r2 maps for all subject for a given model
     #   - subject : e.g. : 'sub-060'
     #   - fmri_runs: list of fMRI data runs (1 for each run)
@@ -163,7 +163,7 @@ def do_single_subject(subject, fmri_runs, matrices, masker, output_parent_folder
         alphas, r2_test = per_voxel_analysis(model, fmri_runs, design_matrices, subject)
         create_maps(masker, alphas, 'alphas', subject, output_parent_folder) # alphas
     else:
-        r2_test = whole_brain_analysis(model, fmri_runs, matrices, subject)
+        r2_test = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
     create_maps(masker, r2_test, 'r2_test', subject, output_parent_folder) # r2 test
 
 
@@ -173,9 +173,10 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
     r2_train = None  # array to contain the r2 values (1 row per fold, 1 column per voxel)
     r2_test = None
     alpha = None
+    nb_runs = len(fmri_runs)
 
     logo = LeaveOneGroupOut() # leave on run out !
-    for train, test in logo.split(fmri_runs, groups=range(1, 10)):
+    for train, test in logo.split(fmri_runs, groups=range(1, nb_runs+1)):
         fmri_data_train = np.vstack([fmri_runs[i] for i in train]) # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
         predictors_train = np.vstack([design_matrices[i] for i in train])
         model_fitted = model.fit(predictors_train, fmri_data_train)
@@ -203,18 +204,19 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
         count = 0
 
         logo = LeaveOneGroupOut() # leave on run out !
-        for train, test in logo.split(fmri_runs, groups=range(nb_runs)): # loop for r2 computation
+        # loop for r2 computation
+        for train, test in logo.split(fmri_runs, groups=range(nb_runs)):
 
             fmri_data_train = [fmri_runs[i] for i in train] # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
             predictors_train = [design_matrices[i] for i in train]
             nb_samples = np.cumsum([0] + [fmri_data_train[i].shape[0] for i in range(len(fmri_data_train))]) # list of cumulative lenght
             indexes = {'run{}'.format(run+1): [nb_samples[i], nb_samples[i+1]] for i, run in enumerate(train)}
 
-            model.cv = Splitter(indexes=indexes, n_splits=nb_runs)
+            model.cv = Splitter(indexes=indexes, n_splits=nb_runs) # adequate splitter for cross-validate alpha taking into account groups
             dm = np.vstack(predictors_train)
             fmri = np.vstack(fmri_data_train)
 
-            for voxel in range(nb_voxels):
+            for voxel in range(nb_voxels): # loop through the voxels
                 X = dm[:,voxel].reshape((dm.shape[0],1))
                 y = fmri[:,voxel].reshape((fmri.shape[0],1))
                 # fit the model for a given voxel

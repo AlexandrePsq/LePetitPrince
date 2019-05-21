@@ -19,7 +19,7 @@ import warnings
 warnings.simplefilter(action='ignore' )
 
 from utilities.settings import Paths, Subjects
-from utilities.utils import *
+from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices, compute_global_masker, do_single_subject
 import pandas as pd
 import numpy as np
 from nilearn.input_data import MultiNiftiMasker

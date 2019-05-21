@@ -7,7 +7,7 @@ if root not in sys.path:
 
 
 from utilities.settings import Subjects, Rois, Paths
-from utilities.utils import *
+from utilities.utils import get_output_parent_folder, get_path2output
 from itertools import combinations, product
 
 import warnings
@@ -31,7 +31,7 @@ language = 'en' # languages = ['en', 'fr']
 subjects = Subjects() # for subject in subjects.subject_lists[language]:
 
 # FMRI sampling period
-tr = 2.0
+tr = 2
 
 # Number of runs
 nb_runs = 1
@@ -73,13 +73,17 @@ def task_raw_features():
     for model in models:
         if model in ['rms', 'f0']:
             input_data_type = 'wave'
+            extension_input = '.wav'
         else:
             input_data_type = 'text'
+            extension_input = '.txt'
+        input_parent_folder = join(paths.path2data, '{0}/{1}/test'.format(input_data_type, language))
+        dependencies = [join(input_parent_folder, '{0}_{1}_{2}'.format(input_data_type, language, run_name) + extension_input) for run_name in run_names]
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, model)
         targets = [get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension) for run_name in run_names]
         yield {
             'name': model,
-            'file_dep': ['raw_features.py'],
+            'file_dep': ['raw_features.py'] + dependencies,
             'targets': targets,
             'actions': ['python raw_features.py --language {} --model {} '.format(language, model) + optional + optional_parallel],
         }
@@ -155,20 +159,21 @@ def task_ridge_indiv():
     input_data_type = 'design-matrices'
     output_data_type = 'ridge-indiv'
     extension = '.csv'
+    subjects = Subjects()
 
     for models in aggregated_models:
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
         input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
         dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
-        targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language)] \
-                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language)] \
-                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.nii.gz') for subject in subjects.get_all(language)] \
-                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.png') for subject in subjects.get_all(language)]
+        targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language, test)] \
+                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.png') for subject in subjects.get_all(language, test)]
         yield {
             'name': models,
             'file_dep': ['ridge-indiv.py'] + dependencies,
             'targets': targets,
-            'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised'.format(language, models) + optional + optional_parallel],
+            'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised '.format(language, models) + optional + optional_parallel + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))],
         }
 
 

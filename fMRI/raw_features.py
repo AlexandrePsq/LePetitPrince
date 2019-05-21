@@ -23,7 +23,6 @@ paths = Paths()
 
 
 def compute_raw_features(model, run, output_parent_folder, input_data_type, output_data_type, language, model_name, extension, overwrite):
-    #run = run[0]
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     path2output = get_path2output(output_parent_folder, output_data_type, language, model_name, run_name, extension)

@@ -136,6 +136,10 @@ def transform_design_matrices(path):
     return dm 
 
 
+def clean_rscores(rscores, r2min, r2max): # remove values with are too low and values too good to be true (e.g. voxels without variation)
+    return np.array([0 if (x < r2min or x >= r2max) else x for x in rscores])
+    
+
 
 #########################################
 ######### First level analysis ##########

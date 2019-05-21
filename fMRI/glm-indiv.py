@@ -26,7 +26,6 @@ from nilearn.input_data import MultiNiftiMasker
 
 from sklearn.metrics import r2_score
 from sklearn.linear_model import LinearRegression
-from nilearn.image import math_img, mean_img
 from joblib import Parallel, delayed
 
 paths = Paths()
@@ -36,7 +35,7 @@ subjects_list = Subjects()
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
-    parser.add_argument("--test", default=False, action='store_true', help="Precise if we are running a test.")
+    parser.add_argument("--subjects", nargs='+', action='append', default=[], help="Subjects list on whom we are running a test: list of 'sub-002...")
     parser.add_argument("--language", type=str, default='en', help="Language of the model.")
     parser.add_argument("--model_name", type=str, help="Name of the model to use to generate the raw features.")
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
@@ -48,10 +47,10 @@ if __name__ == '__main__':
     output_data_type = 'glm-indiv'
     model = LinearRegression()
     model_name = args.model_name
+    subjects = args.subjects[0]
 
-    subjects = subjects_list.get_all(args.language, args.test)
-    dm = get_data(args.language, input_data_type, model=model_name, source='fMRI', test=args.test)
-    fmri_runs = {subject: get_data(args.language, data_type=source, test=args.test, subject=subject) for subject in subjects}
+    dm = get_data(args.language, input_data_type, model=model_name, source='fMRI')
+    fmri_runs = {subject: get_data(args.language, data_type=source, subject=subject) for subject in subjects}
 
     output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model_name)
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not

@@ -51,7 +51,6 @@ if __name__ =='__main__':
     parser.add_argument("--tr", type=float, default=None, help="TR in sec (=sampling period for scans)")
     parser.add_argument("--model", type=str, help="Names of the model used to generate the raw features")
     parser.add_argument("--language", type=str, default='en', help="Language of the model studied.")
-    parser.add_argument("--test", default=False, action="store_true", help="Precise if we are running a test.")
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", default=False, action='store_true', help="Precise if we want to run code in parallel")
 
@@ -66,7 +65,7 @@ if __name__ =='__main__':
     output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model)
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
-    raw_features = get_data(args.language, input_data_type, model=model, source='fMRI', test=args.test)
+    raw_features = get_data(args.language, input_data_type, model=model, source='fMRI')
     
     if not args.parallel:
         for i, run in enumerate(raw_features):

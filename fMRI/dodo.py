@@ -44,7 +44,7 @@ models = sorted(['test'])
 aggregated_models = [' '.join(item) for i in range(1, len(models)+1) for item in combinations(models, i)]
 
 # Testing
-test = False 
+test = True 
 
 # Overwritting
 overwrite = False
@@ -52,7 +52,7 @@ overwrite = False
 # Parallelising
 parallel = True
 
-optional = '--test ' if test else ''
+optional = ''
 optional += '--overwrite ' if overwrite else ''
 optional_parallel = '--parallel ' if parallel else ''
 
@@ -111,7 +111,6 @@ def task_design_matrices():
     output_data_type = 'design-matrices'
     extension = '.csv'
     source = 'fMRI'
-    test=True
 
     for models in aggregated_models:
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
@@ -134,6 +133,8 @@ def task_glm_indiv():
     input_data_type = 'design-matrices'
     output_data_type = 'glm-indiv'
     extension = '.csv'
+    subjects = Subjects()
+
     for models in aggregated_models:
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
         input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
@@ -144,7 +145,7 @@ def task_glm_indiv():
             'name': models,
             'file_dep': ['glm-indiv.py'] + dependencies,
             'targets': targets,
-            'actions': ['python glm-indiv.py --language {} --model_name {} '.format(language, models) + optional + optional_parallel],
+            'actions': ['python glm-indiv.py --language {} --model_name {} '.format(language, models) + optional + optional_parallel + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))],
         }
 
 

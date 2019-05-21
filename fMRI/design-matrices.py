@@ -25,7 +25,6 @@ paths = Paths()
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate design matrices from features in a given language.\n\nInput:\nLanguage and models.""")
-    parser.add_argument("--test", default=False, action='store_true', help="Precise if we are running a test.")
     parser.add_argument("--language", type=str, default='en', help="Language of the text and the model.")
     parser.add_argument("--models", nargs='+', action='append', default=[], help="Name of the models to use to generate the raw features.")
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
@@ -40,7 +39,7 @@ if __name__ == '__main__':
     source = 'fMRI'
 
     for model_ in models:
-        features_list.append(get_data(args.language, input_data_type, model=model_, source='fMRI', test=args.test)) # retrieve the data to transform and append the list of runs (features data) to features_list) 
+        features_list.append(get_data(args.language, input_data_type, model=model_, source='fMRI')) # retrieve the data to transform and append the list of runs (features data) to features_list) 
 
     runs = list(zip(*features_list)) # list of 9 tuples (1 for each run), each tuple containing the features for all the specified models
     # e.g.: [(path2run1_model1, path2run1_model2), (path2run2_model1, path2run2_model2)]

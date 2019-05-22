@@ -19,11 +19,11 @@ import warnings
 warnings.simplefilter(action='ignore' )
 
 from utilities.settings import Paths, Subjects
-from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices, compute_global_masker, do_single_subject
+from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices
+from utilities.first_level_analysis import compute_global_masker, do_single_subject
 import pandas as pd
 from nilearn.masking import compute_epi_mask
 import numpy as np
-from utilities.splitter import Splitter
 from nilearn.input_data import MultiNiftiMasker
 
 from sklearn.metrics import r2_score

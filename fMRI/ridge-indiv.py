@@ -28,7 +28,7 @@ from nilearn.input_data import MultiNiftiMasker
 
 from sklearn.metrics import r2_score
 from sklearn.model_selection import LeaveOneGroupOut
-from sklearn.linear_model import RidgeCV
+from sklearn.linear_model import Ridge
 from nilearn.image import math_img, mean_img
 from joblib import Parallel, delayed
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     input_data_type = 'design-matrices'
     output_data_type = 'ridge-indiv'
     alphas = np.logspace(-3, -1, 30)
-    model = RidgeCV(alphas=alphas, scoring='r2', cv=Splitter())
+    model = Ridge()
     model_name = args.model_name
     subjects = args.subjects[0]
 

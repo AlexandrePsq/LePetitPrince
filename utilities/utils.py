@@ -5,10 +5,11 @@ from .settings import Paths, Extensions
 
 from nilearn.input_data import MultiNiftiMasker
 from nilearn.plotting import plot_glass_brain
-from sklearn.model_selection import LeaveOneGroupOut
-from utilities.splitter import Splitter
+from sklearn.model_selection import LeaveOneOut, LeaveOneGroupOut
 from nilearn.masking import compute_epi_mask
+from utilities.splitter import Splitter
 from nilearn.image import math_img, mean_img
+from tqdm import tqdm
 import nibabel as nib
 import numpy as np
 import pandas as pd
@@ -136,7 +137,6 @@ def transform_design_matrices(path):
     return dm 
 
 
-
 #########################################
 ######### First level analysis ##########
 #########################################
@@ -157,7 +157,7 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     #   - matrices: list of design matrices (1 for each run)
     #   - masker: MultiNiftiMasker object
     fmri_runs = [masker.transform(f) for f in fmri_filenames] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
-
+    
     # compute r2 maps and save them under .nii.gz and .png formats
     if voxel_wised:
         alphas, r2_test = per_voxel_analysis(model, fmri_runs, design_matrices, subject)
@@ -170,7 +170,9 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
 def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
     #   - fmri_runs: list of fMRI data runs (1 for each run)
     #   - matrices: list of design matrices (1 for each run)
-    scores = None # array to contain the r2 values (1 row per fold, 1 column per voxel)
+    r2_train = None  # array to contain the r2 values (1 row per fold, 1 column per voxel)
+    r2_test = None
+    alpha = None
     nb_runs = len(fmri_runs)
 
     logo = LeaveOneGroupOut() # leave on run out !
@@ -180,12 +182,12 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
         model_fitted = model.fit(predictors_train, fmri_data_train)
 
         # return the R2_score for each voxel (=list)
-        r2 = get_r2_score(model_fitted, fmri_runs[test[0]], design_matrices[test[0]])
+        r2_test = get_r2_score(model_fitted, fmri_runs[test[0]], design_matrices[test[0]])
 
         # log the results
-        log(subject, voxel='whole brain', alpha=None, r2=r2)
+        log(subject, voxel='whole brain', alpha=None, r2=r2_test)
 
-        scores = r2 if scores is None else np.vstack([scores, r2])
+        scores = rsquares_test if r2_test is None else np.vstack([r2_test, r2_test])
     return np.mean(scores, axis=0) # compute mean vertically (in time)
 
 
@@ -196,35 +198,63 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject):
     #   - nb_voxels: number of voxels
     #   - indexes: dict specifying row indexes for each run
     nb_voxels = fmri_runs[0].shape[1]
-    nb_runs = len(fmri_runs)
-    alphas = np.zeros(nb_voxels)
-    scores = np.zeros((nb_voxels, nb_runs))
-    count = 0
-
-    logo = LeaveOneGroupOut() # leave on run out !
+    nb_features = design_matrices[0].shape[1]
+    alpha_list = np.logspace(-3, -1, 30)
+    nb_alphas = len(alpha_list)
+    nb_runs_test = len(fmri_runs)
+    nb_runs_valid = nb_runs_test -1 
+    alphas_cv1 = np.zeros((nb_runs_valid, nb_voxels))
+    alphas_cv2 = np.zeros((nb_runs_test, nb_voxels))
+    scores_cv2 = np.zeros((nb_runs_test, nb_voxels))
+    
     # loop for r2 computation
-    for train, test in logo.split(fmri_runs, groups=range(nb_runs)):
-        fmri_data_train = [fmri_runs[i] for i in train] # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
-        predictors_train = [design_matrices[i] for i in train]
-        nb_samples = np.cumsum([0] + [fmri_data_train[i].shape[0] for i in range(len(fmri_data_train))]) # list of cumulative lenght
-        indexes = {'run{}'.format(run+1): [nb_samples[i], nb_samples[i+1]] for i, run in enumerate(train)}
-
-        model.cv = Splitter(indexes_dict=indexes, n_splits=nb_runs) # adequate splitter for cross-validate alpha taking into account groups
-        dm = np.vstack(predictors_train)
-        fmri = np.vstack(fmri_data_train)
-
-        for voxel in range(nb_voxels): # loop through the voxels
-            X = dm[:,voxel].reshape((dm.shape[0],1))
-            y = fmri[:,voxel].reshape((fmri.shape[0],1))
-            # fit the model for a given voxel
-            model_fitted = model.fit(X,y)
-            # retrieve the best alpha and compute the r2 score for this voxel
-            alphas[voxel] = model.alpha_
-            scores[voxel, count] = get_r2_score(model_fitted, 
-                                                fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
-                                                design_matrices[test[0]][:,voxel].reshape((design_matrices[test[0]].shape[0],1)))
-            # log the results
-            log(subject, voxel=voxel, alpha=model_fitted.alpha_, r2=scores[voxel, count])
-        count += 1
+    cv3 = 0
+    logo = LeaveOneOut() # leave on run out !
+    for train_, test in logo.split(fmri_runs):
+        fmri_data_train_ = [fmri_runs[i] for i in train_] # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
+        predictors_train_ = [design_matrices[i] for i in train_]
         
-    return alphas, np.mean(scores, axis=0) # compute mean vertically (in time)
+        cv2 = 0
+        logo2 = LeaveOneOut() # leave on run out !
+        for train, valid in logo2.split(fmri_data_train_):
+            fmri_data_train = [fmri_data_train_[i] for i in train] # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
+            predictors_train = [predictors_train_[i] for i in train]
+            dm = np.vstack(predictors_train)
+            fmri = np.vstack(fmri_data_train)
+            scores_cv1 = np.zeros((nb_voxels, nb_alphas))
+            
+            cv1 = 0
+            for alpha_tmp in tqdm(alpha_list): # compute the r2 for a given alpha for all the voxel
+                model.set_params(alpha=alpha_tmp)
+                model_fitted = model.fit(dm,fmri)
+                r2 = get_r2_score(model_fitted, fmri_data_train_[valid[0]], predictors_train_[valid[0]])
+                scores_cv1[:, cv1] = r2
+                cv1 += 1
+            best_alphas_indexes = np.argmax(scores_cv1, axis=1)
+            alphas_cv1[cv2, :] = np.array([alpha_list[i] for i in best_alphas_indexes])
+            cv2 += 1
+        alphas_cv2[cv3, :] = np.mean(alphas_cv1, axis=0)
+        fmri2 = np.vstack(fmri_data_train_)
+        dm2 = np.vstack(predictors_train_)
+        for voxel in tqdm(range(nb_voxels)): # loop through the voxels and fit the model with the best alpha for this voxel
+            y = fmri2[:,voxel].reshape((fmri2.shape[0],1))
+            model.set_params(alpha=alphas_cv2[cv3, voxel])
+            model_fitted = model.fit(dm2, y)
+            scores_cv2[cv3, voxel] = get_r2_score(model_fitted, 
+                                            fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
+                                            design_matrices[test[0]])
+            # log the results
+            log(subject, voxel=voxel, alpha=alphas_cv2[cv3, voxel], r2=scores_cv2[cv3, voxel])
+        cv3 += 1
+        
+    return np.mean(alphas_cv2, axis=0), np.mean(scores_cv2, axis=0) # compute mean vertically (in time)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    

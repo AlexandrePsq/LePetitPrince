@@ -1,5 +1,6 @@
 from sklearn.model_selection import KFold
 import numpy as np
+from sklearn.model_selection import LeaveOneOut
 
 class Splitter(KFold):
     
@@ -28,15 +29,17 @@ class Splitter(KFold):
         test : ndarray
             The testing set indices for that split.
         """
-        for train_index, test_index in super().split(X):
+        logo = LeaveOneOut()
+        keys = list(self.indexes_dict.keys())
+        for train_index, test_index in logo.split(keys):
             index_train = []
             index_test = []
             for i in train_index:
-                beg, end = self.indexes_dict['run{}'.format(i+1)]
+                beg, end = self.indexes_dict[keys[i]]
                 index_train.append(np.arange(beg, end))
             list_indexes_train = np.hstack(index_train)
             for i in test_index:
-                beg, end = self.indexes_dict['run{}'.format(i+1)]
+                beg, end = self.indexes_dict[keys[i]]
                 index_test.append(np.arange(beg, end))
             list_indexes_test = np.hstack(index_test)
             yield list_indexes_train, list_indexes_test

@@ -13,7 +13,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from utilities.settings import Paths, Scans
-from utilities.utils import *
+from utilities.utils import get_data, check_folder, compute, get_output_parent_folder, get_path2output
 import pandas as pd
 import numpy as np
 from joblib import Parallel, delayed
@@ -27,12 +27,18 @@ scans = Scans()
 def process_raw_features(run, tr, nscans):
     # compute convolution of raw_features with hrf kernel
     df = pd.read_csv(run)
-    conditions = np.vstack((df.onsets, df.duration, df.amplitude))
-    result = compute_regressor(exp_condition=conditions,
-                               hrf_model='spm',
-                               frame_times=np.arange(0.0, nscans*tr, tr),
-                               oversampling=10)
-    return pd.DataFrame(result[0], columns=['hrf'])
+    result = []
+    count = 0
+    raw_features_columns = [col for col in df.columns if col not in ['onsets', 'duration']]
+    for col in raw_features_columns:
+        conditions = np.vstack((df.onsets, df.duration, df[col]))
+        tmp = compute_regressor(exp_condition=conditions,
+                                hrf_model='spm',
+                                frame_times=np.arange(0.0, nscans*tr, tr),
+                                oversampling=10)
+        result.append(pd.DataFrame(tmp[0], columns=['hrf{}'.format(count)]))
+        count += 1
+    return pd.concat(result, axis=1)
 
 def compute_features(run, output_parent_folder, output_data_type, language, model, extension, tr, overwrite):
     name = os.path.basename(os.path.splitext(run)[0])

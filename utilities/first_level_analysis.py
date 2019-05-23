@@ -4,6 +4,7 @@ from sklearn.model_selection import LeaveOneOut, LeaveOneGroupOut
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
 import nibabel as nib
+import sklearn
 import numpy as np
 from tqdm import tqdm
 from .utils import get_r2_score, log
@@ -49,7 +50,7 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     return masker
 
 
-def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_parent_folder, model, voxel_wised=False):
+def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_parent_folder, model, voxel_wised=False, alpha_list=np.logspace(-3, -1, 30)):
     # Compute r2 maps for all subject for a given model
     #   - subject : e.g. : 'sub-060'
     #   - fmri_runs: list of fMRI data runs (1 for each run)
@@ -59,7 +60,7 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     
     # compute r2 maps and save them under .nii.gz and .png formats
     if voxel_wised:
-        alphas, r2_test = per_voxel_analysis(model, fmri_runs, design_matrices, subject)
+        alphas, r2_test = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
         create_maps(masker, alphas, 'alphas', subject, output_parent_folder) # alphas
     else:
         r2_test = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
@@ -76,6 +77,11 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
     for train, test in logo.split(fmri_runs, groups=range(1, nb_runs+1)):
         fmri_data_train = np.vstack([fmri_runs[i] for i in train]) # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
         predictors_train = np.vstack([design_matrices[i] for i in train])
+
+        if type(model) == sklearn.linear_model.RidgeCV:
+            nb_samples = np.cumsum([0] + [fmri_data_train[i].shape[0] for i in range(len(fmri_data_train))]) # list of cumulative lenght
+            indexes = {'run{}'.format(run+1): [nb_samples[i], nb_samples[i+1]] for i, run in enumerate(train)}
+            model.cv = Splitter(indexes_dict=indexes, n_splits=nb_runs) # adequate splitter for cross-validate alpha taking into account groups
         model_fitted = model.fit(predictors_train, fmri_data_train)
 
         # return the R2_score for each voxel (=list)
@@ -88,18 +94,16 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
     return np.mean(scores, axis=0) # compute mean vertically (in time)
 
 
-def per_voxel_analysis(model, fmri_runs, design_matrices, subject):
+def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
     # compute alphas and test score with cross validation
     #   - fmri_runs: list of fMRI data runs (1 for each run)
     #   - design_matrices: list of design matrices (1 for each run)
     #   - nb_voxels: number of voxels
     #   - indexes: dict specifying row indexes for each run
     nb_voxels = fmri_runs[0].shape[1]
-    alpha_list = np.logspace(-3, -1, 30)
     nb_alphas = len(alpha_list)
     nb_runs_test = len(fmri_runs)
     nb_runs_valid = nb_runs_test -1 
-    alphas_cv1 = np.zeros((nb_voxels, nb_alphas))
     alphas_cv2 = np.zeros((nb_runs_test, nb_voxels))
     scores_cv2 = np.zeros((nb_runs_test, nb_voxels))
     

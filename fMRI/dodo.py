@@ -9,6 +9,7 @@ if root not in sys.path:
 from utilities.settings import Subjects, Rois, Paths
 from utilities.utils import get_output_parent_folder, get_path2output
 from itertools import combinations, product
+import numpy as np
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -51,6 +52,10 @@ overwrite = False
 
 # Parallelising
 parallel = True
+
+# Alphas list for voxel-wised analysis
+alphas = np.logspace(-3, -1, 30)
+
 
 optional = ''
 optional += '--overwrite ' if overwrite else ''
@@ -173,7 +178,10 @@ def task_ridge_indiv():
             'name': models,
             'file_dep': ['ridge-indiv.py'] + dependencies,
             'targets': targets,
-            'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised '.format(language, models) + optional + optional_parallel + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))],
+            'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised '.format(language, models) \
+                + optional + optional_parallel \
+                    + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))\
+                        + '--alphas ' + ' '.join(alpha for alpha in alphas)]
         }
 
 

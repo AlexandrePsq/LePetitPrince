@@ -99,7 +99,7 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject):
     nb_alphas = len(alpha_list)
     nb_runs_test = len(fmri_runs)
     nb_runs_valid = nb_runs_test -1 
-    alphas_cv1 = np.zeros((nb_runs_valid, nb_voxels))
+    alphas_cv1 = np.zeros((nb_voxels, nb_alphas))
     alphas_cv2 = np.zeros((nb_runs_test, nb_voxels))
     scores_cv2 = np.zeros((nb_runs_test, nb_voxels))
     
@@ -117,19 +117,19 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject):
             predictors_train = [predictors_train_[i] for i in train]
             dm = np.vstack(predictors_train)
             fmri = np.vstack(fmri_data_train)
-            scores_cv1 = np.zeros((nb_voxels, nb_alphas))
+            scores_cv1 = np.zeros((nb_voxels, nb_runs_valid, nb_alphas))
             
             cv1 = 0
             for alpha_tmp in tqdm(alpha_list): # compute the r2 for a given alpha for all the voxel
                 model.set_params(alpha=alpha_tmp)
                 model_fitted = model.fit(dm,fmri)
                 r2 = get_r2_score(model_fitted, fmri_data_train_[valid[0]], predictors_train_[valid[0]])
-                scores_cv1[:, cv1] = r2
+                scores_cv1[:, cv2, cv1] = r2
                 cv1 += 1
-            best_alphas_indexes = np.argmax(scores_cv1, axis=1)
-            alphas_cv1[cv2, :] = np.array([alpha_list[i] for i in best_alphas_indexes])
+            #best_alphas_indexes = np.argmax(scores_cv1, axis=1)
             cv2 += 1
-        alphas_cv2[cv3, :] = np.mean(alphas_cv1, axis=0)
+        best_alphas_indexes = np.argmax(np.mean(scores_cv1, axis=1), axis=1)
+        alphas_cv2[cv3, :] = np.array([alpha_list[i] for i in best_alphas_indexes])
         fmri2 = np.vstack(fmri_data_train_)
         dm2 = np.vstack(predictors_train_)
         for voxel in tqdm(range(nb_voxels)): # loop through the voxels and fit the model with the best alpha for this voxel

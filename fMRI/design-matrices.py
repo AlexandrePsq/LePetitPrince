@@ -17,7 +17,7 @@ import warnings
 warnings.simplefilter(action='ignore' )
 
 from utilities.settings import Paths
-from utilities.utils import *
+from utilities.utils import get_data, check_folder, compute, get_output_parent_folder, get_path2output
 import pandas as pd
 
 paths = Paths()

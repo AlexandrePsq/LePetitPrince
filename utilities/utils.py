@@ -104,8 +104,8 @@ def transform_design_matrices(path):
     # Read design matrice csv file and add a column with only 1
     dm = pd.read_csv(path, header=0)
     # add the constant
-    const = np.ones((dm.shape[0], 1))
-    dm = np.hstack((dm, const))
+    # const = np.ones((dm.shape[0], 1))
+    # dm = np.hstack((dm, const))
     return dm 
 
 

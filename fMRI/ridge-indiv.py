@@ -46,7 +46,7 @@ if __name__ == '__main__':
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", default=True, action='store_true', help="Precise if we run the code in parallel")
     parser.add_argument("--voxel_wised", default=False, action='store_true', help="Precise if we compute voxel-wised")
-    parser.add_argument("--alphas", nargs='+', action='append', default=np.logspace(-3, -1, 30), help="List of alphas for voxel-wised analysis.")
+    parser.add_argument("--alphas", nargs='+', action='append', default=[np.logspace(-3, -1, 30)], help="List of alphas for voxel-wised analysis.")
 
     args = parser.parse_args()
     source = 'fMRI'

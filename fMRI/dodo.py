@@ -181,7 +181,7 @@ def task_ridge_indiv():
             'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised '.format(language, models) \
                 + optional + optional_parallel \
                     + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))\
-                        + '--alphas ' + ' '.join(alpha for alpha in alphas)]
+                        + ' --alphas ' + ' '.join(str(alpha) for alpha in alphas)]
         }
 
 

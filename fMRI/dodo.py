@@ -25,35 +25,37 @@ from os.path import join
 ############################################################################
 
 
-# Language
+## Language
 language = 'en' # languages = ['en', 'fr']
 
-# List of all the subjects
+## List of all the subjects
 subjects = Subjects() # for subject in subjects.subject_lists[language]:
 
-# FMRI sampling period
+## FMRI sampling period
 tr = 2
 
-# Number of runs
-nb_runs = 1
+## Number of runs
+nb_runs = 3
 run_names = ['run{}'.format(i) for i in range(1,nb_runs + 1)]
 
-# Models
-models = sorted(['test'])
+## Models
+# models = sorted(['test-1', 'test-5', 'test-10', 'test-20', 'test-50', 'test-100'])
+models = sorted(['test-1'])
 
-# Aggregated models (for design matrices contruction)
-aggregated_models = [' '.join(item) for i in range(1, len(models)+1) for item in combinations(models, i)]
+## Aggregated models (for design matrices contruction)
+# aggregated_models = [' '.join(item) for i in range(1, len(models)+1) for item in combinations(models, i)]
+aggregated_models = models
 
-# Testing
+## Testing
 test = True 
 
-# Overwritting
+## Overwritting
 overwrite = False
 
-# Parallelising
+## Parallelising
 parallel = True
 
-# Alphas list for voxel-wised analysis
+## Alphas list for voxel-wised analysis
 alphas = np.logspace(-3, -1, 30)
 
 

@@ -44,7 +44,8 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 def compute_global_masker(files): # [[path, path2], [path3, path4]]
     # return a MultiNiftiMasker object
 
-    mask = join(spm_dir, '/neurospin/unicog/protocols/IRMf/Meyniel_MarkovGuess_2014/spm12/tpm/mask_ICV.nii')
+    spm_dir = '/neurospin/unicog/protocols/IRMf/Meyniel_MarkovGuess_2014'
+    mask = join(spm_dir, 'spm12/tpm/mask_ICV.nii')
     global_mask = math_img('img>0', img=mask)
     masker = MultiNiftiMasker(mask_img=global_mask)
     masker.fit()

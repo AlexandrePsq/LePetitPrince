@@ -84,7 +84,7 @@ def task_raw_features():
         else:
             input_data_type = 'text'
             extension_input = '.txt'
-        input_parent_folder = join(paths.path2data, '{0}/{1}/test'.format(input_data_type, language))
+        input_parent_folder = join(paths.path2data, '{0}/{1}/{2}'.format(input_data_type, language, model))
         dependencies = [join(input_parent_folder, '{0}_{1}_{2}'.format(input_data_type, language, run_name) + extension_input) for run_name in run_names]
         output_parent_folder = get_output_parent_folder(source, output_data_type, language, model)
         targets = [get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension) for run_name in run_names]

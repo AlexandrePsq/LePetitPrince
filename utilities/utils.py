@@ -27,12 +27,12 @@ def get_data(language, data_type, subject=None, source='', model=''):
     if data_type in sub_dir:
         base_path = paths.path2data
         if data_type in ['fMRI', 'MEG']:
-            file_pattern = '{2}/func/{0}_{1}_{2}'.format(data_type, language, subject) + '_run*' + extension
+            file_pattern = '{2}/func/{0}_{1}_{2}_run*'.format(data_type, language, subject) + extension
         else:
-            file_pattern = '{}_{}'.format(data_type, language) + '_run*' + extension
+            file_pattern = '{}_{}_{}_run*'.format(data_type, language, model) + extension
     else:
         base_path = join(paths.path2derivatives, source)
-        file_pattern = '{}_{}'.format(data_type, language) + '_' + model + '_run*' + extension
+        file_pattern = '{}_{}_{}_run*'.format(data_type, language, model) + extension
     data = sorted(glob.glob(join(base_path, '{0}/{1}/{2}'.format(data_type, language, model), file_pattern)))
     return data
 
@@ -43,13 +43,6 @@ def get_output_parent_folder(source, output_data_type, language, model):
 
 def get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension):
     return join(output_parent_folder, '{0}_{1}_{2}_{3}'.format(output_data_type, language, model, run_name) + extension)
-
-
-def withdram(dataframe, run, run_indexes_dict):
-    """Return the dataframe made of the runs data concatenation without the specified run."""
-    beg, end = run_indexes_dict[run]
-    result = np.vstack([dataframe[:beg, :], dataframe[end:,:]])
-    return result
 
 
 

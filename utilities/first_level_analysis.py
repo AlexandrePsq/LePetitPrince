@@ -4,15 +4,17 @@ from sklearn.model_selection import LeaveOneOut, LeaveOneGroupOut
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
 import nibabel as nib
+from .splitter import Splitter
 import sklearn
 import numpy as np
 from tqdm import tqdm
 from .utils import get_r2_score, log
+from .settings import Params
 import os
 from os.path import join
 
 
-
+params = Params()
 
 #########################################
 ################ Figures ################
@@ -44,16 +46,16 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 def compute_global_masker(files): # [[path, path2], [path3, path4]]
     # return a MultiNiftiMasker object
 
-    spm_dir = '/neurospin/unicog/protocols/IRMf/Meyniel_MarkovGuess_2014'
-    mask = join(spm_dir, 'spm12/tpm/mask_ICV.nii')
-    global_mask = math_img('img>0', img=mask)
-    masker = MultiNiftiMasker(mask_img=global_mask)
-    masker.fit()
+    #spm_dir = '/neurospin/unicog/protocols/IRMf/Meyniel_MarkovGuess_2014'
+    #mask = join(spm_dir, 'spm12/tpm/mask_ICV.nii')
+    #global_mask = math_img('img>0', img=mask)
+    #masker = MultiNiftiMasker(mask_img=global_mask)
+    #masker.fit()
 
-    # masks = [compute_epi_mask(f) for f in files]
-    # global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
-    # masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
-    # masker.fit()
+    masks = [compute_epi_mask(f) for f in files]
+    global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
+    masker = MultiNiftiMasker(global_mask, detrend=params.pref.detrend, standardize=params.pref.standardize) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
+    masker.fit()
     return masker
 
 

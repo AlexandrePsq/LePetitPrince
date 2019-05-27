@@ -48,7 +48,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     extension = '.csv'
-    output_data_type = 'raw_features'
+    output_data_type = 'raw-features'
     source = 'fMRI'
     model_name = args.model_name
 

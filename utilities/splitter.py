@@ -1,10 +1,13 @@
 from sklearn.model_selection import KFold
 import numpy as np
 from sklearn.model_selection import LeaveOneOut
+from .settings import Params
+
+params = Params()
 
 class Splitter(KFold):
 
-    def __init__(self, indexes_dict={}, n_splits=9, shuffle=False,
+    def __init__(self, indexes_dict={}, n_splits=params.nb_runs shuffle=False,
                  random_state=None):
         n_splits = n_splits
         self.indexes_dict = indexes_dict

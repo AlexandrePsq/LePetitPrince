@@ -10,6 +10,8 @@
 ########################################################
 
 from os.path import join
+from itertools import combinations
+import numpy as np
 
 class Paths:
     def __init__(self):
@@ -29,7 +31,7 @@ class Extensions:
         # Retrieve extensions
         self.extensions = {'wave':'.wav',
                            'text':'.txt',
-                           'raw_features':'.csv',
+                           'raw-features':'.csv',
                            'features':'.csv',
                            'fMRI':'.nii.nii',
                            'design-matrices':'.csv'
@@ -68,7 +70,9 @@ class Scans:
 class Subjects:
     def __init__(self):
         # Subjects
-        self.subject_lists = {'en': [57, 58, 59, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 86, 87, 88, 89, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 103, 104, 105, 106, 108, 109, 110, 113, 114, 115],
+        self.subject_lists = {'en': [57, 58, 59, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 
+        72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 86, 87, 88, 89, 91, 92, 93, 
+        94, 95, 96, 97, 98, 99, 100, 101, 103, 104, 105, 106, 108, 109, 110, 113, 114, 115],
                               'fr': []
         }
         self.subject_test = {'en': [57],
@@ -97,7 +101,7 @@ class Subjects:
 class Rois:
     def __init__(self):
         # ROIs
-        self.rois2idx = {'None': -1,
+        self.rois2idx = {'All': -1,
                          'IFGorb': 0,
                          'IFGtri': 1,
                          'TP': 2,
@@ -111,10 +115,57 @@ class Rois:
                          'TPJ',
                          'aSTS',
                          'pSTS',
-                         None]
+                         'All']
 
     def add_roi(self, roi_name):
         if roi_name not in self.rois2idx.keys():
             self.rois2idx[roi_name] = len(self.idx2rois) -1
-            self.idx2rois = self.idx2rois[:-1] + [roi_name, None]
+            self.idx2rois = self.idx2rois[:-1] + [roi_name, 'All']
 
+
+class Preferences:
+	def __init__(self):
+
+		# Number of voxel
+		self.subset = None
+
+		
+		# Crossvalidation prefernces
+		self.ridge_nested_crossval = True
+		self.defaut_alpha = 15
+
+		# Alpha for nested
+		self.alphas = np.logspace(-3, -1, 30) # Alphas list for voxel-wised analysis
+		self.alpha_order_min = -4
+		self.alpha_order_max = 6
+		self.alphas_nested_ridgecv = np.logspace(self.alpha_order_min, self.alpha_order_max, self.n_alphas)
+		self.fit_intercept = True
+		
+		# Data
+		self.generate_data = True
+		self.compute_PCA = True
+		self.n_components = 4
+
+        # GLM / Ridge
+        self.detrend = True
+        self.standardize = True
+
+
+class Params:
+	def __init__(self):
+		self.pref = Preferences()
+
+		# Data
+		self.tr = 2 # FMRI sampling period
+		self.nb_runs = 9 # number of runs
+		self.models = sorted(['test-1'])
+		self.aggregated_models = [' '.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
+		self.languages = ['en'] # ['en', 'fr', 'ch']
+
+		self.test = True
+		self.overwrite = False
+		self.parallel = True
+
+		self.nb_features_lstm = 1300
+		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))
+		

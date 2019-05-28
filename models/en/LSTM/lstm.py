@@ -130,17 +130,3 @@ class RNNModel(nn.Module):
         out, hidden = self(inp, hidden)
         activation = hidden[0].data.view(1,1,-1).cpu().numpy()
         return activation, surprisal, (out, hidden)
-
-
-# python LSTM/prepare_LSTM_features/extract_activations/extract_activations.py \
-# LSTM/LSTM_training/word_language_model/English_model_wikitext_LSTM_seed_1_nhid_2_emsize_2_nlayers_5_dropout_0.5_batchsize_64_lr_10_epochs_10_0.pt \
-#  -v LSTM/LSTM_training/word_language_model/data/wiki_kristina/vocab.txt \
-#  -o LSTM/prepare_LSTM_features/extract_activations/english_all.pkl \
-#  -i LSTM/LSTM_training/word_language_model/data/wikitext-2/train.txt --use-unk --get-representations lstm
-# 
-# 
-# python main.py  --model LSTM --data ./data/test --seed 1 --nhid 2 --emsize 2 --nlayers 5 --dropout 0.5 --batch_size 64 --lr 10 --epochs 10 --save ./English_model_wikitext_LSTM_seed_1_nhid_2_emsize_2_nlayers_5_dropout_0.5_batchsize_64_lr_10_epochs_10_0.pt
-
-
-# model = module.load()
-# model.generate(path)

@@ -6,6 +6,7 @@ if root not in sys.path:
     sys.path.append(root)
 
 import torch
+import torch.nn.functional as F
 from ....utilities.settings import Params
 
 params = Params()
@@ -62,3 +63,62 @@ def load(model, data_name, language):
     with open(path, 'wb') as f:
         return torch.load(f)
 
+
+
+###############################################################################
+# Extracting advanced features
+###############################################################################
+
+def LSTMCell(input, hidden, w_ih, w_hh, b_ih=None, b_hh=None): 
+    hx, cx = hidden
+    gates = F.linear(input, w_ih, b_ih) + F.linear(hx, w_hh, b_hh)
+
+    ingate, forgetgate, cy_tilde, outgate = gates.chunk(4, 1) #dim modified from 1 to 2
+
+    ingate = F.sigmoid(ingate)
+    forgetgate = F.sigmoid(forgetgate)
+    cy_tilde = F.tanh(cy_tilde)
+    outgate = F.sigmoid(outgate)
+
+    cy = (forgetgate * cx) + (ingate * cy_tilde)
+    hy = outgate * F.tanh(cy)
+
+    return {'hidden': hy, 'cell': cy, 'in': ingate, 'forget': forgetgate, 'out': outgate, 'c_tilde': cy_tilde}
+
+
+def apply_mask(hidden_l, mask):
+    if type(hidden_l) == torch.autograd.Variable:
+        return hidden_l * mask
+    else:
+        return tuple(h * mask for h in hidden_l)
+
+
+def forward(self, input, hidden, mask=None):
+    weight = self.all_weights
+    dropout = self.dropout
+    # saves the gate values into the rnn object
+    last_gates = []
+
+    hidden = list(zip(*hidden))
+
+    for l in range(self.nlayers):
+        hidden_l = hidden[l]
+        if mask and l in mask:
+            hidden_l = apply_mask(hidden_l, mask[l])
+        # we assume there is just one token in the input
+        gates = LSTMCell(input[0], hidden_l, *weight[l])
+        hy = (gates['hidden'], gates['cell'])
+        if mask and l in mask:
+            hy = apply_mask(hy, mask[l])
+
+        last_gates.append(gates)
+        input = hy[0]
+
+        if dropout != 0 and l < self.nlayers - 1:
+            input = F.dropout(input, p=dropout, training=False, inplace=False)
+
+    self.gates =  {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in range(self.nlayers)], 0) for key in ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']}
+    self.hidden = {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in range(self.nlayers)], 0) for key in ['hidden', 'cell']}
+    # we restore the right dimensionality
+    input = input.unsqueeze(0)
+    return input, (self.hidden['hidden'], self.hidden['cell'])

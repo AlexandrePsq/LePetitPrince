@@ -140,6 +140,9 @@ class Preferences:
 		self.lr = 10 # learning rate
 		self.epochs = 30
 
+		# activations
+		self.extracted_parameters = ['gates.in', 'gates.forget', 'gates.out', 'gates.c_tilde', 'hidden', 'cell']
+		self.surprisal = True
 		
 		# Crossvalidation prefernces
 		self.ridge_nested_crossval = True
@@ -183,7 +186,6 @@ class Params:
 				print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
 		self.eos_separator = '<eos>'
-		self.surprisal = True
 		self.seed = 1111
 
 		self.nb_features_lstm = 1300

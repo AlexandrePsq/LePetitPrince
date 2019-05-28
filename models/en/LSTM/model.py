@@ -19,6 +19,7 @@ import numpy as np
 from .data import Corpus, Dictionary
 from .tokenizer import tokenize
 from utilities.settings import Params
+import utils
 
 
 params = Params()
@@ -63,6 +64,7 @@ class RNNModel(nn.Module):
         self.dropout = dropout
         self.ninp = ninp
         self.nlayers = nlayers
+        self.backup = self.rnn.forward
         self.vocab = None
     
     def init_vocab(self, path):
@@ -92,11 +94,11 @@ class RNNModel(nn.Module):
         else:
             return weight.new_zeros(self.nlayers, bsz, self.nhid)
 
-    def generate(self, path, language):
-        # self.init_vocab(vocab_path)
+    def generate(self, path, language, includ_surprisal=params.pref.surprisal, parameters=params.pref.extracted_parameters):
+        parameters = sorted(parameters)
         # hack the forward function to send an extra argument containing the model parameters
-        # self.rnn.forward = lambda input, hidden: lstm.forward(model.rnn, input, hidden)
-        columns_activations = ['raw-features-activations-{}'.format(i) for i in range(self.nhid * self.nlayers)]
+        self.rnn.forward = lambda input, hidden: utils.forward(self.rnn, input, hidden)
+        columns_activations = ['raw-{}-{}'.format(name, i) for i in range(self.nhid * self.nlayers) for name in parameters]
         activations = []
         surprisals = []
         iterator = tokenize(path, language, self.vocab)
@@ -104,19 +106,17 @@ class RNNModel(nn.Module):
         out = None
         hidden = None
         for item in iterator:
-            activation, surprisal,(out, hidden) = self.extract_activations(item, 
-                                                                            last_item=last_item, 
-                                                                            surprisal=params.surprisal, 
-                                                                            out=out, 
-                                                                            hidden=hidden)
+            activation, surprisal,(out, hidden) = self.extract_activations(item, last_item=last_item, out=out, hidden=hidden)
             last_item = item
-            activations.append(activation[0][0])
+            activations.append(activation)
             surprisals.append(surprisal)
         activations_df = pd.DataFrame(np.vstack(activations), columns=columns_activations)
         surprisals_df = pd.DataFrame(np.vstack(surprisals), columns=['surprisal'])
-        return pd.concat([activations_df, surprisals_df], axis = 1)
+        result = pd.concat([activations_df, surprisals_df], axis = 1) if includ_surprisal else activations_df
+        return result
     
-    def extract_activations(self, item, last_item, surprisal=False, out=None, hidden=None):
+    def extract_activations(self, item, last_item, out=None, hidden=None, parameters=['hidden']):
+        activation = []
         if last_item == params.eos_separator:
             hidden = self.init_hidden(1)
             inp = torch.autograd.Variable(torch.LongTensor([[self.vocab.word2idx[params.eos_separator]]]))
@@ -128,5 +128,7 @@ class RNNModel(nn.Module):
         if params.cuda:
             inp = inp.cuda()
         out, hidden = self(inp, hidden)
-        activation = hidden[0].data.view(1,1,-1).cpu().numpy()
-        return activation, surprisal, (out, hidden)
+        for param in parameters:
+            activation.append(self.rnn.gates[param].data.view(1,1,-1).cpu().numpy()[0][0])
+        return np.hstack(activation), surprisal, (out, hidden)
+

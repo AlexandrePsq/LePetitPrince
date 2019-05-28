@@ -42,8 +42,8 @@ check_folder('MEG')
 check_folder('text')
 for language in languages:
     check_folder('text/{}'.format(language))
-    check_folder('text/{}/onsets-offsets'.format(language))
     for model in params.models:
+        check_folder('text/{}/{}/onsets-offsets'.format(language, model))
         check_folder(os.path.join('text', language, model))
     # LePetitPrince raw text and chapters should be put in text/$language
 

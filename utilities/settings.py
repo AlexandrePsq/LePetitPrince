@@ -133,6 +133,7 @@ class Preferences:
 		# Crossvalidation prefernces
 		self.ridge_nested_crossval = True
 		self.defaut_alpha = 15
+		self.n_alphas = 30
 
 		# Alpha for nested
 		self.alphas = np.logspace(-3, -1, 30) # Alphas list for voxel-wised analysis
@@ -147,8 +148,8 @@ class Preferences:
 		self.n_components = 4
 
         # GLM / Ridge
-        self.detrend = True
-        self.standardize = True
+		self.detrend = True
+		self.standardize = True
 
 
 class Params:
@@ -165,6 +166,10 @@ class Params:
 		self.test = True
 		self.overwrite = False
 		self.parallel = True
+		self.cuda = False
+
+        self.eos_separator = '<eos>'
+        self.surprisal = True
 
 		self.nb_features_lstm = 1300
 		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))

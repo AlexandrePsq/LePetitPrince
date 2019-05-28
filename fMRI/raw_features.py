@@ -30,7 +30,7 @@ def compute_raw_features(model, run, output_parent_folder, input_data_type, outp
     if compute(path2output, overwrite=overwrite):
         raw_features = model.generate(run) # generate raw_features from model's predictions
 
-        raw_features['onsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, 'onsets-offsets', '{}_{}_onsets-offsets_{}'.format(input_data_type, language, run_name)+extension))['onsets']
+        raw_features['onsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_name, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_name, run_name)+extension))['onsets']
         raw_features['duration'] = 0
 
         raw_features.to_csv(path2output, index=False) # saving raw_features.csv
@@ -58,8 +58,7 @@ if __name__ == '__main__':
         input_data_type = 'text'
 
     module = importlib.import_module("models.{}.{}".format(args.language, model_name)) # import the right module depending on the model we want to use
-    model = module.create_model() # initialized the model
-    model.load() # load an already trained model
+    model = module.load() # load an already trained model
 
     output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model_name)
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not

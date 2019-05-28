@@ -12,6 +12,7 @@
 from os.path import join
 from itertools import combinations
 import numpy as np
+import torch
 
 class Paths:
     def __init__(self):
@@ -129,6 +130,16 @@ class Preferences:
 		# Number of voxel
 		self.subset = None
 
+        # LSTM
+		self.seed = 1111
+		self.eval_batch_size = 10
+		self.bsz = 64
+		self.bptt = 35 # sequence length
+		self.clip = 0.25 # gradient clipping
+		self.log_interval = 200 # report interval
+		self.lr = 10 # learning rate
+		self.epochs = 30
+
 		
 		# Crossvalidation prefernces
 		self.ridge_nested_crossval = True
@@ -167,9 +178,13 @@ class Params:
 		self.overwrite = False
 		self.parallel = True
 		self.cuda = False
+		if torch.cuda.is_available():
+			if not self.cuda:
+				print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
-        self.eos_separator = '<eos>'
-        self.surprisal = True
+		self.eos_separator = '<eos>'
+		self.surprisal = True
+		self.seed = 1111
 
 		self.nb_features_lstm = 1300
 		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))

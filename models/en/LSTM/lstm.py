@@ -6,10 +6,8 @@
 ################################################################
 import sys
 import os
-from data import Corpus, Dictionary
-from tokenizer import tokenize, batchify
 
-root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 if root not in sys.path:
     sys.path.append(root)
 
@@ -18,7 +16,10 @@ import torch
 import torch.nn as nn
 import pandas as pd
 import numpy as np
-from ....utilities.settings import Params
+from .data import Corpus, Dictionary
+from .tokenizer import tokenize
+from utilities.settings import Params
+
 
 params = Params()
 
@@ -58,11 +59,17 @@ class RNNModel(nn.Module):
 
         self.rnn_type = rnn_type
         self.nhid = nhid
+        self.ntoken = ntoken
+        self.dropout = dropout
+        self.ninp = ninp
         self.nlayers = nlayers
         self.vocab = None
     
     def init_vocab(self, path):
         self.vocab = Dictionary(path)
+
+    def __name__(self):
+        return '_'.join([self.rnn_type, 'vocab-size', str(self.ntoken), 'embedding-size', str(self.ninp),'nhid', str(self.nhid), 'nlayers', str(self.nlayers), 'dropout', str(self.dropout)])
 
     def init_weights(self):
         initrange = 0.1
@@ -123,13 +130,6 @@ class RNNModel(nn.Module):
         out, hidden = self(inp, hidden)
         activation = hidden[0].data.view(1,1,-1).cpu().numpy()
         return activation, surprisal, (out, hidden)
-
-
-def load(path):
-    return torch.load(path)
-    
-def save(model, path):
-    return torch.save(model, path)
 
 
 # python LSTM/prepare_LSTM_features/extract_activations/extract_activations.py \

@@ -67,8 +67,8 @@ class RNNModel(nn.Module):
         self.backup = self.rnn.forward
         self.vocab = None
     
-    def init_vocab(self, path):
-        self.vocab = Dictionary(path)
+    def init_vocab(self, path, languague):
+        self.vocab = Dictionary(path, language)
 
     def __name__(self):
         return '_'.join([self.rnn_type, 'vocab-size', str(self.ntoken), 'embedding-size', str(self.ninp),'nhid', str(self.nhid), 'nlayers', str(self.nlayers), 'dropout', str(self.dropout)])

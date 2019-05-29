@@ -7,10 +7,10 @@ if root not in sys.path:
 
 import torch
 import torch.nn.functional as F
-from ....utilities.settings import Params
+from ....utilities.settings import Params, Paths
 
 params = Params()
-
+paths = Paths()
 
 ###############################################################################
 # Utilities
@@ -54,12 +54,15 @@ def batchify(data, bsz, device):
 
 def save(model, data_name, language):
     path = '_'.join([model.__name__, data_name, language]) + '.pt'
+    path = os.path.join(paths.path2code, 'models', language, path)
     with open(path, 'wb') as f:
         torch.save(model, f)
 
 
 def load(model, data_name, language):
     path = '_'.join([model.__name__, data_name, language]) + '.pt'
+    path = os.path.join(paths.path2code, 'models', language, path)
+    assert os.path.exists(path)
     with open(path, 'wb') as f:
         return torch.load(f)
 

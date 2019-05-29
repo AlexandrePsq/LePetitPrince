@@ -1,9 +1,11 @@
 from nltk.tokenize import sent_tokenize 
 from nltk.tokenize import word_tokenize
+import os
 
 
 def tokenize(path, language, vocab):
-    raw_text = open(path, 'r').read()
+    assert os.path.exists(path)
+    raw_text = open(path, 'r', encoding='utf8').read()
     text = raw_text.replace('\n', '')
     text = text.replace('<unk>', 'unk')
     tokenized = sent_tokenize(text, language=language)

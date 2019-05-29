@@ -1,5 +1,6 @@
 import os
 import torch
+from .tokenizer import tokenize
 
 class Dictionary(object):
     def __init__(self, path=None):
@@ -29,34 +30,18 @@ class Dictionary(object):
 
 
 class Corpus(object):
-    def __init__(self, path):
+    def __init__(self, path, language):
         self.dictionary = Dictionary()
-        self.train = self.tokenize(os.path.join(path, 'train.txt'))
-        self.valid = self.tokenize(os.path.join(path, 'valid.txt'))
-        self.test = self.tokenize(os.path.join(path, 'test.txt'))
+        self.train = create_tokenized_tensor(tokenize(os.path.join(path, 'train.txt'), language, self.dictionary), self.dictionary)
+        self.valid = create_tokenized_tensor(tokenize(os.path.join(path, 'valid.txt'), language, self.dictionary), self.dictionary)
+        self.test = create_tokenized_tensor(tokenize(os.path.join(path, 'test.txt'), language, self.dictionary), self.dictionary)
 
 
-    def tokenize(self, path):
-        """Tokenizes a text file."""
-        assert os.path.exists(path)
-        tokens = 0
-        with open(path, 'r') as f:
-            for line in f:
-                words = line.split() + ['<eos>']
-                tokens += len(words)
-                for word in words:
-                    word = word.lower()
-                    self.dictionary.add_word(word)
-            self.dictionary.add_word('unk')
-        # Tokenize file content
-        with open(path, 'r') as f:
-            ids = torch.LongTensor(tokens)
-            token = 0
-            for line in f:
-                words = line.split() + ['<eos>']
-                for word in words:
-                    word = word.lower()
-                    ids[token] = self.dictionary.word2idx[word]
-                    token += 1
-
-        return ids
+def create_tokenized_tensor(iterator, dictionary):
+    """Create tensor of embeddings from word iterator."""
+    tensor = torch.LongTensor(len(iterator))
+    token = 0
+    for item in iterator:
+        tensor[token] = dictionary.word2idx[item] if item in dictionary.word2idx else dictionary.word2idx['<unk>']
+        token += 1
+    return tensor

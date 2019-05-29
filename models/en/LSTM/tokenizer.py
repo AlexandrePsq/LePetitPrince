@@ -3,7 +3,7 @@ from nltk.tokenize import word_tokenize
 import os
 
 
-def tokenize(path, language, vocab):
+def tokenize(path, language, vocab=None):
     assert os.path.exists(path)
     raw_text = open(path, 'r', encoding='utf8').read()
     text = raw_text.replace('\n', '')
@@ -13,9 +13,11 @@ def tokenize(path, language, vocab):
     iterator = [unk_transform(item, vocab).lower() for sublist in tokenized for item in sublist]
     return iterator
 
-def unk_transform(word, vocab):
+def unk_transform(word, vocab=None):
     if word == 'unk':
         return '<unk>'
+    elif not vocab:
+        return word
     elif word in vocab.idx2word:
         return word
     else:

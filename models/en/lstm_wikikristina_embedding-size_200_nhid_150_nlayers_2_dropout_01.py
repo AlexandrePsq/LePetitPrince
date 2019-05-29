@@ -27,7 +27,7 @@ if __name__ == '__main__':
     params = Params()
     paths = Paths()
     mod = model.RNNModel('LSTM', 5, 200, 150, 2, dropout=0.1)
-    data = os.path.join(paths.path2data, 'text', 'en', 'models', 'wiki_kristina')
+    data = os.path.join(paths.path2data, 'text', 'en', 'lstm_wikikristina_embedding-size_200_nhid_150_nlayers_2_dropout_01', 'wiki_kristina')
     data_name = 'wiki_kristina'
     language = 'english'
     train.train(mod, data, data_name, language, eval_batch_size=params.pref.eval_batch_size, bsz=params.pref.bsz)

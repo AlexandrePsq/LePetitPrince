@@ -19,7 +19,7 @@ import numpy as np
 from .data import Corpus, Dictionary
 from .tokenizer import tokenize
 from utilities.settings import Params
-import utils
+from . import utils
 
 
 params = Params()

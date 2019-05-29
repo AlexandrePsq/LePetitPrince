@@ -12,9 +12,9 @@ import math
 import pandas as pd
 import numpy as np
 import time
-from data import Corpus
+from .data import Corpus
 from tqdm import tqdm
-from ....utilities.settings import Params
+from utilities.settings import Params
 from .utils import get_batch, repackage_hidden, batchify, save, load
 
 params = Params()
@@ -83,7 +83,7 @@ def forward(model, train_data, corpus, criterion, epoch, bsz=params.pref.bsz, lr
 def train(model, data, data_name, language, eval_batch_size=params.pref.eval_batch_size, bsz=params.pref.bsz):
     torch.manual_seed(params.pref.seed) # setting seed for reproductibility
     device = torch.device("cuda" if params.cuda else "cpu")
-    corpus = data.Corpus(data)
+    corpus = Corpus(data, language)
     train_data = batchify(corpus.train, bsz, device)
     val_data = batchify(corpus.valid, bsz, device)
     test_data = batchify(corpus.test, bsz, device)

@@ -7,7 +7,7 @@ if root not in sys.path:
 
 import torch
 import torch.nn.functional as F
-from ....utilities.settings import Params, Paths
+from utilities.settings import Params, Paths
 
 params = Params()
 paths = Paths()

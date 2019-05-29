@@ -67,7 +67,7 @@ class RNNModel(nn.Module):
         self.backup = self.rnn.forward
         self.vocab = None
     
-    def init_vocab(self, path, languague):
+    def init_vocab(self, path, language):
         self.vocab = Dictionary(path, language)
 
     def __name__(self):
@@ -106,7 +106,7 @@ class RNNModel(nn.Module):
         out = None
         hidden = None
         for item in iterator:
-            activation, surprisal,(out, hidden) = self.extract_activations(item, last_item=last_item, out=out, hidden=hidden, parameters)
+            activation, surprisal,(out, hidden) = self.extract_activations(item, last_item=last_item, out=out, hidden=hidden, parameters=parameters)
             last_item = item
             activations.append(activation)
             surprisals.append(surprisal)

@@ -8,6 +8,7 @@ class Dictionary(object):
     def __init__(self, path, language):
         self.word2idx = {}
         self.idx2word = []
+        self.language = language
         self.word2freq = defaultdict(int)
 
         vocab_path = os.path.join(path, 'vocab.txt')
@@ -34,9 +35,9 @@ class Dictionary(object):
 
 
     def create_vocab(self, path):
-        iterator = tokenize(path, language)
+        iterator = tokenize(path, self.language)
         for item in iterator:
-            self.add_word(word)
+            self.add_word(item)
         self.add_word('<unk>')
 
 
@@ -47,6 +48,7 @@ class Corpus(object):
         self.train = create_tokenized_tensor(tokenize(os.path.join(path, 'train.txt'), language, self.dictionary), self.dictionary)
         self.valid = create_tokenized_tensor(tokenize(os.path.join(path, 'valid.txt'), language, self.dictionary), self.dictionary)
         self.test = create_tokenized_tensor(tokenize(os.path.join(path, 'test.txt'), language, self.dictionary), self.dictionary)
+
 
 
 def create_tokenized_tensor(iterator, dictionary):

@@ -134,7 +134,7 @@ class Preferences:
 		self.seed = 1111
 		self.eval_batch_size = 10
 		self.bsz = 64
-		self.bptt = 35 # sequence length
+		self.bptt = 2 # sequence length
 		self.clip = 0.25 # gradient clipping
 		self.log_interval = 200 # report interval
 		self.lr = 10 # learning rate

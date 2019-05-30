@@ -15,6 +15,7 @@ import time
 from .data import Corpus
 from tqdm import tqdm
 from utilities.settings import Params
+from .model import RNNModel
 from .utils import get_batch, repackage_hidden, batchify, save, load
 
 params = Params()
@@ -90,8 +91,11 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
 
     # Build the model
     ntokens = len(corpus.dictionary)
-    model.encoder.num_embeddings = ntokens
-    model.decoder.out_features = ntokens
+    param = model.param
+    param['ntoken'] = ntokens
+    model = RNNModel(**param)
+    #model.encoder.num_embeddings = ntokens
+    #model.decoder.out_features = ntokens
     model.vocab = corpus.dictionary
     model = model.to(device)
     print(model)

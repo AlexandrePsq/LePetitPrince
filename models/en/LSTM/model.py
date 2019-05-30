@@ -58,20 +58,15 @@ class RNNModel(nn.Module):
 
         self.init_weights()
 
-        self.rnn_type = rnn_type
-        self.nhid = nhid
-        self.ntoken = ntoken
-        self.dropout = dropout
-        self.ninp = ninp
-        self.nlayers = nlayers
         self.backup = self.rnn.forward
         self.vocab = None
+        self.param = {'rnn_type':rnn_type, 'ntoken':ntoken, 'ninp':ninp, 'nhid':nhid, 'nlayers':nlayers, 'dropout':dropout, 'tie_weights':tie_weights}
     
     def init_vocab(self, path, language):
         self.vocab = Dictionary(path, language)
 
     def __name__(self):
-        return '_'.join([self.rnn_type, 'vocab-size', str(self.ntoken), 'embedding-size', str(self.ninp),'nhid', str(self.nhid), 'nlayers', str(self.nlayers), 'dropout', str(self.dropout)])
+        return '_'.join([self.param['rnn_type'], 'vocab-size', str(self.param['ntoken']), 'embedding-size', str(self.param['ninp']),'nhid', str(self.param['nhid']), 'nlayers', str(self.param['nlayers']), 'dropout', str(self.param['dropout'])])
 
     def init_weights(self):
         initrange = 0.1
@@ -88,17 +83,17 @@ class RNNModel(nn.Module):
 
     def init_hidden(self, bsz):
         weight = next(self.parameters())
-        if self.rnn_type == 'LSTM':
-            return (weight.new_zeros(self.nlayers, bsz, self.nhid),
-                    weight.new_zeros(self.nlayers, bsz, self.nhid))
+        if self.param['rnn_type'] == 'LSTM':
+            return (weight.new_zeros(self.param['nlayers'], bsz, self.param['nhid']),
+                    weight.new_zeros(self.param['nlayers'], bsz, self.param['nhid']))
         else:
-            return weight.new_zeros(self.nlayers, bsz, self.nhid)
+            return weight.new_zeros(self.param['nlayers'], bsz, self.param['nhid'])
 
     def generate(self, path, language, includ_surprisal=params.pref.surprisal, parameters=params.pref.extracted_parameters):
         parameters = sorted(parameters)
         # hack the forward function to send an extra argument containing the model parameters
         self.rnn.forward = lambda input, hidden: utils.forward(self.rnn, input, hidden)
-        columns_activations = ['raw-{}-{}'.format(name, i) for i in range(self.nhid * self.nlayers) for name in parameters]
+        columns_activations = ['raw-{}-{}'.format(name, i) for i in range(self.param['nhid'] * self.param['nlayers']) for name in parameters]
         activations = []
         surprisals = []
         iterator = tokenize(path, language, self.vocab)

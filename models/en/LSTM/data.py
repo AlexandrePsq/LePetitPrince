@@ -45,9 +45,33 @@ class Dictionary(object):
 class Corpus(object):
     def __init__(self, path, language):
         self.dictionary = Dictionary(path, language)
-        self.train = create_tokenized_tensor(tokenize(os.path.join(path, 'train.txt'), language, self.dictionary), self.dictionary)
-        self.valid = create_tokenized_tensor(tokenize(os.path.join(path, 'valid.txt'), language, self.dictionary), self.dictionary)
-        self.test = create_tokenized_tensor(tokenize(os.path.join(path, 'test.txt'), language, self.dictionary), self.dictionary)
+        train_path = os.path.join(path, 'train.txt')
+        valid _path = os.path.join(path, 'valid.txt')
+        test_path = os.path.join(path, 'test.txt')
+        train_tensor = os.path.join(path, 'train.pkl')
+        valid_tensor = os.path.join(path, 'valid.pkl')
+        test_tensor = os.path.join(path, 'test.pkl')
+        try:
+            with open(train_tensor, 'rb') as f:
+                self.train = torch.load(f)
+            with open(valid_tensor, 'rb') as f:
+                self.valid = torch.load(f)
+            with open(test_tensor, 'rb') as f:
+                self.test = torch.load(f)
+
+        except FileNotFoundError:
+            logging.info("Tensor files not found, creating new tensor files.")
+            self.train = create_tokenized_tensor(tokenize(train_path, language, self.dictionary), self.dictionary)
+            self.valid = create_tokenized_tensor(tokenize(valid_path, language, self.dictionary), self.dictionary)
+            self.test = create_tokenized_tensor(tokenize(test_path, language, self.dictionary), self.dictionary)
+            
+            with open(train_tensor, 'wb') as f:
+                torch.save(self.train, f)
+            with open(valid_tensor, 'wb') as f:
+                torch.save(self.valid, f)
+            with open(test_tensor, 'wb') as f:
+                torch.save(self.test, f)
+        
 
 
 

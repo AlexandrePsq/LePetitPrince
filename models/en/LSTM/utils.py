@@ -63,7 +63,7 @@ def load(model, data_name, language):
     path = '_'.join([model.__name__, data_name, language]) + '.pt'
     path = os.path.join(paths.path2code, 'models', language, path)
     assert os.path.exists(path)
-    with open(path, 'wb') as f:
+    with open(path, 'rb') as f:
         return torch.load(f)
 
 

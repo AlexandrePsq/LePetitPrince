@@ -86,7 +86,7 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
     device = torch.device("cuda" if params.cuda else "cpu")
     corpus = Corpus(data, language)
     train_data = batchify(corpus.train, bsz, device)
-    val_data = batchify(corpus.valid, bsz, device)
+    val_data = batchify(corpus.valid, eval_batch_size, device)
     test_data = batchify(corpus.test, bsz, device)
 
     # Build the model

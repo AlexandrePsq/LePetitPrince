@@ -27,7 +27,7 @@ def load():
 if __name__ == '__main__':
     params = Params()
     paths = Paths()
-    mod = model.RNNModel('LSTM', 5, 80, 10, 2 dropout=0.1)
+    mod = model.RNNModel('LSTM', 5, 80, 10, 2, dropout=0.1)
     data = os.path.join(paths.path2data, 'text', 'english', 'lstm_training')
     data_name = 'test'
     language = 'english'

@@ -53,7 +53,7 @@ def batchify(data, bsz, device):
 
 
 def save(model, data_name, language):
-    path = '_'.join([model.__name__, data_name, language]) + '.pt'
+    path = '_'.join([model.__name__(), data_name, language]) + '.pt'
     path = os.path.join(paths.path2code, 'models', language, path)
     with open(path, 'wb') as f:
         torch.save(model, f)

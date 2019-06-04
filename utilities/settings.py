@@ -132,9 +132,9 @@ class Preferences:
 
         # LSTM
 		self.seed = 1111
-		self.eval_batch_size = 10
-		self.bsz = 64
-		self.bptt = 2 # sequence length
+		self.eval_batch_size = 20
+		self.bsz = 20
+		self.bptt = 35 # sequence length
 		self.clip = 0.25 # gradient clipping
 		self.log_interval = 200 # report interval
 		self.lr = 10 # learning rate

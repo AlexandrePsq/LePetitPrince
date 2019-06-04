@@ -44,7 +44,7 @@ class Extensions:
 class Scans:
     def __init__(self):
         # number of scans per run
-        self.nscans = {'en':{'run1':282,
+        self.nscans = {'english':{'run1':282,
                              'run2':298,
                              'run3':340,
                              'run4':303,
@@ -54,7 +54,7 @@ class Scans:
                              'run8':292,
                              'run9':368,
         },
-                       'fr':{'run1':309,
+                       'french':{'run1':309,
                              'run2':326,
                              'run3':354,
                              'run4':315,
@@ -71,13 +71,13 @@ class Scans:
 class Subjects:
     def __init__(self):
         # Subjects
-        self.subject_lists = {'en': [57, 58, 59, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 
+        self.subject_lists = {'english': [57, 58, 59, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 
         72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 86, 87, 88, 89, 91, 92, 93, 
         94, 95, 96, 97, 98, 99, 100, 101, 103, 104, 105, 106, 108, 109, 110, 113, 114, 115],
-                              'fr': []
+                              'french': []
         }
-        self.subject_test = {'en': [57],
-                             'fr': []
+        self.subject_test = {'english': [57],
+                             'french': []
         }
         
     def get_subject(self, subject_number):
@@ -175,12 +175,12 @@ class Params:
 		self.nb_runs = 9 # number of runs
 		self.models = sorted(['test-1'])
 		self.aggregated_models = [' '.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
-		self.languages = ['en'] # ['en', 'fr', 'ch']
+		self.languages = ['english'] # ['english', 'french', 'chineese']
 
 		self.test = True
 		self.overwrite = False
 		self.parallel = True
-		self.cuda = False
+		self.cuda = True
 		if torch.cuda.is_available():
 			if not self.cuda:
 				print("WARNING: You have a CUDA device, so you should probably run with --cuda")

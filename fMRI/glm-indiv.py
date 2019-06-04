@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--subjects", nargs='+', action='append', default=[], help="Subjects list on whom we are running a test: list of 'sub-002...")
-    parser.add_argument("--language", type=str, default='en', help="Language of the model.")
+    parser.add_argument("--language", type=str, default='english', help="Language of the model.")
     parser.add_argument("--model_name", type=str, help="Name of the model to use to generate the raw features.")
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", default=True, action='store_true', help="Precise if we run the code in parallel")

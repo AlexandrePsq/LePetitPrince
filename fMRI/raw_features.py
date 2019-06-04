@@ -39,7 +39,7 @@ def compute_raw_features(model, run, output_parent_folder, input_data_type, outp
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate raw features from raw data for a given model in a given language.\n\nInput:\nLanguage and models.""")
-    parser.add_argument("--language", type=str, default='en', help="Language of the text and the model.")
+    parser.add_argument("--language", type=str, default='english', help="Language of the text and the model.")
     parser.add_argument("--model_name", type=str, help="Name of the model to use to generate the raw features.")
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", default=False, action='store_true', help="Precise if we want to run code in parallel")

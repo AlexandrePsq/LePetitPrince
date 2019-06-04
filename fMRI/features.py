@@ -56,7 +56,7 @@ if __name__ =='__main__':
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate features (=fMRI regressors) from raw_features (csv file with 3 columns onset-amplitude-duration) by convolution with an hrf kernel.\n\nInput:\nTime resolution of the scans, language and models.""")
     parser.add_argument("--tr", type=float, default=None, help="TR in sec (=sampling period for scans)")
     parser.add_argument("--model", type=str, help="Names of the model used to generate the raw features")
-    parser.add_argument("--language", type=str, default='en', help="Language of the model studied.")
+    parser.add_argument("--language", type=str, default='english', help="Language of the model studied.")
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", default=False, action='store_true', help="Precise if we want to run code in parallel")
 

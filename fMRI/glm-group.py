@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate design matrices from features in a given language.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--test", type=bool, default=False, action='store_true', help="Precise if we are running a test.")
-    parser.add_argument("--language", type=str, default='en', help="Language of the text and the model.")
+    parser.add_argument("--language", type=str, default='english', help="Language of the text and the model.")
     parser.add_argument("--models", nargs='+', action='append', default=[], help="Name of the models to use to generate the raw features.")
     parser.add_argument("--overwrite", type=bool, default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", type=bool, default=True, help="Precise if we run the code in parallel")

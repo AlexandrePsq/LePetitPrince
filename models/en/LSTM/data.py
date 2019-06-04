@@ -46,7 +46,7 @@ class Corpus(object):
     def __init__(self, path, language):
         self.dictionary = Dictionary(path, language)
         train_path = os.path.join(path, 'train.txt')
-        valid _path = os.path.join(path, 'valid.txt')
+        valid_path = os.path.join(path, 'valid.txt')
         test_path = os.path.join(path, 'test.txt')
         train_tensor = os.path.join(path, 'train.pkl')
         valid_tensor = os.path.join(path, 'valid.pkl')

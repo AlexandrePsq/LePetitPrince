@@ -141,7 +141,7 @@ class Preferences:
 		self.epochs = 30
 
 		# activations
-		self.extracted_parameters = ['gates.in', 'gates.forget', 'gates.out', 'gates.c_tilde', 'hidden', 'cell']
+		self.extracted_parameters = ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']
 		self.surprisal = True
 		
 		# Crossvalidation prefernces

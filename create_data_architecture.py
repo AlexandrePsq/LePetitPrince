@@ -16,7 +16,7 @@ languages = params.languages
 
 
 ##################### ROOT #####################
-os.chdir(paths.path2root())
+os.chdir(paths.path2root)
 check_folder('data')
 check_folder('derivatives')
 check_folder('paradigm')
@@ -24,7 +24,7 @@ check_folder('oldstuff')
 
 
 ##################### DATA #####################
-os.chdir(paths.path2data())
+os.chdir(paths.path2data)
 ## fMRI ##
 check_folder('fMRI')
 for language in languages:
@@ -57,7 +57,7 @@ for language in languages:
 
 
 ################## DERIVATIVES ##################
-os.chdir(paths.path2derivatives())
+os.chdir(paths.path2derivatives)
 check_folder('fMRI')
 folders = ['raw-features', 'features', 'design-matrices', 'glm-indiv', 'glm-group', 'ridge-indiv', 'ridge-group']
 for folder in folders:
@@ -70,4 +70,4 @@ check_folder('MEG')
 # to be done
 
 
-os.chdir(paths.path2code())
+os.chdir(paths.path2code)

@@ -17,7 +17,7 @@ import torch
 class Paths:
     def __init__(self):
         # Paths
-        # self.path2root = '/neurospin/unicog/protocols/IRMf/LePetitPrince'
+        # self.path2root = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince'
         self.path2root = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince'
         self.path2data = join(self.path2root, 'data')
         self.path2derivatives = join(self.path2root, 'derivatives')
@@ -173,7 +173,7 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['test-1'])
+		self.models = sorted(['lstm_test'])
 		self.aggregated_models = [' '.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
 		self.languages = ['english'] # ['english', 'french', 'chineese']
 

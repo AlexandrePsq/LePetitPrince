@@ -28,7 +28,7 @@ def compute_raw_features(model, run, output_parent_folder, input_data_type, outp
     path2output = get_path2output(output_parent_folder, output_data_type, language, model_name, run_name, extension)
     
     if compute(path2output, overwrite=overwrite):
-        raw_features = model.generate(run) # generate raw_features from model's predictions
+        raw_features = model.generate(run, language) # generate raw_features from model's predictions
 
         raw_features['onsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_name, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_name, run_name)+extension))['onsets']
         raw_features['duration'] = 0

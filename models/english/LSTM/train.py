@@ -81,7 +81,7 @@ def forward(model, train_data, corpus, criterion, epoch, bsz=params.pref.bsz, lr
             start_time = time.time()
 
 
-def train(model, data, data_name, language, eval_batch_size=params.pref.eval_batch_size, bsz=params.pref.bsz):
+def train(model, data, data_name, language, eval_batch_size=params.pref.eval_batch_size, bsz=params.pref.bsz, epochs=params.pref.epochs):
     torch.manual_seed(params.pref.seed) # setting seed for reproductibility
     device = torch.device("cuda" if params.cuda else "cpu")
     corpus = Corpus(data, language)
@@ -108,7 +108,7 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
     # At any point you can hit Ctrl + C to break out of training early.
     try:
         print('Entering training...')
-        for epoch in tqdm(range(1, params.pref.epochs+1)):
+        for epoch in tqdm(range(1, epochs+1)):
             epoch_start_time = time.time()
             forward(model, train_data, corpus, criterion, epoch)
             val_loss = evaluate(model, criterion, ntokens, val_data, eval_batch_size)

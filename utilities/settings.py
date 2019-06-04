@@ -17,8 +17,8 @@ import torch
 class Paths:
     def __init__(self):
         # Paths
-        # self.path2root = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince'
-        self.path2root = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince'
+        self.path2root = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince'
+        # self.path2root = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince'
         self.path2data = join(self.path2root, 'data')
         self.path2derivatives = join(self.path2root, 'derivatives')
         self.path2code = join(self.path2root, 'code')

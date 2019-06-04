@@ -92,7 +92,7 @@ class RNNModel(nn.Module):
     def generate(self, path, language, includ_surprisal=params.pref.surprisal, parameters=params.pref.extracted_parameters):
         parameters = sorted(parameters)
         # hack the forward function to send an extra argument containing the model parameters
-        self.rnn.forward = lambda input, hidden: utils.forward(self.rnn, input, hidden)
+        self.rnn.forward = lambda input, hidden: utils.forward(self.rnn, input, hidden, self.param)
         columns_activations = ['raw-{}-{}'.format(name, i) for i in range(self.param['nhid'] * self.param['nlayers']) for name in parameters]
         activations = []
         surprisals = []

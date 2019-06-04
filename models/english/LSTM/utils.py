@@ -96,15 +96,15 @@ def apply_mask(hidden_l, mask):
         return tuple(h * mask for h in hidden_l)
 
 
-def forward(self, input, hidden, mask=None):
+def forward(self, input, hidden, param, mask=None):
     weight = self.all_weights
-    dropout = self.param['dropout']
+    dropout = param['dropout']
     # saves the gate values into the rnn object
     last_gates = []
 
     hidden = list(zip(*hidden))
 
-    for l in range(self.param['nlayers']):
+    for l in range(param['nlayers']):
         hidden_l = hidden[l]
         if mask and l in mask:
             hidden_l = apply_mask(hidden_l, mask[l])
@@ -117,11 +117,11 @@ def forward(self, input, hidden, mask=None):
         last_gates.append(gates)
         input = hy[0]
 
-        if dropout != 0 and l < self.param['nlayers'] - 1:
+        if dropout != 0 and l < param['nlayers'] - 1:
             input = F.dropout(input, p=dropout, training=False, inplace=False)
 
-    self.gates =  {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in range(self.param['nlayers'])], 0) for key in ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']}
-    self.hidden = {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in range(self.param['nlayers'])], 0) for key in ['hidden', 'cell']}
+    self.gates =  {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in range(param['nlayers'])], 0) for key in ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']}
+    self.hidden = {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in range(param['nlayers'])], 0) for key in ['hidden', 'cell']}
     # we restore the right dimensionality
     input = input.unsqueeze(0)
     return input, (self.hidden['hidden'], self.hidden['cell'])

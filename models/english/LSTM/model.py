@@ -66,7 +66,7 @@ class RNNModel(nn.Module):
         self.vocab = Dictionary(path, language)
 
     def __name__(self):
-        return '_'.join([self.param['rnn_type'], 'vocab-size', str(self.param['ntoken']), 'embedding-size', str(self.param['ninp']),'nhid', str(self.param['nhid']), 'nlayers', str(self.param['nlayers']), 'dropout', str(self.param['dropout'])])
+        return '_'.join([self.param['rnn_type'], 'embedding-size', str(self.param['ninp']),'nhid', str(self.param['nhid']), 'nlayers', str(self.param['nlayers']), 'dropout', str(self.param['dropout'])])
 
     def init_weights(self):
         initrange = 0.1

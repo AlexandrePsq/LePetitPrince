@@ -32,7 +32,7 @@ def evaluate(model, criterion, ntokens, data_source, eval_batch_size):
     total_loss = 0.
     hidden = model.init_hidden(eval_batch_size)
     with torch.no_grad():
-        for i in range(0, data_source.size(0) - 1, params.pref.bptt):
+        for i in tqdm(range(0, data_source.size(0) - 1, params.pref.bptt)):
             data, targets = get_batch(data_source, i)
             output, hidden = model(data, hidden)
             output_flat = output.view(-1, ntokens)

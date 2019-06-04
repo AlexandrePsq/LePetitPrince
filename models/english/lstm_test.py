@@ -8,7 +8,7 @@ if root not in sys.path:
 
 
 
-from LSTM import model, train, utils
+from .LSTM import model, train, utils
 import torch
 import os
 

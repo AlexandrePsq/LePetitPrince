@@ -31,4 +31,4 @@ if __name__ == '__main__':
     data = os.path.join(paths.path2data, 'text', 'english', 'lstm_training')
     data_name = 'test'
     language = 'english'
-    train.train(mod, data, data_name, language, eval_batch_size=params.pref.eval_batch_size, bsz=params.pref.bsz, epochs=2)
+    train.train(mod, data, data_name, language, eval_batch_size=params.pref.eval_batch_size, bsz=params.pref.bsz, epochs=1)

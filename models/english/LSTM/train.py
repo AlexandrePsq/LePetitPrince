@@ -46,7 +46,7 @@ def evaluate(model, criterion, ntokens, data_source, eval_batch_size):
 # Training code
 ###############################################################################
 
-def forward(model, train_data, corpus, criterion, epoch, bsz=params.pref.bsz, lr=params.pref.lr):
+def forward(model, train_data, corpus, criterion, epoch, lr, bsz=params.pref.bsz):
     # Turn on training mode which enables dropout.
     model.train()
     total_loss = 0.
@@ -66,7 +66,7 @@ def forward(model, train_data, corpus, criterion, epoch, bsz=params.pref.bsz, lr
         # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
         torch.nn.utils.clip_grad_norm_(model.parameters(), params.pref.clip)
         for p in model.parameters():
-            p.data.add_(-params.pref.lr, p.grad.data)
+            p.data.add_(-lr, p.grad.data)
 
         total_loss += loss.item()
 
@@ -75,7 +75,7 @@ def forward(model, train_data, corpus, criterion, epoch, bsz=params.pref.bsz, lr
             elapsed = time.time() - start_time
             print('| epoch {:3d} | {:5d}/{:5d} batches | lr {:02.2f} | ms/batch {:5.2f} | '
                     'loss {:5.2f} | ppl {:8.2f}'.format(
-                epoch, batch, len(train_data) // params.pref.bptt, params.pref.lr,
+                epoch, batch, len(train_data) // params.pref.bptt, lr,
                 elapsed * 1000 / params.pref.log_interval, cur_loss, math.exp(cur_loss)))
             total_loss = 0
             start_time = time.time()
@@ -104,13 +104,14 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
 
     # Loop over epochs.
     best_val_loss = None
+    lr = params.pref.lr
 
     # At any point you can hit Ctrl + C to break out of training early.
     try:
         print('Entering training...')
         for epoch in tqdm(range(1, epochs+1)):
             epoch_start_time = time.time()
-            forward(model, train_data, corpus, criterion, epoch)
+            forward(model, train_data, corpus, criterion, epoch, lr)
             val_loss = evaluate(model, criterion, ntokens, val_data, eval_batch_size)
             print('-' * 89)
             print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '

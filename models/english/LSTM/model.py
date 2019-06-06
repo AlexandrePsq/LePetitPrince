@@ -13,6 +13,7 @@ if root not in sys.path:
 
 
 import torch
+from tqdm import tqdm
 import torch.nn as nn
 import pandas as pd
 import numpy as np
@@ -100,7 +101,7 @@ class RNNModel(nn.Module):
         last_item = params.eos_separator
         out = None
         hidden = None
-        for item in iterator:
+        for item in tqdm(iterator):
             activation, surprisal,(out, hidden) = self.extract_activations(item, last_item=last_item, out=out, hidden=hidden, parameters=parameters)
             last_item = item
             activations.append(activation)

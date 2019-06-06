@@ -86,7 +86,7 @@ def task_raw_features():
 
 def task_features():
     """Step 2: Generate features (=fMRI regressors) from raw_features (csv file with 3 columns onset-amplitude-duration) by convolution with an hrf kernel."""
-    input_data_type = 'raw_features'
+    input_data_type = 'raw-features'
     output_data_type = 'features'
     extension = '.csv'
     source = 'fMRI'

@@ -3,10 +3,11 @@ from nltk.tokenize import word_tokenize
 import os
 
 
-def tokenize(path, language, vocab=None):
-    assert os.path.exists(path)
-    raw_text = open(path, 'r', encoding='utf8').read()
-    text = raw_text.replace('\n', '')
+def tokenize(path, language, vocab=None, path_like=True):
+    if path_like:
+        assert os.path.exists(path)
+        path = open(path, 'r', encoding='utf8').read()
+    text = path.replace('\n', '')
     text = text.replace('<unk>', 'unk')
     tokenized = sent_tokenize(text, language=language)
     tokenized = [word_tokenize(sentence, language=language) + ['<eos>'] for sentence in tokenized]

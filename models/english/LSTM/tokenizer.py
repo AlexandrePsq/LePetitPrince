@@ -9,9 +9,14 @@ def tokenize(path, language, vocab=None, path_like=True):
         path = open(path, 'r', encoding='utf8').read()
     text = path.replace('\n', '')
     text = text.replace('<unk>', 'unk')
-    tokenized = sent_tokenize(text, language=language)
-    tokenized = [word_tokenize(sentence, language=language) + ['<eos>'] for sentence in tokenized]
-    iterator = [unk_transform(item, vocab).lower() for sublist in tokenized for item in sublist]
+    punctuation = ['.', '\'', ',', ';', ':', '!', '?', '/', '-', '"', '‘', '’', '(', ')', '{', '}', '[', ']', '`', '“', '”', '—']
+    for item in punctuation:
+        text = text.replace(item, ' '+ item + ' ')
+    text = text.replace('.  .  .', '...')
+    iterator = [unk_transform(item, vocab).lower() for item in text.split()]
+    # tokenized = sent_tokenize(text, language=language)
+    # tokenized = [word_tokenize(sentence, language=language) + ['<eos>'] for sentence in tokenized]
+    # iterator = [unk_transform(item, vocab).lower() for sublist in tokenized for item in sublist]
     return iterator
 
 def unk_transform(word, vocab=None):

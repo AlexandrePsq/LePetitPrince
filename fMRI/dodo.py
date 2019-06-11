@@ -61,7 +61,7 @@ def task_check_architecture():
 def task_raw_features():
     """Step 1: Generate raw features from raw data (text, wave) model predictions."""
     extension = '.csv'
-    output_data_type = 'raw_features'
+    output_data_type = 'raw-features'
     source = 'fMRI'
     
     for language in languages:

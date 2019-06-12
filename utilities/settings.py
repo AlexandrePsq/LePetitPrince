@@ -173,7 +173,7 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['lstm_test', 'wordrate_model'])
+		self.models = sorted(['lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01', 'wordrate_model'])
 		self.aggregated_models = ['+'.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
 		self.languages = ['english'] # ['english', 'french', 'chineese']
 

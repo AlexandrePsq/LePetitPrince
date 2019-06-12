@@ -41,6 +41,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate raw features from raw data for a given model in a given language.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--language", type=str, default='english', help="Language of the text and the model.")
     parser.add_argument("--model_name", type=str, help="Name of the model to use to generate the raw features.")
+    parser.add_argument("--model_category", type=str, help="Category of the model to use to generate the raw features.")
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", default=False, action='store_true', help="Precise if we want to run code in parallel")
 
@@ -51,6 +52,7 @@ if __name__ == '__main__':
     output_data_type = 'raw-features'
     source = 'fMRI'
     model_name = args.model_name
+    model_category = args.model_category
 
     if model_name in ['rms', 'f0']:
         input_data_type = 'wave'
@@ -63,7 +65,7 @@ if __name__ == '__main__':
     output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model_name)
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
-    raw_data = get_data(args.language, input_data_type, model=model_name, source='fMRI') # retrieve the data to transform
+    raw_data = get_data(args.language, input_data_type, model=model_category, source='fMRI') # retrieve the data to transform
 
     if not args.parallel:
         for i, run in enumerate(raw_data):

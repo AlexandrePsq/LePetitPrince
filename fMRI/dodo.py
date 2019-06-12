@@ -80,7 +80,7 @@ def task_raw_features():
                 'name': model,
                 'file_dep': ['raw_features.py'] + dependencies,
                 'targets': targets,
-                'actions': ['python raw_features.py --language {} --model {} '.format(language, model) + optional + optional_parallel],
+                'actions': ['python raw_features.py --language {} --model_name {} --model_category {} '.format(language, model, params.get_category(model)) + optional + optional_parallel],
             }
 
 

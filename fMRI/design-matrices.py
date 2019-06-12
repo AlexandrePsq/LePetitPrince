@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     for i in range(len(runs)):
         # create the design matrix for each run
-        model_name = '-'.join(models)
+        model_name = '+'.join(models)
         output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model_name)
         check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
         name = os.path.basename(os.path.splitext(runs[i][0])[0])

@@ -116,7 +116,7 @@ def task_design_matrices():
         for models in aggregated_models:
             output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
             dependencies = []
-            for model in models.split('-'):
+            for model in models.split('+'):
                 input_parent_folder = get_output_parent_folder(source, input_data_type, language, model)
                 dependencies += [get_path2output(input_parent_folder, input_data_type, language, model, run_name, extension) for run_name in run_names]
             targets = [get_path2output(output_parent_folder, output_data_type, language, models, run_name, extension) for run_name in run_names]

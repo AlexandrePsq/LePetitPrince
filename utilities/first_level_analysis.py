@@ -91,7 +91,9 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
             nb_samples = np.cumsum([0] + [fmri_data_train[i].shape[0] for i in range(len(fmri_data_train))]) # list of cumulative lenght
             indexes = {'run{}'.format(run+1): [nb_samples[i], nb_samples[i+1]] for i, run in enumerate(train)}
             model.cv = Splitter(indexes_dict=indexes, n_splits=nb_runs) # adequate splitter for cross-validate alpha taking into account groups
+        print('Fitting model...')
         model_fitted = model.fit(predictors_train, fmri_data_train)
+        print('Model fitted.')
 
         # return the R2_score for each voxel (=list)
         r2 = get_r2_score(model_fitted, fmri_runs[test[0]], design_matrices[test[0]])

@@ -12,7 +12,6 @@ if root not in sys.path:
     sys.path.append(root)
 
 
-import torch
 import pandas as pd
 import numpy as np
 from .tokenizer import tokenize

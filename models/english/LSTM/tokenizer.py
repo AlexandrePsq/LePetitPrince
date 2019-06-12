@@ -26,9 +26,8 @@ def tokenize(path, language, vocab=None, path_like=True):
     punctuation = ['.', '\'', ',', ';', ':', '!', '?', '/', '-', '"', '‘', '’', '(', ')', '{', '}', '[', ']', '`', '“', '”', '—']
 
     ### tokenize without punctuation ###
-    for item in punctuation:
-        text = text.replace(item, ' ')
-    iterator = [unk_transform(item, vocab).lower() for item in text.split()]
+    # for item in punctuation:
+    #     text = text.replace(item, ' ')
     ### tokenize with punctuation ###
     for item in punctuation:
         text = text.replace(item, ' '+ item + ' ')

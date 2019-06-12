@@ -7,8 +7,8 @@ if root not in sys.path:
 
 
 
-from .wordrate import model
-from .wordrate.utils import wordrate
+from .WORDRATE import model
+from .WORDRATE.utils import wordrate
 import os
 
 

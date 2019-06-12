@@ -22,7 +22,7 @@ from joblib import Parallel, delayed
 paths = Paths()
 
 
-def compute_raw_features(model, run, output_parent_folder, input_data_type, output_data_type, language, model_name, extension, overwrite):
+def compute_raw_features(model, run, output_parent_folder, input_data_type, output_data_type, language, model_name, model_category, extension, overwrite):
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     path2output = get_path2output(output_parent_folder, output_data_type, language, model_name, run_name, extension)
@@ -30,7 +30,7 @@ def compute_raw_features(model, run, output_parent_folder, input_data_type, outp
     if compute(path2output, overwrite=overwrite):
         raw_features = model.generate(run, language) # generate raw_features from model's predictions
 
-        raw_features['onsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_name, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_name, run_name)+extension))['onsets']
+        raw_features['onsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension))['onsets']
         raw_features['duration'] = 0
 
         raw_features.to_csv(path2output, index=False) # saving raw_features.csv
@@ -69,9 +69,9 @@ if __name__ == '__main__':
 
     if not args.parallel:
         for i, run in enumerate(raw_data):
-            compute_raw_features(model, run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, extension, args.overwrite)
+            compute_raw_features(model, run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, model_category, extension, args.overwrite)
     else:
         Parallel(n_jobs=-2)(delayed(compute_raw_features) \
-                    (model, run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, extension, args.overwrite) for run in raw_data)
+                    (model, run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, model_category, extension, args.overwrite) for run in raw_data)
 
 

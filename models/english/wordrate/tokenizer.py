@@ -59,7 +59,7 @@ def preprocess(text, special_words, language):
     for word in special_words[language].keys():
         text = text.replace(word, special_words[language][word])
     transf = inflect.engine()
-    numbers = re.findall('|d+', text)
+    numbers = re.findall('\d+', text)
     for number in numbers:
         text = text.replace(number, transf.number_to_words(number))
     return text

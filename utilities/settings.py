@@ -191,6 +191,6 @@ class Params:
 		self.nb_features_lstm = 1300
 		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))
 		
-    def get_category(self, model_name):
-        category = model_name.split('_')[0]
-        return category.upper()
+	def get_category(self, model_name):
+		category = model_name.split('_')[0]
+		return category.upper()

@@ -1,5 +1,5 @@
 from utils import *
-from models.en import *
-from models.fr import *
+from models.englihs import *
+from models.french import *
 from fMRI import *
 from MEG import *

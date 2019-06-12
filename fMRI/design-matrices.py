@@ -54,6 +54,5 @@ if __name__ == '__main__':
         path2output = get_path2output(output_parent_folder, output_data_type, args.language, model_name, run_name, extension)
 
         if compute(path2output, overwrite=args.overwrite):
-            merge = pd.concat([pd.read_csv(path2features, header=None) for path2features in runs[i]], axis=1) # concatenate horizontaly the read csv files of a run
-            merge.columns = models
+            merge = pd.concat([pd.read_csv(path2features, header=0) for path2features in runs[i]], axis=1) # concatenate horizontaly the read csv files of a run
             merge.to_csv(path2output, index=False)

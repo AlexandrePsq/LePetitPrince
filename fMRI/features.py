@@ -48,7 +48,7 @@ def compute_features(run, output_parent_folder, output_data_type, language, mode
     
     if compute(path2output, overwrite=overwrite):
         df = process_raw_features(run, tr, nscans)
-        df.to_csv(path2output, index=False, header=False) # saving features.csv
+        df.to_csv(path2output, index=False) # saving features.csv
 
 
 if __name__ =='__main__':

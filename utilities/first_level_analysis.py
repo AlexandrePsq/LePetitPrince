@@ -83,14 +83,14 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
     nb_runs = len(fmri_runs)
 
     logo = LeaveOneGroupOut() # leave on run out !
-    for train, test in logo.split(fmri_runs, groups=range(1, nb_runs+1)):
+    for train, test in tqdm(logo.split(fmri_runs, groups=range(1, nb_runs+1))):
         fmri_data_train = np.vstack([fmri_runs[i] for i in train]) # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
         predictors_train = np.vstack([design_matrices[i] for i in train])
 
         if type(model) == sklearn.linear_model.RidgeCV:
-            nb_samples = np.cumsum([0] + [fmri_data_train[i].shape[0] for i in range(len(fmri_data_train))]) # list of cumulative lenght
+            nb_samples = np.cumsum([0] + [[fmri_runs[i] for i in train][i].shape[0] for i in range(len([fmri_runs[i] for i in train]))]) # list of cumulative lenght
             indexes = {'run{}'.format(run+1): [nb_samples[i], nb_samples[i+1]] for i, run in enumerate(train)}
-            model.cv = Splitter(indexes_dict=indexes, n_splits=nb_runs) # adequate splitter for cross-validate alpha taking into account groups
+            model.cv = Splitter(indexes_dict=indexes, n_splits=nb_runs-1) # adequate splitter for cross-validate alpha taking into account groups
         print('Fitting model...')
         model_fitted = model.fit(predictors_train, fmri_data_train)
         print('Model fitted.')

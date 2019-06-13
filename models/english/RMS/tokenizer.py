@@ -28,11 +28,10 @@ def tokenize(path, language, vocab=None, path_like=True):
     ### tokenize without punctuation ###
     for item in punctuation:
         text = text.replace(item, ' ')
-    iterator = [unk_transform(item, vocab).lower() for item in text.split()]
     ### tokenize with punctuation ###
-    for item in punctuation:
-        text = text.replace(item, ' '+ item + ' ')
-    text = text.replace('.  .  .', '...')
+    # for item in punctuation:
+    #     text = text.replace(item, ' '+ item + ' ')
+    # text = text.replace('.  .  .', '...')
 
     iterator = [unk_transform(item, vocab).lower() for item in text.split()]
 

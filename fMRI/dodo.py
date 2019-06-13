@@ -124,7 +124,7 @@ def task_design_matrices():
                 'name': models,
                 'file_dep': ['design-matrices.py'] + dependencies,
                 'targets': targets,
-                'actions': ['python design-matrices.py --language {} --models {} '.format(language, models) + optional],
+                'actions': ['python design-matrices.py --language {} --models {} '.format(language, ' '.join(models.split('+'))) + optional],
             }
 
 

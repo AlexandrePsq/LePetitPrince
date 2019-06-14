@@ -7,14 +7,17 @@ import nibabel as nib
 from .splitter import Splitter
 import sklearn
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 from .utils import get_r2_score, log
-from .settings import Params
+from .settings import Params, Paths
 import os
+import pickle
 from os.path import join
 
 
 params = Params()
+paths = Paths()
 
 #########################################
 ################ Figures ################
@@ -93,15 +96,19 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
             model.cv = Splitter(indexes_dict=indexes, n_splits=nb_runs-1) # adequate splitter for cross-validate alpha taking into account groups
         print('Fitting model...')
         model_fitted = model.fit(predictors_train, fmri_data_train)
+        pickle.dump(model_fitted, open(join(paths.path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '{}.sav'.format(test[0])), 'wb'))
         print('Model fitted.')
 
         # return the R2_score for each voxel (=list)
         r2 = get_r2_score(model_fitted, fmri_runs[test[0]], design_matrices[test[0]])
+        print(r2)
 
         # log the results
         log(subject, voxel='whole brain', alpha=None, r2=r2)
 
         scores = r2 if scores is None else np.vstack([scores, r2])
+    result = pd.DataFrame(scores, columns=['voxel #{}'.format(i) for i in range(scores.shape[1])])
+    result.to_csv(join(path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '.csv'))
     return np.mean(scores, axis=0) # compute mean vertically (in time)
 
 

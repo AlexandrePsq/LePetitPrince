@@ -29,9 +29,9 @@ def process_raw_features(run, tr, nscans):
     df = pd.read_csv(run)
     result = []
     count = 0
-    raw_features_columns = [col for col in df.columns if col not in ['onsets', 'duration']]
+    raw_features_columns = [col for col in df.columns if col not in ['offsets', 'duration']]
     for col in raw_features_columns:
-        conditions = np.vstack((df.onsets, df.duration, df[col]))
+        conditions = np.vstack((df.offsets, df.duration, df[col]))
         tmp = compute_regressor(exp_condition=conditions,
                                 hrf_model='spm',
                                 frame_times=np.arange(0.0, nscans*tr, tr),

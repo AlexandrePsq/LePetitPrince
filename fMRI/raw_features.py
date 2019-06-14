@@ -30,7 +30,8 @@ def compute_raw_features(model, run, output_parent_folder, input_data_type, outp
     if compute(path2output, overwrite=overwrite):
         raw_features = model.generate(run, language) # generate raw_features from model's predictions
 
-        raw_features['onsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension))['onsets']
+        # using offsets of words instead of onsets so that the subject has heard the word
+        raw_features['offsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension))['offsets']
         raw_features['duration'] = 0
 
         raw_features.to_csv(path2output, index=False) # saving raw_features.csv

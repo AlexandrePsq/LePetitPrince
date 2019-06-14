@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import csv
 from sklearn.metrics import r2_score
-
+from sklearn.preprocessing import StandardScaler`
 
 paths = Paths()
 extensions = Extensions()
@@ -95,10 +95,13 @@ def get_r2_score(model, y_true, y2predict, r2_min=0., r2_max=0.99):
 
 def transform_design_matrices(path):
     # Read design matrice csv file and add a column with only 1
-    dm = pd.read_csv(path, header=0)
+    dm = pd.read_csv(path, header=0).values
+    scaler = StandardScaler()
+    scaler.fit(dm)
+    dm = scaler.transform(dm)
     # add the constant
-    # const = np.ones((dm.shape[0], 1))
-    # dm = np.hstack((dm, const))
+    const = np.ones((dm.shape[0], 1))
+    dm = np.hstack((dm, const))
     return dm 
 
 

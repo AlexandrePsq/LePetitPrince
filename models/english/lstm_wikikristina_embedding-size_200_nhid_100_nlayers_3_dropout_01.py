@@ -18,10 +18,13 @@ from utilities.settings import Params, Paths
 
 def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
-    mod = model.RNNModel('LSTM', 5, 200, 100, 3, dropout=0.1) # ntoken is chosen randomly, it will or has been determined furing training
+    mod = model.RNNModel('LSTM', 5, 200, 100, 3, dropout=0.1) # ntoken is chosen randomly, it will or has been determined during training
     data_name = 'wiki_kristina'
     language = 'english'
     return utils.load(mod, data_name, language)
+
+def generate(model, run, language):
+    return model.generate(run, language)
 
 
 if __name__ == '__main__':

@@ -206,7 +206,7 @@ class Params:
 
 		# Scaling
 		self.scaling_mean = True
-		self.sclaing_var = False
+		self.scaling_var = False
 		
 	def get_category(self, model_name):
 		category = model_name.split('_')[0]

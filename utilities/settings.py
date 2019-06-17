@@ -174,10 +174,10 @@ class Params:
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
 		self.models = sorted(['wordrate_model',
-								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden'
+								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden',
 								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden-surpisal',
-								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_first-layer'
-								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_second-layer'
+								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_first-layer',
+								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_second-layer',
 								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_third-layer',
 								'lstm_wikikristina_embedding-size_200_nhid_150_nlayers_2_dropout_01_hidden',
 								'lstm_wikikristina_embedding-size_200_nhid_150_nlayers_2_dropout_01_hidden_first-layer',

@@ -124,4 +124,4 @@ def forward(self, input, hidden, param, mask=None):
     self.hidden = {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in param['analyzed_layers']], 0) for key in ['hidden', 'cell']}
     # we restore the right dimensionality
     input = input.unsqueeze(0)
-    return input, (self.hidden['hidden'], self.hidden['cell'])
+    return input, (torch.cat([last_gates[i]['hidden'].unsqueeze(0) for i in param['nlayers']], 0), torch.cat([last_gates[i]['cell'].unsqueeze(0) for i in param['nlayers']], 0))

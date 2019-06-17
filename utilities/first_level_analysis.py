@@ -96,7 +96,7 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
             model.cv = Splitter(indexes_dict=indexes, n_splits=nb_runs-1) # adequate splitter for cross-validate alpha taking into account groups
         print('Fitting model...')
         model_fitted = model.fit(predictors_train, fmri_data_train)
-        pickle.dump(model_fitted, open(join(paths.path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '{}.sav'.format(test[0])), 'wb'))
+        # pickle.dump(model_fitted, open(join(paths.path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '{}.sav'.format(test[0])), 'wb'))
         print('Model fitted.')
 
         # return the R2_score for each voxel (=list)
@@ -108,7 +108,7 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
 
         scores = r2 if scores is None else np.vstack([scores, r2])
     result = pd.DataFrame(scores, columns=['voxel #{}'.format(i) for i in range(scores.shape[1])])
-    result.to_csv(join(path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '.csv'))
+    # result.to_csv(join(paths.path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '.csv'))
     return np.mean(scores, axis=0) # compute mean vertically (in time)
 
 

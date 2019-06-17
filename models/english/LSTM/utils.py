@@ -120,8 +120,8 @@ def forward(self, input, hidden, param, mask=None):
         if dropout != 0 and l < param['nlayers'] - 1:
             input = F.dropout(input, p=dropout, training=False, inplace=False)
 
-    self.gates =  {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in range(param['nlayers'])], 0) for key in ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']}
-    self.hidden = {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in range(param['nlayers'])], 0) for key in ['hidden', 'cell']}
+    self.gates =  {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in param['analyzed_layers']], 0) for key in ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']}
+    self.hidden = {key: torch.cat([last_gates[i][key].unsqueeze(0) for i in param['analyzed_layers']], 0) for key in ['hidden', 'cell']}
     # we restore the right dimensionality
     input = input.unsqueeze(0)
     return input, (self.hidden['hidden'], self.hidden['cell'])

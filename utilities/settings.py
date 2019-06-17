@@ -144,7 +144,7 @@ class Preferences:
 		self.extracted_parameters = ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']
 		self.surprisal = True
 		
-		# Crossvalidation prefernces
+		# Crossvalidation preferences
 		self.ridge_nested_crossval = True
 		self.defaut_alpha = 15
 		self.n_alphas = 30
@@ -173,11 +173,18 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01', 
-                                'wordrate_model',
+		self.models = sorted(['wordrate_model',
                                 'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden'
-                                'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_surpisal'])
-		self.aggregated_models = ['+'.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
+                                'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden-surpisal',
+                                'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_first-layer'
+                                'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_second-layer'
+                                'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_third-layer',
+                                'lstm_wikikristina_embedding-size_200_nhid_150_nlayers_2_dropout_01_hidden',
+                                'lstm_wikikristina_embedding-size_200_nhid_150_nlayers_2_dropout_01_hidden_first-layer',
+                                'lstm_wikikristina_embedding-size_200_nhid_150_nlayers_2_dropout_01_hidden_second-layer',
+                                'lstm_wikikristina_embedding-size_200_nhid_300_nlayers_1_dropout_01_hidden'])
+		self.aggregated_models = self.models
+        # self.aggregated_models = ['+'.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
 		self.languages = ['english'] # ['english', 'french', 'chineese']
 
 		self.test = True
@@ -193,6 +200,13 @@ class Params:
 
 		self.nb_features_lstm = 1300
 		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))
+
+        # PCA
+        self.n_components = 100
+
+        # Scaling
+        self.scaling_mean = True
+        self.sclaing_var = False
 		
 	def get_category(self, model_name):
 		category = model_name.split('_')[0]

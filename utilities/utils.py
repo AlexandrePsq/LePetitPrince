@@ -1,10 +1,11 @@
 import glob
 import os
 from os.path import join
-from .settings import Paths, Extensions
+from .settings import Paths, Extensions, Params
 
 
 from tqdm import tqdm
+from time import time
 import numpy as np
 import pandas as pd
 import csv
@@ -13,6 +14,7 @@ from sklearn.preprocessing import StandardScaler
 
 paths = Paths()
 extensions = Extensions()
+params = Params()
 
 
 #########################################
@@ -96,7 +98,7 @@ def get_r2_score(model, y_true, y2predict, r2_min=0., r2_max=0.99):
 def transform_design_matrices(path):
     # Read design matrice csv file and add a column with only 1
     dm = pd.read_csv(path, header=0).values
-    scaler = StandardScaler()
+    scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
     scaler.fit(dm)
     dm = scaler.transform(dm)
     # add the constant
@@ -105,3 +107,27 @@ def transform_design_matrices(path):
     return dm 
 
 
+
+#########################################
+################## PCA ##################
+#########################################
+# Compute a PCA (eigenfaces) on the given dataset:
+# unsupervised feature extraction / dimensionality reduction
+
+
+#def pca(X):
+#    print("Extracting the top %d eigenfaces from %d faces"
+#        % (n_components, X_train.shape[0]))
+#    t0 = time()
+#    pca = PCA(n_components=n_components, svd_solver='randomized',
+#            whiten=True).fit(X_train)
+#    print("done in %0.3fs" % (time() - t0))
+#
+#    eigenfaces = pca.components_.reshape((n_components, h, w))
+#
+#    print("Projecting the input data on the eigenfaces orthonormal basis")
+#    t0 = time()
+#    X_train_pca = pca.transform(X_train)
+#    X_test_pca = pca.transform(X_test)
+#    print("done in %0.3fs" % (time() - t0))
+#    return X

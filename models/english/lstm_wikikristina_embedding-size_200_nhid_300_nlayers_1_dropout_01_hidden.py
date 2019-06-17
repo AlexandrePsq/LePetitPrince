@@ -25,7 +25,7 @@ def load():
 
 def generate(model, run, language):
     model.param['analyzed_layers'] = range(model.param['nlayers'])
-    return model.generate(run, language)
+    return model.generate(run, language, parameters=['hidden'])
 
 
 if __name__ == '__main__':

@@ -24,6 +24,7 @@ def load():
     return utils.load(mod, data_name, language)
 
 def generate(model, run, language):
+    model.param['analyzed_layers'] = range(model.param['nlayers'])
     return model.generate(run, language)
 
 

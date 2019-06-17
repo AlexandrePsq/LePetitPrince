@@ -24,7 +24,8 @@ def load():
     return utils.load(mod, data_name, language)
 
 def generate(model, run, language):
-    return model.generate(run, language, parameters=['hidden'])
+    model.param['analyzed_layers'] = range(model.param['nlayers'])
+    return model.generate(run, language)
 
 
 if __name__ == '__main__':

@@ -32,6 +32,6 @@ class Wordrate(object):
 
     def generate(self, path, language):
         iterator = tokenize(path, language)
-        dataframes = [pd.DataFrame(function(iterator), columns=[function.__name__]) for function in self.functions]
+        dataframes = [pd.DataFrame(function(iterator, language), columns=[function.__name__]) for function in self.functions]
         result = pd.concat([df for df in dataframes], axis = 1)
         return result

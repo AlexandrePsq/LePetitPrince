@@ -29,13 +29,16 @@ def compute_raw_features(module, run, output_parent_folder, input_data_type, out
     path2output = get_path2output(output_parent_folder, output_data_type, language, model_name, run_name, extension)
     
     if compute(path2output, overwrite=overwrite):
-        raw_features = module.generate(model, run, language) # generate raw_features from model's predictions
+        raw_features, columns2retrieve, save_all = module.generate(model, run, language) # generate raw_features from model's predictions
 
         # using offsets of words instead of onsets so that the subject has heard the word
-        raw_features['offsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension))['offsets']
-        raw_features['duration'] = 0
+        if save_all:
+            raw_features['offsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension))['offsets']
+            raw_features['duration'] = 0
+            raw_features.to_csv(save_all, index=False) # saving all raw_features
 
-        raw_features.to_csv(path2output, index=False) # saving raw_features.csv
+        columns2retrieve += ['offsets', 'duration'] 
+        raw_features[columns2retrieve].to_csv(path2output, index=False) # saving raw_features.csv
 
 
 if __name__ == '__main__':

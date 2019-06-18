@@ -23,7 +23,7 @@ paths = Paths()
 ################ Figures ################
 #########################################
 
-def create_maps(masker, distribution, distribution_name, subject, output_parent_folder):
+def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=0.2):
     model = os.path.basename(output_parent_folder)
     language = os.path.basename(os.path.dirname(output_parent_folder))
     data_type = os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder)))
@@ -35,7 +35,7 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 
     nib.save(img, path2output_raw)
 
-    display = plot_glass_brain(img, display_mode='lzry', threshold=0, colorbar=True)
+    display = plot_glass_brain(img, display_mode='lzry', threshold=0, colorbar=True, black_bg=True, vmin=0., vmax=vmax)
     display.savefig(path2output_png)
     display.close()
 
@@ -73,10 +73,10 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     # compute r2 maps and save them under .nii.gz and .png formats
     if voxel_wised:
         alphas, r2_test = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
-        create_maps(masker, alphas, 'alphas', subject, output_parent_folder) # alphas
+        create_maps(masker, alphas, 'alphas', subject, output_parent_folder, vmax=20) # alphas
     else:
         r2_test = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
-    create_maps(masker, r2_test, 'r2_test', subject, output_parent_folder) # r2 test
+    create_maps(masker, r2_test, 'r2_test', subject, output_parent_folder, vmax=0.2) # r2 test
 
 
 def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
@@ -107,7 +107,7 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
         log(subject, voxel='whole brain', alpha=None, r2=r2)
 
         scores = r2 if scores is None else np.vstack([scores, r2])
-    result = pd.DataFrame(scores, columns=['voxel #{}'.format(i) for i in range(scores.shape[1])])
+    # result = pd.DataFrame(scores, columns=['voxel #{}'.format(i) for i in range(scores.shape[1])])
     # result.to_csv(join(paths.path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '.csv'))
     return np.mean(scores, axis=0) # compute mean vertically (in time)
 

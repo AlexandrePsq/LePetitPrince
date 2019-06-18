@@ -111,23 +111,53 @@ def transform_design_matrices(path):
 #########################################
 ################## PCA ##################
 #########################################
-# Compute a PCA (eigenfaces) on the given dataset:
-# unsupervised feature extraction / dimensionality reduction
+# Compute a Dual-STATIS analysis 
+# takes account of the similarities between the variance-covariance matrices of the groups
 
 
-#def pca(X):
-#    print("Extracting the top %d eigenfaces from %d faces"
-#        % (n_components, X_train.shape[0]))
-#    t0 = time()
-#    pca = PCA(n_components=n_components, svd_solver='randomized',
-#            whiten=True).fit(X_train)
-#    print("done in %0.3fs" % (time() - t0))
-#
-#    eigenfaces = pca.components_.reshape((n_components, h, w))
-#
-#    print("Projecting the input data on the eigenfaces orthonormal basis")
-#    t0 = time()
-#    X_train_pca = pca.transform(X_train)
-#    X_test_pca = pca.transform(X_test)
-#    print("done in %0.3fs" % (time() - t0))
-#    return X
+def pca(X):
+    """
+    See paper:
+    General overview of methods of analysis of multi-group datasets
+    Aida Eslami, El Mostafa Qannari, Achim Kohler, Stephanie Bougeard
+    """
+    M = len(X) # number of groups
+    # Computing variance-covariance matrix for each group
+    cov_matrices = [np.cov(matrix, rowvar=False) for matrix in X]
+    R = np.zeros((M, M))
+    for i in range(M):
+        for k in range(M):
+            R[i,k] = np.trace(np.dot(cov_matrices[i], cov_matrices[k]))
+    # Computing alphas
+    eig_values, eig_vectors = np.linalg.eig(R)
+    alphas = eig_vectors[:, np.argmax(eig_values)] # eigen vector associated with the largest eigen value
+    # 'Mean' variance-covariance matrix construction
+    Vc = np.zeros(cov_matrices[0].shape)
+    for index in range(len(cov_matrices)):
+        Vc = np.add(Vc, np.dot(alphas[index], cov_matrices[index]))
+    # spectral decomposition of Vc
+    eig_values_Vc, A = np.linalg.eig(Vc)
+    diag_matrix = np.diag(eig_values_Vc)
+    ########## testing ##########
+    for matrix in cov_matrices:
+        for index in range(A.shape[0]):
+            print(np.dot(np.dot(A[index], matrix), A[index].T))
+    ##########
+    return ???
+
+
+  # print("Extracting the top %d eigenfaces from %d faces"
+  #     % (n_components, X_train.shape[0]))
+  # t0 = time()
+  # pca = PCA(n_components=n_components, svd_solver='randomized',
+  #         whiten=True).fit(X_train)
+  # print("done in %0.3fs" % (time() - t0))
+
+  # eigenfaces = pca.components_.reshape((n_components, h, w))
+
+  # print("Projecting the input data on the eigenfaces orthonormal basis")
+  # t0 = time()
+  # X_train_pca = pca.transform(X_train)
+  # X_test_pca = pca.transform(X_test)
+  # print("done in %0.3fs" % (time() - t0))
+  # return X

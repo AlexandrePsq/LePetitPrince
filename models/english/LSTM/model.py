@@ -94,7 +94,7 @@ class RNNModel(nn.Module):
         parameters = sorted(parameters)
         # hack the forward function to send an extra argument containing the model parameters
         self.rnn.forward = lambda input, hidden: utils.forward(self.rnn, input, hidden, self.param)
-        columns_activations = ['raw-{}-{}'.format(name, i) for i in range(self.param['nhid'] * len(self.param['analyzed_layers'])) for name in parameters]
+        columns_activations = ['raw-{}-{}'.format(name, i) for i in range(self.param['nhid'] * len(self.param['nlayers'])) for name in parameters]
         activations = []
         surprisals = []
         iterator = tokenize(path, language, self.vocab)

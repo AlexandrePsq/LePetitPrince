@@ -10,6 +10,8 @@ if root not in sys.path:
 from .LSTM import model, train, utils
 import torch
 import os
+import pandas as pd
+import numpy as np
 
 from utilities.settings import Params, Paths
 
@@ -24,8 +26,28 @@ def load():
 
 
 def generate(model, run, language):
-    model.param['analyzed_layers'] = [1]
-    return model.generate(run, language, parameters=['hidden'])
+    name = os.path.basename(os.path.splitext(run)[0])
+    run_name = name.split('_')[-1] # extract the name of the run
+    save_all = None
+    path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, 'raw-features_{}_lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}_{}.csv'.format(language, model.param['ninp'], model.param['nhid'], model.param['nlayers'], str(model.param['dropout']).replace('.', ''), run_name))
+    #### parameters studied ####
+    parameters = sorted(['hidden'])
+    analyzed_layers = sorted([1])
+    retrieve_surprisal = False
+    #### generating raw-features ####
+    if os.path.exists(path):
+        raw_features = pd.read_csv(path)
+    else:
+        raw_features = model.generate(run, language)
+        save_all = path
+    #### Retrieving data of interest ####
+    weight2retrieve = []
+    for layer in analyzed_layers:
+        weight2retrieve.append(np.arange(model.param['nhid']*layer, model.param['nhid']*(layer+1)))
+    columns2retrieve = ['raw-{}-{}'.format(name, i) for i in weight2retrieve for name in parameters]
+    if retrieve_surprisal:
+        columns2retrieve.append('surprisal')
+    return raw_features, columns2retrieve, save_all
 
 
 if __name__ == '__main__':

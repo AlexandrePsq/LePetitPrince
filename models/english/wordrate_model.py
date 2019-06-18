@@ -8,8 +8,12 @@ if root not in sys.path:
 
 
 from .WORDRATE import model
-from .WORDRATE.utils import wordrate
+from .WORDRATE.utils import wordrate, function_words, content_words
 import os
+import pandas as pd
+
+
+from utilities.settings import Paths
 
 
 
@@ -18,3 +22,21 @@ def load():
     language = 'english'
     mod = model.Wordrate([wordrate], language)
     return mod
+
+def generate(mod, run, language):
+    name = os.path.basename(os.path.splitext(run)[0])
+    run_name = name.split('_')[-1] # extract the name of the run
+    save_all = None
+    mod = model.Wordrate([content_words, function_words, wordrate], language) # all functions
+    path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, 'raw-features_{}_wordrate_{}.csv'.format(language, run_name))
+    #### parameters studied ####
+    parameters = sorted([wordrate])
+    #### generating raw-features ####
+    if os.path.exists(path):
+        raw_features = pd.read_csv(path)
+    else:
+        raw_features = mod.generate(run, language)
+        save_all = path
+    #### Retrieving data of interest ####
+    columns2retrieve = [function.__name__ for function in model.Wordrate(parameters, language).functions]
+    return raw_features, columns2retrieve, save_all

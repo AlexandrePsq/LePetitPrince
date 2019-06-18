@@ -31,9 +31,9 @@ def generate(model, run, language):
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
-    model_name = 'raw-features_{}_lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}'.format(language, model.param['ninp'], model.param['nhid'], model.param['nlayers'], str(model.param['dropout']).replace('.', ''))
+    model_name = 'lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}'.format(language, model.param['ninp'], model.param['nhid'], model.param['nlayers'], str(model.param['dropout']).replace('.', ''))
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
-    path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, '{}_{}.csv'.format(model_name, run_name))
+    path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
     #### parameters studied ####
     parameters = sorted(['hidden'])
     analyzed_layers = sorted(range(model.param['nlayers']))

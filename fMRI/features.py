@@ -10,7 +10,7 @@ from os.path import join
 
 
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore')
 
 from utilities.settings import Paths, Scans
 from utilities.utils import get_data, check_folder, compute, get_output_parent_folder, get_path2output

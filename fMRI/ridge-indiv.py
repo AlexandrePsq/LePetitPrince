@@ -16,7 +16,7 @@ from os.path import join
 import os.path as op
 
 import warnings
-warnings.simplefilter(action='ignore' )
+warnings.simplefilter(action='ignore')
 
 from utilities.settings import Paths, Subjects, Params
 from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices, pca

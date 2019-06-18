@@ -6,11 +6,7 @@ if root not in sys.path:
     sys.path.append(root)
 
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-warnings.simplefilter(action='ignore', category=DeprecationWarning)
-warnings.simplefilter(action='ignore', category=ResourceWarning)
-warnings.simplefilter(action='ignore', category=ImportWarning)
-warnings.simplefilter(action='ignore', category=UserWarning)
+warnings.simplefilter(action='ignore')
 
 from .LSTM import model, train, utils
 import torch

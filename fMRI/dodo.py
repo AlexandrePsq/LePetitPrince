@@ -12,11 +12,7 @@ from itertools import combinations, product
 import numpy as np
 
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-warnings.simplefilter(action='ignore', category=DeprecationWarning)
-warnings.simplefilter(action='ignore', category=ResourceWarning)
-warnings.simplefilter(action='ignore', category=ImportWarning)
-warnings.simplefilter(action='ignore', category=UserWarning)
+warnings.simplefilter(action='ignore')
 
 
 from os.path import join

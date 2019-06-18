@@ -5,7 +5,8 @@ root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 if root not in sys.path:
     sys.path.append(root)
 
-
+import warnings
+warnings.simplefilter(action='ignore')
 
 from .WORDRATE import model
 from .WORDRATE.utils import wordrate, function_words, content_words

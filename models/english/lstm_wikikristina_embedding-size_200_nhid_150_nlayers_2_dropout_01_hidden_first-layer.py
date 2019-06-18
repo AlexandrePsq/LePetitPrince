@@ -45,7 +45,7 @@ def generate(model, run, language):
     weight2retrieve = []
     for layer in analyzed_layers:
         weight2retrieve.append(np.arange(model.param['nhid']*layer, model.param['nhid']*(layer+1)))
-    columns2retrieve = ['raw-{}-{}'.format(name, i) for i in weight2retrieve for name in parameters]
+    columns2retrieve = ['raw-{}-{}'.format(name, i) for i in np.hstack(weight2retrieve) for name in parameters]
     if retrieve_surprisal:
         columns2retrieve.append('surprisal')
     return raw_features, columns2retrieve, save_all

@@ -15,6 +15,9 @@ import os
 import pickle
 from os.path import join
 
+import warnings
+warnings.simplefilter(action='ignore')
+
 
 params = Params()
 paths = Paths()

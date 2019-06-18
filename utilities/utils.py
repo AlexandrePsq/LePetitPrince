@@ -3,6 +3,8 @@ import os
 from os.path import join
 from .settings import Paths, Extensions, Params
 
+import warnings
+warnings.simplefilter(action='ignore')
 
 from tqdm import tqdm
 from time import time

@@ -28,7 +28,9 @@ def generate(mod, run, language):
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
     mod = model.Wordrate([content_words, function_words, wordrate], language) # all functions
-    path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, 'raw-features_{}_wordrate_{}.csv'.format(language, run_name))
+    model_name = 'wordrate_model'
+    check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
+    path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
     #### parameters studied ####
     parameters = sorted([wordrate])
     #### generating raw-features ####

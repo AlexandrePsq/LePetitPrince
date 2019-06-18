@@ -142,7 +142,7 @@ class Preferences:
 
 		# activations
 		self.extracted_parameters = ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']
-		self.surprisal = False
+		self.surprisal = True
 		
 		# Crossvalidation preferences
 		self.ridge_nested_crossval = True

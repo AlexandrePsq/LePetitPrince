@@ -164,8 +164,8 @@ def pca(X, n_components=50):
 
 
 
-  def plot(eig_values_Vc, var_exp, cum_var_exp):
-      trace1 = dict(
+def plot(eig_values_Vc, var_exp, cum_var_exp):
+    trace1 = dict(
         type='bar',
         x=['PC %s' %i for i in range(1,len(eig_values_Vc))],
         y=var_exp,

@@ -18,8 +18,8 @@ import os.path as op
 import warnings
 warnings.simplefilter(action='ignore' )
 
-from utilities.settings import Paths, Subjects
-from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices
+from utilities.settings import Paths, Subjects, Params
+from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices, pca
 from utilities.first_level_analysis import compute_global_masker, do_single_subject
 import pandas as pd
 from nilearn.masking import compute_epi_mask
@@ -33,6 +33,7 @@ from nilearn.image import math_img, mean_img
 from joblib import Parallel, delayed
 
 paths = Paths()
+params = Params()
 subjects_list = Subjects()
 
 
@@ -64,6 +65,9 @@ if __name__ == '__main__':
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
     matrices = [transform_design_matrices(run) for run in dm] # list of design matrices (dataframes) where we added a constant column equal to 1
+    print('PCA analysis running...')
+    matrices = pca(matrices, n_components=params.n_components)
+    print('PCA done.')
     masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object ... computation is sloow
 
     if args.parallel:

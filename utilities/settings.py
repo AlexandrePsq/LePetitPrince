@@ -155,11 +155,6 @@ class Preferences:
 		self.alpha_order_max = 6
 		self.alphas_nested_ridgecv = np.logspace(self.alpha_order_min, self.alpha_order_max, self.n_alphas)
 		self.fit_intercept = True
-		
-		# Data
-		self.generate_data = True
-		self.compute_PCA = True
-		self.n_components = 4
 
         # GLM / Ridge
 		self.detrend = True

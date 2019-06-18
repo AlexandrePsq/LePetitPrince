@@ -11,6 +11,7 @@ import pandas as pd
 import csv
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
+import plotly.plotly as py
 
 paths = Paths()
 extensions = Extensions()
@@ -115,7 +116,7 @@ def transform_design_matrices(path):
 # takes account of the similarities between the variance-covariance matrices of the groups
 
 
-def pca(X):
+def pca(X, n_components=50):
     """
     See paper:
     General overview of methods of analysis of multi-group datasets
@@ -137,27 +138,61 @@ def pca(X):
         Vc = np.add(Vc, np.dot(alphas[index], cov_matrices[index]))
     # spectral decomposition of Vc
     eig_values_Vc, A = np.linalg.eig(Vc)
+    # u,s,v = np.linalg.svd(X_std.T)
     diag_matrix = np.diag(eig_values_Vc)
     ########## testing ##########
     for matrix in cov_matrices:
         for index in range(A.shape[0]):
             print(np.dot(np.dot(A[index], matrix), A[index].T))
-    ##########
-    return ???
+    #############################
+    eig_pairs = [(np.abs(eig_values_Vc[i]), A[:,i]) for i in range(len(eig_values_Vc))]
+    eig_pairs.sort()
+    eig_pairs.reverse()
+    tot = sum(eig_values_Vc)
+    var_exp = [(val / tot)*100 for val in sorted(eig_values_Vc, reverse=True)]
+    cum_var_exp = np.cumsum(var_exp)
+    ########## check for n_components ##########
+    plot(eig_values_Vc, var_exp, cum_var_exp)
+    ##################################################
+    projected_matrices = []
+    projector = eig_pairs[0][1].reshape(-1, 1)
+    for index in range(1, n_components):
+        projector = np.hstack((projector, eig_pairs[index][1].reshape(-1, 1)))
+    for matrix in X:
+        projected_matrices.append(np.dot(matrix, projector))
+    return projected_matrices
 
 
-  # print("Extracting the top %d eigenfaces from %d faces"
-  #     % (n_components, X_train.shape[0]))
-  # t0 = time()
-  # pca = PCA(n_components=n_components, svd_solver='randomized',
-  #         whiten=True).fit(X_train)
-  # print("done in %0.3fs" % (time() - t0))
 
-  # eigenfaces = pca.components_.reshape((n_components, h, w))
-
-  # print("Projecting the input data on the eigenfaces orthonormal basis")
-  # t0 = time()
-  # X_train_pca = pca.transform(X_train)
-  # X_test_pca = pca.transform(X_test)
-  # print("done in %0.3fs" % (time() - t0))
-  # return X
+  def plot(eig_values_Vc, var_exp, cum_var_exp):
+      trace1 = dict(
+        type='bar',
+        x=['PC %s' %i for i in range(1,len(eig_values_Vc))],
+        y=var_exp,
+        name='Individual'
+    )
+    trace2 = dict(
+        type='scatter',
+        x=['PC %s' %i for i in range(1,len(eig_values_Vc))], 
+        y=cum_var_exp,
+        name='Cumulative'
+    )
+    data = [trace1, trace2]
+    layout=dict(
+        title='Explained variance by different principal components',
+        yaxis=dict(
+            title='Explained variance in percent'
+        ),
+        annotations=list([
+            dict(
+                x=1.16,
+                y=1.05,
+                xref='paper',
+                yref='paper',
+                text='Explained Variance',
+                showarrow=False,
+            )
+        ])
+    )
+    fig = dict(data=data, layout=layout)
+    py.iplot(fig, filename='selecting-principal-components')

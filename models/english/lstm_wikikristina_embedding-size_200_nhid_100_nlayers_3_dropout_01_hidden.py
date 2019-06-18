@@ -5,7 +5,12 @@ root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 if root not in sys.path:
     sys.path.append(root)
 
-
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore', category=DeprecationWarning)
+warnings.simplefilter(action='ignore', category=ResourceWarning)
+warnings.simplefilter(action='ignore', category=ImportWarning)
+warnings.simplefilter(action='ignore', category=UserWarning)
 
 from .LSTM import model, train, utils
 import torch

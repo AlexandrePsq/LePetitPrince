@@ -16,6 +16,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=DeprecationWarning)
 warnings.simplefilter(action='ignore', category=ResourceWarning)
 warnings.simplefilter(action='ignore', category=ImportWarning)
+warnings.simplefilter(action='ignore', category=UserWarning)
 
 
 from os.path import join

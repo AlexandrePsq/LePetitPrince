@@ -150,7 +150,7 @@ class Preferences:
 		self.n_alphas = 30
 
 		# Alpha for nested
-		self.alphas = np.logspace(-3, -1, 30) # Alphas list for voxel-wised analysis
+		self.alphas = np.logspace(-3, 3, 30) # Alphas list for voxel-wised analysis
 		self.alpha_order_min = -4
 		self.alpha_order_max = 6
 		self.alphas_nested_ridgecv = np.logspace(self.alpha_order_min, self.alpha_order_max, self.n_alphas)

@@ -13,7 +13,7 @@ import pandas as pd
 import csv
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
-import plotly.plotly as py
+import matplotlib.pyplot as plt
 
 paths = Paths()
 extensions = Extensions()
@@ -101,9 +101,6 @@ def get_r2_score(model, y_true, y2predict, r2_min=0., r2_max=0.99):
 def transform_design_matrices(path):
     # Read design matrice csv file and add a column with only 1
     dm = pd.read_csv(path, header=0).values
-    scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
-    scaler.fit(dm)
-    dm = scaler.transform(dm)
     # add the constant
     const = np.ones((dm.shape[0], 1))
     dm = np.hstack((dm, const))
@@ -118,7 +115,7 @@ def transform_design_matrices(path):
 # takes account of the similarities between the variance-covariance matrices of the groups
 
 
-def pca(X, n_components=50):
+def pca(X, data_name, n_components=50):
     """
     See paper:
     General overview of methods of analysis of multi-group datasets
@@ -141,7 +138,7 @@ def pca(X, n_components=50):
     # spectral decomposition of Vc
     eig_values_Vc, A = np.linalg.eig(Vc)
     # u,s,v = np.linalg.svd(X_std.T)
-    diag_matrix = np.diag(eig_values_Vc)
+    # diag_matrix = np.diag(eig_values_Vc)
     ########## testing ##########
     for matrix in cov_matrices:
         for index in range(A.shape[0]):
@@ -154,7 +151,10 @@ def pca(X, n_components=50):
     var_exp = [(val / tot)*100 for val in sorted(eig_values_Vc, reverse=True)]
     cum_var_exp = np.cumsum(var_exp)
     ########## check for n_components ##########
-    plot(eig_values_Vc, var_exp, cum_var_exp)
+    plt.plot(cum_var_exp)
+    plt.xlabel('eigenvalue number')
+    plt.ylabel('explained variance (%)')
+    plt.savefig(os.path.join(paths.path2derivatives, 'fMRI', data_name+ '_pca.png'))
     ##################################################
     projected_matrices = []
     projector = eig_pairs[0][1].reshape(-1, 1)
@@ -162,39 +162,9 @@ def pca(X, n_components=50):
         projector = np.hstack((projector, eig_pairs[index][1].reshape(-1, 1)))
     for matrix in X:
         projected_matrices.append(np.dot(matrix, projector))
+    # normalizing each matrix
+    for index in range(len(projected_matrices)):
+        scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
+        scaler.fit(projected_matrices[index])
+        projected_matrices[index] = scaler.transform(projected_matrices[index])
     return projected_matrices
-
-
-
-def plot(eig_values_Vc, var_exp, cum_var_exp):
-    trace1 = dict(
-        type='bar',
-        x=['PC %s' %i for i in range(1,len(eig_values_Vc))],
-        y=var_exp,
-        name='Individual'
-    )
-    trace2 = dict(
-        type='scatter',
-        x=['PC %s' %i for i in range(1,len(eig_values_Vc))], 
-        y=cum_var_exp,
-        name='Cumulative'
-    )
-    data = [trace1, trace2]
-    layout=dict(
-        title='Explained variance by different principal components',
-        yaxis=dict(
-            title='Explained variance in percent'
-        ),
-        annotations=list([
-            dict(
-                x=1.16,
-                y=1.05,
-                xref='paper',
-                yref='paper',
-                text='Explained Variance',
-                showarrow=False,
-            )
-        ])
-    )
-    fig = dict(data=data, layout=layout)
-    py.iplot(fig, filename='selecting-principal-components')

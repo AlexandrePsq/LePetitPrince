@@ -47,7 +47,7 @@ if __name__ == '__main__':
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", default=True, action='store_true', help="Precise if we run the code in parallel")
     parser.add_argument("--voxel_wised", default=False, action='store_true', help="Precise if we compute voxel-wised")
-    parser.add_argument("--alphas", nargs='+', action='append', default=[np.logspace(-3, 1, 30)], help="List of alphas for voxel-wised analysis.")
+    parser.add_argument("--alphas", nargs='+', action='append', default=[np.logspace(-3, 3, 30)], help="List of alphas for voxel-wised analysis.")
 
     args = parser.parse_args()
     source = 'fMRI'
@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     matrices = [transform_design_matrices(run) for run in dm] # list of design matrices (dataframes) where we added a constant column equal to 1
     print('PCA analysis running...')
-    matrices = pca(matrices, n_components=params.n_components)
+    matrices = pca(matrices, model_name, n_components=params.n_components)
     print('PCA done.')
     masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object ... computation is sloow
 

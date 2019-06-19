@@ -3,6 +3,7 @@ from nltk.tokenize import word_tokenize
 import os
 import re
 import inflect
+from tqdm import tqdm
 
 
 special_words = {

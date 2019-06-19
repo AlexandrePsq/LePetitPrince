@@ -138,7 +138,7 @@ class Preferences:
 		self.clip = 0.25 # gradient clipping
 		self.log_interval = 200 # report interval
 		self.lr = 10 # learning rate
-		self.epochs = 30
+		self.epochs = 40
 
 		# activations
 		self.extracted_parameters = ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']

@@ -19,15 +19,20 @@ special_words = {
 
 
 def tokenize(path, language, vocab=None, path_like=True, train=False):
+    print('Tokenizing...')
     if path_like:
         assert os.path.exists(path)
         path = open(path, 'r', encoding='utf8').read()
+
     if not train:
+        print('Preprocessing...')
         text = preprocess(path, special_words, language)
+        print('Preprocessed.')
     else:
         text = path
     # iterator = [unk_transform(item, vocab).lower() for item in text.split()]
     iterator = [unk_transform(item, vocab) for item in text.split()] # vocab words not lowered
+    print('Tokenized.')
     return iterator
 
 

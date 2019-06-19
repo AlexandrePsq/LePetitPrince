@@ -3,6 +3,7 @@ import torch
 from .tokenizer import tokenize
 from collections import defaultdict
 import logging
+from tqdm import tqdm
 
 class Dictionary(object):
     def __init__(self, path, language):
@@ -36,7 +37,7 @@ class Dictionary(object):
 
     def create_vocab(self, path):
         iterator = tokenize(path, self.language, train=True)
-        for item in iterator:
+        for item in tqdm(iterator):
             self.add_word(item)
         self.add_word('<unk>')
 
@@ -44,7 +45,9 @@ class Dictionary(object):
 
 class Corpus(object):
     def __init__(self, path, language):
+        print('Building dictionary...')
         self.dictionary = Dictionary(path, language)
+        print('Dictionary built.')
         train_path = os.path.join(path, 'train.txt')
         valid_path = os.path.join(path, 'valid.txt')
         test_path = os.path.join(path, 'test.txt')
@@ -61,10 +64,16 @@ class Corpus(object):
 
         except FileNotFoundError:
             logging.info("Tensor files not found, creating new tensor files.")
+            print('Computing train tensor...')
             self.train = create_tokenized_tensor(tokenize(train_path, language, self.dictionary, train=True), self.dictionary)
+            print('Train tensor computed.')
+            print('Computing valid tensor...')
             self.valid = create_tokenized_tensor(tokenize(valid_path, language, self.dictionary, train=True), self.dictionary)
+            print('Valid tensor computed.')
+            print('Computing test tensor...')
             self.test = create_tokenized_tensor(tokenize(test_path, language, self.dictionary, train=True), self.dictionary)
-            
+            print('Test tensor computed.')
+
             with open(train_tensor, 'wb') as f:
                 torch.save(self.train, f)
             with open(valid_tensor, 'wb') as f:
@@ -79,7 +88,7 @@ def create_tokenized_tensor(iterator, dictionary):
     """Create tensor of embeddings from word iterator."""
     tensor = torch.LongTensor(len(iterator))
     token = 0
-    for item in iterator:
+    for item in tqdm(iterator):
         tensor[token] = dictionary.word2idx[item] if item in dictionary.word2idx else dictionary.word2idx['<unk>']
         token += 1
     return tensor

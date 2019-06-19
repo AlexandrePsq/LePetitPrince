@@ -35,7 +35,7 @@ class Dictionary(object):
 
 
     def create_vocab(self, path):
-        iterator = tokenize(path, self.language)
+        iterator = tokenize(path, self.language, train=True)
         for item in iterator:
             self.add_word(item)
         self.add_word('<unk>')
@@ -61,9 +61,9 @@ class Corpus(object):
 
         except FileNotFoundError:
             logging.info("Tensor files not found, creating new tensor files.")
-            self.train = create_tokenized_tensor(tokenize(train_path, language, self.dictionary), self.dictionary)
-            self.valid = create_tokenized_tensor(tokenize(valid_path, language, self.dictionary), self.dictionary)
-            self.test = create_tokenized_tensor(tokenize(test_path, language, self.dictionary), self.dictionary)
+            self.train = create_tokenized_tensor(tokenize(train_path, language, self.dictionary, train=True), self.dictionary)
+            self.valid = create_tokenized_tensor(tokenize(valid_path, language, self.dictionary, train=True), self.dictionary)
+            self.test = create_tokenized_tensor(tokenize(test_path, language, self.dictionary, train=True), self.dictionary)
             
             with open(train_tensor, 'wb') as f:
                 torch.save(self.train, f)

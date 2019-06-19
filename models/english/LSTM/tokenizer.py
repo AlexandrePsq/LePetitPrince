@@ -18,28 +18,17 @@ special_words = {
 }
 
 
-def tokenize(path, language, vocab=None, path_like=True):
+def tokenize(path, language, vocab=None, path_like=True, train=False):
     if path_like:
         assert os.path.exists(path)
         path = open(path, 'r', encoding='utf8').read()
-    text = preprocess(path, special_words, language)
-    punctuation = ['.', '\'', ',', ';', ':', '!', '?', '/', '-', '"', '‘', '’', '(', ')', '{', '}', '[', ']', '`', '“', '”', '—']
+    if not train:
+        text = preprocess(path, special_words, language)
 
-    ### tokenize without punctuation ###
-    # for item in punctuation:
-    #     text = text.replace(item, ' ')
-    ### tokenize with punctuation ###
-    for item in punctuation:
-        text = text.replace(item, ' '+ item + ' ')
-    text = text.replace('.  .  .', '...')
-
-    iterator = [unk_transform(item, vocab).lower() for item in text.split()]
-
-    # ### tokenize thanks to usual tools for text without strange characters ###
-    # tokenized = sent_tokenize(text, language=language)
-    # tokenized = [word_tokenize(sentence, language=language) + ['<eos>'] for sentence in tokenized]
-    # iterator = [unk_transform(item, vocab).lower() for sublist in tokenized for item in sublist]
+    # iterator = [unk_transform(item, vocab).lower() for item in text.split()]
+    iterator = [unk_transform(item, vocab) for item in text.split()] # vocab words not lowered
     return iterator
+
 
 def unk_transform(word, vocab=None):
     if word == 'unk':
@@ -61,4 +50,16 @@ def preprocess(text, special_words, language):
     numbers = re.findall('\d+', text)
     for number in numbers:
         text = text.replace(number, transf.number_to_words(number))
+    punctuation = ['.', '\'', ',', ';', ':', '!', '?', '/', '-', '"', '‘', '’', '(', ')', '{', '}', '[', ']', '`', '“', '”', '—']
+    for item in punctuation:
+        text = text.replace(item, ' '+ item + ' ')
+    text = text.replace('.  .  .', '...')
+    ### tokenize without punctuation ###
+    # for item in punctuation:
+    #     text = text.replace(item, ' ')
+    ### tokenize with punctuation ###
+    # ### tokenize thanks to usual tools for text without strange characters ###
+    # tokenized = sent_tokenize(text, language=language)
+    # tokenized = [word_tokenize(sentence, language=language) + ['<eos>'] for sentence in tokenized]
+    # iterator = [unk_transform(item, vocab).lower() for sublist in tokenized for item in sublist]
     return text

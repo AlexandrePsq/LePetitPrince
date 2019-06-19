@@ -31,7 +31,7 @@ def tokenize(path, language, vocab=None, path_like=True, train=False):
     else:
         text = path
     # iterator = [unk_transform(item, vocab).lower() for item in text.split()]
-    iterator = [unk_transform(item, vocab) for item in text.split()] # vocab words not lowered
+    iterator = [unk_transform(item, vocab) for item in tqdm(text.split())] # vocab words not lowered
     print('Tokenized.')
     return iterator
 

@@ -24,7 +24,8 @@ def tokenize(path, language, vocab=None, path_like=True, train=False):
         path = open(path, 'r', encoding='utf8').read()
     if not train:
         text = preprocess(path, special_words, language)
-
+    else:
+        text = path
     # iterator = [unk_transform(item, vocab).lower() for item in text.split()]
     iterator = [unk_transform(item, vocab) for item in text.split()] # vocab words not lowered
     return iterator

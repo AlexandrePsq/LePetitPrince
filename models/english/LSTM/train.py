@@ -134,6 +134,7 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
         print('Exiting from training early')
 
     # plot the perplexity as a function of the number of epochs
+    print(valid_ppl)
     plt.plot(valid_ppl)
     plt.axvline(x=best_val_loss, color='r', linestyle='--')
     plt.xlabel('epoch number')

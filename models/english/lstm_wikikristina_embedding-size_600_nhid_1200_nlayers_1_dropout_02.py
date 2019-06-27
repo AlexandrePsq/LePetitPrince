@@ -21,7 +21,7 @@ from utilities.utils import check_folder
 def load():
     from .LSTM import model, utils
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
-    mod = model.RNNModel('LSTM', 5, 200, 100, 3, dropout=0.1) # ntoken is chosen randomly, it will or has been determined during training
+    mod = model.RNNModel('LSTM', 5, 600, 1200, 1, dropout=0.2) # ntoken is chosen randomly, it will or has been determined during training
     data_name = 'wiki_kristina'
     language = 'english'
     return utils.load(mod, data_name, language)
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     from LSTM import model, train
     params = Params()
     paths = Paths()
-    mod = model.RNNModel('LSTM', 5, 200, 100, 3, dropout=0.1)
+    mod = model.RNNModel('LSTM', 5, 600, 1200, 1, dropout=0.2)
     data = os.path.join(paths.path2data, 'text', 'english', 'lstm_training')
     data_name = 'wiki_kristina'
     language = 'english'

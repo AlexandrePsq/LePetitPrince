@@ -18,6 +18,7 @@ from utilities.settings import Params, Paths
 from .model import RNNModel
 from .utils import get_batch, repackage_hidden, batchify, save, load
 import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 
 params = Params()
 paths = Paths()
@@ -106,13 +107,16 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
 
     # Loop over epochs.
     best_val_loss = None
+    best_epoch = None
     lr = params.pref.lr
     valid_ppl = []
 
     # At any point you can hit Ctrl + C to break out of training early.
     try:
         print('Entering training...')
-        for epoch in tqdm(range(1, epochs+1)):
+        for epoch in tqdm(range(1, epochs+4)):
+            if epoch == epochs + 1: # we added 3 more epoch with a smaller lr for tuning
+                lr /= 4.0
             epoch_start_time = time.time()
             forward(model, train_data, corpus, criterion, epoch, lr)
             val_loss = evaluate(model, criterion, ntokens, val_data, eval_batch_size)
@@ -126,6 +130,7 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
             if not best_val_loss or val_loss < best_val_loss:
                 save(model, data_name, language)
                 best_val_loss = val_loss
+                best_epoch = epoch
             else:
                 # Anneal the learning rate if no improvement has been seen in the validation dataset.
                 lr /= 4.0
@@ -133,13 +138,6 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
         print('-' * 89)
         print('Exiting from training early')
 
-    # plot the perplexity as a function of the number of epochs
-    print(valid_ppl)
-    plt.plot(valid_ppl)
-    plt.axvline(x=best_val_loss, color='r', linestyle='--')
-    plt.xlabel('epoch number')
-    plt.ylabel('validation perplexity')
-    plt.savefig(os.path.join(paths.path2derivatives, 'fMRI', 'models', language, '{}_perplexity.png'.format(model.__name__)))
     # Load the best saved model.
     print('loading best saved model...')
     model = load(model, data_name, language)
@@ -154,3 +152,14 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
     print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
         test_loss, math.exp(test_loss)))
     print('=' * 89)
+
+    # plot the perplexity as a function of the number of epochs
+    print(valid_ppl)
+    plt.plot(valid_ppl, color='b', linestyle='-')
+    plt.axvline(x=best_epoch, color='r', linestyle='--', label='best epoch: {}'.format(best_epoch))
+    plt.axhline(math.exp(best_val_loss), color='r', linestyle=':', label='best validation ppl: {}'.format(math.exp(best_val_loss)))
+    plt.axhline(math.exp(test_loss), color='g', linestyle='-.', label='test ppl: {}'.format(math.exp(test_loss)))
+    plt.xlabel('epoch number')
+    plt.ylabel('validation perplexity')
+    plt.legend()
+    plt.savefig(os.path.join(paths.path2derivatives, 'fMRI', 'models', language, '{}_perplexity.png'.format(model.__name__())))

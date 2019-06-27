@@ -8,7 +8,6 @@ if root not in sys.path:
 import warnings
 warnings.simplefilter(action='ignore')
 
-from .LSTM import model, train, utils
 import torch
 import os
 import pandas as pd
@@ -21,6 +20,7 @@ from utilities.utils import check_folder
 
 def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
+    from .LSTM import model, utils
     mod = model.RNNModel('LSTM', 5, 200, 300, 1, dropout=0.1) # ntoken is chosen randomly, it will or has been determined during training
     data_name = 'wiki_kristina'
     language = 'english'
@@ -50,6 +50,7 @@ def generate(model, run, language):
 
 
 if __name__ == '__main__':
+    from LSTM import model, train
     params = Params()
     paths = Paths()
     mod = model.RNNModel('LSTM', 5, 200, 300, 1, dropout=0.1)

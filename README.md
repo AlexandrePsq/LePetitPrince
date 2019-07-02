@@ -101,23 +101,23 @@ To give more insights on the three main parts of the project:
 - **code**
     - MEG data analysis pipeline
     - fMRI data analysis pipeline
-        - raw-features.py (generate raw-features and concatenate them with onsets for a given model)
-        - features.py (convolve the raw-features with a 'hrf' kernel for a given model)
-        - design-matrices.py (concatenate features of different models of interest)
-        - glm-indiv.py (GLM model fitted on fMRI data with a design-matrix)
-        - ridge-indiv.py (Ridge model fitted on fMRI data with a design-matrix)
-        - dodo.py (this files in the python analog of makefile script)
+        - raw-features.py *(generate raw-features and concatenate them with onsets for a given model)*
+        - features.py *(convolve the raw-features with a 'hrf' kernel for a given model)*
+        - design-matrices.py *(concatenate features of different models of interest)*
+        - glm-indiv.py *(GLM model fitted on fMRI data with a design-matrix)*
+        - ridge-indiv.py *(Ridge model fitted on fMRI data with a design-matrix)*
+        - dodo.py *(this files in the python analog of makefile script)*
     - utilities
-        - utils.py (utility functions)
-        - settings.py (where we change the parameters)
-        - first_level_analysis.py (functions for first level analysis of fMRI)
-        - splitter.py (splitter for multi-groups Ridge CV)
+        - utils.py *(utility functions)*
+        - settings.py *(where we change the parameters)*
+        - first_level_analysis.py *(functions for first level analysis of fMRI)*
+        - splitter.py *(splitter for multi-groups Ridge CV)*
     - models
-        - \*XXXX\* : framework associated with a kind of model (e.g. LSTM)
-            - model.py (class definition)
-            - train.py (train the model)
-            - tokenizer.py (adequate tokenizer for the model training and generation)
-            - utils.py (utilities functions)
+        - \*XXXX\* : framework associated with a kind of model (e.g. LSTM)*
+            - model.py *(class definition)*
+            - train.py *(train the model)*
+            - tokenizer.py *(adequate tokenizer for the model training and generation)*
+            - utils.py *(utilities functions)*
         - \*xxxx\* : instantiation of a given class model
 
 - **data**
@@ -135,35 +135,37 @@ To give more insights on the three main parts of the project:
 
 ### Model training
 
-To train a given model *model_name.py* in a given language *language*, just write:
+To train a given model called *model_name.py* in a given *language*, just write:
 ($LPP is the path to the LPP project home directory)
 
-```
+<pre>
 cd $LPP
 cd code
-python models/*language*/*model_name.py*
+python models/<i>language</i>/<i>model_name.py</i>
 
-```
+</pre>
 
 ### fMRI pipeline
 
 To start the fMRI pipeline analysis, first:
     - start by modifying the `code/utilities/settings.py` file with the parameters, paths, subjects and models that you want to study.
 
-```
+<pre>
 cd $LPP
 cd code/fMRI
 doit
 
-```
+</pre>
 
 Normally, the dodo.py will not run a file that has already been run except if it has been modified.
 If you still want to do so, run:
 
-```
+<pre>
+cd $LPP
+cd code/fMRI
 doit clean
 doit forget
 
-```
+</pre>
 
 Running `doit` will first create the adequate architecture and then start the fMRI pipeline.

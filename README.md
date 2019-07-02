@@ -51,48 +51,48 @@ To do so, we first created the script create_architecture.py that will do so aut
 Here you have a glance at the overall architecture:
 
 <pre>
-├── <b>paradigm</b> (experiences information, stimuli)
-├── <b>oldstuff</b> (oldscripts, personnal data/code, ...)
-├── <b>code</b> (all the code of all the analysis)
-│   ├── <b>MEG</b> (code of the MEG analysis pipeline)
-│   ├── <b>fMRI</b> (code of the fMRI analysis pipeline)
-│   ├── <b>models</b> (code related to models initialization/training/generation)
+├── <b>paradigm</b> <i>(experiences information, stimuli)</i>
+├── <b>oldstuff</b> <i>(oldscripts, personnal data/code, ...)</i>
+├── <b>code</b> <i>(all the code of all the analysis)</i>
+│   ├── <b>MEG</b> <i>(code of the MEG analysis pipeline)</i>
+│   ├── <b>fMRI</b> <i>(code of the fMRI analysis pipeline)</i>
+│   ├── <b>models</b> <i>(code related to models initialization/training/generation)</i>
 │   │   ├── <b>english</b>
-│   │   │   ├── <b>LSTM</b> (LSTM framework)
-│   │   │   ├── <b>RMS</b> (Framework for wave properties analysis)
-│   │   │   ├── <b>WORDRATE</b> (Framework for simple linguistics properties analysis)
-│   │   │   ├── lstm_wikikristina_embedding-size_200_nhid_300_nlayers_1_dropout_01.py (instantiation of a LSTM model)
-│   │   │   ├── lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01.py (instantiation of a LSTM model)
+│   │   │   ├── <b>LSTM</b> <i>(LSTM framework)</i>
+│   │   │   ├── <b>RMS</b> <i>(Framework for wave properties analysis)</i>
+│   │   │   ├── <b>WORDRATE</b> <i>(Framework for simple linguistics properties analysis)</i>
+│   │   │   ├── lstm_wikikristina_embedding-size_200_nhid_300_nlayers_1_dropout_01.py <i>(instantiation of a LSTM model)</i>
+│   │   │   ├── lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01.py <i>(instantiation of a LSTM model)</i>
 │   │   │   └── ...
 │   │   └── <b>french</b>
-│   └── <b>utilities</b> (utilities functions: parameters settings, splitter for CV, ...)
-├── <b>data</b> (all the raw data acquired from sources)
-│   ├── <b>fMRI</b> (fMRI data, 9 runs per subject)
+│   └── <b>utilities</b> <i>(utilities functions: parameters settings, splitter for CV, ...)</i>
+├── <b>data</b> <i>(all the raw data acquired from sources)</i>
+│   ├── <b>fMRI</b> <i>(fMRI data, 9 runs per subject)</i>
 │   │   └── <b>english</b>
 │   │       └── <b>sub-057</b>
 │   │           └── <b>func</b>
-│   ├── <b>wave</b> (wave files data, 9 runs, data for models training)
+│   ├── <b>wave</b> <i>(wave files data, 9 runs, data for models training)</i>
 │   │   ├── <b>english</b>
 │   │   └── <b>french</b>
-│   └── <b>text</b> (text data, raw text, division in 9 runs, onsets/offsets for each runs, data for models training)
+│   └── <b>text</b> <i>(text data, raw text, division in 9 runs, onsets/offsets for each runs, data for models training)</i>
 │       ├── <b>english</b>
 │       │   ├── <b>lstm_training</b>
 │       │   └── <b>onsets-offsets</b>
 │       └── <b>french</b>
-└── <b>derivatives</b> (results of the code above)
+└── <b>derivatives</b> <i>(results of the code above)</i>
     ├── <b>MEG</b>
-    └── <b>fMRI</b> (results from the fMRI pipeline in code/fMRI/)
-        ├── <b>design-matrices</b> (concatenation of features associated with different models of interest)
+    └── <b>fMRI</b> <i>(results from the fMRI pipeline in code/fMRI/)</i>
+        ├── <b>design-matrices</b> <i>(concatenation of features associated with different models of interest)</i>
         │   └── <b>english</b>
-        ├── <b>features</b> (Raw-features convolved with an 'hrf' kernel)
+        ├── <b>features</b> <i>(Raw-features convolved with an 'hrf' kernel)</i>
         │   └── <b>english</b>
-        ├── <b>glm-indiv</b> (GLM model fitted on fMRI data with a design-matrix)
+        ├── <b>glm-indiv</b> <i>(GLM model fitted on fMRI data with a design-matrix)</i>
         │   └── <b>english</b>
-        ├── <b>models</b> (trained models)
+        ├── <b>models</b> <i>(trained models)</i>
         │   └── <b>english</b>
-        ├── <b>raw_features</b> (Result of a model generation from the text/wave file of LPP, concatenated with the adequate onsets file)
+        ├── <b>raw_features</b> <i>(Result of a model generation from the text/wave file of LPP, concatenated with the adequate onsets file)</i>
         │   └── <b>english</b>
-        └── <b>ridge-indiv</b> (Ridge model fitted on fMRI data with a design-matrix)
+        └── <b>ridge-indiv</b> <i>(Ridge model fitted on fMRI data with a design-matrix)</i>
             └── <b>english</b>
 </pre>
 

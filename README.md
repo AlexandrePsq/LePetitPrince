@@ -13,9 +13,9 @@ It aims at better understanding the cortical bases of language comprehension thr
 ## Data acquisition
 
 This study includes:
-    - 40 fMRI in English
-    - 40 fMRI in French
-    - 20 MEG in French
+- 40 fMRI in English
+- 40 fMRI in French
+- 20 MEG in French
 each of 90 min long.
 
 These data were acquired by passive listening of the audiobook of "Le Petit Prince", divided in 9 runs of approximately 10 min each.
@@ -47,6 +47,7 @@ To do so, we first created the script create_architecture.py that will do so aut
 
 Here you have a glance at the overall architecture:
 
+```
 ├── paradigm (experiences information, stimuli)
 ├── oldstuff (oldscripts, personnal data/code, ...)
 ├── code (all the code of all the analysis)
@@ -90,7 +91,7 @@ Here you have a glance at the overall architecture:
         │   └── english
         └── ridge-indiv (Ridge model fitted on fMRI data with a design-matrix)
             └── english
-
+```
 
 To give more insights on the three main parts of the project:
 

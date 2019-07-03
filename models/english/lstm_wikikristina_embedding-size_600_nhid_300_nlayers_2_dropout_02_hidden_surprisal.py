@@ -8,7 +8,6 @@ if root not in sys.path:
 import warnings
 warnings.simplefilter(action='ignore')
 
-from .LSTM import model, train, utils
 import torch
 import os
 import pandas as pd
@@ -20,8 +19,9 @@ from utilities.utils import check_folder
 
 
 def load():
+    from .LSTM import model, utils
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
-    mod = model.RNNModel('LSTM', 5, 200, 150, 2, dropout=0.1) # ntoken is chosen randomly, it will or has been determined during training
+    mod = model.RNNModel('LSTM', 5, 600, 300, 2, dropout=0.2) # ntoken is chosen randomly, it will or has been determined during training
     data_name = 'wiki_kristina'
     language = 'english'
     return utils.load(mod, data_name, language)
@@ -36,8 +36,8 @@ def generate(model, run, language):
     path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
     #### parameters studied ####
     parameters = sorted(['hidden'])
-    analyzed_layers = sorted([1]) # first layer
-    retrieve_surprisal = False
+    analyzed_layers = sorted(range(model.param['nlayers']))
+    retrieve_surprisal = True
     #### generating raw-features ####
     if os.path.exists(path):
         raw_features = pd.read_csv(path)
@@ -55,9 +55,10 @@ def generate(model, run, language):
 
 
 if __name__ == '__main__':
+    from LSTM import model, train
     params = Params()
     paths = Paths()
-    mod = model.RNNModel('LSTM', 5, 200, 150, 2, dropout=0.1)
+    mod = model.RNNModel('LSTM', 5, 600, 300, 2, dropout=0.2)
     data = os.path.join(paths.path2data, 'text', 'english', 'lstm_training')
     data_name = 'wiki_kristina'
     language = 'english'

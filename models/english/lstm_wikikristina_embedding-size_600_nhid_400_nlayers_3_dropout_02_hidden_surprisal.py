@@ -21,7 +21,7 @@ from utilities.utils import check_folder
 def load():
     from .LSTM import model, utils
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
-    mod = model.RNNModel('LSTM', 5, 200, 100, 3, dropout=0.4) # ntoken is chosen randomly, it will or has been determined during training
+    mod = model.RNNModel('LSTM', 5, 600, 400, 3, dropout=0.2) # ntoken is chosen randomly, it will or has been determined during training
     data_name = 'wiki_kristina'
     language = 'english'
     return utils.load(mod, data_name, language)
@@ -35,6 +35,8 @@ def generate(model, run, language):
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
     path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
     #### parameters studied ####
+    parameters = sorted(['hidden'])
+    analyzed_layers = sorted(range(model.param['nlayers']))
     retrieve_surprisal = True
     #### generating raw-features ####
     if os.path.exists(path):
@@ -43,7 +45,10 @@ def generate(model, run, language):
         raw_features = model.generate(run, language)
         save_all = path
     #### Retrieving data of interest ####
-    columns2retrieve = raw_features.columns
+    weight2retrieve = []
+    for layer in analyzed_layers:
+        weight2retrieve.append(np.arange(model.param['nhid']*layer, model.param['nhid']*(layer+1)))
+    columns2retrieve = ['raw-{}-{}'.format(name, i) for i in np.hstack(weight2retrieve) for name in parameters]
     if retrieve_surprisal:
         columns2retrieve.append('surprisal')
     return raw_features, columns2retrieve, save_all
@@ -53,7 +58,7 @@ if __name__ == '__main__':
     from LSTM import model, train
     params = Params()
     paths = Paths()
-    mod = model.RNNModel('LSTM', 5, 200, 100, 3, dropout=0.4)
+    mod = model.RNNModel('LSTM', 5, 600, 400, 3, dropout=0.2)
     data = os.path.join(paths.path2data, 'text', 'english', 'lstm_training')
     data_name = 'wiki_kristina'
     language = 'english'

@@ -14,6 +14,7 @@ import csv
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+from textwrap import wrap
 
 paths = Paths()
 extensions = Extensions()
@@ -140,20 +141,25 @@ def pca(X, data_name, n_components=50):
     # u,s,v = np.linalg.svd(X_std.T)
     # diag_matrix = np.diag(eig_values_Vc)
     ########## testing ##########
-    for matrix in cov_matrices:
-        for index in range(A.shape[0]):
-            print(np.dot(np.dot(A[index], matrix), A[index].T))
+    #for matrix in cov_matrices:
+    #    for index in range(A.shape[0]):
+    #        print(np.dot(np.dot(A[index], matrix), A[index].T))
     #############################
     eig_pairs = [(np.abs(eig_values_Vc[i]), A[:,i]) for i in range(len(eig_values_Vc))]
     eig_pairs.sort()
     eig_pairs.reverse()
-    tot = sum(eig_values_Vc)
-    var_exp = [(val / tot)*100 for val in sorted(eig_values_Vc, reverse=True)]
+    tot = sum(np.abs(eig_values_Vc))
+    var_exp = [(val / tot)*100 for val in sorted(np.abs(eig_values_Vc), reverse=True)]
     cum_var_exp = np.cumsum(var_exp)
     ########## check for n_components ##########
+    var_model = sum([eig_pairs[index][0] for index in range(n_components)]/tot)*100
     plt.plot(cum_var_exp)
     plt.xlabel('eigenvalue number')
     plt.ylabel('explained variance (%)')
+    plt.axhline(y=var_model, color='g', linestyle='--', label='variance explained by the model: {0:.2f}%'.format(var_model))
+    plt.axvline(x=n_components, color='r', linestyle='--', label='number of components: {}'.format(n_components))
+    plt.title('\n'.join(wrap(data_name)))
+    plt.legend()
     plt.savefig(os.path.join(paths.path2derivatives, 'fMRI', data_name+ '_pca.png'))
     ##################################################
     projected_matrices = []

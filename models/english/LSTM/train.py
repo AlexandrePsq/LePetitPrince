@@ -156,7 +156,7 @@ def train(model, data, data_name, language, eval_batch_size=params.pref.eval_bat
     # plot the perplexity as a function of the number of epochs
     print(valid_ppl)
     ppl_df = pd.DataFrame.from_items([('ppl', valid_ppl)])
-    ppl_df.to_csv(os.path.join(paths.path2derivatives, 'fMRI', 'models', language, '{}_perplexity.png'.format(model.__name__())))
+    ppl_df.to_csv(os.path.join(paths.path2derivatives, 'fMRI', 'models', language, '{}_perplexity.csv'.format(model.__name__())))
     plt.plot(valid_ppl, color='b', linestyle='-')
     plt.ylim(0,100)
     plt.axvline(x=best_epoch, color='r', linestyle='--', label='best epoch: {}'.format(best_epoch))

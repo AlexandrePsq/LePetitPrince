@@ -27,7 +27,8 @@ parameters_list = [['hidden'], ['cell'], ['c_tilde'], ['in'], ['forget'], ['out'
 if __name__ == '__main__':
 
     for [embedding_size, nhid, nlayers, dropout, parameters] in [[ninp, nhid, nlay, drop, par] for ninp in embedding_size_list for nhid in nhid_list for nlay in nlayers_list for drop in dropout_list for par in parameters_list]:
-        for analyzed_layers in [[item] for item in sorted(range(nlayers))]+[sorted(range(nlayers))]:
+        layer_range = [[item] for item in sorted(range(nlayers))]+[sorted(range(nlayers))] if len(sorted(range(nlayers))) > 1 else [[item] for item in sorted(range(nlayers))]
+        for analyzed_layers in layer_range:
 
             retrieve_surprisal = (parameters_list==[]) # retrieve surprisal only if we do not retrieve the other
 

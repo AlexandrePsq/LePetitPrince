@@ -70,9 +70,9 @@ if __name__ == '__main__':
 
                 result +=\
                 """
-                    parameters = sorted({4})
-                    analyzed_layers = sorted({5}) # first layer
-                    retrieve_surprisal = {6}
+                    parameters = sorted({0})
+                    analyzed_layers = sorted({1}) # first layer
+                    retrieve_surprisal = {2}
                 """.format(parameters, analyzed_layers, retrieve_surprisal)
 
                 result +=\

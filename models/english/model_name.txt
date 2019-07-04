@@ -1,0 +1,1 @@
+lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02

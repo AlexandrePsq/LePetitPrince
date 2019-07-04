@@ -76,7 +76,7 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     # compute r2 maps and save them under .nii.gz and .png formats
     if voxel_wised:
         alphas, r2_test = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
-        create_maps(masker, alphas, 'alphas', subject, output_parent_folder, vmax=20) # alphas
+        create_maps(masker, alphas, 'alphas', subject, output_parent_folder, vmax=5e3) # alphas
     else:
         r2_test = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
     create_maps(masker, r2_test, 'r2_test', subject, output_parent_folder, vmax=0.2) # r2 test

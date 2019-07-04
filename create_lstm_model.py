@@ -5,6 +5,18 @@ import itertools
 
 paths = Paths()
 
+layers_name = {'[0]':'first-layer',
+                '[1]':'second-layer',
+                '[2]':'third-layer',
+                '[3]':'fourth-layer',
+                '[4]':'fifth-layer',
+                '[5]':'sixth-layer',
+                '[6]':'seventh-layer',
+                '[7]':'eighth-layer',
+                '[8]':'ninth-layer',
+                '[9]':'tenth-layer'
+                }
+
 language = 'english'
 embedding_size_list = [600]
 nhid_list = [600]
@@ -19,7 +31,9 @@ if __name__ == '__main__':
 
             retrieve_surprisal = (parameters_list==[]) # retrieve surprisal only if we do not retrieve the other
 
-            model_name = 'lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}'.format(embedding_size, nhid, nlayers, str(dropout).replace('.', ''))
+            extension = parameters[0] if len(parameters)>0 else 'surprisal' + '_'
+            extension += layers_name[str(analyzed_layers)] if str(analyzed_layers) in layers_name.keys() else 'all_layers'
+            model_name = 'lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}_'.format(embedding_size, nhid, nlayers, str(dropout).replace('.', '')) + extension
 
             if not os.path.isfile(model_name+'.py'):
                 with open(os.path.join(paths.path2code, 'models', language, 'model_name.txt'), 'a+') as f:

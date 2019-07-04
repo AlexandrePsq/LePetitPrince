@@ -98,12 +98,12 @@ if __name__ == '__main__':
     from LSTM import model, train
     params = Params()
     paths = Paths()
-    mod = model.RNNModel('LSTM', 5, 200, 100, 3, dropout=0.1)
+    mod = model.RNNModel('LSTM', 5, {0}, {1}, {2}, dropout={3})
     data = os.path.join(paths.path2data, 'text', 'english', 'lstm_training')
     data_name = 'wiki_kristina'
     language = 'english'
     train.train(mod, data, data_name, language, eval_batch_size=params.pref.eval_batch_size, bsz=params.pref.bsz)
-                """
+                """.format(embedding_size, nhid, nlayers, dropout)
 
 
                 with open(os.path.join(paths.path2code, 'models', language, model_name + '.py'), 'w') as f:

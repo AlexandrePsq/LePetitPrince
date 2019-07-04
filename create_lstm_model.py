@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
             retrieve_surprisal = (parameters_list==[]) # retrieve surprisal only if we do not retrieve the other
 
-            extension = parameters[0] if len(parameters)>0 else 'surprisal' + '_'
+            extension = (parameters[0] if len(parameters)>0 else 'surprisal') + '_'
             extension += layers_name[str(analyzed_layers)] if str(analyzed_layers) in layers_name.keys() else 'all_layers'
             model_name = 'lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}_'.format(embedding_size, nhid, nlayers, str(dropout).replace('.', '')) + extension
 

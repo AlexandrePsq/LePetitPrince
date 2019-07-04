@@ -92,7 +92,10 @@ def generate(model, run, language):
     if retrieve_surprisal:
         columns2retrieve.append('surprisal')
     return raw_features, columns2retrieve, save_all
+                """
 
+                result +=\
+                """
 
 if __name__ == '__main__':
     from LSTM import model, train

@@ -30,7 +30,7 @@ if __name__ == '__main__':
         layer_range = [[item] for item in sorted(range(nlayers))]+[sorted(range(nlayers))] if len(sorted(range(nlayers))) > 1 else [[item] for item in sorted(range(nlayers))]
         for analyzed_layers in layer_range:
 
-            retrieve_surprisal = (parameters_list==[]) # retrieve surprisal only if we do not retrieve the other
+            retrieve_surprisal = (parameters==[]) # retrieve surprisal only if we do not retrieve the other
 
             extension = (parameters[0] if len(parameters)>0 else 'surprisal') + '_'
             extension += layers_name[str(analyzed_layers)] if str(analyzed_layers) in layers_name.keys() else 'all_layers'

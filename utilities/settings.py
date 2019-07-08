@@ -10,7 +10,7 @@
 ########################################################
 
 from os.path import join
-from itertools import combinations
+from itertools import product
 import numpy as np
 import torch
 
@@ -98,31 +98,6 @@ class Subjects:
             result.append(self.get_subject(subj))
         return result
 
-        
-class Rois:
-    def __init__(self):
-        # ROIs
-        self.rois2idx = {'All': -1,
-                         'IFGorb': 0,
-                         'IFGtri': 1,
-                         'TP': 2,
-                         'TPJ': 3,
-                         'aSTS': 4,
-                         'pSTS': 5
-        }
-        self.idx2rois = ['IFGorb',
-                         'IFGtri',
-                         'TP',
-                         'TPJ',
-                         'aSTS',
-                         'pSTS',
-                         'All']
-
-    def add_roi(self, roi_name):
-        if roi_name not in self.rois2idx.keys():
-            self.rois2idx[roi_name] = len(self.idx2rois) -1
-            self.idx2rois = self.idx2rois[:-1] + [roi_name, 'All']
-
 
 class Preferences:
 	def __init__(self):
@@ -168,20 +143,39 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['wordrate_model',
-								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden',
-								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden-surprisal',
-								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_first-layer',
-								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_second-layer',
-								'lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01_hidden_third-layer',
-								'lstm_wikikristina_embedding-size_200_nhid_150_nlayers_2_dropout_01_hidden',
-								'lstm_wikikristina_embedding-size_200_nhid_150_nlayers_2_dropout_01_hidden_first-layer',
-								'lstm_wikikristina_embedding-size_200_nhid_150_nlayers_2_dropout_01_hidden_second-layer',
-								'lstm_wikikristina_embedding-size_200_nhid_300_nlayers_1_dropout_01_hidden'])
-		self.aggregated_models = self.models
-        # self.aggregated_models = ['+'.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
+		self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden',
+								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden'])
+		# self.aggregated_models = self.models
+		self.basic_features = sorted(['wordrate_model', 'word_freq', 'rms', 'fundamental_freq'])
+		self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
+										'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden',
+										'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden',
+										'lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden'])
+		self.aggregated_models = ['+'.join(model) for model in list(product(self.basic_features, self.modelsOfInterest))]
+		# self.aggregated_models = ['+'.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
 		self.languages = ['english'] # ['english', 'french', 'chineese']
 
+		# ROI
+		self.atlas = 'cort-prob-2mm' #extracted from harvard-oxford
+		self.atlas_possible = ['cort-maxprob-thr0-1mm',
+								'cort-maxprob-thr0-2mm',
+								'cort-maxprob-thr25-1mm',
+								'cort-maxprob-thr25-2mm',
+								'cort-maxprob-thr50-1mm',
+								'cort-maxprob-thr50-2mm',
+								'cort-prob-1mm',
+								'cort-prob-2mm',
+								'cortl-maxprob-thr0-1mm',
+								'cortl-maxprob-thr0-2mm',
+								'cortl-maxprob-thr25-1mm',
+								'cortl-maxprob-thr25-2mm',
+								'cortl-maxprob-thr50-1mm',
+								'cortl-maxprob-thr50-2mm',
+								'cortl-prob-1mm',
+								'cortl-prob-2mm']
+
+
+		# general parameters
 		self.test = True
 		self.overwrite = False
 		self.parallel = True

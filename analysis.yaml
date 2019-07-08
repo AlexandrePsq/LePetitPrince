@@ -1,0 +1,18 @@
+- model1: wordrate_model
+  model2: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer
+  model1_name: wordrate
+  model2_name: LSTM E600 H1200 L1 hidden-first-layer
+  name: r2_test
+  title: freq VS embeddings
+- model1: wordrate_model
+  model2: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_out_first-layer
+  model1_name: wordrate
+  model2_name: LSTM E600 H1200 L1 out-first-layer
+  name: r2_test
+  title: test
+- model1: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer
+  model2: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_out_first-layer
+  model1_name: LSTM E600 H1200 L1 hidden-first-layer
+  model2_name: LSTM E600 H1200 L1 out-first-layer
+  name: r2_test
+  title: hidden VS out

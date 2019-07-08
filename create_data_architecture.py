@@ -59,7 +59,7 @@ for language in languages:
 ################## DERIVATIVES ##################
 os.chdir(paths.path2derivatives)
 check_folder('fMRI')
-folders = ['raw-features', 'features', 'design-matrices', 'glm-indiv', 'glm-group', 'ridge-indiv', 'ridge-group']
+folders = ['raw-features', 'features', 'design-matrices', 'glm-indiv', 'glm-group', 'ridge-indiv', 'ridge-group', 'models', 'analysis']
 for folder in folders:
     check_folder(os.path.join('fMRI', folder))
     for language in languages:

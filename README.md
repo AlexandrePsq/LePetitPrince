@@ -1,13 +1,16 @@
 # LePetitPrince
 
+
 This repository includes the code of "Le Petit Prince" project.
 (LPP = Le Petit Prince)
+
 
 
 ## Project description
 
 This project is a cross-linguistics study involving NLP and Neurolinguistics experts (NeuroSpin, FAIR, INRIA, CORNELL, ...).
 It aims at better understanding the cortical bases of language comprehension through computational linguistics.
+
 
 
 ## Data acquisition
@@ -21,6 +24,7 @@ each of 90 min long.
 These data were acquired by passive listening of the audiobook of "Le Petit Prince", divided in 9 runs of approximately 10 min each.
 
 This huge dataset will be shared through neurovault.
+
 
 
 ## Methodology
@@ -42,6 +46,8 @@ Ridge (cross validated) regression between our design-matrix and the fMRI data (
 **For MEG**:
 
 (Not done yet)
+
+
 
 ## Data architecture
 
@@ -131,6 +137,7 @@ To give more insights on the three main parts of the project:
     - fMRI (every script of `code/fMRI/` fills a folder of the same name here, the same goes for `code/models/`)
 
 
+
 ## Executing scripts
 
 ### Model training
@@ -142,8 +149,8 @@ To train a given model called *model_name.py* in a given *language*, just write:
 cd $LPP
 cd code
 python models/<i>language</i>/<i>model_name.py</i>
-
 </pre>
+
 
 ### fMRI pipeline
 
@@ -154,7 +161,6 @@ To start the fMRI pipeline analysis, first:
 cd $LPP
 cd code/fMRI
 doit
-
 </pre>
 
 Normally, the dodo.py will not run a file that has already been run except if it has been modified.
@@ -165,7 +171,22 @@ cd $LPP
 cd code/fMRI
 doit clean
 doit forget
-
 </pre>
 
 Running `doit` will first create the adequate architecture and then start the fMRI pipeline.
+
+
+
+### Analysis
+
+Available analysis so far:
+- scatter plot comparison of r2 distributions per ROI in the brain for 2 given models
+
+To run such an analysis, you should first fill in the `analysis.yaml` file with the name of the model you want to study and the name of the study that this scatter plot is suppose to enlighten (e.g. syntax VS semantic).
+Then run the following command line:
+
+<pre>
+cd $LPP
+cd code/fMRI
+python analysis.py $LPP/code/analysis.yaml
+</pre>

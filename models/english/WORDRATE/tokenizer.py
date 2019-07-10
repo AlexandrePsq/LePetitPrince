@@ -21,7 +21,7 @@ special_words = {
 def tokenize(path, language, vocab=None, path_like=True):
     if path_like:
         assert os.path.exists(path)
-        path = open(path, 'r', encoding='utf8').read()
+        path = open(path, 'r', encoding='utf8').read().lower()
     text = preprocess(path, special_words, language)
     punctuation = ['.', '\'', ',', ';', ':', '!', '?', '/', '-', '"', '‘', '’', '(', ')', '{', '}', '[', ']', '`', '“', '”', '—']
 
@@ -33,7 +33,7 @@ def tokenize(path, language, vocab=None, path_like=True):
     #     text = text.replace(item, ' '+ item + ' ')
     # text = text.replace('.  .  .', '...')
 
-    iterator = [unk_transform(item, vocab).lower() for item in text.split()]
+    iterator = [unk_transform(item, vocab) for item in text.split()]
 
     # ### tokenize thanks to usual tools for text without strange characters ###
     # tokenized = sent_tokenize(text, language=language)

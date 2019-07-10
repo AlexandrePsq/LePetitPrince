@@ -35,10 +35,12 @@ def compute_raw_features(module, run, output_parent_folder, input_data_type, out
         if save_all:
             raw_features['offsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension))['offsets']
             raw_features['duration'] = 0
+            raw_features = raw_features[:raw_features.offsets.count()] # in case the tokenizer have some words after the last offset (we don(t want to create totally imaginary offsets))
             raw_features.to_csv(save_all, index=False) # saving all raw_features
 
         columns2retrieve += ['offsets', 'duration'] 
-        raw_features[columns2retrieve].to_csv(path2output, index=False) # saving raw_features.csv
+        result = raw_features[columns2retrieve]
+        result[:result.offsets.count()].to_csv(path2output, index=False) # saving raw_features.csv
 
 
 if __name__ == '__main__':

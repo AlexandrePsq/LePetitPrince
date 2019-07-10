@@ -38,9 +38,6 @@ class EnergySpectrum(object):
 
     def generate(self, path, language):
         iterator = tokenize(path, language)
-        name = os.path.basename(os.path.splitext(path)[0])
-        run_name = name.split('_')[-1]
-        model_category = os.path.basename(os.path.dirname(path))
 
         dataframes = [pd.DataFrame(function(iterator, language), columns=[function.__name__]) for function in self.functions]
         result = pd.concat([df for df in dataframes], axis = 1)

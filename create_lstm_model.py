@@ -73,7 +73,7 @@ def load():
 
                 result +=\
                 """
-def generate(model, run, language):
+def generate(model, run, language, textgrid):
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
@@ -106,7 +106,7 @@ def generate(model, run, language):
     
     if retrieve_surprisal:
         columns2retrieve.append('surprisal')
-    return raw_features, columns2retrieve, save_all
+    return raw_features[:textgrid.offsets.count()], columns2retrieve, save_all
                 """
 
                 result +=\

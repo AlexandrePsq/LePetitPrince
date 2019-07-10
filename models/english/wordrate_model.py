@@ -25,7 +25,7 @@ def load():
     mod = model.Wordrate([wordrate], language)
     return mod
 
-def generate(mod, run, language):
+def generate(mod, run, language, textgrid):
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
@@ -39,8 +39,8 @@ def generate(mod, run, language):
     if os.path.exists(path):
         raw_features = pd.read_csv(path)
     else:
-        raw_features = mod.generate(run, language)
+        raw_features = mod.generate(run, language, textgrid)
         save_all = path
     #### Retrieving data of interest ####
     columns2retrieve = [function.__name__ for function in model.Wordrate(parameters, language).functions]
-    return raw_features, columns2retrieve, save_all
+    return raw_features[:textgrid.offsets.count()], columns2retrieve, save_all

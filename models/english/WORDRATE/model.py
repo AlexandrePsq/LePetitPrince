@@ -30,8 +30,9 @@ class Wordrate(object):
     def __name__(self):
         return '_'.join([function.__name__ for function in self.functions])
 
-    def generate(self, path, language):
-        iterator = tokenize(path, language)
+    def generate(self, path, language, textgrid):
+        # iterator = tokenize(path, language)
+        iterator = list(textgrid['word'])
         dataframes = [pd.DataFrame(function(iterator, language), columns=[function.__name__]) for function in self.functions]
         result = pd.concat([df for df in dataframes], axis = 1)
         return result

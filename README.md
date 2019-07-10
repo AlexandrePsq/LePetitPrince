@@ -155,7 +155,7 @@ To give more insights on the three main parts of the project:
 
 If you want to train a given model called *model_name.py* in a given *language* and use it in the pipeline, you need to create a module *model_name.py* in <pre>$LPP/code/models/<i>language</i>/</pre>, and define in it the functions:
 - `load`: that returns the trained model 
-- `generate`: that take as arguments a model, a path to the input run and a language and generate raw-features
+- `generate`: that take as arguments a model, a path to the input run, a language and a textgrid dataframe and generate raw-features
 
 And add at the end of the script:
 <pre>

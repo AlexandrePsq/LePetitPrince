@@ -29,18 +29,17 @@ def compute_raw_features(module, run, output_parent_folder, input_data_type, out
     path2output = get_path2output(output_parent_folder, output_data_type, language, model_name, run_name, extension)
     
     if compute(path2output, overwrite=overwrite):
-        raw_features, columns2retrieve, save_all = module.generate(model, run, language) # generate raw_features from model's predictions
+        textgrid = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension)) # df with onsets-offsets-word
+        raw_features, columns2retrieve, save_all = module.generate(model, run, language, textgrid) # generate raw_features from model's predictions
 
         # using offsets of words instead of onsets so that the subject has heard the word
         if save_all:
-            raw_features['offsets'] = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension))['offsets']
+            raw_features['offsets'] = textgrid['offsets']
             raw_features['duration'] = 0
-            raw_features = raw_features[:raw_features.offsets.count()] # in case the tokenizer have some words after the last offset (we don(t want to create totally imaginary offsets))
             raw_features.to_csv(save_all, index=False) # saving all raw_features
 
         columns2retrieve += ['offsets', 'duration'] 
-        result = raw_features[columns2retrieve]
-        result[:result.offsets.count()].to_csv(path2output, index=False) # saving raw_features.csv
+        raw_features[columns2retrieve].to_csv(path2output, index=False) # saving raw_features.csv
 
 
 if __name__ == '__main__':

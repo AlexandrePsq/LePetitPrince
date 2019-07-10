@@ -9,7 +9,7 @@ def tokenize(path, slice_period=100e-3):
     wave_file = wave.open(path, mode='r')
     rate = wave_file.getframerate()
     n_frames = wave_file.getnframes()   # Number of frames.
-    slice_length = slice_period * rate
+    slice_length = int(slice_period * rate)
 
 
     # Read audio data.

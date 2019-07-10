@@ -56,7 +56,6 @@ class Glove(object):
 
 
     def generate(self, path, language):
-        parameters = sorted(parameters)
         columns_activations = ['embedding-{}'.format(i) for i in range(self.param['embedding-size'])]
         activations = []
         iterator = tokenize(path, language)

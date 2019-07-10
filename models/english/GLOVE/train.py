@@ -10,14 +10,12 @@ import math
 import pandas as pd
 import numpy as np
 import time
-from .data import Corpus
 from tqdm import tqdm
-from utilities.settings import Params, Paths
+from utilities.settings import Paths
 from .tokenizer import tokenize
-import matplotlib.pyplot as plt
-plt.switch_backend('agg')
+from gensim.models import Word2Vec
+import pickle
 
-params = Params()
 paths = Paths()
 
 
@@ -35,8 +33,13 @@ def train(model, path2data, data_name, language):
     try:
         print('Entering training...')
         sentences = tokenize(path2data, language, train=True)
-        model = Word2Vec(sentences, min_count=1, size=self.param['embedding-size'])
+        model = Word2Vec(sentences, min_count=1, size=model.param['embedding-size'])
     except KeyboardInterrupt:
         print('-' * 89)
         print('Exiting from training early')
+
+    path = '_'.join([model.__name__(), data_name, language]) + '.pt'
+    path = os.path.join(paths.path2derivatives, 'fMRI/models', language, path)
+    model.save(path)
+
 

@@ -6,7 +6,7 @@ if root not in sys.path:
     sys.path.append(root)
 
 
-from utilities.settings import Subjects, Rois, Paths, Params
+from utilities.settings import Subjects, Paths, Params
 from utilities.utils import get_output_parent_folder, get_path2output
 from itertools import combinations, product
 import numpy as np
@@ -63,7 +63,7 @@ def task_raw_features():
     
     for language in languages:
         for model in models:
-            if model in ['rms', 'f0']:
+            if model.split('_')[0] in ['rms', 'f0']:
                 input_data_type = 'wave'
                 extension_input = '.wav'
             else:

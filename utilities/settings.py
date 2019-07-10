@@ -145,7 +145,7 @@ class Params:
 		self.nb_runs = 9 # number of runs
 		self.models = sorted(['wordrate_model', 
 								'rms_model', 
-								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden'])
+								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer'])
 		# self.aggregated_models = self.models
 		self.basic_features = sorted(['wordrate_model', 'word_freq', 'rms', 'fundamental_freq'])
 		self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',

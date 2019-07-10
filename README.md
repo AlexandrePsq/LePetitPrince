@@ -15,6 +15,19 @@ It aims at better understanding the cortical bases of language comprehension thr
 
 ## Data acquisition
 
+
+The story is segmented into 9 runs:
+- Chapters 1 to 3 --> run 1
+- Chapters 4 to 6 --> run 2
+- Chapters 7 to 9 --> run 3
+- Chapters 10 to 12 --> run 4
+- Chapters 13 to 14 --> run 5
+- Chapters 15 to 19 --> run 6
+- Chapters 20 to 22 --> run 7
+- Chapters 23 to 25 --> run 8
+- Chapters 26 to 27 --> run 9
+
+
 This study includes:
 - 40 fMRI in English
 - 40 fMRI in French

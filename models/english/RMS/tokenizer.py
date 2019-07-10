@@ -15,4 +15,4 @@ def tokenize(path, slice_period=100e-3):
     # Read audio data.
     data = np.fromstring(wave_file.readframes(n_frames), dtype=np.int16)
     data_list = [data[index*slice_length: index*slice_length + slice_length] for index in range(n_frames//slice_length)]
-    return data_list
+    return data_list, rate, n_frames, slice_length

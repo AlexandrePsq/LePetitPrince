@@ -37,8 +37,12 @@ class EnergySpectrum(object):
 
 
     def generate(self, path, language, textgrid, slice_period=100e-3):
-        iterator = tokenize(path, slice_period=100e-3)
+        iterator, frame_rate, n_frames, slice_length = tokenize(path, slice_period=100e-3)
 
-        dataframes = [pd.DataFrame(function(iterator, language), columns=[function.__name__]) for function in self.functions]
+        parameters = {'frame_rate': frame_rate, 
+                        'n_frames': n_frames, 
+                        'slice_length': slice_length}
+
+        dataframes = [pd.DataFrame(function(iterator, language, parameters), columns=[function.__name__]) for function in self.functions]
         result = pd.concat([df for df in dataframes], axis = 1)
         return result

@@ -25,6 +25,7 @@ import pandas as pd
 from nilearn.masking import compute_epi_mask
 import numpy as np
 from nilearn.input_data import MultiNiftiMasker
+from sklearn.preprocessing import StandardScaler
 
 from sklearn.metrics import r2_score
 from sklearn.model_selection import LeaveOneGroupOut
@@ -71,6 +72,10 @@ if __name__ == '__main__':
         print('PCA done.')
     else:
         print('Skipping PCA.')
+        for index in range(len(matrices)):
+            scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
+            scaler.fit(matrices[index])
+            matrices[index] = scaler.transform(matrices[index])
     masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object ... computation is sloow
 
     if args.parallel:

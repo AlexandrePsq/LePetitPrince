@@ -36,8 +36,8 @@ class EnergySpectrum(object):
         return '_'.join([function.__name__ for function in self.functions])
 
 
-    def generate(self, path, language, textgrid, slice_period=100e-3):
-        iterator, frame_rate, n_frames, slice_length = tokenize(path, slice_period=100e-3)
+    def generate(self, path, language, textgrid, slice_period=10e-3):
+        iterator, frame_rate, n_frames, slice_length = tokenize(path, slice_period=slice_period)
 
         parameters = {'frame_rate': frame_rate, 
                         'n_frames': n_frames, 

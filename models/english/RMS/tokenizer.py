@@ -4,7 +4,7 @@ import os
 
 
 
-def tokenize(path, slice_period=100e-3):
+def tokenize(path, slice_period):
     # slice_period is in s
     wave_file = wave.open(path, mode='r')
     rate = wave_file.getframerate()

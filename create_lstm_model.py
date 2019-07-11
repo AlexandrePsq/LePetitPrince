@@ -19,8 +19,8 @@ layers_name = {'[0]':'first-layer',
 
 language = 'english'
 embedding_size_list = [600]
-nhid_list = [600] # [200]
-nlayers_list = [1,2,3] # [2,3]
+nhid_list = [50, 100, 150] # [200]
+nlayers_list = [1] # [2,3]
 dropout_list = [0.2]
 parameters_list = [['hidden'], ['cell'], ['c_tilde'], ['in'], ['forget'], ['out'], []]
 

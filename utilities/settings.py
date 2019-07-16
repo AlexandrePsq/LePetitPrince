@@ -143,14 +143,11 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['rms_model,'
-								'lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
-								'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
-								'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',
-								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer',
-								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden_first-layer',
-								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_first-layer',
-								'lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers'])
+		self.models = sorted(['rms_model',
+								'wordrate_content-word',
+								'wordrate_function-word',
+								'lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer',
+								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer'])
 		self.aggregated_models = self.models
 		self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'
 		self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',

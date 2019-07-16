@@ -32,7 +32,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     features_list = []
-    models = sorted(args.models[0])
+    models = args.models[0]
     input_data_type = 'features'
     output_data_type = 'design-matrices'
     extension = '.csv'

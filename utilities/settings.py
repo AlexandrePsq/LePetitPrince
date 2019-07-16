@@ -147,10 +147,10 @@ class Params:
 								'lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
 								'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
 								'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',
-								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
-								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden',
-								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden',
-								'lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden'])
+								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer',
+								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden_first-layer',
+								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_first-layer',
+								'lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers'])
 		self.aggregated_models = self.models
 		self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'
 		self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
@@ -197,6 +197,7 @@ class Params:
 		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))
 
 		# PCA
+		self.pca = False
 		self.n_components = 100
 
 		# Scaling

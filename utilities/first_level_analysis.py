@@ -32,9 +32,11 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
     data_type = os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder)))
 
     img = masker.inverse_transform(distribution)
+
+    pca = 'pca_' + str(params.n_components) if params.pca else 'no_pca'
     
-    path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, language, model, distribution_name, subject)+'.nii.gz')
-    path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(data_type, language, model, distribution_name, subject)+'.png')
+    path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(data_type, language, model, distribution_name, pca, subject)+'.nii.gz')
+    path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(data_type, language, model, distribution_name, pca, subject)+'.png')
 
     nib.save(img, path2output_raw)
 

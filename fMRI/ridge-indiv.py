@@ -66,7 +66,7 @@ if __name__ == '__main__':
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
     matrices = [transform_design_matrices(run) for run in dm] # list of design matrices (dataframes) where we added a constant column equal to 1
-    if matrices[0].shape[1] > params.n_components:
+    if (matrices[0].shape[1] > params.n_components) & (params.pca):
         print('PCA analysis running...')
         matrices = pca(matrices, model_name, n_components=params.n_components)
         print('PCA done.')

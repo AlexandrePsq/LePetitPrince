@@ -32,6 +32,8 @@ from sklearn.model_selection import LeaveOneGroupOut
 from sklearn.linear_model import Ridge, RidgeCV
 from nilearn.image import math_img, mean_img
 from joblib import Parallel, delayed
+import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 
 paths = Paths()
 params = Params()
@@ -46,7 +48,7 @@ if __name__ == '__main__':
     parser.add_argument("--language", type=str, default='english', help="Language of the model.")
     parser.add_argument("--model_name", type=str, help="Name of the model to use to generate the raw features.")
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
-    parser.add_argument("--parallel", default=True, action='store_true', help="Precise if we run the code in parallel")
+    parser.add_argument("--parallel", default=False, action='store_true', help="Precise if we run the code in parallel")
     parser.add_argument("--voxel_wised", default=False, action='store_true', help="Precise if we compute voxel-wised")
     parser.add_argument("--alphas", nargs='+', action='append', default=[np.logspace(-3, 3, 30)], help="List of alphas for voxel-wised analysis.")
 

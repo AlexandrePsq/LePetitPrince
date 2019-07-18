@@ -1,23 +1,146 @@
 subjects:
   - 57
+
 source: fMRI
+
 language: english
-analysis_list:
+
+scatter_plots:
   - model1: wordrate_model
     model2: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer
     model1_name: wordrate
     model2_name: LSTM E600 H1200 L1 hidden-first-layer
-    name: r2_test
-    title: freq VS embeddings
+    title: r2_test
+    name: freq VS embeddings
   - model1: wordrate_model
     model2: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_out_first-layer
     model1_name: wordrate
     model2_name: LSTM E600 H1200 L1 out-first-layer
-    name: r2_test
-    title: test
+    title: r2_test
+    name: test
   - model1: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer
     model2: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_out_first-layer
     model1_name: LSTM E600 H1200 L1 hidden-first-layer
     model2_name: LSTM E600 H1200 L1 out-first-layer
+    title: r2_test
+    name: hidden VS out
+
+
+
+
+check_model:
+  - model: wordrate_model
+    model_name: wordrate
     name: r2_test
-    title: hidden VS out
+    title: R2_test distribution
+
+
+
+
+
+model_complexity:
+  - model_category: LSTM
+    complexity_variable:
+      - 50
+      - 100
+      - 150
+      - 200
+      - 300
+      - 400
+      - 500
+      - 600
+    variable_name: nhid
+    variable_of_interest: r2_test
+    parameters: 
+      rnn_type: LSTM
+      ninp: 600
+      nlayers: 1
+      dropout: 0.2
+      other: hidden_first-layer
+    title: R2 test = f(nhid)
+    name: model_complexity
+  - model_category: LSTM
+    complexity_variable:
+      - 20
+      - 40
+      - 60
+      - 80
+      - 100
+      - 150
+      - 200
+      - 250
+      - 300
+      - 350
+      - 400
+      - 500
+      - 600
+      - 800
+      - 1000
+    variable_name: 'pca components'
+    variable_of_interest: r2_test
+    parameters: 
+      rnn_type: LSTM
+      ninp: 600
+      nlayers: 1
+      dropout: 0.2
+      nhid: 1800
+      other: hidden_first-layer
+    title: 'R2 test = f(pca components)'
+    name: model_complexity
+  - model_category: LSTM
+    complexity_variable:
+      - 
+      -
+      -
+      -
+      -
+      -
+      -
+      -
+    variable_name: perplexity
+    variable_of_interest: r2_test
+    parameters: 
+      rnn_type: LSTM
+      ninp: 600
+      nlayers: 1
+      dropout: 0.2
+      other: hidden_first-layer
+    title: 'R2 test = f(perplexity)'
+    name: model_complexity
+  - model_category: LSTM
+    complexity_variable:
+      - 50
+      - 100
+      - 150
+      - 200
+      - 300
+      - 400
+      - 500
+      - 600
+    variable_name: nhid
+    variable_of_interest: perplexity
+    value_v-o-i: 
+      - - value for subject 0
+        - value for subject 1
+      - - value for subject 0
+        - value for subject 1
+      - - value for subject 0
+        - value for subject 1
+      - - value for subject 0
+        - value for subject 1
+      - - value for subject 0
+        - value for subject 1
+      - - value for subject 0
+        - value for subject 1
+      - - value for subject 0
+        - value for subject 1
+      - - value for subject 0
+        - value for subject 1
+    parameters: 
+      rnn_type: LSTM
+      ninp: 600
+      nlayers: 1
+      dropout: 0.2
+      other: hidden_first-layer
+    title: 'R2 test = f(perplexity)'
+    name: model_complexity

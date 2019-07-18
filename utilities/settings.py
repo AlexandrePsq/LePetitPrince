@@ -114,6 +114,7 @@ class Preferences:
 		self.log_interval = 200 # report interval
 		self.lr = 10 # learning rate
 		self.epochs = 40
+		self.shift_surprisal = 0
 
 		# activations
 		self.extracted_parameters = ['in', 'forget', 'out', 'c_tilde', 'hidden', 'cell']
@@ -180,7 +181,7 @@ class Params:
 
 		# general parameters
 		self.test = True
-		self.overwrite = False
+		self.overwrite = True
 		self.parallel = True
 		self.cuda = True
 		if torch.cuda.is_available():

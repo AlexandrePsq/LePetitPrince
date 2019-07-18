@@ -14,6 +14,7 @@ import csv
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 from textwrap import wrap
 
 paths = Paths()
@@ -106,6 +107,19 @@ def transform_design_matrices(path):
     const = np.ones((dm.shape[0], 1))
     dm = np.hstack((dm, const))
     return dm 
+
+
+def shift(column, n_rows, column_name):
+    # shift the rows of a column and padd with 0
+    df2 = pd.DataFrame([0]*np.abs(n_rows), columns=[column_name]) 
+    tmp = column.iloc[-min(0, n_rows):len(column)-max(0,n_rows)]
+    if n_rows >=0:
+        result = df2.append(pd.DataFrame(tmp, columns=[column_name]), ignore_index=True)
+    else:
+        print(pd.DataFrame(tmp, columns=[column_name]))
+        print(df2)
+        result = pd.DataFrame(tmp, columns=[column_name]).append(df2, ignore_index=True)
+    return result
 
 
 

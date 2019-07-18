@@ -13,13 +13,14 @@ import importlib
 import warnings
 warnings.simplefilter(action='ignore')
 
-from utilities.settings import Paths
+from utilities.settings import Paths, Params
 from utilities.utils import get_data, check_folder, compute, get_output_parent_folder, get_path2output
 import pandas as pd
 from joblib import Parallel, delayed
 
 
 paths = Paths()
+params = Params()
 
 
 def compute_raw_features(module, run, output_parent_folder, input_data_type, output_data_type, language, model_name, model_category, extension, overwrite):
@@ -38,8 +39,11 @@ def compute_raw_features(module, run, output_parent_folder, input_data_type, out
             raw_features['duration'] = 0
             raw_features.to_csv(save_all, index=False) # saving all raw_features
 
-        columns2retrieve += ['offsets', 'duration'] 
-        raw_features[columns2retrieve].to_csv(path2output, index=False) # saving raw_features.csv
+        columns2retrieve += ['offsets', 'duration']
+        result = raw_features[columns2retrieve]
+        if columns2retrieve == ['surprisal', 'offsets', 'duration']:
+            result['offsets'] += params.pref.shift_surprisal
+        result.to_csv(path2output, index=False) # saving raw_features.csv
 
 
 if __name__ == '__main__':

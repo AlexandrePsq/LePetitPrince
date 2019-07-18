@@ -23,6 +23,7 @@ nhid_list = [50, 100, 150] # [200]
 nlayers_list = [1] # [2,3]
 dropout_list = [0.2]
 parameters_list = [['hidden'], ['cell'], ['c_tilde'], ['in'], ['forget'], ['out'], []]
+shift_surprisal = None
 
 if __name__ == '__main__':
 
@@ -59,7 +60,7 @@ import pandas as pd
 import numpy as np
 
 from utilities.settings import Params, Paths
-from utilities.utils import check_folder
+from utilities.utils import check_folder, shift
 
 
 def load():
@@ -105,6 +106,8 @@ def generate(model, run, language, textgrid):
     columns2retrieve = ['raw-{}-{}'.format(name, i) for i in np.hstack(weight2retrieve) for name in parameters]
     
     if retrieve_surprisal:
+        # if shift_surprisal:
+        #     raw_features['surprisal'] = shift(raw_features['surprisal'], shift_surprisal, 'surprisal')
         columns2retrieve.append('surprisal')
     return raw_features[:textgrid.offsets.count()], columns2retrieve, save_all
                 """

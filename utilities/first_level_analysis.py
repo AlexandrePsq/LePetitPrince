@@ -14,6 +14,8 @@ from .settings import Params, Paths
 import os
 import pickle
 from os.path import join
+import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 
 import warnings
 warnings.simplefilter(action='ignore')

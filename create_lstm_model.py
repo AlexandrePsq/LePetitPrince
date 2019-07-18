@@ -22,18 +22,19 @@ embedding_size_list = [600]
 nhid_list = [50, 100, 150] # [200]
 nlayers_list = [1] # [2,3]
 dropout_list = [0.2]
-parameters_list = [['hidden'], ['cell'], ['c_tilde'], ['in'], ['forget'], ['out'], []]
+parameters_list = [['hidden'], ['cell'], ['c_tilde'], ['in'], ['forget'], ['out'], ['surprisal'], ['entropy']]
 shift_surprisal = None
+shift_entropy = None
 
 if __name__ == '__main__':
 
     for [embedding_size, nhid, nlayers, dropout, parameters] in [[ninp, nhid, nlay, drop, par] for ninp in embedding_size_list for nhid in nhid_list for nlay in nlayers_list for drop in dropout_list for par in parameters_list]:
         layer_range = [[item] for item in sorted(range(nlayers))]+[sorted(range(nlayers))] if len(sorted(range(nlayers))) > 1 else [[item] for item in sorted(range(nlayers))]
         for analyzed_layers in layer_range:
+            retrieve_surprisal = (parameters==['surprisal'])
+            retrieve_entropy = (parameters==['entropy'])
 
-            retrieve_surprisal = (parameters==[]) # retrieve surprisal only if we do not retrieve the other
-
-            extension = (parameters[0] if len(parameters)>0 else 'surprisal') + '_'
+            extension = parameters[0] + '_'
             extension += layers_name[str(analyzed_layers)] if str(analyzed_layers) in layers_name.keys() else 'all_layers'
             model_name = 'lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}_'.format(embedding_size, nhid, nlayers, str(dropout).replace('.', '')) + extension
 
@@ -89,7 +90,8 @@ def generate(model, run, language, textgrid):
     parameters = sorted({0})
     analyzed_layers = sorted({1}) # first layer
     retrieve_surprisal = {2}
-                """.format(parameters, analyzed_layers, retrieve_surprisal)
+    retrieve_entropy = {3}
+                """.format(parameters, analyzed_layers, retrieve_surprisal, retrieve_entropy)
 
                 result +=\
                 """
@@ -109,6 +111,10 @@ def generate(model, run, language, textgrid):
         # if shift_surprisal:
         #     raw_features['surprisal'] = shift(raw_features['surprisal'], shift_surprisal, 'surprisal')
         columns2retrieve.append('surprisal')
+    if retrieve_entropy:
+        # if shift_entropy:
+        #     raw_features['entropy'] = shift(raw_features['entropy'], shift_entropy, 'entropy')
+        columns2retrieve.append('entropy')
     return raw_features[:textgrid.offsets.count()], columns2retrieve, save_all
                 """
 

@@ -17,6 +17,7 @@ from tqdm import tqdm
 import torch.nn as nn
 import pandas as pd
 import numpy as np
+import scipy.stats.entropy as H
 from .data import Corpus, Dictionary
 from .tokenizer import tokenize
 from utilities.settings import Params
@@ -90,25 +91,29 @@ class RNNModel(nn.Module):
         else:
             return weight.new_zeros(self.param['nlayers'], bsz, self.param['nhid'])
 
-    def generate(self, path, language, includ_surprisal=params.pref.surprisal, parameters=params.pref.extracted_parameters):
+    def generate(self, path, language, includ_surprisal=params.pref.surprisal, includ_entropy=params.pref.entropy, parameters=params.pref.extracted_parameters):
         parameters = sorted(parameters)
         # hack the forward function to send an extra argument containing the model parameters
         self.rnn.forward = lambda input, hidden: utils.forward(self.rnn, input, hidden, self.param)
         columns_activations = ['raw-{}-{}'.format(name, i) for i in range(self.param['nhid'] * self.param['nlayers']) for name in parameters]
         activations = []
         surprisals = []
+        entropies = []
         iterator = tokenize(path, language, self.vocab)
         last_item = params.eos_separator
         out = None
         hidden = None
         for item in tqdm(iterator):
-            activation, surprisal,(out, hidden) = self.extract_activations(item, last_item=last_item, out=out, hidden=hidden, parameters=parameters)
+            activation, surprisal, entropy, (out, hidden) = self.extract_activations(item, last_item=last_item, out=out, hidden=hidden, parameters=parameters)
             last_item = item
             activations.append(activation)
             surprisals.append(surprisal)
+            entropies.append(entropy)
         activations_df = pd.DataFrame(np.vstack(activations), columns=columns_activations)
         surprisals_df = pd.DataFrame(np.vstack(surprisals), columns=['surprisal'])
+        entropies_df = pd.DataFrame(np.vstack(entropies), columns=['entropy'])
         result = pd.concat([activations_df, surprisals_df], axis = 1) if includ_surprisal else activations_df
+        result = pd.concat([result, entropies_df], axis = 1) if includ_entropy else result
         return result
     
     def extract_activations(self, item, last_item, out=None, hidden=None, parameters=['hidden']):
@@ -119,6 +124,11 @@ class RNNModel(nn.Module):
             if params.cuda:
                 inp = inp.cuda()
             out, hidden = self(inp, hidden)
+        # print(torch.nn.functional.softmax(out[0]).unsqueeze(0), '\n\n\n\n)
+        # print(torch.nn.functional.softmax(out[0]).unsqueeze(0).size)
+        # a = input()
+        entropy = H(torch.nn.functional.softmax(out[0]).unsqueeze(0))
+        # entropy = H(torch.nn.functional.softmax(out[0]).unsqueeze(0)[0,0,:])
         out = torch.nn.functional.log_softmax(out[0]).unsqueeze(0)
         surprisal = out[0, 0, self.vocab.word2idx[item]].item()
         inp = torch.autograd.Variable(torch.LongTensor([[self.vocab.word2idx[item]]]))
@@ -127,5 +137,5 @@ class RNNModel(nn.Module):
         out, hidden = self(inp, hidden)
         for param in parameters:
             activation.append(self.rnn.gates[param].data.view(1,1,-1).cpu().numpy()[0][0])
-        return np.hstack(activation), surprisal, (out, hidden)
+        return np.hstack(activation), surprisal, entropy, (out, hidden)
 

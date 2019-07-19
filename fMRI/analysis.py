@@ -177,6 +177,7 @@ if __name__ == '__main__':
             else:
                 y_list = []
                 for subject in subjects:
+                    non_zero_value = []
                     y_sub = []
                     subject = Subjects().get_subject(int(subject))
                     for var in analysis['complexity_variable']:
@@ -202,6 +203,7 @@ if __name__ == '__main__':
                                                 subject + '.nii.gz'])
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file)[0])
+                        non_zero_value.append(np.count_nonzero(y_sub[-1]))
                     plt.figure(i)
                     plt.boxplot(y_sub, positions=x, sym='', widths=5, meanline=True, showmeans=True)
                     plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
@@ -211,6 +213,17 @@ if __name__ == '__main__':
                     save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_complexity')
                     check_folder(save_folder)
                     plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
+                    plt.close()
+                    i += 1
+                    plt.figure(i)
+                    plt.plot(x, non_zero_value)
+                    plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
+                    plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
+                    plt.ylabel('\n'.join(wrap('count')))
+                    plt.legend()
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_complexity')
+                    check_folder(save_folder)
+                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' non zero values count' + ' - ' + subject  + '.png'))
                     plt.close()
                     i += 1
                     y_list.append(y_sub)  # you should include confounds

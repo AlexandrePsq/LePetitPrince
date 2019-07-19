@@ -179,9 +179,6 @@ if __name__ == '__main__':
                 for subject in subjects:
                     non_zero_value = []
                     max_values = []
-                    q1 = []
-                    m = []
-                    q3 = []
                     y_sub = []
                     subject = Subjects().get_subject(int(subject))
                     for var in analysis['complexity_variable']:
@@ -209,9 +206,6 @@ if __name__ == '__main__':
                         y_sub.append(masker.transform(path2file)[0])
                         non_zero_value.append(np.count_nonzero(y_sub[-1]))
                         max_values.append(np.max(y_sub[-1]))
-                        q1.append(np.percentile(y_sub[-1], 25))
-                        m.append(np.percentile(y_sub[-1], 50))
-                        q3.append(np.percentile(y_sub[-1], 75))
                     plt.figure(i)
                     plt.boxplot(y_sub, positions=x, sym='', widths=5, meanline=True, showmeans=True)
                     plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
@@ -240,8 +234,8 @@ if __name__ == '__main__':
                     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
                     color = 'tab:blue'
-                    ax2.set_ylabel('\n'.join(wrap('R2 max\nPercentile 25\nPercentile 50\nPercentile75')), color=color)  # we already handled the x-label with ax1
-                    ax2.plot(x, max_values, color=color, x, q1, color = color, x, m, color = color, x, q3, color=color)
+                    ax2.set_ylabel('\n'.join(wrap('R2 max')), color=color)  # we already handled the x-label with ax1
+                    ax2.plot(x, max_values, color=color)
                     ax2.tick_params(axis='y', labelcolor=color)
 
                     fig.tight_layout()
@@ -256,11 +250,6 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-                
                 # save plots
                 plt.figure(i)
                 plt.boxplot(np.ndarray.tolist(np.mean(np.array(y_list), axis=0)), positions=x)

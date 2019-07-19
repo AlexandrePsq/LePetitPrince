@@ -46,9 +46,7 @@ class EnergySpectrum(object):
         source = 'wave'
         model_category = 'RMS'
         for index in range(1,params.nb_runs + 1):
-            file_name = '{}_{}_{}_run{}.wav'.format(source, language, model_category, index)
-            wave_file = wave.open(os.path.join(paths.path2data, source, language, model_category, file_name), mode='r'
-            length = int(parameters['n_frames']/parameters['frame_rate'] // slice_period)
+            length = int((parameters['n_frames']/parameters['frame_rate']) // slice_period)
             offsets = np.cumsum(np.ones(length) * slice_period)
             offsets = np.array([round(x, 3) for x in offsets])
             onsets = np.hstack([np.zeros(1), offsets[:-1]])

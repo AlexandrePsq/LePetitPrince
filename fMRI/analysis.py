@@ -174,29 +174,28 @@ if __name__ == '__main__':
                 y_list = []
                 for subject in subjects:
                     y_sub = []
-                    for nhid in model['complexity_variable']:
+                    for var in model['complexity_variable']:
                         subject = Subjects().get_subject(int(subject))
                         # extract data
                         model_name = '_'.join([model['model_category'].lower(), 
                                                 'wikikristina', 
-                                                'embedding-size', model['parameters']['ninp'], 
-                                                'nhid', model['parameters']['nhid'],
-                                                'nlayers',  model['parameters']['nlayers'],
-                                                'dropout',  model['parameters']['dropout'],
+                                                'embedding-size',  var if model['variable_name']=='ninp' else model['parameters']['ninp'], 
+                                                'nhid', var if model['variable_name']=='nhid' else model['parameters']['nhid'],
+                                                'nlayers',   var if model['variable_name']=='nlayers' else model['parameters']['nlayers'],
+                                                'dropout',  var if model['variable_name']=='dropout' else model['parameters']['dropout'],
                                                 model['parameters']['other']])
                         path = os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, model_name)
                         file_name = '_'.join(['ridge-indiv', 
                                                 language, model['model_category'].lower(),
                                                 'wikikristina', 
-                                                'embedding-size', model['parameters']['ninp'], 
-                                                'nhid', model['parameters']['nhid'],
-                                                'nlayers',  model['parameters']['nlayers'],
-                                                'dropout',  model['parameters']['dropout'],
+                                                'embedding-size', var if model['variable_name']=='ninp' else model['parameters']['ninp'], 
+                                                'nhid', var if model['variable_name']=='nhid' else model['parameters']['nhid'],
+                                                'nlayers',  var if model['variable_name']=='nlayers' else model['parameters']['nlayers'],
+                                                'dropout',  var if model['variable_name']=='dropout' else model['parameters']['dropout'],
                                                 model['parameters']['other'],
-                                                model['variable_of_interest',
-                                                'no_pca',
-                                                subject + '.nii.gz'],
-                                                ])
+                                                model['variable_of_interest'],
+                                                var if model['variable_name']=='pca' else model['parameters']['pca'],
+                                                subject + '.nii.gz'])
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file))
                     plt.figure(i)

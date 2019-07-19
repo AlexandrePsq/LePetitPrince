@@ -153,7 +153,7 @@ if __name__ == '__main__':
     #       sub1_list: list of values (perplexity, r2 distribution, ...) for a given subject
     if 'model_complexity' in args.analysis[0]:
         mask = mean_img(load_img(args.default_mask))
-        masker = NiftiMasker(memory='nilearn_cache', verbose=5)
+        masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=5)
         masker.fit()
         
         for analysis in analysis_parameters['model_complexity']:

@@ -67,81 +67,81 @@ model_complexity:
       other: hidden_first-layer
     title: 'R2 test = f(pca components)'
     name: model_complexity
-  - model_category: LSTM
-    complexity_variable:
-      - 50
-      - 100
-      - 150
-      - 200
-      - 300
-      - 400
-      - 500
-      - 600
-    variable_name: nhid
-    variable_of_interest: r2_test
-    parameters: 
-      rnn_type: LSTM
-      ninp: 600
-      nlayers: 1
-      dropout: 0.2
-      pca: no_pca
-      other: hidden_first-layer
-    title: R2 test = f(nhid)
-    name: model_complexity
-  - model_category: LSTM
-    complexity_variable:
-      - 
-      -
-      -
-      -
-      -
-      -
-      -
-      -
-    variable_name: perplexity
-    variable_of_interest: r2_test
-    parameters: 
-      rnn_type: LSTM
-      ninp: 600
-      nlayers: 1
-      dropout: 0.2
-      other: hidden_first-layer
-    title: 'R2 test = f(perplexity)'
-    name: model_complexity
-  - model_category: LSTM
-    complexity_variable:
-      - 50
-      - 100
-      - 150
-      - 200
-      - 300
-      - 400
-      - 500
-      - 600
-    variable_name: nhid
-    variable_of_interest: perplexity
-    value_v-o-i: 
-      - - value for subject 0
-        - value for subject 1
-      - - value for subject 0
-        - value for subject 1
-      - - value for subject 0
-        - value for subject 1
-      - - value for subject 0
-        - value for subject 1
-      - - value for subject 0
-        - value for subject 1
-      - - value for subject 0
-        - value for subject 1
-      - - value for subject 0
-        - value for subject 1
-      - - value for subject 0
-        - value for subject 1
-    parameters: 
-      rnn_type: LSTM
-      ninp: 600
-      nlayers: 1
-      dropout: 0.2
-      other: hidden_first-layer
-    title: 'R2 test = f(perplexity)'
-    name: model_complexity
+#  - model_category: LSTM
+#    complexity_variable:
+#      - 50
+#      - 100
+#      - 150
+#      - 200
+#      - 300
+#      - 400
+#      - 500
+#      - 600
+#    variable_name: nhid
+#    variable_of_interest: r2_test
+#    parameters: 
+#      rnn_type: LSTM
+#      ninp: 600
+#      nlayers: 1
+#      dropout: 0.2
+#      pca: no_pca
+#      other: hidden_first-layer
+#    title: R2 test = f(nhid)
+#    name: model_complexity
+#  - model_category: LSTM
+#    complexity_variable:
+#      - 
+#      -
+#      -
+#      -
+#      -
+#      -
+#      -
+#      -
+#    variable_name: perplexity
+#    variable_of_interest: r2_test
+#    parameters: 
+#      rnn_type: LSTM
+#      ninp: 600
+#      nlayers: 1
+#      dropout: 0.2
+#      other: hidden_first-layer
+#    title: 'R2 test = f(perplexity)'
+#    name: model_complexity
+#  - model_category: LSTM
+#    complexity_variable:
+#      - 50
+#      - 100
+#      - 150
+#      - 200
+#      - 300
+#      - 400
+#      - 500
+#      - 600
+#    variable_name: nhid
+#    variable_of_interest: perplexity
+#    value_v-o-i: 
+#      - - value for subject 0
+#        - value for subject 1
+#      - - value for subject 0
+#        - value for subject 1
+#      - - value for subject 0
+#        - value for subject 1
+#      - - value for subject 0
+#        - value for subject 1
+#      - - value for subject 0
+#        - value for subject 1
+#      - - value for subject 0
+#        - value for subject 1
+#      - - value for subject 0
+#        - value for subject 1
+#      - - value for subject 0
+#        - value for subject 1
+#    parameters: 
+#      rnn_type: LSTM
+#      ninp: 600
+#      nlayers: 1
+#      dropout: 0.2
+#      other: hidden_first-layer
+#    title: 'R2 test = f(perplexity)'
+#    name: model_complexity

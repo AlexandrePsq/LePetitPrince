@@ -68,6 +68,7 @@ def compute(path, overwrite=False):
 def check_folder(path):
     # Create adequate folders if necessary
     if not os.path.isdir(path):
+        check_folder(os.path.dirname(path))
         os.mkdir(path)
 
 

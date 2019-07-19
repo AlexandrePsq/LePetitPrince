@@ -97,7 +97,7 @@ if __name__ == '__main__':
                     plt.ylim(0,0.2)
                     plt.plot([max([np.min(x), np.min(y)]), min([np.max(x), np.max(y)])], [max([np.min(x), np.min(y)]), min([np.max(x), np.max(y)])])
                     plt.legend()
-                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', 'scatter_plots')
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'scatter_plots')
                     check_folder(save_folder)
                     plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + labels[index_mask+1] + ' - ' + subject  + '.png'))
                     plt.close()
@@ -135,7 +135,7 @@ if __name__ == '__main__':
                     plt.ylabel('\n'.join(wrap('Density')))
                     plt.xlim(0,0.2)
                     plt.legend()
-                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', 'check_model')
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'check_model')
                     check_folder(save_folder)
                     plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + labels[index_mask+1] + ' - ' + subject  + '.png'))
                     plt.close()
@@ -169,7 +169,9 @@ if __name__ == '__main__':
                 plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
                 plt.ylabel('\n'.join(wrap(analysis['variable_of_interest'])))
                 plt.legend()
-                plt.savefig(os.path.join(paths.path2derivatives, source, 'analysis', analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_complexity')
+                check_folder(save_folder)
+                plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
                 plt.close()
                 i+=1
             else:
@@ -199,14 +201,16 @@ if __name__ == '__main__':
                                                 str('pca_' + str(var) if analysis['variable_name']=='pca' else analysis['parameters']['pca']),
                                                 subject + '.nii.gz'])
                         path2file = os.path.join(path, file_name)
-                        y_sub.append(masker.transform(path2file))
+                        y_sub.append(masker.transform(path2file)[0])
                     plt.figure(i)
                     plt.boxplot(y_sub, positions=x)
                     plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
                     plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
                     plt.ylabel('\n'.join(wrap(analysis['variable_of_interest'])))
                     plt.legend()
-                    plt.savefig(os.path.join(paths.path2derivatives, source, 'analysis', analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_complexity')
+                    check_folder(save_folder)
+                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
                     plt.close()
                     i += 1
                     y_list.append(y_sub)  # you should include confounds
@@ -218,7 +222,10 @@ if __name__ == '__main__':
                 plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
                 plt.ylabel('\n'.join(wrap(analysis['variable_of_interest'])))
                 plt.legend()
-                plt.savefig(os.path.join(paths.path2derivatives, source, 'analysis', analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + 'all-subjects'  + '.png'))
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_complexity')
+                check_folder(save_folder)
+                plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
+                plt.close()
                 plt.close()
                 i += 1
 

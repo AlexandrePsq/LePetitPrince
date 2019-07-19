@@ -180,22 +180,22 @@ if __name__ == '__main__':
                         # extract data
                         model_name = '_'.join([analysis['model_category'].lower(), 
                                                 'wikikristina', 
-                                                'embedding-size',  var if analysis['variable_name']=='ninp' else analysis['parameters']['ninp'], 
-                                                'nhid', var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid'],
-                                                'nlayers',   var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers'],
-                                                'dropout',  var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout'],
+                                                'embedding-size',  str(var if analysis['variable_name']=='ninp' else analysis['parameters']['ninp']),
+                                                'nhid', str(var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid']),
+                                                'nlayers',   str(var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers']),
+                                                'dropout',  str(var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout']),
                                                 analysis['parameters']['other']])
                         path = os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, model_name)
                         file_name = '_'.join(['ridge-indiv', 
                                                 language, analysis['model_category'].lower(),
                                                 'wikikristina', 
-                                                'embedding-size', var if analysis['variable_name']=='ninp' else analysis['parameters']['ninp'], 
-                                                'nhid', var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid'],
-                                                'nlayers',  var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers'],
-                                                'dropout',  var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout'],
+                                                'embedding-size', str(var if analysis['variable_name']=='ninp' else analysis['parameters']['ninp']), 
+                                                'nhid', str(var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid']),
+                                                'nlayers',  str(var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers']),
+                                                'dropout',  str(var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout']),
                                                 analysis['parameters']['other'],
                                                 analysis['variable_of_interest'],
-                                                var if analysis['variable_name']=='pca' else analysis['parameters']['pca'],
+                                                str(var if analysis['variable_name']=='pca' else analysis['parameters']['pca']),
                                                 subject + '.nii.gz'])
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file))

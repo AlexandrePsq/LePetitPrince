@@ -75,7 +75,7 @@ def load():
 
                 result +=\
                 """
-def generate(model, run, language, textgrid):
+def generate(model, run, language, textgrid, overwrite=False):
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
@@ -96,7 +96,7 @@ def generate(model, run, language, textgrid):
                 result +=\
                 """
     #### generating raw-features ####
-    if os.path.exists(path):
+    if (os.path.exists(path)) & (not overwrite):
         raw_features = pd.read_csv(path)
     else:
         raw_features = model.generate(run, language)

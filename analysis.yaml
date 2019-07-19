@@ -25,6 +25,15 @@ scatter_plots:
     title: r2_test
     name: hidden VS out
 
+specific_analysis:
+  - parameters:
+      model_category: LSTM
+      ninp: 600
+      nhid: 600
+      dropout: 0.2
+      nlayers: 1
+      other: '{}_first-layer'
+    data: 'text/english/LSTM/text_english_LSTM_run{}.txt'
 
 
 

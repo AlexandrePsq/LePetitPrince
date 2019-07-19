@@ -8,6 +8,8 @@ if root not in sys.path:
 
 from utilities.settings import Subjects, Paths, Params
 from utilities.utils import get_output_parent_folder, get_path2output
+from models.english.LSTM.tokenizer import tokenize
+
 from itertools import combinations, product
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
@@ -58,7 +60,8 @@ if __name__ == '__main__':
 
     i = 0
 
-    #paths.path2derivatives = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/derivatives' # to delete
+    paths.path2derivatives = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/derivatives' # to delete
+    paths.path2data = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/data'
 
 
     ###########################################################################
@@ -264,4 +267,81 @@ if __name__ == '__main__':
                 plt.close()
                 i += 1
 
-                
+    ###########################################################################
+    ############################ Specific analysis ############################
+    ###########################################################################
+    if 'specific_analysis' in args.analysis[0]:
+        window_size = 100
+        color_map = {'entropy': 'tab:red',
+                        'surprisal': 'tab:blue'}
+        analysis_name = 'Entropy - Surprisal'
+        for subject in subjects:
+            subject = Subjects().get_subject(int(subject))
+            for model in analysis_parameters['specific_analysis']:
+                for run in range(1, params.nb_runs + 1):
+                    path = os.path.join(paths.path2data, model['data'].format(run))
+                    iterator = tokenize(path, language)
+                    x = np.arange(len(iterator))[:window_size]
+
+                    def get_path(name, model):
+                        model_name = '_'.join([model['parameters']['model_category'].lower(), 
+                                                    'wikikristina', 
+                                                    'embedding-size',  str(model['parameters']['ninp']),
+                                                    'nhid', str(model['parameters']['nhid']),
+                                                    'nlayers',   str(model['parameters']['nlayers']),
+                                                    'dropout',  str(model['parameters']['dropout']).replace('.', ''),
+                                                    model['parameters']['other'].format(name)])
+                        path = os.path.join(paths.path2derivatives, source, 'raw-features', language, model_name)
+                        file_name = '_'.join(['raw-features', 
+                                                language, model['parameters']['model_category'].lower(),
+                                                'wikikristina', 
+                                                'embedding-size',  str(model['parameters']['ninp']),
+                                                'nhid', str(model['parameters']['nhid']),
+                                                'nlayers',   str(model['parameters']['nlayers']),
+                                                'dropout',  str(model['parameters']['dropout']).replace('.', ''),
+                                                model['parameters']['other'].format(name),
+                                                'run{}.csv'.format(run)])
+                        return os.path.join(path, file_name)
+
+                    y_ent = pd.read_csv(get_path('entropy', model))['entropy'][:window_size]
+                    y_sur = pd.read_csv(get_path('surprisal', model))['surprisal'][:window_size]
+                    
+                    fig, ax1 = plt.subplots(i)
+                    ax1.xticks(x, iterator[:window_size])
+                    plt.title('\n'.join(wrap('Entropy & Surprisal' + ' - ' + subject)))
+                    color = color_map[analysis_name]
+                    ax1.set_xlabel('\n'.join(wrap('Le Petit Prince text')))
+                    ax1.set_ylabel('\n'.join(wrap('Entropy')), color=color)
+                    ax1.plot(x, y_ent, color=color)
+                    ax1.tick_params(axis='y', labelcolor=color)
+
+                    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+                    color = 'tab:blue'
+                    ax2.set_ylabel('\n'.join(wrap('Surprisal')), color=color)  # we already handled the x-label with ax1
+                    ax2.plot(x, y_sur, color=color)
+                    ax2.tick_params(axis='y', labelcolor=color)
+                    fig.tight_layout()
+                    plt.legend()
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'specific_analysis')
+                    check_folder(save_folder)
+                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + 'window_size_' + window_size + ' - ' + subject  + '.png'))
+                    plt.close()
+                    i += 1
+
+
+
+                    
+
+                    
+                    
+
+                    
+
+                    
+
+                    
+                    plt.legend()
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_complexity')
+                    check_folder(save_folder)
+                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' non zero values count' + ' - ' + subject  + '.png'))
+                    plt.close()

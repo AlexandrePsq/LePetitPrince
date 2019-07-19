@@ -183,7 +183,7 @@ if __name__ == '__main__':
                                                 'embedding-size',  str(var if analysis['variable_name']=='ninp' else analysis['parameters']['ninp']),
                                                 'nhid', str(var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid']),
                                                 'nlayers',   str(var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers']),
-                                                'dropout',  str(var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout']),
+                                                'dropout',  str(var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout']).replace('.', ''),
                                                 analysis['parameters']['other']])
                         path = os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, model_name)
                         file_name = '_'.join(['ridge-indiv', 
@@ -192,7 +192,7 @@ if __name__ == '__main__':
                                                 'embedding-size', str(var if analysis['variable_name']=='ninp' else analysis['parameters']['ninp']), 
                                                 'nhid', str(var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid']),
                                                 'nlayers',  str(var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers']),
-                                                'dropout',  str(var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout']),
+                                                'dropout',  str(var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout']).replace('.', ''),
                                                 analysis['parameters']['other'],
                                                 analysis['variable_of_interest'],
                                                 str(var if analysis['variable_name']=='pca' else analysis['parameters']['pca']),

@@ -176,8 +176,8 @@ if __name__ == '__main__':
                 y_list = []
                 for subject in subjects:
                     y_sub = []
+                    subject = Subjects().get_subject(int(subject))
                     for var in analysis['complexity_variable']:
-                        subject = Subjects().get_subject(int(subject))
                         # extract data
                         model_name = '_'.join([analysis['model_category'].lower(), 
                                                 'wikikristina', 

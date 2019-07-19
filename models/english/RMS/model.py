@@ -51,7 +51,6 @@ class EnergySpectrum(object):
             length = int(parameters['n_frames']/parameters['frame_rate'] // slice_period)
             offsets = np.cumsum(np.ones(length) * slice_period)
             offsets = np.array([round(x, 3) for x in offsets])
-            offsets = np.apply_along_axis(lambda y: round(y, 3), 0, offsets)
             onsets = np.hstack([np.zeros(1), offsets[:-1]])
             duration = np.zeros(length)
             df = pd.DataFrame({})

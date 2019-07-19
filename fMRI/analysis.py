@@ -195,7 +195,7 @@ if __name__ == '__main__':
                                                 'dropout',  str(var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout']).replace('.', ''),
                                                 analysis['parameters']['other'],
                                                 analysis['variable_of_interest'],
-                                                str(var if analysis['variable_name']=='pca' else analysis['parameters']['pca']),
+                                                str('pca_' + var if analysis['variable_name']=='pca' else analysis['parameters']['pca']),
                                                 subject + '.nii.gz'])
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file))

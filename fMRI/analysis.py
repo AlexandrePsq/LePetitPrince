@@ -42,6 +42,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Objective:\nAnalysis of the fMRI pipeline.""")
     parser.add_argument("--path_yaml", default=None, help="Path to the yaml file with the models to compare.")
     parser.add_argument("--analysis", nargs='+', default=[], action='append', help='Analysis to perform.')
+    parser.add_argument("--default_mask", default=os.path.join(paths.path2data, 'fMRI', 'english', 'sub-057', 'func', 'fMRI_english_sub-057_run1.nii.nii'), help='fMRI data to construct a global mask.')
 
     args = parser.parse_args()
 
@@ -151,60 +152,60 @@ if __name__ == '__main__':
     # y_list: list of list of values for each subject [sub1_list, sub2_list, ...]
     #       sub1_list: list of values (perplexity, r2 distribution, ...) for a given subject
     if 'model_complexity' in args.analysis[0]:
+        mask = mean_img(load_img(args.default_mask))
         masker = NiftiMasker(memory='nilearn_cache', verbose=5)
         masker.fit()
-        analysis_name = analysis['name']
         
-        for model in analysis_parameters['model_complexity']:
-            if model['variable_name'] != 'r2_test':
-                x = model['complexity_variable']
-                y_list = list(zip(*model['value_v-o-i'])) # list of list of subject values [sub1_list, sub2_list, ...]
-                y = np.mean(model['value_v-o-i'], axis=1)
+        for analysis in analysis_parameters['model_complexity']:
+            analysis_name = analysis['name']
+            x = analysis['complexity_variable']
+            if analysis['variable_of_interest'] != 'r2_test':
+                y_list = list(zip(*analysis['value_v-o-i'])) # list of list of subject values [sub1_list, sub2_list, ...]
+                y = np.mean(analysis['value_v-o-i'], axis=1)
                 plt.figure(i)
                 plt.plot(x, y)
-                plt.title('\n'.join(wrap(model['title'])))
-                plt.xlabel('\n'.join(wrap(model['variable_name'])))
-                plt.ylabel('\n'.join(wrap(model['variable_of_interest'])))
+                plt.title('\n'.join(wrap(analysis['title'])))
+                plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
+                plt.ylabel('\n'.join(wrap(analysis['variable_of_interest'])))
                 plt.legend()
-                plt.savefig(os.path.join(paths.path2derivatives, source, 'analysis', analysis_name + ' - ' + model['variable_of_interest'] + ' = f(' + model['variable_name'] + ') - ' + subject  + '.png'))
+                plt.savefig(os.path.join(paths.path2derivatives, source, 'analysis', analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
                 plt.close()
                 i+=1
             else:
-                x = model['complexity_variable']
                 y_list = []
                 for subject in subjects:
                     y_sub = []
-                    for var in model['complexity_variable']:
+                    for var in analysis['complexity_variable']:
                         subject = Subjects().get_subject(int(subject))
                         # extract data
-                        model_name = '_'.join([model['model_category'].lower(), 
+                        model_name = '_'.join([analysis['model_category'].lower(), 
                                                 'wikikristina', 
-                                                'embedding-size',  var if model['variable_name']=='ninp' else model['parameters']['ninp'], 
-                                                'nhid', var if model['variable_name']=='nhid' else model['parameters']['nhid'],
-                                                'nlayers',   var if model['variable_name']=='nlayers' else model['parameters']['nlayers'],
-                                                'dropout',  var if model['variable_name']=='dropout' else model['parameters']['dropout'],
-                                                model['parameters']['other']])
+                                                'embedding-size',  var if analysis['variable_name']=='ninp' else analysis['parameters']['ninp'], 
+                                                'nhid', var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid'],
+                                                'nlayers',   var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers'],
+                                                'dropout',  var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout'],
+                                                analysis['parameters']['other']])
                         path = os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, model_name)
                         file_name = '_'.join(['ridge-indiv', 
-                                                language, model['model_category'].lower(),
+                                                language, analysis['model_category'].lower(),
                                                 'wikikristina', 
-                                                'embedding-size', var if model['variable_name']=='ninp' else model['parameters']['ninp'], 
-                                                'nhid', var if model['variable_name']=='nhid' else model['parameters']['nhid'],
-                                                'nlayers',  var if model['variable_name']=='nlayers' else model['parameters']['nlayers'],
-                                                'dropout',  var if model['variable_name']=='dropout' else model['parameters']['dropout'],
-                                                model['parameters']['other'],
-                                                model['variable_of_interest'],
-                                                var if model['variable_name']=='pca' else model['parameters']['pca'],
+                                                'embedding-size', var if analysis['variable_name']=='ninp' else analysis['parameters']['ninp'], 
+                                                'nhid', var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid'],
+                                                'nlayers',  var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers'],
+                                                'dropout',  var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout'],
+                                                analysis['parameters']['other'],
+                                                analysis['variable_of_interest'],
+                                                var if analysis['variable_name']=='pca' else analysis['parameters']['pca'],
                                                 subject + '.nii.gz'])
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file))
                     plt.figure(i)
                     plt.boxplot(y_sub, positions=x)
-                    plt.title('\n'.join(wrap(model['title'] + ' - ' + subject)))
-                    plt.xlabel('\n'.join(wrap(model['variable_name'])))
-                    plt.ylabel('\n'.join(wrap(model['variable_of_interest'])))
+                    plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
+                    plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
+                    plt.ylabel('\n'.join(wrap(analysis['variable_of_interest'])))
                     plt.legend()
-                    plt.savefig(os.path.join(paths.path2derivatives, source, 'analysis', analysis_name + ' - ' + model['variable_of_interest'] + ' = f(' + model['variable_name'] + ') - ' + subject  + '.png'))
+                    plt.savefig(os.path.join(paths.path2derivatives, source, 'analysis', analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
                     plt.close()
                     i += 1
                     y_list.append(y_sub)  # you should include confounds
@@ -212,11 +213,11 @@ if __name__ == '__main__':
                 # save plots
                 plt.figure(i)
                 plt.boxplot(np.ndarray.tolist(np.mean(np.array(y_list), axis=0)), positions=x)
-                plt.title('\n'.join(wrap(model['title'] + ' - ' + subject)))
-                plt.xlabel('\n'.join(wrap(model['variable_name'])))
-                plt.ylabel('\n'.join(wrap(model['variable_of_interest'])))
+                plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
+                plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
+                plt.ylabel('\n'.join(wrap(analysis['variable_of_interest'])))
                 plt.legend()
-                plt.savefig(os.path.join(paths.path2derivatives, source, 'analysis', analysis_name + ' - ' + model['variable_of_interest'] + ' = f(' + model['variable_name'] + ') - ' + 'all-subjects'  + '.png'))
+                plt.savefig(os.path.join(paths.path2derivatives, source, 'analysis', analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + 'all-subjects'  + '.png'))
                 plt.close()
                 i += 1
 

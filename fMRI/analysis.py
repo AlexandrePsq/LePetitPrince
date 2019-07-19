@@ -217,7 +217,7 @@ if __name__ == '__main__':
                     i += 1
                     plt.figure(i)
                     plt.plot(x, non_zero_value)
-                    plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
+                    plt.title('\n'.join(wrap('Count R2>0' ' - ' + subject)))
                     plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
                     plt.ylabel('\n'.join(wrap('count')))
                     plt.legend()

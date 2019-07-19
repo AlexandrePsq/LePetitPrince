@@ -178,6 +178,7 @@ if __name__ == '__main__':
                 y_list = []
                 for subject in subjects:
                     non_zero_value = []
+                    max_values = []
                     y_sub = []
                     subject = Subjects().get_subject(int(subject))
                     for var in analysis['complexity_variable']:
@@ -204,6 +205,7 @@ if __name__ == '__main__':
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file)[0])
                         non_zero_value.append(np.count_nonzero(y_sub[-1]))
+                        max_values.append(np.max(y_sub[-1]))
                     plt.figure(i)
                     plt.boxplot(y_sub, positions=x, sym='', widths=5, meanline=True, showmeans=True)
                     plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
@@ -215,18 +217,43 @@ if __name__ == '__main__':
                     plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
                     plt.close()
                     i += 1
-                    plt.figure(i)
-                    plt.plot(x, non_zero_value)
-                    plt.title('\n'.join(wrap('Count R2>0' ' - ' + subject)))
-                    plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
-                    plt.ylabel('\n'.join(wrap('count')))
+
+                    t = np.arange(0.01, 10.0, 0.01)
+                    data1 = np.exp(t)
+                    data2 = np.sin(2 * np.pi * t)
+
+                    fig, ax1 = plt.subplots(i)
+                    plt.title('\n'.join(wrap('Count R2>0 + R2 max' ' - ' + subject)))
+
+                    color = 'tab:red'
+                    ax1.set_xlabel('\n'.join(wrap(analysis['variable_name'])))
+                    ax1.set_ylabel('\n'.join(wrap('count')), color=color)
+                    ax1.plot(x, non_zero_value, color=color)
+                    ax1.tick_params(axis='y', labelcolor=color)
+
+                    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+                    color = 'tab:blue'
+                    ax2.set_ylabel('\n'.join(wrap('R2 max')), color=color)  # we already handled the x-label with ax1
+                    ax2.plot(x, max_values, color=color)
+                    ax2.tick_params(axis='y', labelcolor=color)
+
+                    fig.tight_layout()
                     plt.legend()
                     save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_complexity')
                     check_folder(save_folder)
                     plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' non zero values count' + ' - ' + subject  + '.png'))
                     plt.close()
+
                     i += 1
                     y_list.append(y_sub)  # you should include confounds
+
+
+
+
+
+
+
                 
                 # save plots
                 plt.figure(i)

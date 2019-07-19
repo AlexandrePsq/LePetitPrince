@@ -129,7 +129,7 @@ class RNNModel(nn.Module):
         if params.cuda:
             inp = inp.cuda()
         out, hidden = self(inp, hidden)
-        pk = torch.nn.functional.softmax(out[0]).unsqueeze(0)
+        pk = torch.nn.functional.softmax(out[0]).unsqueeze(0).detach().cpu().numpy()[0][0]
         entropy = -np.sum(pk * np.log2(pk), axis=0)
         for param in parameters:
             activation.append(self.rnn.gates[param].data.view(1,1,-1).cpu().numpy()[0][0])

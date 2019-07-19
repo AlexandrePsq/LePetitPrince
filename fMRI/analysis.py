@@ -224,7 +224,7 @@ if __name__ == '__main__':
                 plt.legend()
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_complexity')
                 check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + subject  + '.png'))
+                plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' = f(' + analysis['variable_name'] + ') - ' + 'averaged_accross_subjects'  + '.png'))
                 plt.close()
                 plt.close()
                 i += 1

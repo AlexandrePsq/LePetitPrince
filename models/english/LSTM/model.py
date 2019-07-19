@@ -17,7 +17,6 @@ from tqdm import tqdm
 import torch.nn as nn
 import pandas as pd
 import numpy as np
-import scipy.stats.entropy as H
 from .data import Corpus, Dictionary
 from .tokenizer import tokenize
 from utilities.settings import Params
@@ -127,7 +126,8 @@ class RNNModel(nn.Module):
         # print(torch.nn.functional.softmax(out[0]).unsqueeze(0), '\n\n\n\n)
         # print(torch.nn.functional.softmax(out[0]).unsqueeze(0).size)
         # a = input()
-        entropy = H(torch.nn.functional.softmax(out[0]).unsqueeze(0))
+        pk = torch.nn.functional.softmax(out[0]).unsqueeze(0)
+        entropy = -np.sum(pk * np.log(pk), axis=0)
         # entropy = H(torch.nn.functional.softmax(out[0]).unsqueeze(0)[0,0,:])
         out = torch.nn.functional.log_softmax(out[0]).unsqueeze(0)
         surprisal = out[0, 0, self.vocab.word2idx[item]].item()

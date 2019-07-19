@@ -123,18 +123,14 @@ class RNNModel(nn.Module):
             if params.cuda:
                 inp = inp.cuda()
             out, hidden = self(inp, hidden)
-        # print(torch.nn.functional.softmax(out[0]).unsqueeze(0), '\n\n\n\n)
-        # print(torch.nn.functional.softmax(out[0]).unsqueeze(0).size)
-        # a = input()
-        pk = torch.nn.functional.softmax(out[0]).unsqueeze(0)
-        entropy = -np.sum(pk * np.log(pk), axis=0)
-        # entropy = H(torch.nn.functional.softmax(out[0]).unsqueeze(0)[0,0,:])
         out = torch.nn.functional.log_softmax(out[0]).unsqueeze(0)
         surprisal = out[0, 0, self.vocab.word2idx[item]].item()
         inp = torch.autograd.Variable(torch.LongTensor([[self.vocab.word2idx[item]]]))
         if params.cuda:
             inp = inp.cuda()
         out, hidden = self(inp, hidden)
+        pk = torch.nn.functional.softmax(out[0]).unsqueeze(0)
+        entropy = -np.sum(pk * np.log2(pk), axis=0)
         for param in parameters:
             activation.append(self.rnn.gates[param].data.view(1,1,-1).cpu().numpy()[0][0])
         return np.hstack(activation), surprisal, entropy, (out, hidden)

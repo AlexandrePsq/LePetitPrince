@@ -203,7 +203,7 @@ if __name__ == '__main__':
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file)[0])
                     plt.figure(i)
-                    plt.boxplot(y_sub, positions=x, sym='', widths=5)
+                    plt.boxplot(y_sub, positions=x, sym='', widths=5, meanline=True, showmeans=True)
                     plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
                     plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
                     plt.ylabel('\n'.join(wrap(analysis['variable_of_interest'])))

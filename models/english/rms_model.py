@@ -39,7 +39,7 @@ def generate(mod, run, language, textgrid):
     if os.path.exists(path):
         raw_features = pd.read_csv(path)
     else:
-        raw_features = mod.generate(run, language, textgrid, slice_period=100e-3)
+        raw_features = mod.generate(run, language, textgrid, slice_period=10e-3)
         save_all = path
     #### Retrieving data of interest ####
     columns2retrieve = [function.__name__ for function in model.EnergySpectrum(parameters, language).functions]

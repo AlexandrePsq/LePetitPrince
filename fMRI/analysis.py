@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     i = 0
 
-    paths.path2derivatives = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/derivatives' # to delete
+    #paths.path2derivatives = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/derivatives' # to delete
 
 
     ###########################################################################

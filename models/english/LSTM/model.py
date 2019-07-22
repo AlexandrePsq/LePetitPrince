@@ -124,7 +124,7 @@ class RNNModel(nn.Module):
                 inp = inp.cuda()
             out, hidden = self(inp, hidden)
         out = torch.nn.functional.log_softmax(out[0]).unsqueeze(0)
-        surprisal = out[0, 0, self.vocab.word2idx[item]].item()
+        surprisal = -out[0, 0, self.vocab.word2idx[item]].item()
         inp = torch.autograd.Variable(torch.LongTensor([[self.vocab.word2idx[item]]]))
         if params.cuda:
             inp = inp.cuda()

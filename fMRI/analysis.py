@@ -320,24 +320,7 @@ if __name__ == '__main__':
                     plt.legend()
                     save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'specific_analysis')
                     check_folder(save_folder)
-                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + 'window_size_' + window_size + ' - ' + subject  + '.png'))
+                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + 'window_size_' + str(window_size) + ' - ' + subject  + '.png'))
                     plt.close()
                     i += 1
 
-
-
-                    
-
-                    
-                    
-
-                    
-
-                    
-
-                    
-                    plt.legend()
-                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_complexity')
-                    check_folder(save_folder)
-                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + analysis['variable_of_interest'] + ' non zero values count' + ' - ' + subject  + '.png'))
-                    plt.close()

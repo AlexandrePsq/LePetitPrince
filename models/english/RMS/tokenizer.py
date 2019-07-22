@@ -12,7 +12,7 @@ def tokenize(path, slice_period):
     # slice_length = int(slice_period * rate)
     [rate, data] = wave.read(path)
     slice_length = int(slice_period * rate)
-    data_list = [data[index*slice_length: index*slice_length + slice_length] for index in range(len(data)//slice_length)]
+    data_list = [np.array(data[index*slice_length: index*slice_length + slice_length], dtype=np.float64) for index in range(len(data)//slice_length)]
     
 
     # Read audio data.

@@ -310,6 +310,7 @@ if __name__ == '__main__':
                     ax1.set_xlabel('\n'.join(wrap('Le Petit Prince text')))
                     ax1.set_ylabel('\n'.join(wrap('Entropy')), color=color)
                     ax1.plot(x, y_ent, color=color)
+                    plt.legend()
                     ax1.tick_params(axis='y', labelcolor=color)
 
                     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis

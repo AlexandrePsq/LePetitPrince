@@ -267,7 +267,8 @@ if __name__ == '__main__':
     ############################ Specific analysis ############################
     ###########################################################################
     if 'specific_analysis' in args.analysis[0]:
-        window_size = 100
+        window_size_beg = 0
+        window_size_end = 20
         color_map = {'entropy': 'tab:red',
                         'surprisal': 'tab:blue'}
         analysis_name = 'Entropy - Surprisal'
@@ -277,7 +278,7 @@ if __name__ == '__main__':
                 for run in range(1, params.nb_runs + 1):
                     path = os.path.join(paths.path2data, model['data'].format(run))
                     iterator = tokenize(path, language)
-                    x = np.arange(len(iterator))[:window_size]
+                    x = np.arange(len(iterator))[window_size_beg:window_size_end]
 
                     def get_path(name, model):
                         model_name = '_'.join([model['parameters']['model_category'].lower(), 
@@ -299,11 +300,11 @@ if __name__ == '__main__':
                                                 'run{}.csv'.format(run)])
                         return os.path.join(path, file_name)
 
-                    y_ent = pd.read_csv(get_path('entropy', model))['entropy'][:window_size]
-                    y_sur = pd.read_csv(get_path('surprisal', model))['surprisal'][:window_size]
+                    y_ent = pd.read_csv(get_path('entropy', model))['entropy'][window_size_beg:window_size_end]
+                    y_sur = pd.read_csv(get_path('surprisal', model))['surprisal'][window_size_beg:window_size_end]
                     
                     fig, ax1 = plt.subplots()
-                    plt.xticks(x, iterator[:window_size])
+                    plt.xticks(x, iterator[window_size_beg:window_size_end])
                     plt.title('\n'.join(wrap('Entropy & Surprisal' + ' - ' + subject)))
                     color = color_map['entropy']
                     ax1.set_xlabel('\n'.join(wrap('Le Petit Prince text')))
@@ -320,7 +321,7 @@ if __name__ == '__main__':
                     plt.legend()
                     save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'specific_analysis')
                     check_folder(save_folder)
-                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + 'window_size_' + str(window_size) + ' - ' + subject  + 'run{}.png'.format(run)))
+                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + 'window_size_' + str(window_size_end-window_size_beg) + ' - ' + subject  + 'run{}.png'.format(run)))
                     plt.close()
                     i += 1
 

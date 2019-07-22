@@ -302,7 +302,7 @@ if __name__ == '__main__':
                     y_ent = pd.read_csv(get_path('entropy', model))['entropy'][:window_size]
                     y_sur = pd.read_csv(get_path('surprisal', model))['surprisal'][:window_size]
                     
-                    fig, ax1 = plt.subplots(i)
+                    fig, ax1 = plt.subplots()
                     plt.xticks(x, iterator[:window_size])
                     plt.title('\n'.join(wrap('Entropy & Surprisal' + ' - ' + subject)))
                     color = color_map['entropy']

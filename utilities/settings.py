@@ -179,7 +179,7 @@ class Params:
 
 		# general parameters
 		self.test = True
-		self.overwrite = True
+		self.overwrite = False
 		self.parallel = False
 		self.cuda = True
 		if torch.cuda.is_available():

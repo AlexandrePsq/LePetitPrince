@@ -50,6 +50,10 @@ check_model:
 model_complexity:
   - model_category: LSTM
     complexity_variable:
+      - 1
+      - 2
+      - 5
+      - 10
       - 20
       - 40
       - 60

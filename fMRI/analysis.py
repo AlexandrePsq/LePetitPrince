@@ -60,8 +60,8 @@ if __name__ == '__main__':
 
     i = 0
 
-    paths.path2derivatives = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/derivatives' # to delete
-    paths.path2data = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/data'
+    #paths.path2derivatives = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/derivatives' # to delete
+    #paths.path2data = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/data'
 
 
     ###########################################################################
@@ -307,16 +307,16 @@ if __name__ == '__main__':
                     y_sur = pd.read_csv(get_path('surprisal', model))['surprisal'][:window_size]
                     
                     fig, ax1 = plt.subplots(i)
-                    ax1.xticks(x, iterator[:window_size])
+                    plt.xticks(x, iterator[:window_size])
                     plt.title('\n'.join(wrap('Entropy & Surprisal' + ' - ' + subject)))
-                    color = color_map[analysis_name]
+                    color = color_map['entropy']
                     ax1.set_xlabel('\n'.join(wrap('Le Petit Prince text')))
                     ax1.set_ylabel('\n'.join(wrap('Entropy')), color=color)
                     ax1.plot(x, y_ent, color=color)
                     ax1.tick_params(axis='y', labelcolor=color)
 
                     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-                    color = 'tab:blue'
+                    color = color_map['surprisal']
                     ax2.set_ylabel('\n'.join(wrap('Surprisal')), color=color)  # we already handled the x-label with ax1
                     ax2.plot(x, y_sur, color=color)
                     ax2.tick_params(axis='y', labelcolor=color)

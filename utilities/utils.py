@@ -175,7 +175,7 @@ def pca(X, data_name, n_components=50):
     plt.axvline(x=n_components, color='r', linestyle='--', label='number of components: {}'.format(n_components))
     plt.title('\n'.join(wrap(data_name)))
     plt.legend()
-    plt.savefig(os.path.join(paths.path2derivatives, 'fMRI', data_name+ '_pca.png'))
+    plt.savefig(os.path.join(paths.path2derivatives, 'fMRI', data_name+ '_pca_{}.png'.format(n_components)))
     ##################################################
     projected_matrices = []
     projector = eig_pairs[0][1].reshape(-1, 1)

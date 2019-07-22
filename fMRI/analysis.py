@@ -320,7 +320,7 @@ if __name__ == '__main__':
                     plt.legend()
                     save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'specific_analysis')
                     check_folder(save_folder)
-                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + 'window_size_' + str(window_size) + ' - ' + subject  + '.png'))
+                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + 'window_size_' + str(window_size) + ' - ' + subject  + 'run{}.png'.format(run)))
                     plt.close()
                     i += 1
 

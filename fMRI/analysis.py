@@ -304,7 +304,7 @@ if __name__ == '__main__':
                     y_sur = pd.read_csv(get_path('surprisal', model))['surprisal'][window_size_beg:window_size_end]
                     
                     fig, ax1 = plt.subplots()
-                    plt.xticks(x, iterator[window_size_beg:window_size_end])
+                    plt.xticks(x, iterator[window_size_beg:window_size_end], rotation=90)
                     plt.title('\n'.join(wrap('Entropy & Surprisal' + ' - ' + subject)))
                     color = color_map['entropy']
                     ax1.set_xlabel('\n'.join(wrap('Le Petit Prince text')))

@@ -320,6 +320,7 @@ if __name__ == '__main__':
                     ax2.tick_params(axis='y', labelcolor=color)
                     fig.tight_layout()
                     plt.legend()
+                    plt.grid(which='both')
                     save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'specific_analysis')
                     check_folder(save_folder)
                     plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + 'window_size_' + str(window_size_end-window_size_beg) + ' - ' + subject  + 'run{}.png'.format(run)))

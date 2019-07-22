@@ -16,7 +16,6 @@ from .tokenizer import tokenize
 from .utils import *
 from utilities.settings import Params, Paths
 from . import utils
-import wave
 
 params = Params()
 paths = Paths()

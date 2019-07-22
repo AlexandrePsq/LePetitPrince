@@ -209,7 +209,7 @@ if __name__ == '__main__':
                         y_sub.append(masker.transform(path2file)[0])
                         non_zero_value.append(np.count_nonzero(y_sub[-1]))
                         max_values.append(np.max(y_sub[-1]))
-                    plt.figure(i)
+                    plt.subplots(i)
                     plt.boxplot(y_sub, positions=x, sym='', widths=5, meanline=True, showmeans=True)
                     plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
                     plt.xlabel('\n'.join(wrap(analysis['variable_name'])))
@@ -221,11 +221,7 @@ if __name__ == '__main__':
                     plt.close()
                     i += 1
 
-                    t = np.arange(0.01, 10.0, 0.01)
-                    data1 = np.exp(t)
-                    data2 = np.sin(2 * np.pi * t)
-
-                    fig, ax1 = plt.subplots(i)
+                    fig, ax1 = plt.subplots()
                     plt.title('\n'.join(wrap('Count R2>0 + R2 max' ' - ' + subject)))
 
                     color = 'tab:red'

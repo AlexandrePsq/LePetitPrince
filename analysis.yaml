@@ -75,7 +75,7 @@ model_complexity:
       nhid: 1800
       other: hidden_first-layer
     title: 'R2 test = f(pca components)'
-    name: model_complexity
+    name: model_complexity - LSTM E600H1800L1D02 - pca
   - model_category: LSTM
     complexity_variable:
       - 50
@@ -84,6 +84,7 @@ model_complexity:
       - 200
       - 300
       - 400
+      - 300
       - 500
       - 600
     variable_name: nhid
@@ -96,7 +97,7 @@ model_complexity:
       pca: no_pca
       other: hidden_first-layer
     title: R2 test = f(nhid)
-    name: model_complexity
+    name: model_complexity - LSTM E600HXL1D02 - nhid
 #  - model_category: LSTM
 #    complexity_variable:
 #      - 
@@ -149,4 +150,4 @@ model_complexity:
       dropout: 0.2
       other: hidden_first-layer
     title: 'Perplexity = f(n_hid)'
-    name: model_complexity
+    name: model_complexity - LSTM E600HXL1D02 - nhid

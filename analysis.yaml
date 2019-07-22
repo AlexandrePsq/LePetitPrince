@@ -84,9 +84,9 @@ model_complexity:
       - 200
       - 300
       - 400
-      - 300
       - 500
       - 600
+      - 1800
     variable_name: nhid
     variable_of_interest: r2_test
     parameters: 

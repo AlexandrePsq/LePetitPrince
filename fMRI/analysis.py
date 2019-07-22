@@ -209,7 +209,7 @@ if __name__ == '__main__':
                         y_sub.append(masker.transform(path2file)[0])
                         non_zero_value.append(np.count_nonzero(y_sub[-1]))
                         max_values.append(np.max(y_sub[-1]))
-                    plt.subplots(i)
+                    plt.figure(i)
                     plt.boxplot(y_sub, positions=x, sym='', widths=5, meanline=True, showmeans=True)
                     plt.title('\n'.join(wrap(analysis['title'] + ' - ' + subject)))
                     plt.xlabel('\n'.join(wrap(analysis['variable_name'])))

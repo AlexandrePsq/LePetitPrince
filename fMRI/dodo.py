@@ -160,32 +160,33 @@ def task_ridge_indiv():
 
     for language in languages:
         for models in aggregated_models:
-            output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
-            input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-            dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
-            targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('threshold the averaged values'), subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('threshold the averaged values'), subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('average the thresholded values'), subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('average the thresholded values'), subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('weighted average'), subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('weighted average'), subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('threshold the averaged values'), subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('threshold the averaged values'), subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('average the thresholded values'), subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('average the thresholded values'), subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('weighted average'), subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('weighted average'), subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('threshold the averaged values'), subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('threshold the averaged values'), subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('average the thresholded values'), subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('average the thresholded values'), subject)+'.png') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('weighted average'), subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('weighted average'), subject)+'.png') for subject in subjects.get_all(language, test)]
             for pca in pca_list:
+                pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
+                output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
+                input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
+                dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
+                targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'alphas', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('threshold the averaged values'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('threshold the averaged values'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('average the thresholded values'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('average the thresholded values'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('weighted average'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test - {}'.format('weighted average'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('threshold the averaged values'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('threshold the averaged values'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('average the thresholded values'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('average the thresholded values'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('weighted average'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'p-values - {}'.format('weighted average'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('threshold the averaged values'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('threshold the averaged values'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('average the thresholded values'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('average the thresholded values'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('weighted average'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('weighted average'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
                 yield {
                     'name': models + str(pca),
                     'file_dep': ['ridge-indiv.py'] + dependencies,

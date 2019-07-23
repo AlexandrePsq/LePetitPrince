@@ -204,8 +204,9 @@ def get_significativity_value(model, x_test, y_test, n_sample, alpha_percentile,
     # percentile(alpha_percentile)
     r2_test = get_r2_score(model, y_test, x_test)
     distribution_array = None
+    x_shuffled = x_test.copy()
     for _ in range(n_sample):
-        x_shuffled = np.transpose(np.random.shuffle(np.transpose(x_test)))
+        np.transpose(np.random.shuffle(np.transpose(x_shuffled)))
         r2_tmp = get_r2_score(model, y_test, x_shuffled)
         distribution_array = r2_tmp if distribution_array is None else np.vstack([distribution_array, r2_tmp])
     thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel

@@ -183,15 +183,7 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
             # scores_cv2[cv3, voxel] = get_r2_score(model_fitted, 
             #                                 fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
             #                                 design_matrices[test[0]])
-            print(test[0])
-            print(design_matrices[test[0]])
-            print('voxel', voxel)
-            print('fmri_runs[test[0]].shape', fmri_runs[test[0]].shape)
-            print(type(design_matrices[test[0]]))
-            print(type(fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1))))
-            a=input()
-            print('fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1))', fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)))
-            r2, r2_significative, p_value, distribution = get_significativity_value(model_fitted, design_matrices[test[0]], fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), n_sample=np.max(100 * dm2.shape[1], dm2.shape[0]), alpha_percentile=99, voxel=voxel)
+            r2, r2_significative, p_value, distribution = get_significativity_value(model_fitted, design_matrices[test[0]], fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), n_sample=max(100 * dm2.shape[1], dm2.shape[0]), alpha_percentile=params.alpha_percentile, voxel=voxel)
             scores_cv2[cv3, voxel] = r2
             scores_significative[cv3, voxel] = r2_significative
             p_value_array[cv3, voxel] = p_value

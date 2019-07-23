@@ -69,6 +69,8 @@ model_complexity:
       - 600
       - 800
       - 1000
+      - 1500
+      - 1800
     variable_name: pca
     variable_of_interest: r2_test
     parameters: 
@@ -90,6 +92,7 @@ model_complexity:
       - 400
       - 500
       - 600
+      - 1200
       - 1800
     variable_name: nhid
     variable_of_interest: r2_test

@@ -19,8 +19,8 @@ paths = Paths()
 ###############################################################################
 
 def rms(iterator, language, parameters):
-    frame_rate = parameters['frame_rate']
 
     return np.apply_along_axis(lambda y: np.sqrt(np.mean(np.square(y, dtype=np.float64))),1, iterator)
 
+    #frame_rate = parameters['frame_rate']
     #return np.apply_along_axis(lambda y: simps(np.abs(hilbert(y)), dx=1/frame_rate),1, iterator)

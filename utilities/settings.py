@@ -195,6 +195,9 @@ class Params:
 		self.pca = False
 		self.n_components = 1500
 
+		# Deconfounding
+		self.alpha_percentile = 99
+
 		# Scaling
 		self.scaling_mean = True
 		self.scaling_var = False

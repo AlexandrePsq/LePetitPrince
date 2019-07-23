@@ -92,13 +92,14 @@ def log(subject, voxel, alpha, r2):
 #########################################
 
 
-def get_r2_score(model, y_true, y2predict, r2_min=0., r2_max=0.99):
+def get_r2_score(model, y_true, x, r2_min=0., r2_max=0.99):
     # return the R2_score for each voxel (=list)
     r2 = r2_score(y_true,
-                    model.predict(y2predict),
+                    model.predict(x),
                     multioutput='raw_values')
     # remove values with are too low and values too good to be true (e.g. voxels without variation)
-    return np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
+    # return np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
+    return r2
 
 
 def transform_design_matrices(path):
@@ -189,3 +190,66 @@ def pca(X, data_name, n_components=50):
         scaler.fit(projected_matrices[index])
         projected_matrices[index] = scaler.transform(projected_matrices[index])
     return projected_matrices
+
+
+
+##########################################
+########## Significativity test ##########
+##########################################
+
+def get_significativity_value(model, x_test, y_test, n_sample, alpha_percentile, voxel):
+    # receive a trained model, x_test and y_test (test set of the cross-validation).
+    # It returns three values (or three list depending on the parameter voxel_wised):
+    # r2 value computed on test set, the thresholded value at percentile(alpha_percentile) and 
+    # percentile(alpha_percentile)
+    r2_test = get_r2_score(model, y_test, x_test)
+    distribution_array = None
+    for _ in range(n_sample):
+        x_shuffled = np.transpose(np.random.shuffle(np.transpose(x_test)))
+        r2_tmp = get_r2_score(model, y_test, x_shuffled)
+        distribution_array = r2_tmp if distribution_array is None else np.vstack([distribution_array, r2_tmp])
+    thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
+    r2_significative = r2_test.copy()
+    r2_significative[r2_test < thresholds] = 0.
+    return r2_test, r2_significative, thresholds, distribution_array
+
+
+def process(r2_test_array, r2_significative_array, p_values_array, distribution_array, alpha_percentile):
+    # receive r2 computed on the test set and r2 significative computed on each set
+    # (for each voxel each) and the entire distribution of r2 values computed accross
+    # all runs (with shuffled columns) and returns significative r2 computed with the 
+    # method that you want.
+    r2_final = []
+    r2_significative_final = []
+    thresholds_final = []
+
+    # yair
+    r2_test = np.mean(r2_test_array, axis=0)
+    thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
+    r2_significative = r2_test.copy()
+    r2_significative[r2_test < thresholds] = 0.
+    r2_final.append(r2_test)
+    r2_significative_final.append(r2_significative)
+    thresholds_final.append(thresholds)
+
+    # alex 1.0
+    r2_test = np.mean(r2_test_array, axis=0)
+    r2_significative = np.mean(r2_significative_array, axis=0)
+    thresholds = np.mean(p_values_array, axis=0)
+    r2_final.append(r2_test)
+    r2_significative_final.append(r2_significative)
+    thresholds_final.append(thresholds)
+
+    # alex 2.0
+    Ns = np.count_nonzero(r2_significative_array, axis=0)
+    N = r2_significative_array.shape[0]
+    normalization = (Ns**2 + (N-Ns)**2)/N
+    r2_test = (np.sum(np.multiply(r2_test_array, (Ns * (r2_significative_array > 0) + (N - Ns) * (r2_significative_array == 0))) / N, axis=0))/normalization # list: 1 value for each voxel
+    thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
+    r2_significative = r2_test.copy()
+    r2_significative[r2_test < thresholds] = 0.
+    r2_final.append(r2_test)
+    r2_significative_final.append(r2_significative)
+    thresholds_final.append(thresholds)
+    
+    return list(zip(r2_final, r2_significative_final, thresholds_final)), ['threshold the averaged values', 'average the thresholded values', 'weighted average']

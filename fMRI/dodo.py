@@ -187,7 +187,7 @@ def task_ridge_indiv():
                     + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'significative_r2 - {}'.format('weighted average'), subject)+'.png') for subject in subjects.get_all(language, test)]
             for pca in pca_list:
                 yield {
-                    'name': models + pca,
+                    'name': models + str(pca),
                     'file_dep': ['ridge-indiv.py'] + dependencies,
                     'targets': targets,
                     'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised --pca {}'.format(language, models, pca) \

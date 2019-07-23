@@ -191,7 +191,7 @@ def task_ridge_indiv():
                     'name': models + str(pca),
                     'file_dep': ['ridge-indiv.py'] + dependencies,
                     'targets': targets,
-                    'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised --pca {}'.format(language, models, pca) \
+                    'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised --pca {} '.format(language, models, pca) \
                         + optional + optional_parallel \
                             + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))\
                                 + ' --alphas ' + ' '.join(str(alpha) for alpha in alphas)]

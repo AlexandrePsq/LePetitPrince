@@ -28,14 +28,14 @@ paths = Paths()
 ################ Figures ################
 #########################################
 
-def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=0.2):
+def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=0.2, pca=''):
     model = os.path.basename(output_parent_folder)
     language = os.path.basename(os.path.dirname(output_parent_folder))
     data_type = os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder)))
 
     img = masker.inverse_transform(distribution)
 
-    pca = 'pca_' + str(params.n_components) if params.pca else 'no_pca'
+    pca = 'pca_' + str(pca) if params.pca else 'no_pca'
     
     path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(data_type, language, model, distribution_name, pca, subject)+'.nii.gz')
     path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(data_type, language, model, distribution_name, pca, subject)+'.png')
@@ -69,7 +69,7 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     return masker
 
 
-def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_parent_folder, model, voxel_wised=False, alpha_list=np.logspace(-3, -1, 30)):
+def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_parent_folder, model, voxel_wised=False, alpha_list=np.logspace(-3, -1, 30), pca=params.n_components_default):
     # Compute r2 maps for all subject for a given model
     #   - subject : e.g. : 'sub-060'
     #   - fmri_runs: list of fMRI data runs (1 for each run)
@@ -81,16 +81,16 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     if voxel_wised:
         alphas, r2_test, r2_significative, p_values, distribution_array = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
         alphas = np.mean(alphas, axis=0)
-        create_maps(masker, alphas, 'alphas', subject, output_parent_folder) # alphas # argument deleted: , vmax=5e3
+        create_maps(masker, alphas, 'alphas', subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3
     else:
         r2_test, r2_significative, p_values, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
     values, names = process(r2_test, r2_significative, p_values, distribution_array, params.alpha_percentile) # use complementary mehtod to compute the r2_significative
     for index in range(len(names)):
         r2_test, r2_significative, p_values = values[index]
         name = names[index]
-        create_maps(masker, r2_test, 'r2_test - {}'.format(name), subject, output_parent_folder, vmax=0.2) # r2 test
-        create_maps(masker, p_values, 'p-values - {}'.format(name), subject, output_parent_folder) # p_values
-        create_maps(masker, r2_significative, 'significative_r2 - {}'.format(name), subject, output_parent_folder, vmax=0.2) # r2_significative
+        create_maps(masker, r2_test, 'r2_test - {}'.format(name), subject, output_parent_folder, vmax=0.2, pca=pca) # r2 test
+        create_maps(masker, p_values, 'p-values - {}'.format(name), subject, output_parent_folder, pca=pca) # p_values
+        create_maps(masker, r2_significative, 'significative_r2 - {}'.format(name), subject, output_parent_folder, vmax=0.2, pca=pca) # r2_significative
 
 
 def whole_brain_analysis(model, fmri_runs, design_matrices, subject):

@@ -193,7 +193,8 @@ class Params:
 
 		# PCA
 		self.pca = False
-		self.n_components = 1500
+		self.n_components_default = 1500
+		self.n_components_list = [1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000]
 
 		# Deconfounding
 		self.alpha_percentile = 99

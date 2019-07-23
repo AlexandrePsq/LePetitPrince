@@ -51,6 +51,7 @@ if __name__ == '__main__':
     parser.add_argument("--parallel", default=False, action='store_true', help="Precise if we run the code in parallel")
     parser.add_argument("--voxel_wised", default=False, action='store_true', help="Precise if we compute voxel-wised")
     parser.add_argument("--alphas", nargs='+', action='append', default=[np.logspace(-3, 3, 30)], help="List of alphas for voxel-wised analysis.")
+    parser.add_argument("--pca", type=int, default=params.n_components_default, help="pca value to use.")
 
     args = parser.parse_args()
     source = 'fMRI'
@@ -68,9 +69,9 @@ if __name__ == '__main__':
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
     matrices = [transform_design_matrices(run) for run in dm] # list of design matrices (dataframes) where we added a constant column equal to 1
-    if (matrices[0].shape[1] > params.n_components) & (params.pca):
+    if (matrices[0].shape[1] > args.pca) & (params.pca):
         print('PCA analysis running...')
-        matrices = pca(matrices, model_name, n_components=params.n_components)
+        matrices = pca(matrices, model_name, n_components=args.pca)
         print('PCA done.')
     else:
         print('Skipping PCA.')
@@ -81,8 +82,8 @@ if __name__ == '__main__':
     masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object ... computation is sloow
 
     if args.parallel:
-            Parallel(n_jobs=-2)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, voxel_wised=args.voxel_wised, alpha_list=alphas) for sub in subjects)
+            Parallel(n_jobs=-2)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, voxel_wised=args.voxel_wised, alpha_list=alphas, pca=args.pca) for sub in subjects)
     else:
         for sub in subjects:
             print('Processing subject {}...'.format(sub))
-            do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, voxel_wised=args.voxel_wised, alpha_list=alphas)
+            do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, voxel_wised=args.voxel_wised, alpha_list=alphas, pca=args.pca)

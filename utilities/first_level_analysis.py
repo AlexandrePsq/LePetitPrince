@@ -118,7 +118,7 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
 
         # return the R2_score for each voxel (=list)
         #r2 = get_r2_score(model_fitted, fmri_runs[test[0]], design_matrices[test[0]])
-        r2, r2_significative, p_value, distribution = get_significativity_value(model_fitted, design_matrices[test[0]], fmri_runs[test[0]], n_sample=np.max(100 * fmri_data_train.shape[1], fmri_data_train.shape[0]), alpha_percentile=99, voxel=None)
+        r2, r2_significative, p_value, distribution = get_significativity_value(model_fitted, design_matrices[test[0]], fmri_runs[test[0]], n_sample=max(100 * fmri_data_train.shape[1], fmri_data_train.shape[0]), alpha_percentile=params.alpha_percentile, voxel=None)
 
         # log the results
         log(subject, voxel='whole brain', alpha=None, r2=r2)

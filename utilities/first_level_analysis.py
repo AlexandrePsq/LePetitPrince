@@ -8,8 +8,9 @@ from .splitter import Splitter
 import sklearn
 import numpy as np
 import pandas as pd
+from time import time
 from tqdm import tqdm
-from .utils import get_r2_score, log, get_significativity_value, process
+from .utils import get_r2_score, log, sample_r2, get_significativity_value
 from .settings import Params, Paths
 import os
 import pickle
@@ -28,7 +29,7 @@ paths = Paths()
 ################ Figures ################
 #########################################
 
-def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=0.2, pca=''):
+def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=0.2, pca='', voxel_wise=False):
     model = os.path.basename(output_parent_folder)
     language = os.path.basename(os.path.dirname(output_parent_folder))
     data_type = os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder)))
@@ -37,8 +38,8 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 
     pca = 'pca_' + str(pca) if params.pca else 'no_pca'
     
-    path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(data_type, language, model, distribution_name, pca, subject)+'.nii.gz')
-    path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(data_type, language, model, distribution_name, pca, subject)+'.png')
+    path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(data_type, language, model, distribution_name, pca, voxel_wise, subject)+'.nii.gz')
+    path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(data_type, language, model, distribution_name, pca, voxel_wise, subject)+'.png')
 
     nib.save(img, path2output_raw)
 
@@ -79,30 +80,37 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     
     # compute r2 maps and save them under .nii.gz and .png formats
     if voxel_wised:
-        alphas, r2_test, r2_significative, p_values, distribution_array = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
+        alphas, r2_test, distribution_array = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
         alphas = np.mean(alphas, axis=0)
         create_maps(masker, alphas, 'alphas', subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3
     else:
-        r2_test, r2_significative, p_values, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
-    values, names = process(r2_test, r2_significative, p_values, distribution_array, params.alpha_percentile) # use complementary mehtod to compute the r2_significative
+        r2_test, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
+    values, names = get_significativity_value(r2_test, distribution_array, params.alpha_percentile) # use complementary mehtod to compute the r2_significative
     for index in range(len(names)):
         r2_test, r2_significative, p_values = values[index]
         name = names[index]
-        create_maps(masker, r2_test, 'r2_test - {}'.format(name), subject, output_parent_folder, vmax=0.2, pca=pca) # r2 test
-        create_maps(masker, p_values, 'p-values - {}'.format(name), subject, output_parent_folder, pca=pca) # p_values
-        create_maps(masker, r2_significative, 'significative_r2 - {}'.format(name), subject, output_parent_folder, vmax=0.2, pca=pca) # r2_significative
+        create_maps(masker, r2_test, 'r2_test - {}'.format(name), subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) # r2 test
+        create_maps(masker, p_values, 'p-values - {}'.format(name), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # p_values
+        create_maps(masker, r2_significative, 'significative_r2 - {}'.format(name), subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=voxel_wised) # r2_significative
 
 
 def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
     #   - fmri_runs: list of fMRI data runs (1 for each run)
     #   - matrices: list of design matrices (1 for each run)
-    scores = None  # array to contain the r2 values (1 row per fold, 1 column per voxel)
-    scores_significative = None 
-    p_value_array = None
     distribution_array = None
     nb_runs = len(fmri_runs)
+    nb_voxels = fmri_runs[0].shape[1]
+    n_sample = max(100 * design_matrices[0].shape[1], design_matrices[0].shape[0])
+    scores_cv = np.zeros((nb_runs, nb_voxels))
+    distribution_array = np.zeros((nb_runs, n_sample, nb_voxels))
 
     logo = LeaveOneGroupOut() # leave on run out !
+    columns_index = np.arange(design_matrices[0].shape[1])
+    shuffling = []
+    cv = 0
+    for _ in range(n_sample):
+        np.random.shuffle(columns_index)
+        shuffling.append(columns_index)
     for train, test in tqdm(logo.split(fmri_runs, groups=range(1, nb_runs+1))):
         fmri_data_train = np.vstack([fmri_runs[i] for i in train]) # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
         predictors_train = np.vstack([design_matrices[i] for i in train])
@@ -112,24 +120,32 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
             indexes = {'run{}'.format(run+1): [nb_samples[i], nb_samples[i+1]] for i, run in enumerate(train)}
             model.cv = Splitter(indexes_dict=indexes, n_splits=nb_runs-1) # adequate splitter for cross-validate alpha taking into account groups
         print('Fitting model...')
+        start = time()
         model_fitted = model.fit(predictors_train, fmri_data_train)
         # pickle.dump(model_fitted, open(join(paths.path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '{}.sav'.format(test[0])), 'wb'))
-        print('Model fitted.')
+        with open(os.path.join(paths.path2derivatives, 'fMRI', 'time2fit.txt'), 'w') as f:
+            f.write(str(model_fitted))
+            f.write('Model fitted in {}.'.format(time()-start))
+        print('Model fitted in {}.'.format(time()-start))
 
         # return the R2_score for each voxel (=list)
         #r2 = get_r2_score(model_fitted, fmri_runs[test[0]], design_matrices[test[0]])
-        r2, r2_significative, p_value, distribution = get_significativity_value(model_fitted, design_matrices[test[0]], fmri_runs[test[0]], n_sample=max(100 * fmri_data_train.shape[1], fmri_data_train.shape[0]), alpha_percentile=params.alpha_percentile, voxel=None)
+        r2, distribution = sample_r2(model_fitted, 
+                                        design_matrices[test[0]], 
+                                        fmri_runs[test[0]], 
+                                        shuffling=shuffling,
+                                        n_sample=n_sample, 
+                                        alpha_percentile=params.alpha_percentile)
 
         # log the results
-        log(subject, voxel='whole brain', alpha=None, r2=r2)
+        # log(subject, voxel='whole brain', alpha=None, r2=r2)
 
-        scores = r2 if scores is None else np.vstack([scores, r2]) # 1d array: 1 value for each voxel
-        scores_significative = r2_significative if scores is None else np.vstack([scores_significative, r2_significative]) 
-        p_value_array = p_value if scores is None else np.vstack([p_value_array, p_value])
-        distribution_array = distribution if distribution_array is None else np.vstack([distribution_array, distribution]) 
+        scores_cv[cv, :] = r2 # r2 is a 1d array: 1 value for each voxel
+        distribution_array[cv, :, :] = distribution # distribution is a 2d array: n_sample values for each voxel
+        cv += 1
     # result = pd.DataFrame(scores, columns=['voxel #{}'.format(i) for i in range(scores.shape[1])])
     # result.to_csv(join(paths.path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '.csv'))
-    return scores, scores_significative, p_value_array, distribution_array # 2D arrays : (nb_runs_test, nb_voxels)
+    return scores_cv, distribution_array # 2D arrays : (nb_runs_test, nb_voxels)
 
 
 def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
@@ -138,19 +154,23 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
     #   - design_matrices: list of design matrices (1 for each run)
     #   - nb_voxels: number of voxels
     #   - indexes: dict specifying row indexes for each run
+    n_sample = max(100 * design_matrices[0].shape[1], design_matrices[0].shape[0])
     nb_voxels = fmri_runs[0].shape[1]
     nb_alphas = len(alpha_list)
     nb_runs_test = len(fmri_runs)
     nb_runs_valid = nb_runs_test -1 
     alphas_cv2 = np.zeros((nb_runs_test, nb_voxels))
     scores_cv2 = np.zeros((nb_runs_test, nb_voxels))
-    scores_significative = np.zeros((nb_runs_test, nb_voxels))
-    p_value_array = np.zeros((nb_runs_test, nb_voxels))
-    distribution_array = None
+    distribution_array = np.zeros((nb_runs_test, n_sample, nb_voxels))
     
     # loop for r2 computation
     cv3 = 0
     logo = LeaveOneOut() # leave on run out !
+    columns_index = np.arange(design_matrices[0].shape[1])
+    shuffling = []
+    for _ in range(n_sample):
+        np.random.shuffle(columns_index)
+        shuffling.append(columns_index)
     for train_, test in logo.split(fmri_runs):
         fmri_data_train_ = [fmri_runs[i] for i in train_] # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
         predictors_train_ = [design_matrices[i] for i in train_]
@@ -183,15 +203,18 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
             # scores_cv2[cv3, voxel] = get_r2_score(model_fitted, 
             #                                 fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
             #                                 design_matrices[test[0]])
-            r2, r2_significative, p_value, distribution = get_significativity_value(model_fitted, design_matrices[test[0]], fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), n_sample=max(100 * dm2.shape[1], dm2.shape[0]), alpha_percentile=params.alpha_percentile, voxel=voxel)
-            scores_cv2[cv3, voxel] = r2
-            scores_significative[cv3, voxel] = r2_significative
-            p_value_array[cv3, voxel] = p_value
-            distribution_array = distribution if distribution_array is None else np.vstack([distribution_array, distribution]) 
+            r2, distribution = sample_r2(model_fitted, 
+                                            design_matrices[test[0]], 
+                                            fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
+                                            shuffling=shuffling,
+                                            n_sample=n_sample, 
+                                            alpha_percentile=params.alpha_percentile)
+            scores_cv2[cv3, voxel] = r2[0]
+            distribution_array[cv3, :, voxel] = distribution
 
             # log the results
-            log(subject, voxel=voxel, alpha=alphas_cv2[cv3, voxel], r2=scores_cv2[cv3, voxel])
+            # log(subject, voxel=voxel, alpha=alphas_cv2[cv3, voxel], r2=scores_cv2[cv3, voxel])
         cv3 += 1
         
-    return alphas_cv2, scores_cv2, scores_significative, p_value_array, distribution_array # 2D arrays : (nb_runs_test, nb_voxels)
+    return alphas_cv2, scores_cv2, distribution_array # 2D arrays : (nb_runs_test, nb_voxels)
     

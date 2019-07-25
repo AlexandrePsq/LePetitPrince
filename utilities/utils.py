@@ -197,25 +197,28 @@ def pca(X, data_name, n_components=50):
 ########## Significativity test ##########
 ##########################################
 
-def get_significativity_value(model, x_test, y_test, n_sample, alpha_percentile, voxel):
+def sample_r2(model, x_test, y_test, shuffling, n_sample, alpha_percentile, test=False):
     # receive a trained model, x_test and y_test (test set of the cross-validation).
     # It returns three values (or three list depending on the parameter voxel_wised):
     # r2 value computed on test set, the thresholded value at percentile(alpha_percentile) and 
     # percentile(alpha_percentile)
-    r2_test = get_r2_score(model, y_test, x_test)
-    distribution_array = None
-    x_shuffled = x_test.copy()
-    for _ in tqdm(range(n_sample)):
-        np.transpose(np.random.shuffle(np.transpose(x_shuffled)))
-        r2_tmp = get_r2_score(model, y_test, x_shuffled)
-        distribution_array = r2_tmp if distribution_array is None else np.vstack([distribution_array, r2_tmp])
-    thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
-    r2_significative = r2_test.copy()
-    r2_significative[r2_test < thresholds] = 0.
-    return r2_test, r2_significative, thresholds, distribution_array
+    if test:
+        r2_test = get_r2_score(model, y_test, x_test)
+        return r2_test, None, None, None
+    else:
+        r2_test = get_r2_score(model, y_test, x_test)
+        distribution_array = None
+        for index in tqdm(range(n_sample)):
+            r2_tmp = get_r2_score(model, y_test, x_test.T[shuffling[index]].T)
+            distribution_array = r2_tmp if distribution_array is None else np.vstack([distribution_array, r2_tmp])
+        return r2_test, distribution_array
+        # thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
+        # r2_significative = r2_test.copy()
+        # r2_significative[r2_test < thresholds] = 0.
+        # return r2_test, r2_significative, thresholds, distribution_array
 
 
-def process(r2_test_array, r2_significative_array, p_values_array, distribution_array, alpha_percentile):
+def get_significativity_value(r2_test_array, distribution_array, alpha_percentile, test=False):
     # receive r2 computed on the test set and r2 significative computed on each set
     # (for each voxel each) and the entire distribution of r2 values computed accross
     # all runs (with shuffled columns) and returns significative r2 computed with the 
@@ -224,33 +227,31 @@ def process(r2_test_array, r2_significative_array, p_values_array, distribution_
     r2_significative_final = []
     thresholds_final = []
 
-    # yair
     r2_test = np.mean(r2_test_array, axis=0)
-    thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
-    r2_significative = r2_test.copy()
-    r2_significative[r2_test < thresholds] = 0.
     r2_final.append(r2_test)
-    r2_significative_final.append(r2_significative)
-    thresholds_final.append(thresholds)
+    distribution_array = np.mean(distribution_array, axis=0)
 
-    # alex 1.0
-    r2_test = np.mean(r2_test_array, axis=0)
-    r2_significative = np.mean(r2_significative_array, axis=0)
-    thresholds = np.mean(p_values_array, axis=0)
-    r2_final.append(r2_test)
-    r2_significative_final.append(r2_significative)
-    thresholds_final.append(thresholds)
+    if test:
+        r2_significative_final.append(None)
+        thresholds_final.append(None)
+    else:
+        thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
+        r2_significative = r2_test.copy()
+        r2_significative[r2_test < thresholds] = 0.
+        r2_final.append(r2_test)
+        r2_significative_final.append(r2_significative)
+        thresholds_final.append(thresholds)
 
-    # alex 2.0
-    Ns = np.count_nonzero(r2_significative_array, axis=0)
-    N = r2_significative_array.shape[0]
-    normalization = (Ns**2 + (N-Ns)**2)/N
-    r2_test = (np.sum(np.multiply(r2_test_array, (Ns * (r2_significative_array > 0) + (N - Ns) * (r2_significative_array == 0))) / N, axis=0))/normalization # list: 1 value for each voxel
-    thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
-    r2_significative = r2_test.copy()
-    r2_significative[r2_test < thresholds] = 0.
-    r2_final.append(r2_test)
-    r2_significative_final.append(r2_significative)
-    thresholds_final.append(thresholds)
+        # alex 2.0
+        # Ns = np.count_nonzero(r2_significative_array, axis=0)
+        # N = r2_significative_array.shape[0]
+        # normalization = (Ns**2 + (N-Ns)**2)/N
+        # r2_test = (np.sum(np.multiply(r2_test_array, (Ns * (r2_significative_array > 0) + (N - Ns) * (r2_significative_array == 0))) / N, axis=0))/normalization # list: 1 value for each voxel
+        # thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
+        # r2_significative = r2_test.copy()
+        # r2_significative[r2_test < thresholds] = 0.
+        # r2_final.append(r2_test)
+        # r2_significative_final.append(r2_significative)
+        # thresholds_final.append(thresholds)
     
     return list(zip(r2_final, r2_significative_final, thresholds_final)), ['threshold the averaged values', 'average the thresholded values', 'weighted average']

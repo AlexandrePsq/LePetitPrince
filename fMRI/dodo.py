@@ -160,6 +160,7 @@ def task_ridge_indiv():
 
     for language in languages:
         for models in aggregated_models:
+            pca_list = pca_list if params.pca else ['']
             for pca in pca_list:
                 pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
                 output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
@@ -187,14 +188,18 @@ def task_ridge_indiv():
                         + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'significative_r2 - {}'.format('average the thresholded values'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
                         + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'significative_r2 - {}'.format('weighted average'), pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
                         + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'significative_r2 - {}'.format('weighted average'), pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
+                pca_argument = ' --pca {} '.format(pca) if params.pca else ''
+                alphas_argument =  ' --alphas ' + ' '.join(str(alpha) for alpha in alphas) if params.voxel_wise else ''
                 yield {
-                    'name': models + '_pca_' + str(pca),
+                    'name': models + '_pca_' + str(pca) if params.pca else models + '_no_pca',
                     'file_dep': ['ridge-indiv.py'] + dependencies,
                     'targets': targets,
-                    'actions': ['python ridge-indiv.py --language {} --model_name {} --voxel_wised --pca {} '.format(language, models, pca) \
+                    'actions': ['python ridge-indiv.py --language {} --model_name {} '.format(language, models) \
                         + optional + optional_parallel \
-                            + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))\
-                                + ' --alphas ' + ' '.join(str(alpha) for alpha in alphas)]
+                            + pca_argument \
+                                + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))\
+                                    + alphas_argument]
+
                 }
 
 

@@ -58,7 +58,7 @@ if __name__ == '__main__':
     input_data_type = 'design-matrices'
     output_data_type = 'ridge-indiv'
     alphas = args.alphas[0]
-    model = Ridge() if args.voxel_wised else RidgeCV(alphas, scoring='r2')
+    model = Ridge() if args.voxel_wised else Ridge(params.pref.alpha_default) #RidgeCV(params.pref.alpha_default, scoring='r2')
     model_name = args.model_name
     subjects = args.subjects[0]
 

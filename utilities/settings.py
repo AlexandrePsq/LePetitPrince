@@ -123,7 +123,6 @@ class Preferences:
 		
 		# Crossvalidation preferences
 		self.ridge_nested_crossval = True
-		self.defaut_alpha = 15
 		self.n_alphas = 30
 
 		# Alpha for nested
@@ -136,6 +135,7 @@ class Preferences:
         # GLM / Ridge
 		self.detrend = True
 		self.standardize = True
+		self.alpha_default = 10
 
 
 class Params:
@@ -145,7 +145,7 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer'])
+		self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer'])
 		#self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',
@@ -191,6 +191,7 @@ class Params:
 		self.overwrite = True
 		self.parallel = True
 		self.cuda = True
+		self.voxel_wise = False
 		if torch.cuda.is_available():
 			if not self.cuda:
 				print("WARNING: You have a CUDA device, so you should probably run with --cuda")
@@ -202,7 +203,7 @@ class Params:
 		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))
 
 		# PCA
-		self.pca = True
+		self.pca = False
 		self.n_components_default = 1500
 		self.n_components_list = [1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 1800]
 

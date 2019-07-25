@@ -82,14 +82,15 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     if voxel_wised:
         alphas, r2_test, distribution_array = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
         alphas = np.mean(alphas, axis=0)
+        optional = str(params.pref.alpha_default) if ((type(model) == sklearn.linear_model.Ridge) & not params.voxel_wise) else ''
         create_maps(masker, alphas, 'alphas', subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3
     else:
         r2_test, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
     r2_test, r2_significative, p_values = get_significativity_value(r2_test, distribution_array, params.alpha_percentile)
-    create_maps(masker, r2_test, 'r2_test', subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) # r2 test
+    create_maps(masker, r2_test, 'r2_test{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) # r2 test
     try:
-        create_maps(masker, p_values, 'p-values', subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # p_values
-        create_maps(masker, r2_significative, 'significative_r2', subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=voxel_wised) # r2_significative
+        create_maps(masker, p_values, 'p-values{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # p_values
+        create_maps(masker, r2_significative, 'significative_r2{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=voxel_wised) # r2_significative
     except:
         print('Test Done.')
 

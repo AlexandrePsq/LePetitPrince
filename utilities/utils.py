@@ -204,7 +204,7 @@ def sample_r2(model, x_test, y_test, shuffling, n_sample, alpha_percentile, test
     # percentile(alpha_percentile)
     if test:
         r2_test = get_r2_score(model, y_test, x_test)
-        return r2_test, None, None, None
+        return r2_test, None
     else:
         r2_test = get_r2_score(model, y_test, x_test)
         distribution_array = None

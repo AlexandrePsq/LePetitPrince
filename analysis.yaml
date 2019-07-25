@@ -28,7 +28,7 @@ scatter_plots:
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer
     model2_name: LSTM E600 H200 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=600
     model1_name: LSTM E600 H200 L1 hidden-first-layer no_pca voxel-wise sub-057
-    title: alpha=600 VS alpha voxel-wise
+    title: alpha=500 VS alpha voxel-wise
     name: LSTM E600 H200 L1 hidden-first-layer
   - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer_r2_test_1000_no_pca_not_voxel_wise
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer

@@ -6,25 +6,25 @@ source: fMRI
 language: english
 
 scatter_plots:
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test10_no_pca_False_sub-057
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test10_no_pca_False
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_sub-057
+    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
     model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=10
     model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
     title: r2_test
     name: freq VS embeddings
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test100_no_pca_False_sub-057
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test100_no_pca_False
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_sub-057
+    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
     model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=100
     model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
     title: r2_test
     name: test
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test1000_no_pca_False_sub-057
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test1000_no_pca_False
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_sub-057
+    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
     model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=1000
     model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057

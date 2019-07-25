@@ -100,9 +100,9 @@ if __name__ == '__main__':
                     plt.ylim(0,0.2)
                     plt.plot([max([np.min(x), np.min(y)]), min([np.max(x), np.max(y)])], [max([np.min(x), np.min(y)]), min([np.max(x), np.max(y)])])
                     plt.legend()
-                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'scatter_plots')
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'scatter_plots', analysis_name)
                     check_folder(save_folder)
-                    plt.savefig(os.path.join(save_folder, analysis_name + ' - ' + labels[index_mask+1] + ' - ' + subject  + '.png'))
+                    plt.savefig(os.path.join(save_folder, analysis['title'] + ' - ' + labels[index_mask+1] + ' - ' + subject  + '.png'))
                     plt.close()
                     i+=1
     

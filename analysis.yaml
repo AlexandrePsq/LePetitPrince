@@ -13,7 +13,7 @@ scatter_plots:
     model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=10
     model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
     title: alpha=10 VS alpha voxel-wise
-    name: alpha=10 VS alpha voxel-wise
+    name: LSTM E600 H600 L1 hidden-first-layer
   - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test100_no_pca_False
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
     model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca
@@ -21,7 +21,7 @@ scatter_plots:
     model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=100
     model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
     title: alpha=100 VS alpha voxel-wise
-    name: alpha=100 VS alpha voxel-wise
+    name: LSTM E600 H600 L1 hidden-first-layer
   - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test1000_no_pca_False
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
     model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca
@@ -29,7 +29,7 @@ scatter_plots:
     model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=1000
     model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
     title: alpha=1000 VS alpha voxel-wise
-    name: alpha=1000 VS alpha voxel-wise
+    name: LSTM E600 H600 L1 hidden-first-layer
 
 specific_analysis:
   - parameters:

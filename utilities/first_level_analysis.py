@@ -37,6 +37,7 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
     img = masker.inverse_transform(distribution)
 
     pca = 'pca_' + str(pca) if params.pca else 'no_pca'
+    voxel_wise = 'voxel_wise' if voxel_wise else 'not_voxel_wise'
     
     path2output_raw = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(data_type, language, model, distribution_name, pca, voxel_wise, subject)+'.nii.gz')
     path2output_png = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(data_type, language, model, distribution_name, pca, voxel_wise, subject)+'.png')
@@ -85,7 +86,7 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
         create_maps(masker, alphas, 'alphas', subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3
     else:
         r2_test, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
-    optional = str(params.pref.alpha_default) if ((type(model) == sklearn.linear_model.Ridge) & (not params.voxel_wise)) else ''
+    optional = '_' + str(params.pref.alpha_default) if ((type(model) == sklearn.linear_model.Ridge) & (not params.voxel_wise)) else ''
     r2_test, r2_significative, p_values = get_significativity_value(r2_test, 
                                                                     distribution_array, 
                                                                     params.alpha_percentile,

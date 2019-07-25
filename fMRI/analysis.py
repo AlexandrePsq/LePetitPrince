@@ -82,8 +82,8 @@ if __name__ == '__main__':
             for analysis in analysis_parameters['scatter_plots']:
                 for subject in subjects:
                     subject = Subjects().get_subject(int(subject))
-                    model1 = [os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, analysis['model1'], 'ridge-indiv_{}_'.format(language) + analysis['model1'] + '_' + analysis['name'] + '_' + subject + '.nii.gz')]
-                    model2 = [os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, analysis['model2'], 'ridge-indiv_{}_'.format(language) + analysis['model2'] + '_' + analysis['name'] + '_' + subject + '.nii.gz')]
+                    model1 = [os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, analysis['model1_folder'], 'ridge-indiv_{}_'.format(language) + analysis['model1'] + '_' + analysis['title'] + '_' + subject + '.nii.gz')]
+                    model2 = [os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, analysis['model2_folder'], 'ridge-indiv_{}_'.format(language) + analysis['model2'] + '_' + analysis['title'] + '_' + subject + '.nii.gz')]
                     analysis_name = analysis['name']
                     x = masker.transform(model1) # you should include confounds
                     y = masker.transform(model2)

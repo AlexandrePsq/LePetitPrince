@@ -223,24 +223,17 @@ def get_significativity_value(r2_test_array, distribution_array, alpha_percentil
     # (for each voxel each) and the entire distribution of r2 values computed accross
     # all runs (with shuffled columns) and returns significative r2 computed with the 
     # method that you want.
-    r2_final = []
-    r2_significative_final = []
-    thresholds_final = []
 
-    r2_test = np.mean(r2_test_array, axis=0)
-    r2_final.append(r2_test)
+    r2_final = np.mean(r2_test_array, axis=0)
     distribution_array = np.mean(distribution_array, axis=0)
 
     if test:
-        r2_significative_final.append(None)
-        thresholds_final.append(None)
+        r2_significative_final = None
+        thresholds_final = None
     else:
-        thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
-        r2_significative = r2_test.copy()
-        r2_significative[r2_test < thresholds] = 0.
-        r2_final.append(r2_test)
-        r2_significative_final.append(r2_significative)
-        thresholds_final.append(thresholds)
+        thresholds_final = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
+        r2_significative_final = r2_test.copy()
+        r2_significative_final[r2_test < thresholds_final] = 0.
 
         # alex 2.0
         # Ns = np.count_nonzero(r2_significative_array, axis=0)
@@ -254,4 +247,4 @@ def get_significativity_value(r2_test_array, distribution_array, alpha_percentil
         # r2_significative_final.append(r2_significative)
         # thresholds_final.append(thresholds)
     
-    return list(zip(r2_final, r2_significative_final, thresholds_final)), ['threshold the averaged values', 'average the thresholded values', 'weighted average']
+    return r2_final, r2_significative_final, thresholds_final

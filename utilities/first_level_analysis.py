@@ -85,13 +85,10 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
         create_maps(masker, alphas, 'alphas', subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3
     else:
         r2_test, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
-    values, names = get_significativity_value(r2_test, distribution_array, params.alpha_percentile) # use complementary mehtod to compute the r2_significative
-    for index in range(len(names)):
-        r2_test, r2_significative, p_values = values[index]
-        name = names[index]
-        create_maps(masker, r2_test, 'r2_test - {}'.format(name), subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) # r2 test
-        create_maps(masker, p_values, 'p-values - {}'.format(name), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # p_values
-        create_maps(masker, r2_significative, 'significative_r2 - {}'.format(name), subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=voxel_wised) # r2_significative
+    r2_test, r2_significative, p_values = get_significativity_value(r2_test, distribution_array, params.alpha_percentile) # use complementary mehtod to compute the r2_significative
+    create_maps(masker, r2_test, 'r2_test', subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) # r2 test
+    create_maps(masker, p_values, 'p-values', subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # p_values
+    create_maps(masker, r2_significative, 'significative_r2', subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=voxel_wised) # r2_significative
 
 
 def whole_brain_analysis(model, fmri_runs, design_matrices, subject):

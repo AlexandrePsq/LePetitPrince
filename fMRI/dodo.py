@@ -35,7 +35,6 @@ test = params.test
 overwrite = params.overwrite
 parallel = params.parallel
 alphas = params.pref.alphas
-pca_list = params.n_components_list
 
 
 optional = ''
@@ -160,7 +159,7 @@ def task_ridge_indiv():
 
     for language in languages:
         for models in aggregated_models:
-            pca_list = pca_list if params.pca else ['']
+            pca_list = params.n_components_list if params.pca else ['']
             for pca in pca_list:
                 pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
                 output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)

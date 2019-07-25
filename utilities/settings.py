@@ -135,7 +135,7 @@ class Preferences:
         # GLM / Ridge
 		self.detrend = True
 		self.standardize = True
-		self.alpha_default = 10
+		self.alpha_default = 100
 
 
 class Params:

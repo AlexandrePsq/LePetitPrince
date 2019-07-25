@@ -6,38 +6,38 @@ source: fMRI
 language: english
 
 scatter_plots:
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer_r2_test_10_no_pca_not_voxel_wise
-    model2_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
-    model1_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer
-    model2_name: LSTM E600 H200 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=10
-    model1_name: LSTM E600 H200 L1 hidden-first-layer no_pca voxel-wise sub-057
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_r2_test_10_no_pca_not_voxel_wise
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+    model2_name: LSTM E600 H300 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=10
+    model1_name: LSTM E600 H300 L1 hidden-first-layer no_pca voxel-wise sub-057
     title: alpha=10 VS alpha voxel-wise
-    name: LSTM E600 H200 L1 hidden-first-layer
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer_r2_test_100_no_pca_not_voxel_wise
-    model2_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
-    model1_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer
-    model2_name: LSTM E600 H200 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=100
-    model1_name: LSTM E600 H200 L1 hidden-first-layer no_pca voxel-wise sub-057
+    name: LSTM E600 H300 L1 hidden-first-layer
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_r2_test_100_no_pca_not_voxel_wise
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+    model2_name: LSTM E600 H300 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=100
+    model1_name: LSTM E600 H300 L1 hidden-first-layer no_pca voxel-wise sub-057
     title: alpha=100 VS alpha voxel-wise
-    name: LSTM E600 H200 L1 hidden-first-layer
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer_r2_test_500_no_pca_not_voxel_wise
-    model2_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
-    model1_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer
-    model2_name: LSTM E600 H200 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=600
-    model1_name: LSTM E600 H200 L1 hidden-first-layer no_pca voxel-wise sub-057
+    name: LSTM E600 H300 L1 hidden-first-layer
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_r2_test_500_no_pca_not_voxel_wise
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+    model2_name: LSTM E600 H300 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=600
+    model1_name: LSTM E600 H300 L1 hidden-first-layer no_pca voxel-wise sub-057
     title: alpha=500 VS alpha voxel-wise
-    name: LSTM E600 H200 L1 hidden-first-layer
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer_r2_test_1000_no_pca_not_voxel_wise
-    model2_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
-    model1_folder: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer
-    model2_name: LSTM E600 H200 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=1000
-    model1_name: LSTM E600 H200 L1 hidden-first-layer no_pca voxel-wise sub-057
+    name: LSTM E600 H300 L1 hidden-first-layer
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_r2_test_1000_no_pca_not_voxel_wise
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+    model2_name: LSTM E600 H300 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=1000
+    model1_name: LSTM E600 H300 L1 hidden-first-layer no_pca voxel-wise sub-057
     title: alpha=1000 VS alpha voxel-wise
-    name: LSTM E600 H200 L1 hidden-first-layer
+    name: LSTM E600 H300 L1 hidden-first-layer
 
 specific_analysis:
   - parameters:

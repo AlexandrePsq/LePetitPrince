@@ -187,7 +187,7 @@ class Params:
 
 
 		# general parameters
-		self.test = False
+		self.test = True
 		self.overwrite = True
 		self.parallel = True
 		self.cuda = True

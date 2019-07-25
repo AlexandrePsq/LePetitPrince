@@ -89,8 +89,7 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     optional = '_' + str(params.pref.alpha_default) if ((type(model) == sklearn.linear_model.Ridge) & (not params.voxel_wise)) else ''
     r2_test, r2_significative, p_values = get_significativity_value(r2_test, 
                                                                     distribution_array, 
-                                                                    params.alpha_percentile,
-                                                                    test=True)
+                                                                    params.alpha_percentile)
     create_maps(masker, r2_test, 'r2_test{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) # r2 test
     try:
         create_maps(masker, p_values, 'p-values{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # p_values
@@ -140,8 +139,7 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
                                         fmri_runs[test[0]], 
                                         shuffling=shuffling,
                                         n_sample=n_sample, 
-                                        alpha_percentile=params.alpha_percentile,
-                                        test=True)
+                                        alpha_percentile=params.alpha_percentile)
 
         # log the results
         # log(subject, voxel='whole brain', alpha=None, r2=r2)
@@ -214,8 +212,7 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
                                             fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
                                             shuffling=shuffling,
                                             n_sample=n_sample, 
-                                            alpha_percentile=params.alpha_percentile,
-                                            test=True)
+                                            alpha_percentile=params.alpha_percentile)
             scores_cv2[cv3, voxel] = r2[0]
             distribution_array[cv3, :, voxel] = distribution
 

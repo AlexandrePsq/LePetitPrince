@@ -232,8 +232,8 @@ def get_significativity_value(r2_test_array, distribution_array, alpha_percentil
         thresholds_final = None
     else:
         thresholds_final = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
-        r2_significative_final = r2_test.copy()
-        r2_significative_final[r2_test < thresholds_final] = 0.
+        r2_significative_final = r2_final.copy()
+        r2_significative_final[r2_final < thresholds_final] = 0.
 
         # alex 2.0
         # Ns = np.count_nonzero(r2_significative_array, axis=0)

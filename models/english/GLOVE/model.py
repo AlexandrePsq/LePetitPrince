@@ -44,7 +44,7 @@ class Glove(object):
             for word in self.words2add[key]:
                 vector += self.model.vectors[self.model.vocab[word].index]
             self.model.vocab[key] = {'count': None, 'index': index}
-            self.model.vectors.append(vector)
+            self.model.vectors = np.vstack(self.model.vectors, vector)
             self.model.index2word.append(key)
     
 

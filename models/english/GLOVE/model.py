@@ -30,8 +30,6 @@ class Glove(object):
         super(Glove, self).__init__()
         if not path2model:
             default_model = os.path.join(paths.path2derivatives, 'fMRI/models', language, 'glove_6B_300d.bin')
-            if os.path.isfile(default_model):
-                self.model = Word2Vec.load(default_model)
             self.load_default_model(language, default_model)
         else:
             try:

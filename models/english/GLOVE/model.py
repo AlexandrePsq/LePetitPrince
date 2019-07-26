@@ -39,11 +39,20 @@ class Glove(object):
             except:
                 self.model = None
         self.param = {'model_type':'GLOVE', 'embedding-size':embedding_size, 'training_set':training_set, 'language':language}
+        self.words2add = {'hadn':['had', 'not']}
+        for key in self.words2add.keys():
+            vector = np.zeros((300,))
+            index = len(self.model.vocab)
+            for word in self.words2add[key]:
+                vector += self.model.vectors[self.model.vocab[word].index]
+            self.model.vocab[key] = {'count': None, 'index': index}
+            self.model.vectors.append(vector)
+            self.model.index2word.append(key)
     
 
     def load_default_model(self, language, saving_path):
         glove_input_file = os.path.join(paths.path2data, 'text', language, 'glove_training', 'glove.6B.300d.txt')
-        word2vec_output_file = os.path.join(paths.path2data, 'text', language, 'glove_training', 'glove.6B.300d.txt.word2vec')
+        word2vec_output_file = os.path.join(paths.path2data, 'text', language, 'glove_training', 'glove.6B.300d.bin') # may be change the extension to txt.word2vec
         if not os.path.isfile(word2vec_output_file):
             assert os.path.isfile(glove_input_file) 
             glove2word2vec(glove_input_file, word2vec_output_file)

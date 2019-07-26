@@ -104,7 +104,7 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
     distribution_array = None
     nb_runs = len(fmri_runs)
     nb_voxels = fmri_runs[0].shape[1]
-    n_sample = min(max(100 * design_matrices[0].shape[1], design_matrices[0].shape[0]), 5000)
+    n_sample = min(max(100 * design_matrices[0].shape[1], design_matrices[0].shape[0]), 8000)
     scores_cv = np.zeros((nb_runs, nb_voxels))
     distribution_array = np.zeros((nb_runs, n_sample, nb_voxels))
 
@@ -158,7 +158,7 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
     #   - design_matrices: list of design matrices (1 for each run)
     #   - nb_voxels: number of voxels
     #   - indexes: dict specifying row indexes for each run
-    n_sample = min(max(100 * design_matrices[0].shape[1], design_matrices[0].shape[0]), 5000)
+    n_sample = min(max(100 * design_matrices[0].shape[1], design_matrices[0].shape[0]), 8000)
     nb_voxels = fmri_runs[0].shape[1]
     nb_alphas = len(alpha_list)
     nb_runs_test = len(fmri_runs)

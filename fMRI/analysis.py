@@ -192,7 +192,7 @@ if __name__ == '__main__':
                                                 'nhid', str(var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid']),
                                                 'nlayers',   str(var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers']),
                                                 'dropout',  str(var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout']).replace('.', ''),
-                                                analysis['parameters']['other']])
+                                                analysis['parameters']['which']])
                         path = os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, model_name)
                         file_name = '_'.join(['ridge-indiv', 
                                                 language, analysis['model_category'].lower(),
@@ -201,9 +201,10 @@ if __name__ == '__main__':
                                                 'nhid', str(var if analysis['variable_name']=='nhid' else analysis['parameters']['nhid']),
                                                 'nlayers',  str(var if analysis['variable_name']=='nlayers' else analysis['parameters']['nlayers']),
                                                 'dropout',  str(var if analysis['variable_name']=='dropout' else analysis['parameters']['dropout']).replace('.', ''),
-                                                analysis['parameters']['other'],
+                                                analysis['parameters']['which'],
                                                 analysis['variable_of_interest'],
                                                 str('pca_' + str(var) if analysis['variable_name']=='pca' else analysis['parameters']['pca']),
+                                                analysis['parameters']['voxel_wise']
                                                 subject + '.nii.gz'])
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file)[0])

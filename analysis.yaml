@@ -86,39 +86,41 @@ model_complexity:
       - 1500
       - 1800
     variable_name: pca
-    variable_of_interest: r2_test
+    variable_of_interest: significative_r2_100
     parameters: 
       rnn_type: LSTM
       ninp: 600
       nlayers: 1
       dropout: 0.2
       nhid: 1800
-      other: hidden_first-layer
+      which: hidden_first-layer
+      voxel_wise: not_voxel_wise
     title: 'R2 test = f(pca components)'
     name: model_complexity - LSTM E600H1800L1D02 - pca
-  - model_category: LSTM
-    complexity_variable:
-      - 50
-      - 100
-      - 150
-      - 200
-      - 300
-      - 400
-      - 500
-      - 600
-      - 1200
-      - 1800
-    variable_name: nhid
-    variable_of_interest: r2_test
-    parameters: 
-      rnn_type: LSTM
-      ninp: 600
-      nlayers: 1
-      dropout: 0.2
-      pca: no_pca
-      other: hidden_first-layer
-    title: R2 test = f(nhid)
-    name: model_complexity - LSTM E600HXL1D02 - nhid
+#  - model_category: LSTM
+#    complexity_variable:
+#      - 50
+#      - 100
+#      - 150
+#      - 200
+#      - 300
+#      - 400
+#      - 500
+#      - 600
+#      - 1200
+#      - 1800
+#    variable_name: nhid
+#    variable_of_interest: r2_test
+#    parameters: 
+#      rnn_type: LSTM
+#      ninp: 600
+#      nlayers: 1
+#      dropout: 0.2
+#      pca: no_pca
+#      which: hidden_first-layer
+#      voxel_wise: not_voxel_wise
+#    title: R2 test = f(nhid)
+#    name: model_complexity - LSTM E600HXL1D02 - nhid
 #  - model_category: LSTM
 #    complexity_variable:
 #      - 

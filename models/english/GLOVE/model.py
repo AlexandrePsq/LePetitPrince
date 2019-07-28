@@ -37,14 +37,18 @@ class Glove(object):
             except:
                 self.model = None
         self.param = {'model_type':'GLOVE', 'embedding-size':embedding_size, 'training_set':training_set, 'language':language}
-        self.words2add = {'hadn':['had', 'not']}
+        self.words2add = {'hadn':(['had', 'n’t'], 1),
+                            'crossly':(['accross'], 0), 
+                            'mustn':(['must', 'n’t'], 1), 
+                            'redfaced':(['red', 'face'], 0),
+                            'streetlamp':(['lamp', 'street'], 0)} # the second value in the tuple is the number of following words to skip in generate
         for key in self.words2add.keys():
             vector = np.zeros((300,))
             index = len(self.model.vocab)
             for word in self.words2add[key]:
                 vector += self.model.vectors[self.model.vocab[word].index]
             self.model.vocab[key] = {'count': None, 'index': index}
-            self.model.vectors = np.vstack(self.model.vectors, vector)
+            self.model.vectors = np.vstack((self.model.vectors, vector))
             self.model.index2word.append(key)
     
 
@@ -66,7 +70,15 @@ class Glove(object):
         columns_activations = ['embedding-{}'.format(i) for i in range(self.param['embedding-size'])]
         activations = []
         iterator = tokenize(path, language)
+        skip = 0
         for item in tqdm(iterator):
-            activations.append(self.model[item])
+            if item in self.words2add.keys():
+                for word in self.words2add[item][0]:
+                    activations.append(self.model[word])
+                skip = self.words2add[item][1]
+            if skip ==0:
+                activations.append(self.model[item])
+            else:
+                skip -= 1
         return pd.DataFrame(np.vstack(activations), columns=columns_activations)
     

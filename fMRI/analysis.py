@@ -204,7 +204,7 @@ if __name__ == '__main__':
                                                 analysis['parameters']['which'],
                                                 analysis['variable_of_interest'],
                                                 str('pca_' + str(var) if analysis['variable_name']=='pca' else analysis['parameters']['pca']),
-                                                analysis['parameters']['voxel_wise']
+                                                analysis['parameters']['voxel_wise'],
                                                 subject + '.nii.gz'])
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file)[0])

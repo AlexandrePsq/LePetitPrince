@@ -26,7 +26,7 @@ paths = Paths()
 
 class Glove(object):
 
-    def __init__(self, embedding_size=300, training_set='wikipedia', path2model=None, language='english'):
+    def __init__(self, embedding_size=300, training_set='wikipedia', path2model=None, language='english', functions=[]):
         super(Glove, self).__init__()
         if not path2model:
             default_model = os.path.join(paths.path2derivatives, 'fMRI/models', language, 'glove_6B_300d.bin')
@@ -37,6 +37,7 @@ class Glove(object):
             except:
                 self.model = None
         self.param = {'model_type':'GLOVE', 'embedding-size':embedding_size, 'training_set':training_set, 'language':language}
+        self.functions = functions
         self.words2add = {'hadn':(['had', 'n’t'], 1),
                             'crossly':(['accross'], 0), 
                             'mustn':(['must', 'n’t'], 1), 
@@ -45,7 +46,7 @@ class Glove(object):
         for key in self.words2add.keys():
             vector = np.zeros((300,))
             index = len(self.model.vocab)
-            for word in self.words2add[key]:
+            for word in self.words2add[key][0]:
                 vector += self.model.vectors[self.model.vocab[word].index]
             self.model.vocab[key] = {'count': None, 'index': index}
             self.model.vectors = np.vstack((self.model.vectors, vector))
@@ -63,22 +64,14 @@ class Glove(object):
 
 
     def __name__(self):
-        return '_'.join([self.param['model_type'], 'language', self.param['language'], 'embedding-size', str(self.param['embedding-size']),'training_set', self.param['training_set']])
+        return '_'.join([self.param['model_type'], 'language', self.param['language'], 'embedding-size', str(self.param['embedding-size']),'training_set', self.param['training_set']] + [function.__name__ for function in self.functions])
 
 
-    def generate(self, path, language):
-        columns_activations = ['embedding-{}'.format(i) for i in range(self.param['embedding-size'])]
-        activations = []
-        iterator = tokenize(path, language)
-        skip = 0
-        for item in tqdm(iterator):
-            if item in self.words2add.keys():
-                for word in self.words2add[item][0]:
-                    activations.append(self.model[word])
-                skip = self.words2add[item][1]
-            if skip ==0:
-                activations.append(self.model[item])
-            else:
-                skip -= 1
-        return pd.DataFrame(np.vstack(activations), columns=columns_activations)
+    def generate(self, path, language, textgrid):
+         # iterator = tokenize(path, language) 
+        iterator = list(textgrid['word']) # we suppose the textgrid dataframe (=csv file with onsets and offsets issue from original textgrid) has been created thanks to the tokennize function
+        dataframes = [pd.DataFrame(self.function(iterator, language), columns=[function.__name__]) for function in self.functions]
+        result = pd.concat([df for df in dataframes], axis = 1)
+        return result
+
     

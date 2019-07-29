@@ -6,55 +6,162 @@ source: fMRI
 language: english
 
 scatter_plots:
+
+  # comparison alpha = constant to alpha voxel-wised
 #  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_10_no_pca_not_voxel_wise
 #    model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
 #    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
 #    model1_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
-#    model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=10
-#    model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
+#    y_label: R2 of LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=10
+#    x_label: R2 of LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
+#    input_data_folder1: ridge-indiv
+#    input_data_folder2: ridge-indiv
 #    title: alpha=10 VS alpha voxel-wise
-#    name: LSTM E600 H600 L1 hidden-first-layer
+#    name: Alpha_determination/alpha_fixed_VS_alpha_voxel_wised/LSTM_E600_H600_L1_hidden-first-layer
 #  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_100_no_pca_not_voxel_wise
 #    model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
 #    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
 #    model1_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
-#    model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=100
-#    model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
+#    y_label: R2 of LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=100
+#    x_label: R2 of LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
+#    input_data_folder1: ridge-indiv
+#    input_data_folder2: ridge-indiv
 #    title: alpha=100 VS alpha voxel-wise
-#    name: LSTM E600 H600 L1 hidden-first-layer
+#    name: Alpha_determination/alpha_fixed_VS_alpha_voxel_wised/LSTM_E600_H600_L1_hidden-first-layer
 #  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_500_no_pca_not_voxel_wise
 #    model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
 #    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
 #    model1_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
-#    model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=600
-#    model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
+#    y_label: R2 of LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=600
+#    x_label: R2 of LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
+#    input_data_folder1: ridge-indiv
+#    input_data_folder2: ridge-indiv
 #    title: alpha=500 VS alpha voxel-wise
-#    name: LSTM E600 H600 L1 hidden-first-layer
+#    name: Alpha_determination/alpha_fixed_VS_alpha_voxel_wised/LSTM_E600_H600_L1_hidden-first-layer
 #  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_1000_no_pca_not_voxel_wise
 #    model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
 #    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_no_pca_voxel_wise
 #    model1_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
-#    model2_name: LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=1000
-#    model1_name: LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
+#    y_label: R2 of LSTM E600 H600 L1 hidden-first-layer no_pca not_voxel-wise sub-057 alpha=1000
+#    x_label: R2 of LSTM E600 H600 L1 hidden-first-layer no_pca voxel-wise sub-057
+#    input_data_folder1: ridge-indiv
+#    input_data_folder2: ridge-indiv
 #    title: alpha=1000 VS alpha voxel-wise
-#    name: LSTM E600 H600 L1 hidden-first-layer
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_alphas_pca_1800
-    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_alphas_pca_1800
-    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    model2_name: LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
-    model1_name: LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
-    title: distribution alpha voxel-wise
-    name: LSTM E600 H1800 L1 hidden-first-layer
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_alphas_pca_1800
-    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_1800
-    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    model2_name: LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
-    model1_name: LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
-    title: alpha VS R2 voxel-wise
-    name: LSTM E600 H1800 L1 hidden-first-layer
+#    name: Alpha_determination/alpha_fixed_VS_alpha_voxel_wised/LSTM_E600_H600_L1_hidden-first-layer
 
+  # distribution des alphas
+#  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_alphas_pca_1800
+#    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+#    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_alphas_pca_1800
+#    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+#    y_label: alphas of LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
+#    x_label: alphas of LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
+#    input_data_folder1: ridge-indiv
+#    input_data_folder2: ridge-indiv
+#    title: distribution alpha voxel-wise
+#    name:  Alpha_determination/LSTM_E600_H1800_L1_hidden-first-layer
+#  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_alphas_pca_1800
+#    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+#    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_1800
+#    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+#    y_label: alphas of LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
+#    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
+#    input_data_folder1: ridge-indiv
+#    input_data_folder2: ridge-indiv
+#    title: alpha VS R2 voxel-wise
+#    name: Alpha_determination/LSTM_E600_H1800_L1_hidden-first-layer
+
+  # comparison GLM-RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_5
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_5
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 5 voxel-wise sub-057
+    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 5 voxel-wise sub-057
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 5
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_10
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_10
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 10 voxel-wise sub-057
+    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 10 voxel-wise sub-057
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 10
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_20
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_20
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 20 voxel-wise sub-057
+    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 20 voxel-wise sub-057
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 20
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_100
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_100
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 100 voxel-wise sub-057
+    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 100 voxel-wise sub-057
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 100
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_300
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_300
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 300 voxel-wise sub-057
+    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 300 voxel-wise sub-057
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 300
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_500
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_500
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 500 voxel-wise sub-057
+    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 500 voxel-wise sub-057
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 500
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_800
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_800
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 800 voxel-wise sub-057
+    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 800 voxel-wise sub-057
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 800
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_1500
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_1500
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 1500 voxel-wise sub-057
+    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 1500 voxel-wise sub-057
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 1500
+    name: GLM VS RIDGE
+
+
+
+
+
+
+
+
+
+    
 specific_analysis:
   - parameters:
       model_category: LSTM

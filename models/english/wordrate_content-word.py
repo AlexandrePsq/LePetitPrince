@@ -8,8 +8,6 @@ if root not in sys.path:
 import warnings
 warnings.simplefilter(action='ignore')
 
-from .WORDRATE import model
-from .WORDRATE.utils import content_words
 import os
 import pandas as pd
 
@@ -21,11 +19,15 @@ from utilities.utils import check_folder
 
 def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
+    from .WORDRATE import model
+    from .WORDRATE.utils import content_words
     language = 'english'
     mod = model.Wordrate([content_words], language)
     return mod
 
 def generate(mod, run, language, textgrid, overwrite=False):
+    from .WORDRATE import model
+    from .WORDRATE.utils import content_words
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None

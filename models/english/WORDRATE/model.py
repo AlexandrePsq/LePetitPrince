@@ -15,7 +15,6 @@ if root not in sys.path:
 import pandas as pd
 import numpy as np
 from .tokenizer import tokenize
-from .utils import *
 
 
 

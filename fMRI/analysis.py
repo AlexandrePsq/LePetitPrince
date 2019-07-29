@@ -82,8 +82,8 @@ if __name__ == '__main__':
             for analysis in analysis_parameters['scatter_plots']:
                 for subject in subjects:
                     subject = Subjects().get_subject(int(subject))
-                    model1 = [os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, analysis['model1_folder'], analysis['model1']+ '_' + subject + '.nii.gz')]
-                    model2 = [os.path.join(paths.path2derivatives, source, 'ridge-indiv', language, analysis['model2_folder'], analysis['model2'] + '_' + subject + '.nii.gz')]
+                    model1 = [os.path.join(paths.path2derivatives, source, analysis['input_data_folder1'], language, analysis['model1_folder'], analysis['model1']+ '_' + subject + '.nii.gz')]
+                    model2 = [os.path.join(paths.path2derivatives, source, analysis['input_data_folder2'], language, analysis['model2_folder'], analysis['model2'] + '_' + subject + '.nii.gz')]
                     analysis_name = analysis['name']
                     x = masker.transform(model1) # you should include confounds
                     y = masker.transform(model2)
@@ -94,8 +94,8 @@ if __name__ == '__main__':
                     plt.scatter([np.mean(x)], [np.mean(y)], c='green', label='Average value')
                     plt.scatter([np.percentile(x, 50)], [np.percentile(y, 50)], c='blue', label='Median value')
                     plt.title('\n'.join(wrap('{} in {}'.format(analysis['title'], labels[index_mask+1]))))
-                    plt.xlabel('\n'.join(wrap('R2 of {}'.format(analysis['model1_name']))))
-                    plt.ylabel('\n'.join(wrap('R2 of {}'.format(analysis['model2_name']))))
+                    plt.xlabel('\n'.join(wrap('{}'.format(analysis['x_label']))))
+                    plt.ylabel('\n'.join(wrap('{}'.format(analysis['y_label']))))
                     #plt.xlim(0,0.2)
                     #plt.ylim(0,0.2)
                     plt.plot([max([np.min(x), np.min(y)]), min([np.max(x), np.max(y)])], [max([np.min(x), np.min(y)]), min([np.max(x), np.max(y)])])

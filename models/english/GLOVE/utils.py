@@ -73,10 +73,10 @@ def embeddings(model, words2add, iterator, language, param=None):
     for item in tqdm(iterator):
         if item in words2add.keys():
             for word in words2add[item][0]:
-                activations.append(model.vectors[model.vocab[word]])
+                activations.append(model.vectors[model.vocab[word].index])
             skip = words2add[item][1]
         elif skip ==0:
-            activations.append(model.vectors[model.vocab[item]])
+            activations.append(model.vectors[model.vocab[item].index])
         else:
             skip -= 1
     return pd.DataFrame(np.vstack(activations), columns=columns_activations)

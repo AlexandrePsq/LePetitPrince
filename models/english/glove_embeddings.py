@@ -20,6 +20,7 @@ from utilities.utils import check_folder
 def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
     from .GLOVE import model
+    from .GLOVE.utils import embeddings
     language = 'english'
     #### parameters studied ####
     parameters = sorted([embeddings])
@@ -27,7 +28,6 @@ def load():
     return mod
 
 def generate(mod, run, language, textgrid, overwrite=False):
-    from .GLOVE.utils import embeddings
     from .GLOVE import model
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run

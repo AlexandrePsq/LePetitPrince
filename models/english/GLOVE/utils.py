@@ -60,7 +60,7 @@ def neighborhood_density(model, words2add, iterator, language, method='mean', th
                 activations.append(result[model.vocab[word].index])
             skip = words2add[item][1]
         elif skip ==0:
-            activations.append(result[model.vocab[word].index])
+            activations.append(result[model.vocab[item].index])
         else:
             skip -= 1
     return pd.DataFrame(np.vstack(activations), columns=columns_activations)
@@ -76,7 +76,7 @@ def embeddings(model, words2add, iterator, language, param=None):
                 activations.append(model.vectors[model.vocab[word]])
             skip = words2add[item][1]
         elif skip ==0:
-            activations.append(model.vectors[model.vocab[word]])
+            activations.append(model.vectors[model.vocab[item]])
         else:
             skip -= 1
     return pd.DataFrame(np.vstack(activations), columns=columns_activations)

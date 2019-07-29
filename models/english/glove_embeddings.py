@@ -21,7 +21,9 @@ def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
     from .GLOVE import model
     language = 'english'
-    mod = model.Glove(path2model="None", language=language)
+    #### parameters studied ####
+    parameters = sorted([embeddings])
+    mod = model.Glove(functions=parameters, language=language)
     return mod
 
 def generate(mod, run, language, textgrid, overwrite=False):
@@ -30,10 +32,8 @@ def generate(mod, run, language, textgrid, overwrite=False):
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
-    #### parameters studied ####
-    parameters = sorted([embeddings])
+    
     # Defining paths
-    mod = model.Glove(functions=parameters, language=language) # all functions
     model_name = 'glove_model'
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
     path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))

@@ -52,7 +52,7 @@ scatter_plots:
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
     model2_name: LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
     model1_name: LSTM E600 H1800 L1 hidden-first-layer pca 1800 voxel-wise sub-057
-    title: distribution alpha voxel-wise
+    title: alpha VS R2 voxel-wise
     name: LSTM E600 H1800 L1 hidden-first-layer
 
 specific_analysis:

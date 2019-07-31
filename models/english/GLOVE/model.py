@@ -70,7 +70,7 @@ class Glove(object):
     def generate(self, path, language, textgrid):
          # iterator = tokenize(path, language) 
         iterator = list(textgrid['word']) # we suppose the textgrid dataframe (=csv file with onsets and offsets issue from original textgrid) has been created thanks to the tokennize function
-        dataframes = [pd.DataFrame(function(self.model, self.words2add, iterator, language, self.param), columns=[function.__name__]) for function in self.functions]
+        dataframes = [function(self.model, self.words2add, iterator, language, self.param) for function in self.functions]
         result = pd.concat([df for df in dataframes], axis = 1)
         return result
 

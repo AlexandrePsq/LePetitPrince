@@ -18,7 +18,7 @@ import os.path as op
 import warnings
 warnings.simplefilter(action='ignore' )
 
-from utilities.settings import Paths, Subjects
+from utilities.settings import Paths, Subjects, Params
 from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices
 from utilities.first_level_analysis import compute_global_masker, do_single_subject
 import pandas as pd
@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
 paths = Paths()
+params = Params()
 subjects_list = Subjects()
 
 

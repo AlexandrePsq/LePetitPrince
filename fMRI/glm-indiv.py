@@ -24,6 +24,7 @@ from utilities.first_level_analysis import compute_global_masker, do_single_subj
 import pandas as pd
 import numpy as np
 from nilearn.input_data import MultiNiftiMasker
+from sklearn.preprocessing import StandardScaler
 
 from sklearn.metrics import r2_score
 from sklearn.linear_model import LinearRegression
@@ -43,6 +44,7 @@ if __name__ == '__main__':
     parser.add_argument("--model_name", type=str, help="Name of the model to use to generate the raw features.")
     parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", default=False, action='store_true', help="Precise if we run the code in parallel")
+    parser.add_argument("--pca", type=int, default=params.n_components_default, help="pca value to use.")
 
     args = parser.parse_args()
     source = 'fMRI'
@@ -62,11 +64,21 @@ if __name__ == '__main__':
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
     matrices = [transform_design_matrices(run) for run in dm] # list of design matrices (dataframes) where we added a constant column equal to 1
+    if (matrices[0].shape[1] > args.pca) & (params.pca):
+        print('PCA analysis running...')
+        matrices = pca(matrices, model_name, n_components=args.pca)
+        print('PCA done.')
+    else:
+        print('Skipping PCA.')
+        for index in range(len(matrices)):
+            scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
+            scaler.fit(matrices[index])
+            matrices[index] = scaler.transform(matrices[index])
     masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object ... computation is sloow
 
     if args.parallel:
-            Parallel(n_jobs=-2)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model) for sub in subjects)
+            Parallel(n_jobs=-2)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, pca=args.pca) for sub in subjects)
     else:
         for sub in subjects:
             print('Processing subject {}...'.format(sub))
-            do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model)
+            do_single_subject(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, pca=args.pca)

@@ -145,7 +145,7 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['glove_embeddings'])
+		self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer'])
 		#self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',
@@ -188,7 +188,7 @@ class Params:
 
 		# general parameters
 		self.test = True
-		self.overwrite = True
+		self.overwrite = False
 		self.parallel = True
 		self.cuda = True
 		self.voxel_wise = False
@@ -205,7 +205,7 @@ class Params:
 		# PCA
 		self.pca = False
 		self.n_components_default = 1500
-		self.n_components_list = [1, 2, 5, 10, 20]#, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 1800]
+		self.n_components_list = [500, 800, 1500] #[1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 1800]
 
 		# Deconfounding
 		self.alpha_percentile = 99

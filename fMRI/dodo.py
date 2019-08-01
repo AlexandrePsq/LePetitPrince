@@ -136,17 +136,22 @@ def task_glm_indiv():
 
     for language in languages:
         for models in aggregated_models:
-            output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
-            input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-            dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
-            targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                    + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}".format(output_data_type, language, models, 'r2_test', subject)+'.png') for subject in subjects.get_all(language, test)]
-            yield {
-                'name': models,
-                'file_dep': ['glm-indiv.py'] + dependencies,
-                'targets': targets,
-                'actions': ['python glm-indiv.py --language {} --model_name {} '.format(language, models) + optional + optional_parallel + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))],
-            }
+            pca_list = params.n_components_list if params.pca else ['']
+            for pca in pca_list:
+                pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
+                output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
+                input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
+                dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
+                targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
+                pca_argument = ' --pca {} '.format(pca) if params.pca else ''
+                alphas_argument =  ' --alphas ' + ' '.join(str(alpha) for alpha in alphas) if params.voxel_wise else ''
+                yield {
+                    'name': models + '_pca_' + str(pca) if params.pca else models + '_no_pca',
+                    'file_dep': ['glm-indiv.py'] + dependencies,
+                    'targets': targets,
+                    'actions': ['python glm-indiv.py --language {} --model_name {} '.format(language, models) + optional + optional_parallel + pca_argument + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))],
+                }
 
 
 def task_ridge_indiv():

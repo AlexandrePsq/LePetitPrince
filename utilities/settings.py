@@ -203,7 +203,7 @@ class Params:
 		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))
 
 		# PCA
-		self.pca = False
+		self.pca = True
 		self.n_components_default = 1500
 		self.n_components_list = [500] #[1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 1800]
 

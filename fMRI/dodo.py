@@ -145,7 +145,6 @@ def task_glm_indiv():
                 targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
                         + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
                 pca_argument = ' --pca {} '.format(pca) if params.pca else ''
-                alphas_argument =  ' --alphas ' + ' '.join(str(alpha) for alpha in alphas) if params.voxel_wise else ''
                 yield {
                     'name': models + '_pca_' + str(pca) if params.pca else models + '_no_pca',
                     'file_dep': ['glm-indiv.py'] + dependencies,

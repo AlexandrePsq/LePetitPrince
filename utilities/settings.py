@@ -52,7 +52,7 @@ class Scans:
                              'run6':343,
                              'run7':325,
                              'run8':292,
-                             'run9':368,
+                             'run9':368
         },
                        'french':{'run1':309,
                              'run2':326,
@@ -62,7 +62,7 @@ class Scans:
                              'run6':378,
                              'run7':332,
                              'run8':294,
-                             'run9':336,
+                             'run9':336
         }
         }
     def get_nscans(self, language, run):

@@ -71,8 +71,8 @@ scatter_plots:
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
     model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_5_not_voxel_wise
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 5 voxel-wise sub-057
-    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 5 voxel-wise sub-057
+    y_label: R2 of Ridge (pca 5)
+    x_label: R2 of GLM (pca 5)
     input_data_folder1: glm-indiv
     input_data_folder2: ridge-indiv
     title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 5
@@ -81,8 +81,8 @@ scatter_plots:
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
     model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_10_not_voxel_wise
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 10 voxel-wise sub-057
-    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 10 voxel-wise sub-057
+    y_label: R2 of Ridge (pca 10)
+    x_label: R2 of GLM (pca 10)
     input_data_folder1: glm-indiv
     input_data_folder2: ridge-indiv
     title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 10
@@ -91,8 +91,8 @@ scatter_plots:
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
     model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_20_not_voxel_wise
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 20 voxel-wise sub-057
-    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 20 voxel-wise sub-057
+    y_label: R2 of Ridge (pca 20)
+    x_label: R2 of GLM (pca 20)
     input_data_folder1: glm-indiv
     input_data_folder2: ridge-indiv
     title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 5
@@ -101,8 +101,8 @@ scatter_plots:
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
     model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_100_not_voxel_wise
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 100 voxel-wise sub-057
-    x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 100 voxel-wise sub-057
+    y_label: R2 of Ridge (pca 100)
+    x_label: R2 of GLM (pca 100)
     input_data_folder1: glm-indiv
     input_data_folder2: ridge-indiv
     title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 10
@@ -139,6 +139,9 @@ model_complexity:
       - 300
       - 350
       - 400
+      - 500
+      - 600
+      - 800
       - 1000
       - 1500
     variable_name: pca

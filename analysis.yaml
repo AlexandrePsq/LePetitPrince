@@ -69,7 +69,7 @@ scatter_plots:
   # comparison GLM-RIDGE
   - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_100
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_100
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_100_not_voxel_wise
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
     y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 5 voxel-wise sub-057
     x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 5 voxel-wise sub-057
@@ -79,7 +79,7 @@ scatter_plots:
     name: GLM VS RIDGE
   - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_300
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_300
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_300_not_voxel_wise
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
     y_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 10 voxel-wise sub-057
     x_label: R2 of LSTM E600 H1800 L1 hidden-first-layer pca 10 voxel-wise sub-057

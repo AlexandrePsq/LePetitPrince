@@ -141,7 +141,6 @@ model_complexity:
       - 400
       - 1000
       - 1500
-      - 1800
     variable_name: pca
     variable_of_interest: significative_r2_100
     parameters: 

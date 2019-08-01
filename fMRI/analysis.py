@@ -163,7 +163,7 @@ if __name__ == '__main__':
         for analysis in analysis_parameters['model_complexity']:
             analysis_name = analysis['name']
             x = analysis['complexity_variable']
-            if analysis['variable_of_interest'] != 'r2_test':
+            if analysis['variable_of_interest'] not in ['r2_test', 'significative_r2_100']:
                 y_list = list(zip(*analysis['value_v-o-i'])) # list of list of subject values [sub1_list, sub2_list, ...]
                 y = np.mean(analysis['value_v-o-i'], axis=1)
                 plt.figure(i)

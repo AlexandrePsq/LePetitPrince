@@ -50,9 +50,9 @@ paths = Paths()
 
 def task_check_architecture():
     yield {
-                'name': 'architecture',
-                'file_dep': ['../create_data_architecture.py'],
-                'actions': ['python ../create_data_architecture.py'],
+            'name': 'architecture',
+            'file_dep': ['../create_data_architecture.py'],
+            'actions': ['python ../create_data_architecture.py']
             }
 
 

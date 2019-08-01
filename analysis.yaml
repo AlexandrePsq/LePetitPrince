@@ -1,12 +1,8 @@
 subjects:
   - 57
-
 source: fMRI
-
 language: english
-
 scatter_plots:
-
   # comparison alpha = constant to alpha voxel-wised
 #  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer_r2_test_10_no_pca_not_voxel_wise
 #    model2_folder: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
@@ -70,7 +66,6 @@ scatter_plots:
 #    input_data_folder2: ridge-indiv
 #    title: alpha VS R2 voxel-wise
 #    name: Alpha_determination/LSTM_E600_H1800_L1_hidden-first-layer
-
   # comparison GLM-RIDGE
   - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_5
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
@@ -151,17 +146,7 @@ scatter_plots:
     input_data_folder1: glm-indiv
     input_data_folder2: ridge-indiv
     title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 1500
-    name: GLM VS RIDGE
-
-
-
-
-
-
-
-
-
-    
+    name: GLM VS RIDGE   
 specific_analysis:
   - parameters:
       model_category: LSTM
@@ -171,19 +156,11 @@ specific_analysis:
       nlayers: 1
       other: '{}_first-layer'
     data: 'text/english/LSTM/text_english_LSTM_run{}.txt'
-
-
-
 check_model:
   - model: wordrate_model
     model_name: wordrate
     name: r2_test
     title: R2_test distribution
-
-
-
-
-
 model_complexity:
   - model_category: LSTM
     complexity_variable:

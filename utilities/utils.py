@@ -199,9 +199,8 @@ def pca(X, data_name, n_components=50):
 
 def sample_r2(model, x_test, y_test, shuffling, n_sample, alpha_percentile, test=False):
     # receive a trained model, x_test and y_test (test set of the cross-validation).
-    # It returns three values (or three list depending on the parameter voxel_wised):
-    # r2 value computed on test set, the thresholded value at percentile(alpha_percentile) and 
-    # percentile(alpha_percentile)
+    # It returns two values (or two lists depending on the parameter voxel_wised):
+    # r2 value computed on test set and the distribution array
     if test:
         r2_test = get_r2_score(model, y_test, x_test)
         return r2_test, None
@@ -219,10 +218,8 @@ def sample_r2(model, x_test, y_test, shuffling, n_sample, alpha_percentile, test
 
 
 def get_significativity_value(r2_test_array, distribution_array, alpha_percentile, test=False):
-    # receive r2 computed on the test set and r2 significative computed on each set
-    # (for each voxel each) and the entire distribution of r2 values computed accross
-    # all runs (with shuffled columns) and returns significative r2 computed with the 
-    # method that you want.
+    # receive r2 computed on the test set and the entire distribution of r2 values computed accross
+    # all runs (with shuffled columns) and returns r2 averaged across CV, significative r2 and threshold
 
     r2_final = np.mean(r2_test_array, axis=0)
     distribution_array = np.mean(distribution_array, axis=0)

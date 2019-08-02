@@ -191,7 +191,7 @@ class Params:
 		self.overwrite = False
 		self.parallel = True
 		self.cuda = True
-		self.voxel_wise = False
+		self.voxel_wise = True
 		if torch.cuda.is_available():
 			if not self.cuda:
 				print("WARNING: You have a CUDA device, so you should probably run with --cuda")
@@ -208,7 +208,8 @@ class Params:
 		self.n_components_list = [500] #[1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 1800]
 
 		# Deconfounding
-		self.alpha_percentile = 99
+		self.n_sample = 100
+		self.alpha_percentile = 95
 
 		# Scaling
 		self.scaling_mean = True

@@ -107,22 +107,22 @@ scatter_plots:
     input_data_folder2: ridge-indiv
     title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 10
     name: GLM VS RIDGE 
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer_r2_test
-    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer
-    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer_r2_test_not_voxel_wise
-    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer
-    y_label: R2 of Ridge
-    x_label: R2 of GLM
-    input_data_folder1: glm-indiv
-    input_data_folder2: ridge-indiv
-    title: GLM VS RIDGE - LSTM E600 H1800 L1 surprisal
-    name: GLM VS RIDGE
+#  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer_r2_test
+#    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer
+#    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer_r2_test_not_voxel_wise
+#    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer
+#    y_label: R2 of Ridge
+#    x_label: R2 of GLM
+#    input_data_folder1: glm-indiv
+#    input_data_folder2: ridge-indiv
+#    title: GLM VS RIDGE - LSTM E600 H1800 L1 surprisal
+#    name: GLM VS RIDGE
   - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_r2_100_pca_100_not_voxel_wise
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_100
+    model1: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_100_pca_100_not_voxel_wise
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    y_label: R2 of Ridge (pca 100)
-    x_label: R2 of GLM (pca 100)
+    y_label: R2 significative
+    x_label: R2 
     input_data_folder1: ridge-indiv
     input_data_folder2: ridge-indiv
     title: R2 VS significative R2 - LSTM E600 H1800 L1 hidden-first-layer pca 10

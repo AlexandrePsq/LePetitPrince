@@ -125,7 +125,17 @@ scatter_plots:
     x_label: R2 
     input_data_folder1: ridge-indiv
     input_data_folder2: ridge-indiv
-    title: R2 VS significative R2 - LSTM E600 H1800 L1 hidden-first-layer pca 10
+    title: R2 VS significative R2 - LSTM E600 H1800 L1 hidden-first-layer pca 100
+    name: R2 VS significative R2
+  - model2: ridge-indiv_english_glove_emebddings_significative_r2_100_no_pca_not_voxel_wise
+    model2_folder: glove_emebddings
+    model1: ridge-indiv_english_glove_emebddings_r2_test_100_no_pca_not_voxel_wise
+    model1_folder: glove_emebddings
+    y_label: R2 significative
+    x_label: R2 
+    input_data_folder1: ridge-indiv
+    input_data_folder2: ridge-indiv
+    title: R2 VS significative R2 - glove embeddings
     name: R2 VS significative R2
 specific_analysis:
   - parameters:

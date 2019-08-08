@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    alphas = [int(alpha) for alpha in args.alphas.split(',')]
+    alphas = [float(alpha) for alpha in args.alphas.split(',')]
     model = Ridge()
 
     indexes = [int(i) for i in args.indexes.split(',')]

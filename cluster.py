@@ -277,7 +277,7 @@ if __name__ == '__main__':
                                 "--alphas", alphas, 
                                 "--output", yaml_files_directory],  
                 name="Alphas CV - split {}".format(run + 1), 
-                referenced_input_files=[scripts_directory, design_matrices_directory, fmri_directory],
+                referenced_input_files=[scripts_directory],
                 referenced_output_files=[yaml_files_directory], 
                 working_directory=scripts_directory)
 
@@ -336,15 +336,10 @@ if __name__ == '__main__':
     manual = True
     if manual:
         
-        print(vars(controller.workflow(workflow_id)))
-        #print(controller.jobs(workflow_id))
         Helper.list_failed_jobs(workflow_id, controller)
         Helper.transfer_input_files(workflow_id, controller)
-        print(controller.workflow_status(workflow_id))
         Helper.wait_workflow(workflow_id, controller)
-        print(controller.workflow_status(workflow_id))
         Helper.transfer_output_files(workflow_id, controller)
-        print(controller.workflow_status(workflow_id))
         #Helper.delete_all_workflows(controller)
 
     print("Finished !!!")

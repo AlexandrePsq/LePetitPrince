@@ -335,6 +335,10 @@ if __name__ == '__main__':
     # You may use the gui or manually transfer the files:
     manual = True
     if manual:
+        print(controller.workflow_status(workflow_id))
+        print(controller.workflow(workflow_id))
+        print(controller.jobs(workflow_id))
+        Helper.list_failed_jobs(workflow_id, controller)
         Helper.transfer_input_files(workflow_id, controller)
         Helper.wait_workflow(workflow_id, controller)
         Helper.transfer_output_files(workflow_id, controller)

@@ -130,8 +130,8 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nUse cluster nodes to perform the Ridge analysis.""")
-    parser.add_argument("--login", type=str, default='', help="Login to connect to the cluster.")
-    parser.add_argument("--password", type=str, default='', help="Password to connect to the cluster.")
+    parser.add_argument("--login", type=str, default=None, help="Login to connect to the cluster.")
+    parser.add_argument("--password", type=str, default=None, help="Password to connect to the cluster.")
     parser.add_argument("--fmri_data", type=str, default='', help="Path to fMRI data directory.")
     parser.add_argument("--design_matrices", type=str, default='', help="Path to design-matrices directory(for a given model).")
     parser.add_argument("--model_name", type=str, default='', help="Name of the model.")

@@ -52,8 +52,8 @@ if __name__ == '__main__':
     x_paths = sorted([glob.glob(os.path.join(args.x, '*_run{}*'.format(i))) for i in indexes])
     x = [np.load(item[0]) for item in x_paths]
 
-    y_paths = [glob.glob(os.path.join(args.y, '*_run{}*'.format(i))) for i in indexes]
-    y = sorted([np.load(item[0]) for item in y_paths])
+    y_paths = sorted([glob.glob(os.path.join(args.y, '*_run{}*'.format(i))) for i in indexes])
+    y = [np.load(item[0]) for item in y_paths]
 
     run = int(args.run)
     nb_voxels = y[0].shape[1]

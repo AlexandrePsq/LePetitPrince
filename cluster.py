@@ -26,9 +26,12 @@ import argparse
 
 def check_folder(path):
     # Create adequate folders if necessary
-    if not os.path.isdir(path):
+    try:
+        if not os.path.isdir(path):
             check_folder(os.path.dirname(path))
             os.mkdir(path)
+    except:
+        pass
 
 
 def transform_design_matrices(path):
@@ -80,7 +83,6 @@ def pca(X, data_name, n_components=50):
     eig_pairs = [(np.abs(eig_values_Vc[i]), A[:,i]) for i in range(len(eig_values_Vc))]
     eig_pairs.sort()
     eig_pairs.reverse()
-    tot = sum(np.abs(eig_values_Vc))
     ##################################################
     projected_matrices = []
     projector = eig_pairs[0][1].reshape(-1, 1)
@@ -155,17 +157,35 @@ if __name__ == '__main__':
 
     inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/inputs/"
     scripts_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/utilities" # "/home/ap259944/inputs/scripts/"
-    fmri_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/inputs/y/"
-    design_matrices_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/inputs/x/"
-    derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/derivatives/"
-    shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/derivatives/shuffling.npy"
-    r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/derivatives/r2/"
-    distribution_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/derivatives/distribution/"
-    yaml_files_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/derivatives/yaml_files/"
-    output_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/outputs/"
+    fmri_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/y/" # "/home/ap259944/inputs/y/"
+    design_matrices_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/x/" # "/home/ap259944/inputs/x/"
+    derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/derivatives/" # "/home/ap259944/derivatives/"
+    shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/shuffling.npy" # "/home/ap259944/derivatives/shuffling.npy"
+    r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/r2/" # "/home/ap259944/derivatives/r2/"
+    distribution_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/distribution/" # "/home/ap259944/derivatives/distribution/"
+    yaml_files_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/yaml_files/" # "/home/ap259944/derivatives/yaml_files/"
+    output_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/outputs/" # "/home/ap259944/outputs/"
 
     design_matrices = sorted(glob.glob(os.path.join(args.design_matrices, '*run*')))
     fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, '*run*')))
+
+
+    ####################
+    ### Sanity check ###
+    ####################
+
+    all_paths = [inputs_path, 
+                    scripts_path,
+                    fmri_path, 
+                    design_matrices_path, 
+                    derivatives_path, 
+                    r2_path, 
+                    distribution_path, 
+                    yaml_files_path, 
+                    output_path]
+    for path in all_paths:
+        check_folder(path)
+
 
 
     ###########################
@@ -192,24 +212,6 @@ if __name__ == '__main__':
     alpha_list = np.logspace(-3, 3, 100)
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(95)
-
-
-    ####################
-    ### Sanity check ###
-    ####################
-
-    all_paths = [inputs_path, 
-                    scripts_path,
-                    fmri_path, 
-                    design_matrices_path, 
-                    derivatives_path, 
-                    shuffling_path, 
-                    r2_path, 
-                    distribution_path, 
-                    yaml_files_path, 
-                    output_path]
-    for path in all_paths:
-        check_folder(path)
 
 
     ################
@@ -254,11 +256,11 @@ if __name__ == '__main__':
     # first job: split the dataset
     job_0 = Job(command=["python", "shuffling_preparation.py", 
                             "--nb_features", nb_features,
-                            "--shuffling", shuffling_path,
+                            "--output", output_directory,
                             "--n_permutations", nb_permutations], 
                 name="Preparing permutations for significance analysis", 
                 referenced_input_files=[scripts_directory],
-                referenced_output_files=[shuffling_path], 
+                referenced_output_files=[output_directory],
                 working_directory=scripts_directory)
 
     jobs.append(job_0)
@@ -342,7 +344,7 @@ if __name__ == '__main__':
         Helper.transfer_input_files(workflow_id, controller)
         Helper.wait_workflow(workflow_id, controller)
         Helper.transfer_output_files(workflow_id, controller)
-        Helper.delete_all_workflows(controller)
+        #Helper.delete_all_workflows(controller)
 
     print("Finished !!!")
 

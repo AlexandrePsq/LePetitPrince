@@ -110,6 +110,20 @@ def transform_design_matrices(path):
     dm = np.hstack((dm, const))
     return dm 
 
+def standardization(matrices, model_name, pca_components=300):
+    if (matrices[0].shape[1] > pca_components) & (params.pca):
+        print('PCA analysis running...')
+        matrices = pca(matrices, model_name, n_components=pca_components)
+        print('PCA done.')
+    else:
+        print('Skipping PCA.')
+        for index in range(len(matrices)):
+            scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
+            scaler.fit(matrices[index])
+            matrices[index] = scaler.transform(matrices[index])
+    return matrices
+
+
 
 def shift(column, n_rows, column_name):
     # shift the rows of a column and padd with 0
@@ -208,7 +222,7 @@ def sample_r2(model, x_test, y_test, shuffling, n_sample, alpha_percentile, test
         r2_test = get_r2_score(model, y_test, x_test)
         distribution_array = None
         for index in tqdm(range(n_sample)):
-            r2_tmp = get_r2_score(model, y_test, x_test.T[shuffling[index]].T)
+            r2_tmp = get_r2_score(model, y_test, x_test[:, shuffling[index]])
             distribution_array = r2_tmp if distribution_array is None else np.vstack([distribution_array, r2_tmp])
         return r2_test, distribution_array
         # thresholds = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel

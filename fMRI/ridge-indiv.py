@@ -19,14 +19,12 @@ import warnings
 warnings.simplefilter(action='ignore')
 
 from utilities.settings import Paths, Subjects, Params
-from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices, pca
+from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices, standardization
 from utilities.first_level_analysis import compute_global_masker, do_single_subject
 import pandas as pd
 from nilearn.masking import compute_epi_mask
 import numpy as np
 from nilearn.input_data import MultiNiftiMasker
-from sklearn.preprocessing import StandardScaler
-
 from sklearn.metrics import r2_score
 from sklearn.model_selection import LeaveOneGroupOut
 from sklearn.linear_model import Ridge, RidgeCV
@@ -47,7 +45,6 @@ if __name__ == '__main__':
     parser.add_argument("--subjects", nargs='+', action='append', default=[], help="Subjects list on whom we are running a test: list of 'sub-002...")
     parser.add_argument("--language", type=str, default='english', help="Language of the model.")
     parser.add_argument("--model_name", type=str, help="Name of the model to use to generate the raw features.")
-    parser.add_argument("--overwrite", default=False, action='store_true', help="Precise if we overwrite existing files")
     parser.add_argument("--parallel", default=False, action='store_true', help="Precise if we run the code in parallel")
     parser.add_argument("--voxel_wised", default=False, action='store_true', help="Precise if we compute voxel-wised")
     parser.add_argument("--alphas", nargs='+', action='append', default=[np.logspace(-3, 3, 30)], help="List of alphas for voxel-wised analysis.")
@@ -69,16 +66,7 @@ if __name__ == '__main__':
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
     matrices = [transform_design_matrices(run) for run in dm] # list of design matrices (dataframes) where we added a constant column equal to 1
-    if (matrices[0].shape[1] > args.pca) & (params.pca):
-        print('PCA analysis running...')
-        matrices = pca(matrices, model_name, n_components=args.pca)
-        print('PCA done.')
-    else:
-        print('Skipping PCA.')
-        for index in range(len(matrices)):
-            scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
-            scaler.fit(matrices[index])
-            matrices[index] = scaler.transform(matrices[index])
+    matrices = standardization(matrices, model_name, pca_components=args.pca)
     masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object ... computation is sloow
 
     if args.parallel:

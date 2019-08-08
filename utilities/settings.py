@@ -210,6 +210,7 @@ class Params:
 		# Deconfounding
 		self.n_sample = 100
 		self.alpha_percentile = 95
+		self.cluster_bsz = 100
 
 		# Scaling
 		self.scaling_mean = True

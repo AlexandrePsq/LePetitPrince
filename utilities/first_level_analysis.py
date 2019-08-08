@@ -167,6 +167,12 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
     alphas_cv2 = np.zeros((nb_runs_test, nb_voxels))
     scores_cv2 = np.zeros((nb_runs_test, nb_voxels))
     distribution_array = np.zeros((nb_runs_test, n_sample, nb_voxels))
+    batch_size = params.cluster_bsz
+    path2_y_train = os.path.join('y_train.npy')
+    path2_x_train = os.path.join('x_train.npy')
+    path2_x_test = os.path.join('x_test.npy')
+    path2_y_test = os.path.join('y_test.npy')
+    path2_shuffling = os.path.join('shuffling.npy')
     
     # loop for r2 computation
     cv3 = 0
@@ -201,19 +207,37 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
         alphas_cv2[cv3, :] = np.array([alpha_list[i] for i in best_alphas_indexes])
         fmri2 = np.vstack(fmri_data_train_)
         dm2 = np.vstack(predictors_train_)
+        i = -1
         for voxel in tqdm(range(nb_voxels)): # loop through the voxels and fit the model with the best alpha for this voxel
-            y = fmri2[:,voxel].reshape((fmri2.shape[0],1))
-            model.set_params(alpha=alphas_cv2[cv3, voxel])
-            model_fitted = model.fit(dm2, y)
-            # scores_cv2[cv3, voxel] = get_r2_score(model_fitted, 
-            #                                 fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
-            #                                 design_matrices[test[0]])
-            r2, distribution = sample_r2(model_fitted, 
-                                            design_matrices[test[0]], 
-                                            fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
-                                            shuffling=shuffling,
-                                            n_sample=n_sample, 
-                                            alpha_percentile=params.alpha_percentile)
+            path2_output_r2 = os.path.join('r2_{}_{}.npy'.format(voxel, cv3))
+            path2_output_distribution = os.path.join('distribution_{}_{}.npy'.format(voxel, cv3))
+            if voxel % batch_size == 0:
+                i += 1
+            np.save(path2_y_train fmri2)
+            np.save(path2_x_train, dm2)
+            np.save(path2_x_test, design_matrices[test[0]])
+            np.save(path2_y_test, fmri_runs[test[0]])
+            np.save(path2_shuffling, shuffling)
+            with open('cluster_node_{}.txt'.format(i), 'a+') as f:
+                f.write('python significance_clusterized.py --alpha {} \
+                                                            --voxel {} \
+                                                            --output_r2 {}  \
+                                                            --output_distribution {} \
+                                                            --y_train {} \
+                                                            --x_train {} \
+                                                            --x_test {} \
+                                                            --y_test {} \
+                                                            --shuffling {}'.format(alphas_cv2[cv3, voxel],
+                                                                                    voxel,
+                                                                                    path2_output_r2,
+                                                                                    path2_output_distribution,
+                                                                                    path2_y_train,
+                                                                                    path2_x_train,
+                                                                                    path2_x_test,
+                                                                                    path2_y_test,
+                                                                                    path2_shuffling
+                                                                                    ))
+
             scores_cv2[cv3, voxel] = r2[0]
             distribution_array[cv3, :, voxel] = distribution
 

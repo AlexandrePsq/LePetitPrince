@@ -315,13 +315,15 @@ if __name__ == '__main__':
                         referenced_input_files=[scripts_directory, raw_data_directory, output_directory],
                         referenced_output_files=[output_directory], 
                         working_directory=scripts_directory)
+    jobs.append(job_final)
+    dependencies.append((job_merge, job_final))
 
     cv_alphas = Group(elements=group_cv_alphas,
                         name="CV on alphas")
 
     workflow = Workflow(jobs=jobs,
                     dependencies= dependencies,
-                    root_group=[job_0, cv_alphas, job_generator, job_merge])
+                    root_group=[job_0, cv_alphas, job_generator, job_merge, job_final])
 
 
     ### Submit the workflow to computing resource (configured in the client-server mode)

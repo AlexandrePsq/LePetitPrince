@@ -139,7 +139,7 @@ if __name__ == '__main__':
     fmri_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/y/" # "/home/ap259944/inputs/y/"
     design_matrices_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/x/" # "/home/ap259944/inputs/x/"
     derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/derivatives/" # "/home/ap259944/derivatives/"
-    shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/shuffling.npy" # "/home/ap259944/derivatives/shuffling.npy"
+    shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/outputs/shuffling.npy" # "/home/ap259944/derivatives/shuffling.npy"
     r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/r2/" # "/home/ap259944/derivatives/r2/"
     distribution_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/distribution/" # "/home/ap259944/derivatives/distribution/"
     yaml_files_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/yaml_files/" # "/home/ap259944/derivatives/yaml_files/"
@@ -253,7 +253,6 @@ if __name__ == '__main__':
                                     "--y", fmri_directory, 
                                     "--alphas", alphas, 
                                     "--output", output_directory, 
-                                    "--shuffling", shuffling_path, 
                                     "--nb_permutations", nb_permutations, 
                                     "--alpha_percentile", alpha_percentile, 
                                     "--login", login, 
@@ -328,7 +327,7 @@ if __name__ == '__main__':
 
     ### Submit the workflow to computing resource (configured in the client-server mode)
 
-    controller = WorkflowController("DSV_cluster_ap259944", login, password)
+    controller = WorkflowController() #"DSV_cluster_ap259944", login, password
 
     workflow_id = controller.submit_workflow(workflow=workflow,
                                             name="Ridge - LPP")

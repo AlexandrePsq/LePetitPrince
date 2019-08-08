@@ -26,13 +26,14 @@ if __name__ == '__main__':
     parser.add_argument("--y", type=str, default='', help="Path to y folder.")
     parser.add_argument("--alphas", type=str, default=None, help="Alphas values to test during CV (delimiter=',').")
     parser.add_argument("--output", type=str, default=None, help="Output folder.")
-    parser.add_argument("--shuffling", type=str, default=None, help="Path of shuffling array.")
     parser.add_argument("--nb_permutations", type=str, default=None, help="Path of shuffling array.")
     parser.add_argument("--alpha_percentile", type=str, default=None, help="Path of shuffling array.")
     parser.add_argument("--login", type=str, default='', help="Login to connect to the cluster.")
     parser.add_argument("--password", type=str, default='', help="Password to connect to the cluster.")
 
     args = parser.parse_args()
+
+    shuffling =  os.path.join(args.output, 'shuffling.npy')
 
     ### FileTransfers
     # FileTransfer creation for input/output files
@@ -54,7 +55,7 @@ if __name__ == '__main__':
                             "--output_distribution", os.path.join(args.output, 'distribution'), 
                             "--x", args.x, 
                             "--y", args.y, 
-                            "--shuffling", args.shuffling, 
+                            "--shuffling", shuffling, 
                             "--n_permutations", args.nb_permutations, 
                             "--alpha_percentile", args.alpha_percentile], 
                     name="job {} - alpha {}".format(run, alpha), 
@@ -73,7 +74,7 @@ if __name__ == '__main__':
 
     ### Submit the workflow to computing resource (configured in the client-server mode)
 
-    controller2 = WorkflowController("DSV_cluster_ap259944", args.login, args.password)
+    controller2 = WorkflowController() #"DSV_cluster_ap259944", args.login, args.password
 
     workflow_id2 = controller2.submit_workflow(workflow=workflow2,
                                             name="Voxel-wise computations")

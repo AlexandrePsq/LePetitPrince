@@ -41,7 +41,7 @@ def transform_design_matrices(path):
 
 
 def standardization(matrices, model_name, pca_components="300"):
-    if (pca_components) & (matrices[0].shape[1] > int(pca_components)):
+    if (pca_components) and (matrices[0].shape[1] > int(pca_components)):
         print('PCA analysis running...')
         matrices = pca(matrices, model_name, n_components=int(pca_components))
         print('PCA done.')

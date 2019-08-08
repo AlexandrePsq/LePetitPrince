@@ -49,8 +49,8 @@ if __name__ == '__main__':
 
     indexes = [int(i) for i in args.indexes.split(',')]
     
-    x_paths = [glob.glob(os.path.join(args.x, '*_run{}*'.format(i))) for i in indexes]
-    x = sorted([np.load(item[0]) for item in x_paths])
+    x_paths = sorted([glob.glob(os.path.join(args.x, '*_run{}*'.format(i))) for i in indexes])
+    x = [np.load(item[0]) for item in x_paths]
 
     y_paths = [glob.glob(os.path.join(args.y, '*_run{}*'.format(i))) for i in indexes]
     y = sorted([np.load(item[0]) for item in y_paths])

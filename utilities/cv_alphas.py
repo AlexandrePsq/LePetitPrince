@@ -4,6 +4,7 @@ import os
 import glob
 import yaml
 import argparse
+import subprocess
 
 import warnings
 warnings.simplefilter(action='ignore')
@@ -29,7 +30,7 @@ def check_folder(path):
         check_folder(os.path.dirname(path))
         os.mkdir(path)
 
-
+subprocess.call("touch /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/delete.txt", shell=True)
 
 if __name__ == '__main__':
 

@@ -8,9 +8,12 @@ import glob
 
 def check_folder(path):
     # Create adequate folders if necessary
-    if not os.path.isdir(path):
-        check_folder(os.path.dirname(path))
-        os.mkdir(path)
+    try:
+        if not os.path.isdir(path):
+            check_folder(os.path.dirname(path))
+            os.mkdir(path)
+    except:
+        pass
 
 
 def get_significativity_value(r2_test_array, distribution_array, alpha_percentile, test=False):

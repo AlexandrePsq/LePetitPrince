@@ -96,7 +96,7 @@ def pca(X, data_name, n_components=50):
         scaler.fit(projected_matrices[index])
         projected_matrices[index] = scaler.transform(projected_matrices[index])
     return projected_matrices
-            
+
 
 def compute_global_masker(files): # [[path, path2], [path3, path4]]
     # return a MultiNiftiMasker object
@@ -105,27 +105,6 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
     masker.fit()
     return masker
-
-
-def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=0.2, pca='', voxel_wise=False):
-    model = os.path.basename(output_parent_folder)
-    language = os.path.basename(os.path.dirname(output_parent_folder))
-    data_type = os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder)))
-
-    img = masker.inverse_transform(distribution)
-
-    pca = 'pca_' + str(pca) if (pca!='') else 'no_pca'
-    voxel_wise = 'voxel_wise' if voxel_wise else 'not_voxel_wise'
-    
-    path2output_raw = os.path.join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(data_type, language, model, distribution_name, pca, voxel_wise, subject)+'.nii.gz')
-    path2output_png = os.path.join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(data_type, language, model, distribution_name, pca, voxel_wise, subject)+'.png')
-
-    nib.save(img, path2output_raw)
-
-    display = plot_glass_brain(img, display_mode='lzry', threshold=0, colorbar=True, black_bg=True, vmin=0., vmax=vmax)
-    display.savefig(path2output_png)
-    display.close()
-
 
 
 
@@ -155,7 +134,7 @@ if __name__ == '__main__':
     ### Data retrieval ###
     ######################
 
-    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/" # "/home/ap259944/inputs/"
+    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/inputs/{}".format(args.fmri_data) # "/home/ap259944/inputs/"
     scripts_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/utilities" # "/home/ap259944/inputs/scripts/"
     fmri_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/y/" # "/home/ap259944/inputs/y/"
     design_matrices_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/x/" # "/home/ap259944/inputs/x/"
@@ -220,6 +199,9 @@ if __name__ == '__main__':
 
     ### FileTransfers
     # FileTransfer creation for input/output files
+    raw_data_directory = FileTransfer(is_input=True,
+                        client_path=inputs_path,
+                        name="raw data directory")
     scripts_directory = FileTransfer(is_input=True,
                         client_path=scripts_path,
                         name="working directory")
@@ -308,7 +290,7 @@ if __name__ == '__main__':
     jobs.append(job_generator)
                 
     # Merging the results and compute significant r2
-    job_final = Job(command=["python", "merge_results.py", 
+    job_merge = Job(command=["python", "merge_results.py", 
                                 "--input_r2", r2_directory, 
                                 "--input_distribution", distribution_directory, 
                                 "--output", output_directory, 
@@ -320,15 +302,26 @@ if __name__ == '__main__':
             referenced_output_files=[output_directory], 
             working_directory=scripts_directory)
 
-    jobs.append(job_final)
-    dependencies.append((job_generator, job_final))
+    jobs.append(job_merge)
+    dependencies.append((job_generator, job_merge))
+
+    # Plotting the maps
+    job_final = Job(command=["python", "merge_results.py", 
+                                "--output", output_directory, 
+                                "--subject", args.subject, 
+                                "--pca", args.pca, 
+                                "--fmri_data", raw_data_directory], 
+                        name="Creating the maps.", 
+                        referenced_input_files=[scripts_directory, raw_data_directory, output_directory],
+                        referenced_output_files=[output_directory], 
+                        working_directory=scripts_directory)
 
     cv_alphas = Group(elements=group_cv_alphas,
                         name="CV on alphas")
 
     workflow = Workflow(jobs=jobs,
                     dependencies= dependencies,
-                    root_group=[job_0, cv_alphas, job_generator, job_final])
+                    root_group=[job_0, cv_alphas, job_generator, job_merge])
 
 
     ### Submit the workflow to computing resource (configured in the client-server mode)
@@ -347,23 +340,3 @@ if __name__ == '__main__':
         #Helper.delete_all_workflows(controller)
 
     print("Finished !!!")
-
-
-    #####################
-    ### Plotting maps ###
-    #####################
-    output_parent_folder = os.path.join(output_path, 'maps')
-    alphas = np.mean(np.load(os.path.join(output_path, 'voxel2alpha.npy')), axis=0)
-    r2 = np.load(os.path.join(output_path, 'r2.npy'))
-    z_values = np.load(os.path.join(output_path, 'z_values.npy'))
-    significant_r2 = np.load(os.path.join(output_path, 'significant_r2.npy'))
-    pca = int(args.pca)
-    
-    # creating maps
-    create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3
-    create_maps(masker, r2, 'r2', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # r2 test
-    create_maps(masker, z_values, 'z_values', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # p_values
-    create_maps(masker, significant_r2, 'significant_r2', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significative
-
-
-    

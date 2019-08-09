@@ -70,9 +70,6 @@ if __name__ == '__main__':
         dm = np.vstack(x_train)
         fmri = np.vstack(y_train)
         scores = np.zeros((nb_voxels, nb_runs_cv, nb_alphas))
-        with open(os.path.join(args.output, 'delete_first_part.txt'), 'a+') as f:
-            f.write('Et de 1 passage')
-            f.write('\n')
         
         alpha_index = 0
         for alpha_tmp in alphas: # compute the r2 for a given alpha for all the voxel

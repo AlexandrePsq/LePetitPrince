@@ -60,6 +60,10 @@ if __name__ == '__main__':
     nb_alphas = len(alphas)
     nb_runs_cv = len(x)
 
+    with open(os.path.join(args.output, 'delete_avant.txt'), 'a+') as f:
+        f.write('Et de 1 passage')
+        f.write('\n')
+
 
     logo = LeaveOneOut() # leave on run out !
     cv_index = 0
@@ -98,6 +102,10 @@ if __name__ == '__main__':
  
         with open(yaml_path, 'w') as outfile:
             yaml.dump(yaml_file, outfile, default_flow_style=False)
+    
+    with open(os.path.join(args.output, 'delete_apres.txt'), 'a+') as f:
+        f.write('Et de 1 passage')
+        f.write('\n')
     
     # saving
     np.save(os.path.join(args.output, 'voxel2alpha{}.npy'.format(run)), voxel2alpha)

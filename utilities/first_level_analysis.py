@@ -1,3 +1,4 @@
+from soma_workflow.client import Job, Workflow, Helper, Group, WorkflowController, FileTransfer, SharedResourcePath
 from nilearn.input_data import MultiNiftiMasker
 from nilearn.plotting import plot_glass_brain
 from sklearn.model_selection import LeaveOneOut, LeaveOneGroupOut

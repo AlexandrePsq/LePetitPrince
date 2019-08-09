@@ -51,6 +51,9 @@ if __name__ == '__main__':
     x = [np.load(item[0]) for item in x_paths]
 
     y_paths = sorted([glob.glob(os.path.join(args.y, '*_run{}*'.format(i))) for i in indexes])
+    with open(os.path.join(args.output, 'delete_avant.txt'), 'a+') as f:
+        f.write(str(y_paths))
+        f.write('\n')
     y = [np.load(item[0]) for item in y_paths]
 
     run = int(args.run)
@@ -58,9 +61,7 @@ if __name__ == '__main__':
     nb_alphas = len(alphas)
     nb_runs_cv = len(x)
 
-    with open(os.path.join(args.output, 'delete_avant.txt'), 'a+') as f:
-        f.write(str(len(y)))
-        f.write('\n')
+    
 
 
     logo = LeaveOneOut() # leave on run out !

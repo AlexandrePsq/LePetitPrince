@@ -335,8 +335,6 @@ if __name__ == '__main__':
     # You may use the gui or manually transfer the files:
     manual = True
     if manual:
-        
-        Helper.list_failed_jobs(workflow_id, controller)
         Helper.transfer_input_files(workflow_id, controller)
         Helper.wait_workflow(workflow_id, controller)
         Helper.transfer_output_files(workflow_id, controller)

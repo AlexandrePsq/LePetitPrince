@@ -59,7 +59,7 @@ if __name__ == '__main__':
     nb_runs_cv = len(x)
 
     with open(os.path.join(args.output, 'delete_avant.txt'), 'a+') as f:
-        f.write('Et de 1 passage')
+        f.write(str(len(y)))
         f.write('\n')
 
 

@@ -29,9 +29,6 @@ def check_folder(path):
         check_folder(os.path.dirname(path))
         os.mkdir(path)
 
-with open('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/delete.yaml', 'w') as outfile:
-    yaml.dump({'r':1, 't':2}, outfile, default_flow_style=False)
-
 
 if __name__ == '__main__':
 

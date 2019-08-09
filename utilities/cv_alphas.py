@@ -48,17 +48,9 @@ if __name__ == '__main__':
     indexes = [int(i) for i in args.indexes.split(',')]
     
     x_paths = sorted([glob.glob(os.path.join(args.x, '*_run{}*'.format(i))) for i in indexes])
-    with open(os.path.join(args.output, 'delete_x.txt'), 'a+') as f:
-        f.write(str(indexes))
-        f.write(str(x_paths))
-        f.write('\n')
     x = [np.load(item[0]) for item in x_paths]
 
     y_paths = sorted([glob.glob(os.path.join(args.y, '*_run{}*'.format(i))) for i in indexes])
-    with open(os.path.join(args.output, 'delete_y.txt'), 'a+') as f:
-        f.write(str(indexes))
-        f.write(str(y_paths))
-        f.write('\n')
     y = [np.load(item[0]) for item in y_paths]
 
     run = int(args.run)

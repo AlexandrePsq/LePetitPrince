@@ -53,49 +53,49 @@ Analysis pipeline:
 The files are organized in the following overall folder structure:
 
 ---
-├── paradigm (experiences information, stimuli)
-├── oldstuff (oldscripts, personnal data/code, ...)
-├── code (all the code of all the analysis)
-│   ├── MEG (code of the MEG analysis pipeline)
-│   ├── fMRI (code of the fMRI analysis pipeline)
-│   ├── models (code related to models initialization/training/generation)
-│   │   ├── english
-│   │   │   ├── LSTM (LSTM framework)
-│   │   │   ├── RMS (Framework for wave properties analysis)
-│   │   │   ├── WORDRATE (Framework for simple linguistics properties analysis)
-│   │   │   ├── lstm_wikikristina_embedding-size_200_nhid_300_nlayers_1_dropout_01.py (instantiation of a LSTM model)
-│   │   │   ├── lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01.py (instantiation of a LSTM model)
-│   │   │   └── ...
-│   │   └── french
-│   └── utilities (utilities functions: parameters settings, splitter for CV, ...)
-├── data (all the raw data acquired from sources)
-│   ├── fMRI (fMRI data, 9 runs per subject)
-│   │   └── english
-│   │       └── sub-057
-│   │           └── func
-│   ├── wave (wave files data, 9 runs, data for models training)
-│   │   ├── english
-│   │   └── french
-│   └── text (text data, raw text, division in 9 runs, onsets/offsets for each runs, data for models training)
-│       ├── english
-│       │   ├── lstm_training
-│       │   └── onsets-offsets
-│       └── french
-└── derivatives (results of the code above)
-    ├── MEG
-    └── fMRI (results from the fMRI pipeline in code/fMRI/)
-        ├── design-matrices (concatenation of features associated with different models of interest)
-        │   └── english
-        ├── features (Raw-features convolved with an 'hrf' kernel)
-        │   └── english
-        ├── glm-indiv (GLM model fitted on fMRI data with a design-matrix)
-        │   └── english
-        ├── models (trained models)
-        │   └── english
-        ├── raw_features (Result of a model generation from the text/wave file of LPP, concatenated with the adequate onsets file)
-        │   └── english
-        └── ridge-indiv (Ridge model fitted on fMRI data with a design-matrix)
-            └── english
+    paradigm (experiences information, stimuli)
+    oldstuff (oldscripts, personnal data/code, ...)
+    code (all the code of all the analysis)
+        MEG (code of the MEG analysis pipeline)
+        fMRI (code of the fMRI analysis pipeline)
+        models (code related to models initialization/training/generation)
+            english
+                LSTM (LSTM framework)
+                RMS (Framework for wave properties analysis)
+                WORDRATE (Framework for simple linguistics properties analysis)
+                lstm_wikikristina_embedding-size_200_nhid_300_nlayers_1_dropout_01.py (instantiation of a LSTM model)
+                lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01.py (instantiation of a LSTM model)
+                ...
+            french
+        utilities (utilities functions: parameters settings, splitter for CV, ...)
+    data (all the raw data acquired from sources)
+        fMRI (fMRI data, 9 runs per subject)
+            english
+                sub-057
+                    func
+        wave (wave files data, 9 runs, data for models training)
+            english
+            french
+        text (text data, raw text, division in 9 runs, onsets/offsets for each runs, data for models training)
+            english
+                lstm_training
+                onsets-offsets
+            french
+    derivatives (results of the code above)
+        MEG
+        fMRI (results from the fMRI pipeline in code/fMRI/)
+            design-matrices (concatenation of features associated with different models of interest)
+                english
+            features (Raw-features convolved with an 'hrf' kernel)
+                english
+            glm-indiv (GLM model fitted on fMRI data with a design-matrix)
+                english
+            models (trained models)
+                english
+            raw_features (Result of a model generation from the text/wave file of LPP, concatenated with the adequate onsets file)
+                english
+            ridge-indiv (Ridge model fitted on fMRI data with a design-matrix)
+                english
 ---
 
 The script `create_architecture.py` automatically generates this tree structure (but does not fill it).

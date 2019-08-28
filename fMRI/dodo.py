@@ -187,7 +187,7 @@ def task_ridge_indiv():
                         + optional + optional_parallel \
                             + pca_argument \
                                 + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))\
-                                    + alphas_argument]
+                                    + alphas_argument + " --voxel_wised"]
 
                 }
 

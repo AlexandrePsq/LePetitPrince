@@ -266,8 +266,8 @@ if __name__ == '__main__':
     # cross-validation on alpha for each split 
     group_cv_alphas = []
 
-    for run in range(int(nb_runs)):
-        indexes = np.arange(int(nb_runs))
+    for run in range(1, 1+int(nb_runs)):
+        indexes = np.arange(1, 1+int(nb_runs))
         indexes = ','.join([str(i) for i in np.delete(indexes, run, 0)]) 
         job = Job(command=["python", "cv_alphas.py", 
                                 "--indexes", indexes, 
@@ -276,7 +276,7 @@ if __name__ == '__main__':
                                 "--run", str(run), 
                                 "--alphas", alphas, 
                                 "--output", yaml_files_directory],  
-                name="Alphas CV - split {}".format(run + 1), 
+                name="Alphas CV - split {}".format(run), 
                 referenced_input_files=[scripts_directory],
                 referenced_output_files=[yaml_files_directory], 
                 working_directory=scripts_directory)

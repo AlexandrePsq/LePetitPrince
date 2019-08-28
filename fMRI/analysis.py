@@ -182,7 +182,7 @@ if __name__ == '__main__':
             else:
                 y_list = []
                 for subject in subjects:
-                    non_zero_value = []
+                    significant_values = [np.load(mask).sum() for mask in analysis['mask']]
                     max_values = []
                     y_sub = []
                     subject = Subjects().get_subject(int(subject))
@@ -210,7 +210,6 @@ if __name__ == '__main__':
                                                 subject + '.nii.gz'])
                         path2file = os.path.join(path, file_name)
                         y_sub.append(masker.transform(path2file)[0])
-                        non_zero_value.append(np.count_nonzero(y_sub[-1]))
                         max_values.append(np.max(y_sub[-1]))
                     plt.figure(i)
                     plt.boxplot(y_sub, positions=x, sym='', widths=5, meanline=True, showmeans=True)
@@ -230,7 +229,7 @@ if __name__ == '__main__':
                     color = 'tab:red'
                     ax1.set_xlabel('\n'.join(wrap(analysis['variable_name'])))
                     ax1.set_ylabel('\n'.join(wrap('count')), color=color)
-                    ax1.plot(x, non_zero_value, color=color)
+                    ax1.plot(x, significant_values, color=color)
                     ax1.tick_params(axis='y', labelcolor=color)
 
                     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis

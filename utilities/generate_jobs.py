@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
     ### Submit the workflow to computing resource (configured in the client-server mode)
 
-    controller2 = WorkflowController() #"DSV_cluster_ap259944", args.login, args.password
+    controller2 = WorkflowController("DSV_cluster_ap259944", login, password) #"DSV_cluster_ap259944", args.login, args.password
 
     workflow_id2 = controller2.submit_workflow(workflow=workflow2,
                                             name="Voxel-wise computations")

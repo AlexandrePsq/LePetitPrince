@@ -87,12 +87,24 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     else:
         r2_test, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
     optional = '_' + str(params.pref.alpha_default) if ((type(model) == sklearn.linear_model.Ridge) & (not params.voxel_wise)) else ''
-    r2_test, r2_significative, p_values = get_significativity_value(r2_test, 
-                                                                    distribution_array, 
-                                                                    params.alpha_percentile)
+    r2_test, mask, z_values = get_significativity_value(r2_test, 
+                                                        distribution_array, 
+                                                        params.alpha_percentile)
     create_maps(masker, r2_test, 'r2_test{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) # r2 test
     try:
-        create_maps(masker, p_values, 'p-values{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # p_values
+        r2_significative = np.zeros(r2_test.shape)
+        r2_significative[mask] = r2_test[mask]
+        r2_significative[~mask] = -1
+        path2mask = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder))), 
+                                                                                    os.path.basename(os.path.dirname(output_parent_folder)), 
+                                                                                    os.path.basename(output_parent_folder), 
+                                                                                    'mask', 
+                                                                                    'pca_' + str(pca) if params.pca else 'no_pca',
+                                                                                    'voxel_wise' if voxel_wised else 'not_voxel_wise'
+                                                                                    subject)
+                                                                                    +'.npy')
+        np.save(path2mask, mask) # mask
+        create_maps(masker, z_values, 'z-values{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # z_values
         create_maps(masker, r2_significative, 'significative_r2{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=voxel_wised) # r2_significative
     except:
         print('Test Done.')

@@ -24,10 +24,9 @@ def get_significativity_value(r2_test_array, distribution_array, alpha_percentil
     distribution_array = np.mean(distribution_array, axis=0)
 
     z_values = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
-    r2_significative_final = r2_final.copy()
-    r2_significative_final[r2_final < z_values] = 0.
+    mask = (r2_final > z_values).astype(int)
     
-    return r2_final, r2_significative_final, z_values, distribution_array
+    return r2_final, mask, z_values, distribution_array
 
 
 
@@ -68,21 +67,26 @@ if __name__ =='__main__':
     alphas_array = np.vstack(alphas_array)
     
     # computing significativity
-    r2, r2_significative, z_values, distribution_array = get_significativity_value(scores, 
-                                                                                    distribution_array, 
-                                                                                    int(args.alpha_percentile))
-    
+    r2, mask, z_values, distribution_array = get_significativity_value(scores, 
+                                                                        distribution_array, 
+                                                                        int(args.alpha_percentile))
+    r2_significative = np.zeros(r2.shape)
+    r2_significative[mask] = r2[mask]
+    r2_significative[~mask] = -1
+
     # defining paths
     check_folder(args.output)
     r2_output_path = os.path.join(args.output, 'r2.npy')
-    significant_r2_output_path = os.path.join(args.output, 'significant_r2.npy')
+    r2_significative_output_path = os.path.join(args.output, 'r2_significative.npy')
+    mask_output_path = os.path.join(args.output, 'mask.npy')
     z_values_output_path = os.path.join(args.output, 'z_values.npy')
     distribution_output_path = os.path.join(args.output, 'distribution.npy')
     alphas_path = os.path.join(args.output, 'voxel2alpha.npy')
 
     # saving
     np.save(r2_output_path, r2)
-    np.save(significant_r2_output_path, r2_significative)
+    np.save(r2_significative_output_path, r2_significative)
+    np.save(mask_output_path, mask)
     np.save(z_values_output_path, z_values)
     np.save(distribution_output_path, distribution_array)
     np.save(alphas_path, alphas_array)

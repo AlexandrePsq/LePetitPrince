@@ -327,7 +327,7 @@ if __name__ == '__main__':
 
     ### Submit the workflow to computing resource (configured in the client-server mode)
 
-    controller = WorkflowController() #"DSV_cluster_ap259944", login, password
+    controller = WorkflowController("DSV_cluster_ap259944", login, password) #"DSV_cluster_ap259944", login, password
 
     workflow_id = controller.submit_workflow(workflow=workflow,
                                             name="Ridge - LPP")

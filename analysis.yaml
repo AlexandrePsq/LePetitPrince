@@ -87,15 +87,15 @@ scatter_plots:
     input_data_folder2: ridge-indiv
     title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 10
     name: GLM VS RIDGE
-  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_20
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_50
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_20_not_voxel_wise
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_50_not_voxel_wise
     model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-    y_label: R2 of Ridge (pca 20)
-    x_label: R2 of GLM (pca 20)
+    y_label: R2 of Ridge (pca 50)
+    x_label: R2 of GLM (pca 50)
     input_data_folder1: glm-indiv
     input_data_folder2: ridge-indiv
-    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 20
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 50
     name: GLM VS RIDGE
   - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_100
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
@@ -106,6 +106,56 @@ scatter_plots:
     input_data_folder1: glm-indiv
     input_data_folder2: ridge-indiv
     title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 100
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_300
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_300_not_voxel_wise
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of Ridge (pca 300)
+    x_label: R2 of GLM (pca 300)
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 300
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_600
+    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    model1: glm-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_600_not_voxel_wise
+    model1_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+    y_label: R2 of Ridge (pca 600)
+    x_label: R2 of GLM (pca 600)
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 600
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_wordrate_model_r2_test_no_pca
+    model2_folder: wordrate_model
+    model1: glm-indiv_english_wordrate_model_r2_test_no_pca_not_voxel_wise
+    model1_folder: wordrate_model
+    y_label: R2 of Ridge
+    x_label: R2 of GLM
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - wordrate_model
+    name: GLM VS RIDGE
+  - model2: ridge-indiv_english_rms_model_r2_test_no_pca
+    model2_folder: rms_model
+    model1: glm-indiv_english_rms_model_r2_test_no_pca_not_voxel_wise
+    model1_folder: rms_model
+    y_label: R2 of Ridge
+    x_label: R2 of GLM
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - rms_model
+    name: GLM VS RIDGE 
+  - model2: ridge-indiv_english_glove_embeddings_r2_test_no_pca
+    model2_folder: glove_embeddings
+    model1: glm-indiv_english_glove_embeddings_r2_test_no_pca_not_voxel_wise
+    model1_folder: glove_embeddings
+    y_label: R2 of Ridge
+    x_label: R2 of GLM
+    input_data_folder1: glm-indiv
+    input_data_folder2: ridge-indiv
+    title: GLM VS RIDGE - glove_embeddings
     name: GLM VS RIDGE 
 #  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer_r2_test
 #    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer
@@ -153,6 +203,27 @@ check_model:
     title: R2_test distribution
 model_complexity:
   - model_category: LSTM
+    mask:
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_1_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_2_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_5_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_10_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_20_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_40_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_60_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_80_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_100_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_150_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_200_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_250_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_300_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_350_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_400_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_500_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_600_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_800_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_1000_voxel_wise_sub-057.npy
+      - /neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer/ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_significative_mask_pca_1500_voxel_wise_sub-057.npy
     complexity_variable:
       - 1
       - 2

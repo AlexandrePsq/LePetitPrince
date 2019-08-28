@@ -100,7 +100,7 @@ if __name__ == '__main__':
                     #plt.xlim(0,0.2)
                     #plt.ylim(0,0.2)
                     plt.plot([max([np.min(x), np.min(y)]), min([np.max(x), np.max(y)])], [max([np.min(x), np.min(y)]), min([np.max(x), np.max(y)])], c='blue')
-                    plt.plot(x, np.zeros(len(x)), c='blue')
+                    plt.axhline(y=0., color='blue', linestyle='-')
                     plt.legend()
                     save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'scatter_plots', analysis_name)
                     check_folder(save_folder)

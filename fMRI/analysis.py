@@ -92,6 +92,7 @@ if __name__ == '__main__':
                     plt.figure(i)
                     plt.scatter(x, y, c='red', marker='.')
                     plt.scatter([np.mean(x)], [np.mean(y)], c='green', label='Average value')
+                    plt.scatter(x-y, y, c='black', label='increase in r2')
                     plt.scatter([np.percentile(x, 50)], [np.percentile(y, 50)], c='blue', label='Median value')
                     plt.title('\n'.join(wrap('{} in {}'.format(analysis['title'], labels[index_mask+1]))))
                     plt.xlabel('\n'.join(wrap('{}'.format(analysis['x_label']))))

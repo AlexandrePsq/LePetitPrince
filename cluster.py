@@ -134,16 +134,16 @@ if __name__ == '__main__':
     ### Data retrieval ###
     ######################
 
-    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/inputs/{}".format(args.fmri_data) # "/home/ap259944/inputs/"
-    scripts_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/utilities" # "/home/ap259944/inputs/scripts/"
-    fmri_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/y/" # "/home/ap259944/inputs/y/"
-    design_matrices_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/x/" # "/home/ap259944/inputs/x/"
-    derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/derivatives/" # "/home/ap259944/derivatives/"
-    shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/outputs/shuffling.npy" # "/home/ap259944/derivatives/shuffling.npy"
-    r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/r2/" # "/home/ap259944/derivatives/r2/"
-    distribution_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/distribution/" # "/home/ap259944/derivatives/distribution/"
-    yaml_files_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/yaml_files/" # "/home/ap259944/derivatives/yaml_files/"
-    output_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/outputs/" # "/home/ap259944/outputs/"
+    inputs_path =  "/home/ap259944/inputs/"  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/inputs/{}".
+    scripts_path =  "/home/ap259944/inputs/scripts/"  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/utilities"
+    fmri_path = "/home/ap259944/inputs/{}/y/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/y/"
+    design_matrices_path = "/home/ap259944/inputs/{}/x/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/x/"
+    derivatives_path = "/home/ap259944/{}/derivatives/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/derivatives/"
+    shuffling_path = "/home/ap259944/{}/derivatives/shuffling.npy".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/outputs/shuffling.npy"
+    r2_path = "/home/ap259944/{}/derivatives/r2/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/r2/"
+    distribution_path = "/home/ap259944/{}/derivatives/distribution/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/distribution/"
+    yaml_files_path = "/home/ap259944/{}/derivatives/yaml_files/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/yaml_files/"
+    output_path = "/home/ap259944/{}/outputs/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/outputs/"
 
     design_matrices = sorted(glob.glob(os.path.join(args.design_matrices, '*run*')))
     fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, '*run*')))

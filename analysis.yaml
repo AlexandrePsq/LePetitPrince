@@ -95,7 +95,7 @@ scatter_plots:
     x_label: R2 of GLM (pca 20)
     input_data_folder1: glm-indiv
     input_data_folder2: ridge-indiv
-    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 5
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 20
     name: GLM VS RIDGE
   - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer_r2_test_pca_100
     model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
@@ -105,7 +105,7 @@ scatter_plots:
     x_label: R2 of GLM (pca 100)
     input_data_folder1: glm-indiv
     input_data_folder2: ridge-indiv
-    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 10
+    title: GLM VS RIDGE - LSTM E600 H1800 L1 hidden-first-layer pca 100
     name: GLM VS RIDGE 
 #  - model2: ridge-indiv_english_lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer_r2_test
 #    model2_folder: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_surprisal_first-layer

@@ -56,7 +56,7 @@ if __name__ == '__main__':
     subjects = args.subjects[0]
 
     dm = get_data(args.language, input_data_type, model=model_name, source='fMRI')
-    if len(dm)==0 or len(pd.read_csv(dm[0]).columns) > 20:
+    if (not params.force_glm) or len(dm)==0 or len(pd.read_csv(dm[0]).columns) > 20:
         print("You have a lot of features: Linear regression will give you an empty mask (highly negative r2)... you should use a Ridge regression")
         quit()
     fmri_runs = {subject: get_data(args.language, data_type=source, subject=subject) for subject in subjects}

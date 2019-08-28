@@ -192,6 +192,7 @@ class Params:
 		self.parallel = True
 		self.cuda = True
 		self.voxel_wise = True
+		self.force_glm = True
 		if torch.cuda.is_available():
 			if not self.cuda:
 				print("WARNING: You have a CUDA device, so you should probably run with --cuda")

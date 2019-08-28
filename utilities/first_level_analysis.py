@@ -213,7 +213,8 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
                                             fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
                                             shuffling=shuffling,
                                             n_sample=n_sample, 
-                                            alpha_percentile=params.alpha_percentile)
+                                            alpha_percentile=params.alpha_percentile,
+                                            test=True)
             scores_cv2[cv3, voxel] = r2[0]
             distribution_array[cv3, :, voxel] = distribution
 

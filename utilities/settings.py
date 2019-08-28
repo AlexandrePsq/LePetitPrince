@@ -206,7 +206,7 @@ class Params:
 		# PCA
 		self.pca = True
 		self.n_components_default = 1500
-		self.n_components_list = [5, 10, 20, 200, 300, 600] #[1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 1800]
+		self.n_components_list = [5, 10, 50, 100, 300, 600] #[1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 1800]
 
 		# Deconfounding
 		self.n_sample = 100

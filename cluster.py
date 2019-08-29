@@ -145,8 +145,8 @@ if __name__ == '__main__':
     yaml_files_path = "/home/ap259944/{}/derivatives/yaml_files/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/yaml_files/"
     output_path = "/home/ap259944/{}/outputs/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/outputs/"
 
-    design_matrices = sorted(glob.glob(os.path.join(args.design_matrices, '*run*')))
-    fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, '*run*')))
+    design_matrices = sorted(glob.glob(os.path.join(args.design_matrices, 'design-matrices_*run*')))
+    fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, 'fMRI_*run*')))
 
 
     ####################

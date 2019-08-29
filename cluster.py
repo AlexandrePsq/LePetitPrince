@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from nilearn.masking import compute_epi_mask
+from nilearn.masking import compute_epi_mask # cause warning
 from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker
 from nilearn.plotting import plot_glass_brain
@@ -177,8 +177,8 @@ if __name__ == '__main__':
     y = [masker.transform(f) for f in fmri_runs] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
 
     for index in range(len(y)):
-        np.save(os.path.join(fmri_path, 'y_run{}.npy'.format(index)), y[index])
-        np.save(os.path.join(design_matrices_path, 'x_run{}.npy'.format(index)), y[index])
+        np.save(os.path.join(fmri_path, 'y_run{}.npy'.format(index+1)), y[index])
+        np.save(os.path.join(design_matrices_path, 'x_run{}.npy'.format(index+1)), y[index])
 
     ##################
     ### Parameters ###

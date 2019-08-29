@@ -268,7 +268,7 @@ if __name__ == '__main__':
 
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))
-        indexes = ','.join([str(i) for i in np.delete(indexes, run, 0)]) 
+        indexes = ','.join([str(i) for i in np.delete(indexes, run-1, 0)]) 
         job = Job(command=["python", "cv_alphas.py", 
                                 "--indexes", indexes, 
                                 "--x", design_matrices_directory, 

@@ -238,11 +238,11 @@ if __name__ == '__main__':
     # first job: split the dataset
     job_0 = Job(command=["python", "shuffling_preparation.py", 
                             "--nb_features", nb_features,
-                            "--output", output_directory,
+                            "--output", derivatives_directory,
                             "--n_permutations", nb_permutations], 
                 name="Preparing permutations for significance analysis", 
                 referenced_input_files=[scripts_directory],
-                referenced_output_files=[output_directory],
+                referenced_output_files=[derivatives_directory],
                 working_directory=scripts_directory)
 
     jobs.append(job_0)
@@ -252,7 +252,7 @@ if __name__ == '__main__':
                                     "--x", design_matrices_directory, 
                                     "--y", fmri_directory, 
                                     "--alphas", alphas, 
-                                    "--output", output_directory, 
+                                    "--output", derivatives_directory, 
                                     "--nb_permutations", nb_permutations, 
                                     "--alpha_percentile", alpha_percentile, 
                                     "--login", login, 

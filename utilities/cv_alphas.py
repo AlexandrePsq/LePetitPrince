@@ -71,13 +71,13 @@ if __name__ == '__main__':
         
         alpha_index = 0
         for alpha_tmp in alphas: # compute the r2 for a given alpha for all the voxel
+            model.set_params(alpha=alpha_tmp)
+            model_fitted = model.fit(dm,fmri)
             # to delete
             with open(os.path.join(args.output, 'delete_second_part.txt'), 'a+') as f:
                 f.write('Et de 1 passage')
                 f.write('\n')
             # end of to delete
-            model.set_params(alpha=alpha_tmp)
-            model_fitted = model.fit(dm,fmri)
             r2 = get_r2_score(model_fitted, y[valid[0]], x[valid[0]])
             scores[:, cv_index, alpha_index] = r2
             alpha_index += 1

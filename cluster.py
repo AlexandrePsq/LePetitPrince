@@ -277,6 +277,8 @@ if __name__ == '__main__':
     workflow = Workflow(jobs=jobs,
                     dependencies= dependencies,
                     root_group=[job_0, cv_alphas, job_generator, job_merge, job_final])
+    
+    Helper.serialize(os.path.join(inputs_path, 'cluster_jobs.somawf'), workflow)
 
 
     ### Submit the workflow to computing resource (configured in the client-server mode)
@@ -289,7 +291,6 @@ if __name__ == '__main__':
     # You may use the gui or manually transfer the files:
     manual = True
 
-    Herlper.serialize(os.path.join(inputs_path, 'cluster_jobs.somawf'), workflow)
     if manual:
         Helper.wait_workflow(workflow_id, controller)
         Helper.transfer_output_files(workflow_id, controller)

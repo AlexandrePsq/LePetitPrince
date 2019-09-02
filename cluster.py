@@ -288,12 +288,5 @@ if __name__ == '__main__':
     workflow_id = controller.submit_workflow(workflow=workflow,
                                             name="Ridge - LPP")
 
-    # You may use the gui or manually transfer the files:
-    manual = True
-
-    if manual:
-        Helper.wait_workflow(workflow_id, controller)
-        Helper.transfer_output_files(workflow_id, controller)
-        #Helper.delete_all_workflows(controller)
-
+    
     print("Finished !!!")

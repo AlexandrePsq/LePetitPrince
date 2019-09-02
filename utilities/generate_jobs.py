@@ -12,11 +12,11 @@ import numpy as np
 from sklearn.metrics import r2_score
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import LeaveOneOut
-from soma_workflow.client import Job, Workflow, Helper, Group, WorkflowController, FileTransfer, SharedResourcePath
+from soma_workflow.client import Job, Workflow, Helper, Group, WorkflowController
 
 
 
-scripts_path = '/Users/alexpsq/Code/inputs/scripts/' # "/home/ap259944/inputs/scripts/"
+scripts_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/utilities"
 
 
 if __name__ == '__main__':
@@ -34,12 +34,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     shuffling =  os.path.join(args.output, 'shuffling.npy')
-
-    ### FileTransfers
-    # FileTransfer creation for input/output files
-    scripts_directory = FileTransfer(is_input=True,
-                        client_path=scripts_path,
-                        name="working directory")
 
     files_list = sorted(glob.glob(os.path.join(args.output, 'run_*_alpha_*.yml')))
     group_significativity = []
@@ -59,8 +53,7 @@ if __name__ == '__main__':
                             "--n_permutations", args.nb_permutations, 
                             "--alpha_percentile", args.alpha_percentile], 
                     name="job {} - alpha {}".format(run, alpha), 
-                    referenced_input_files=[scripts_directory], 
-                    working_directory=scripts_directory)
+                    working_directory=scripts_path)
         group_significativity.append(job)
         jobs.append(job)
 
@@ -74,7 +67,7 @@ if __name__ == '__main__':
 
     ### Submit the workflow to computing resource (configured in the client-server mode)
 
-    controller2 = WorkflowController("DSV_cluster_ap259944", login, password) #"DSV_cluster_ap259944", args.login, args.password
+    controller2 = WorkflowController("DSV_cluster_ap259944", args.login, args.password) #"DSV_cluster_ap259944", args.login, args.password
 
     workflow_id2 = controller2.submit_workflow(workflow=workflow2,
                                             name="Voxel-wise computations")

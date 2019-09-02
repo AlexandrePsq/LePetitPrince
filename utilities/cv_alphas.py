@@ -19,8 +19,6 @@ def get_r2_score(model, y_true, x, r2_min=0., r2_max=0.99):
     r2 = r2_score(y_true,
                     model.predict(x),
                     multioutput='raw_values')
-    # remove values with are too low and values too good to be true (e.g. voxels without variation)
-    # return np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
     return r2
 
 def check_folder(path):
@@ -47,10 +45,10 @@ if __name__ == '__main__':
 
     indexes = [int(i) for i in args.indexes.split(',')]
     
-    x_paths = sorted([glob.glob(os.path.join(args.x, '*_run{}*'.format(i))) for i in indexes])
+    x_paths = sorted([glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]) #[[a], [b], [c]]
     x = [np.load(item[0]) for item in x_paths]
 
-    y_paths = sorted([glob.glob(os.path.join(args.y, '*_run{}*'.format(i))) for i in indexes])
+    y_paths = sorted([glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes])
     y = [np.load(item[0]) for item in y_paths]
 
     run = int(args.run)
@@ -73,9 +71,11 @@ if __name__ == '__main__':
         
         alpha_index = 0
         for alpha_tmp in alphas: # compute the r2 for a given alpha for all the voxel
+            # to delete
             with open(os.path.join(args.output, 'delete_second_part.txt'), 'a+') as f:
                 f.write('Et de 1 passage')
                 f.write('\n')
+            # end of to delete
             model.set_params(alpha=alpha_tmp)
             model_fitted = model.fit(dm,fmri)
             r2 = get_r2_score(model_fitted, y[valid[0]], x[valid[0]])
@@ -101,10 +101,11 @@ if __name__ == '__main__':
  
         with open(yaml_path, 'w') as outfile:
             yaml.dump(yaml_file, outfile, default_flow_style=False)
-    
+    # to delete
     with open(os.path.join(args.output, 'delete_apres.txt'), 'a+') as f:
         f.write('Et de 1 passage')
         f.write('\n')
+    # end of to delete
     
     # saving
     np.save(os.path.join(args.output, 'voxel2alpha{}.npy'.format(run)), voxel2alpha)

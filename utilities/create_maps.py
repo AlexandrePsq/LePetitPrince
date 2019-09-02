@@ -68,7 +68,7 @@ if __name__ =='__main__':
     args = parser.parse_args()
 
 
-    fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, '*run*')))
+    fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, 'fMRI_*run*')))
     masker = compute_global_masker(list(fmri_runs))
 
     # defining paths
@@ -77,7 +77,7 @@ if __name__ =='__main__':
     r2 = np.load(os.path.join(args.output, 'r2.npy'))
     z_values = np.load(os.path.join(args.output, 'z_values.npy'))
     significant_r2 = np.load(os.path.join(args.output, 'significant_r2.npy'))
-    pca = int(args.pca)
+    pca = int(args.pca) if type(args.pca)==str else None
     
     # creating maps
     create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3

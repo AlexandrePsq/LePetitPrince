@@ -51,7 +51,6 @@ if __name__ =='__main__':
     # retrieving data
     files_r2 = sorted(glob.glob(os.path.join(args.input_r2, 'run_*_voxel_*.npy'))) # e.g. run_6_voxel_[1,2,3].npy
     files_distribution = sorted(glob.glob(os.path.join(args.input_distribution, 'run_*_voxel_*.npy')))
-    fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, '*run*')))
 
     # merging
     for index in range(len(files_r2)):

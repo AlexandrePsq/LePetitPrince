@@ -113,8 +113,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Objective:\nUse cluster nodes to perform the Ridge analysis.""")
     parser.add_argument("--login", type=str, default=None, help="Login to connect to the cluster.")
     parser.add_argument("--password", type=str, default=None, help="Password to connect to the cluster.")
-    parser.add_argument("--fmri_data", type=str, default='', help="Path to fMRI data directory.")
-    parser.add_argument("--design_matrices", type=str, default='', help="Path to design-matrices directory(for a given model).")
     parser.add_argument("--model_name", type=str, default='', help="Name of the model.")
     parser.add_argument("--subject", type=str, default='sub-057', help="Subject name.")
     parser.add_argument("--pca", type=str, default=None, help="Number of components to keep for the PCA.")
@@ -134,19 +132,19 @@ if __name__ == '__main__':
     ### Data retrieval ###
     ######################
 
-    inputs_path =  "/home/ap259944/inputs/"  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/inputs/{}".
-    scripts_path =  "/home/ap259944/inputs/scripts/"  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/utilities"
-    fmri_path = "/home/ap259944/inputs/y/{}/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/y/"
-    design_matrices_path = "/home/ap259944/inputs/x/"  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/x/"
-    derivatives_path = "/home/ap259944/derivatives/{}/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/derivatives/"
-    shuffling_path = "/home/ap259944/derivatives/{}/shuffling.npy".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/outputs/shuffling.npy"
-    r2_path = "/home/ap259944/derivatives/{}/r2/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/r2/"
-    distribution_path = "/home/ap259944/derivatives/{}/distribution/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/distribution/"
-    yaml_files_path = "/home/ap259944/derivatives/{}/yaml_files/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/yaml_files/"
-    output_path = "/home/ap259944/outputs/{}/".format(args.subject)  # "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/test/outputs/"
+    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
+    scripts_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/utilities"
+    fmri_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI/english/{}/func/".format(args.subject) 
+    design_matrices_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/design-matrices/english/{}/".format(args.model_name)
+    derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/ridge-indiv/english/{}/".format(args.subject)
+    shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/shuffling.npy".format(args.subject)
+    r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/r2/".format(args.subject)
+    distribution_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/distribution/".format(args.subject)
+    yaml_files_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/yaml_files/".format(args.subject)
+    output_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/outputs/".format(args.subject)
 
-    design_matrices = sorted(glob.glob(os.path.join(args.design_matrices, 'design-matrices_*run*')))
-    fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, 'fMRI_*run*')))
+    design_matrices = sorted(glob.glob(os.path.join(design_matrices_path, 'design-matrices_*run*')))
+    fmri_runs = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
 
 
     ####################
@@ -197,40 +195,6 @@ if __name__ == '__main__':
     ### Pipeline ###
     ################
 
-    ### FileTransfers
-    # FileTransfer creation for input/output files
-    raw_data_directory = FileTransfer(is_input=True,
-                        client_path=inputs_path,
-                        name="raw data directory")
-    scripts_directory = FileTransfer(is_input=True,
-                        client_path=scripts_path,
-                        name="working directory")
-    fmri_directory = FileTransfer(is_input=True,
-                        client_path=fmri_path,
-                        name="fmri data directory")
-    design_matrices_directory = FileTransfer(is_input=True,
-                        client_path=design_matrices_path,
-                        name="design-matrices directory")
-    derivatives_directory = FileTransfer(is_input=True,
-                        client_path=derivatives_path,
-                        name="derivatives directory")
-    shuffling_path = FileTransfer(is_input=True,
-                        client_path=shuffling_path,
-                        name="shuffling file")
-    r2_directory = FileTransfer(is_input=True,
-                        client_path=r2_path,
-                        name="R2 directory")
-    distribution_directory = FileTransfer(is_input=True,
-                        client_path=distribution_path,
-                        name="distribution directory")
-    yaml_files_directory = FileTransfer(is_input=True,
-                        client_path=yaml_files_path,
-                        name="yaml files directory")
-    output_directory = FileTransfer(is_input=False,
-                        client_path=output_path,
-                        name="Outputs directory")
-
-
     ### Create the workflow:
     dependencies = []
     jobs = []
@@ -238,29 +202,25 @@ if __name__ == '__main__':
     # first job: split the dataset
     job_0 = Job(command=["python", "shuffling_preparation.py", 
                             "--nb_features", nb_features,
-                            "--output", derivatives_directory,
+                            "--output", shuffling_path,
                             "--n_permutations", nb_permutations], 
-                name="Preparing permutations for significance analysis", 
-                referenced_input_files=[scripts_directory],
-                referenced_output_files=[derivatives_directory],
-                working_directory=scripts_directory)
+                name="Preparing permutations for significance analysis",
+                working_directory=scripts_path)
 
     jobs.append(job_0)
 
     # significativity retrieval 
     job_generator = Job(command=["python", "generate_jobs.py", 
-                                    "--x", design_matrices_directory, 
-                                    "--y", fmri_directory, 
+                                    "--x", design_matrices_path, 
+                                    "--y", fmri_path, 
                                     "--alphas", alphas, 
-                                    "--output", derivatives_directory, 
+                                    "--output", derivatives_path, 
                                     "--nb_permutations", nb_permutations, 
                                     "--alpha_percentile", alpha_percentile, 
                                     "--login", login, 
                                     "--password", password], 
-                        name="Launch the internal workflow to compute R2 and voxels distribution", 
-                        referenced_input_files=[scripts_directory],
-                        referenced_output_files=[r2_directory, distribution_directory], 
-                        working_directory=scripts_directory)
+                        name="Launch the internal workflow to compute R2 and voxels distribution",
+                        working_directory=scripts_path)
 
 
     # cross-validation on alpha for each split 
@@ -271,15 +231,13 @@ if __name__ == '__main__':
         indexes = ','.join([str(i) for i in np.delete(indexes, run-1, 0)]) 
         job = Job(command=["python", "cv_alphas.py", 
                                 "--indexes", indexes, 
-                                "--x", design_matrices_directory, 
-                                "--y", fmri_directory, 
+                                "--x", design_matrices_path, 
+                                "--y", fmri_path, 
                                 "--run", str(run), 
                                 "--alphas", alphas, 
-                                "--output", yaml_files_directory],  
+                                "--output", yaml_files_path],  
                 name="Alphas CV - split {}".format(run), 
-                referenced_input_files=[scripts_directory],
-                referenced_output_files=[yaml_files_directory], 
-                working_directory=scripts_directory)
+                working_directory=scripts_path)
 
         group_cv_alphas.append(job)
         jobs.append(job)
@@ -290,30 +248,26 @@ if __name__ == '__main__':
                 
     # Merging the results and compute significant r2
     job_merge = Job(command=["python", "merge_results.py", 
-                                "--input_r2", r2_directory, 
-                                "--input_distribution", distribution_directory, 
-                                "--output", output_directory, 
+                                "--input_r2", r2_path, 
+                                "--input_distribution", distribution_path, 
+                                "--output", output_path, 
                                 "--nb_runs", nb_runs, 
                                 "--n_permutations", nb_permutations, 
                                 "--alpha_percentile", alpha_percentile], 
-            name="Merging all the r2 and distribution respectively together.", 
-            referenced_input_files=[scripts_directory, r2_directory, distribution_directory],
-            referenced_output_files=[output_directory], 
-            working_directory=scripts_directory)
+            name="Merging all the r2 and distribution respectively together.",
+            working_directory=scripts_path)
 
     jobs.append(job_merge)
     dependencies.append((job_generator, job_merge))
 
     # Plotting the maps
-    job_final = Job(command=["python", "merge_results.py", 
-                                "--output", output_directory, 
+    job_final = Job(command=["python", "create_maps.py", 
+                                "--output", output_path, 
                                 "--subject", args.subject, 
                                 "--pca", args.pca, 
-                                "--fmri_data", raw_data_directory], 
-                        name="Creating the maps.", 
-                        referenced_input_files=[scripts_directory, raw_data_directory, output_directory],
-                        referenced_output_files=[output_directory], 
-                        working_directory=scripts_directory)
+                                "--fmri_data", fmri_path], 
+                        name="Creating the maps.",
+                        working_directory=scripts_path)
     jobs.append(job_final)
     dependencies.append((job_merge, job_final))
 

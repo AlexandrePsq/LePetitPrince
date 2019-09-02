@@ -75,17 +75,17 @@ if __name__ == '__main__':
 
     indexes = [int(i) for i in args.indexes.split(',')]
     
-    x_paths = [glob.glob(os.path.join(args.x, '*_run{}*'.format(i))) for i in indexes]
+    x_paths = [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]
     x = sorted([np.load(item[0]) for item in x_paths])
 
-    y_paths = [glob.glob(os.path.join(args.y, '*_run{}*'.format(i))) for i in indexes]
+    y_paths = [glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes]
     y = sorted([np.load(item[0]) for item in y_paths])
     
     y_train = np.vstack(y)[:, voxels]
     x_train = np.vstack(x)
 
-    x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}*'.format(run))))
-    y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}*'.format(run))))[:, voxels]
+    x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run))))
+    y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run))))[:, voxels]
 
     # y = fmri[:,voxel].reshape((fmri.shape[0],1))
     model.set_params(alpha=alpha)

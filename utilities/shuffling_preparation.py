@@ -38,7 +38,6 @@ if __name__ == '__main__':
     for _ in range(n_permutations):
         np.random.shuffle(columns_index)
         shuffling.append(columns_index.copy())
-    check_folder(args.output)
     np.save(args.output, shuffling)
     #np.save(os.path.join(args.output, 'shuffling.npy'), shuffling)
     

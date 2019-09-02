@@ -288,8 +288,9 @@ if __name__ == '__main__':
 
     # You may use the gui or manually transfer the files:
     manual = True
+
+    Herlper.serialize(os.path.join(inputs_path, 'cluster_jobs.somawf'), workflow)
     if manual:
-        Helper.transfer_input_files(workflow_id, controller)
         Helper.wait_workflow(workflow_id, controller)
         Helper.transfer_output_files(workflow_id, controller)
         #Helper.delete_all_workflows(controller)

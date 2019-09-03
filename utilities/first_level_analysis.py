@@ -100,7 +100,7 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
                                                                                     os.path.basename(output_parent_folder), 
                                                                                     'mask', 
                                                                                     'pca_' + str(pca) if params.pca else 'no_pca',
-                                                                                    'voxel_wise' if voxel_wised else 'not_voxel_wise'
+                                                                                    'voxel_wise' if voxel_wised else 'not_voxel_wise',
                                                                                     subject)
                                                                                     +'.npy')
         np.save(path2mask, mask) # mask

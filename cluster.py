@@ -167,7 +167,7 @@ if __name__ == '__main__':
     for path in all_paths:
         check_folder(path)
 
-    
+
 
     ###########################
     ### Data transformation ###
@@ -242,6 +242,7 @@ if __name__ == '__main__':
                                 "--input_distribution", distribution_path, 
                                 "--output", output_path, 
                                 "--nb_runs", nb_runs, 
+                                "--nb_voxels", nb_voxels,
                                 "--n_permutations", nb_permutations, 
                                 "--alpha_percentile", alpha_percentile], 
             name="Merging all the r2 and distribution respectively together.",

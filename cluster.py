@@ -264,7 +264,7 @@ if __name__ == '__main__':
         group_significativity.append(job)
         jobs.append(job)
         for job_cv in group_cv_alphas:
-            dependencies.append(job_cv, job)
+            dependencies.append((job_cv, job))
             dependencies.append((job, job_merge))
     
     jobs.append(job_merge)

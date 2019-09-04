@@ -249,7 +249,7 @@ if __name__ == '__main__':
     for yaml_file in files_list:
         info = os.path.basename(yaml_file).split('_')
         run = int(info[1])
-        alpha = int(info[3][:-4])
+        alpha = float(info[3][:-4])
         job = Job(command=["python", "significance_clusterized.py", 
                             "--yaml_file", yaml_file, 
                             "--output_r2", r2_path, 

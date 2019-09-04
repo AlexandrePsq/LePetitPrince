@@ -3,6 +3,7 @@
 import argparse
 import os
 import numpy as np
+import yaml
 import glob
 
 
@@ -51,14 +52,20 @@ if __name__ =='__main__':
     distribution_array = np.zeros((nb_runs, int(args.n_permutations), nb_voxels))
     
     # retrieving data
-    files_r2 = sorted(glob.glob(os.path.join(args.input_r2, 'run_*_voxel_*.npy'))) # e.g. run_6_voxel_[1,2,3].npy
-    files_distribution = sorted(glob.glob(os.path.join(args.input_distribution, 'run_*_voxel_*.npy')))
+    files_r2 = sorted(glob.glob(os.path.join(args.input_r2, 'run_*_alpha_*.npy'))) # e.g. run_6_alpha_10.32.npy
+    files_distribution = sorted(glob.glob(os.path.join(args.input_distribution, 'run_*_alpha_*.npy')))
 
     # merging
     for index in range(len(files_r2)):
         info = os.path.basename(files_r2[index]).split('_')
         run = int(info[1])
-        voxels = eval(info[3].split('.')[0])
+        alpha = float(info[3][:-4])
+        with open(os.path.join(args.yaml_files, 'run_{}_alpha_{}.yml'.format(run, alpha)), 'r') as stream:
+            try:
+                voxels = yaml.safe_load(stream)['voxels']
+            except yaml.YAMLError as exc:
+                print(exc)
+                quit()
         scores[run, voxels] = np.load(files_r2[index])
         distribution_array[run, :, voxels] = np.load(files_distribution[index]).T
     

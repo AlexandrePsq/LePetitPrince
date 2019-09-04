@@ -100,8 +100,8 @@ if __name__ == '__main__':
     check_folder(args.output_distribution)
 
     # saving
-    r2_saving_path = os.path.join(args.output_r2, 'run_{}_voxel_{}.npy'.format(run, voxels))
-    distribution_saving_path = os.path.join(args.output_distribution, 'run_{}_voxel_{}.npy'.format(run, voxels))
+    r2_saving_path = os.path.join(args.output_r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
+    distribution_saving_path = os.path.join(args.output_distribution, 'run_{}_alpha_{}.npy'.format(run, alpha))
 
     np.save(r2_saving_path, r2)
     np.save(distribution_saving_path, distribution)

@@ -224,7 +224,7 @@ if __name__ == '__main__':
                                 "--output", yaml_files_path],  
                 name="Alphas CV - split {}".format(run), 
                 working_directory=scripts_path,
-                native_specification="-q Nspin_bigM")
+                native_specification="-q Nspin_bigM -o ~/soma-workflow/logs/output_log.txt -e ~/soma-workflow/logs/error_log.txt")
 
         group_cv_alphas.append(job)
         jobs.append(job)
@@ -239,7 +239,8 @@ if __name__ == '__main__':
                                 "--n_permutations", nb_permutations, 
                                 "--alpha_percentile", alpha_percentile], 
             name="Merging all the r2 and distribution respectively together.",
-            working_directory=scripts_path)
+            working_directory=scripts_path,
+            native_specification="-o ~/soma-workflow/logs/output_log.txt -e ~/soma-workflow/logs/error_log.txt")
 
     # significativity retrieval 
     files_list = sorted(['run_{}_alpha_{}.yml'.format(run, alpha) for run in range(1,10) for alpha in alpha_list])
@@ -259,7 +260,8 @@ if __name__ == '__main__':
                             "--n_permutations", nb_permutations, 
                             "--alpha_percentile", alpha_percentile], 
                     name="job {} - alpha {}".format(run, alpha), 
-                    working_directory=scripts_path)
+                    working_directory=scripts_path,
+                    native_specification="-q Nspin_short -o ~/soma-workflow/logs/output_log.txt -e ~/soma-workflow/logs/error_log.txt")
         group_significativity.append(job)
         jobs.append(job)
         for job_cv in group_cv_alphas:
@@ -276,7 +278,8 @@ if __name__ == '__main__':
                                 "--pca", args.pca, 
                                 "--fmri_data", fmri_path], 
                         name="Creating the maps.",
-                        working_directory=scripts_path)
+                        working_directory=scripts_path,
+                        native_specification="-o ~/soma-workflow/logs/output_log.txt -e ~/soma-workflow/logs/error_log.txt")
     jobs.append(job_final)
     dependencies.append((job_merge, job_final))
 

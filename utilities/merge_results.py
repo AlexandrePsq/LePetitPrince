@@ -66,7 +66,7 @@ if __name__ =='__main__':
             except yaml.YAMLError as exc:
                 print(exc)
                 quit()
-        scores[run, voxels] = np.load(files_r2[index])
+        scores[run-1, voxels] = np.load(files_r2[index])
         distribution_array[run, :, voxels] = np.load(files_distribution[index]).T
     
     alphas_array = []

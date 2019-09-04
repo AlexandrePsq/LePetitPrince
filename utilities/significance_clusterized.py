@@ -65,7 +65,7 @@ if __name__ == '__main__':
             data = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-            quit
+            quit()
 
     source = 'fMRI'
     model = Ridge()
@@ -74,7 +74,7 @@ if __name__ == '__main__':
     run = int(data['run'])
     indexes = data['indexes']
 
-    indexes = [int(i) for i in args.indexes.split(',')]
+    indexes = [int(i) for i in indexes.split(',')]
     
     x_paths = [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]
     x = sorted([np.load(item[0]) for item in x_paths])

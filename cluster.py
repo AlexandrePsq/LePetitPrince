@@ -139,7 +139,6 @@ if __name__ == '__main__':
     derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/ridge-indiv/english/{}/".format(args.subject)
     shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/shuffling.npy".format(args.subject)
     r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/r2/".format(args.subject)
-    subject_directory_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/".format(args.subject)
     distribution_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/distribution/".format(args.subject)
     yaml_files_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/yaml_files/".format(args.subject)
     output_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/outputs/".format(args.subject)
@@ -261,7 +260,7 @@ if __name__ == '__main__':
         run = int(info[1])
         alpha = float(info[3][:-4])
         job = Job(command=["python", "significance_clusterized.py", 
-                            "--yaml_file", os.path.join(subject_directory_path, yaml_file), 
+                            "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
                             "--output_r2", r2_path, 
                             "--output_distribution", distribution_path, 
                             "--x", design_matrices_path, 

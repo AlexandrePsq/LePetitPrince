@@ -78,6 +78,8 @@ if __name__ =='__main__':
     z_values = np.load(os.path.join(args.output, 'z_values.npy'))
     significant_r2 = np.load(os.path.join(args.output, 'r2_significative.npy'))
     pca = int(args.pca) if type(args.pca)==str else None
+
+    check_folder(output_parent_folder)
     
     # creating maps
     create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3

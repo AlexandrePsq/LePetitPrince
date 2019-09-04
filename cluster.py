@@ -142,6 +142,8 @@ if __name__ == '__main__':
     distribution_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/distribution/".format(args.subject)
     yaml_files_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/yaml_files/".format(args.subject)
     output_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/outputs/".format(args.subject)
+    log_error_path = "/home/{}/soma-workflow/logs/error_log.txt".format(login)
+    log_output_path = "/home/{}/soma-workflow/logs/output_log.txt".format(login)
 
     design_matrices = sorted(glob.glob(os.path.join(design_matrices_path, 'design-matrices_*run*')))
     fmri_runs = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
@@ -159,11 +161,13 @@ if __name__ == '__main__':
                     r2_path, 
                     distribution_path, 
                     yaml_files_path, 
-                    output_path]
+                    output_path,
+                    os.path.dirname(log_error_path),
+                    os.path.dirname(log_output_path)]
     for path in all_paths:
         check_folder(path)
 
-
+    
 
     ###########################
     ### Data transformation ###
@@ -224,8 +228,8 @@ if __name__ == '__main__':
                                 "--output", yaml_files_path],  
                 name="Alphas CV - split {}".format(run), 
                 working_directory=scripts_path,
-                stdout_file="~/soma-workflow/logs/output_log.txt",
-                stderr_file="~/soma-workflow/logs/error_log.txt",
+                stdout_file="/home/{}/soma-workflow/logs/output_log.txt".format(login),
+                stderr_file="/home/{}/soma-workflow/logs/error_log.txt".format(login),
                 native_specification="-q Nspin_bigM")
 
         group_cv_alphas.append(job)
@@ -242,8 +246,8 @@ if __name__ == '__main__':
                                 "--alpha_percentile", alpha_percentile], 
             name="Merging all the r2 and distribution respectively together.",
             working_directory=scripts_path,
-            stdout_file="~/soma-workflow/logs/output_log.txt",
-            stderr_file="~/soma-workflow/logs/error_log.txt")
+            stdout_file="/home/{}/soma-workflow/logs/output_log.txt".format(login),
+            stderr_file="/home/{}/soma-workflow/logs/error_log.txt".format(login))
 
     # significativity retrieval 
     files_list = sorted(['run_{}_alpha_{}.yml'.format(run, alpha) for run in range(1,10) for alpha in alpha_list])
@@ -264,8 +268,8 @@ if __name__ == '__main__':
                             "--alpha_percentile", alpha_percentile], 
                     name="job {} - alpha {}".format(run, alpha), 
                     working_directory=scripts_path,
-                    stdout_file="~/soma-workflow/logs/output_log.txt",
-                    stderr_file="~/soma-workflow/logs/error_log.txt",
+                    stdout_file="/home/{}/soma-workflow/logs/output_log.txt".format(login),
+                    stderr_file="/home/{}/soma-workflow/logs/error_log.txt".format(login),
                     native_specification="-q Nspin_short")
         group_significativity.append(job)
         jobs.append(job)
@@ -284,8 +288,8 @@ if __name__ == '__main__':
                                 "--fmri_data", fmri_path], 
                         name="Creating the maps.",
                         working_directory=scripts_path,
-                        stdout_file="~/soma-workflow/logs/output_log.txt",
-                        stderr_file="~/soma-workflow/logs/error_log.txt")
+                        stdout_file="/home/{}/soma-workflow/logs/output_log.txt".format(login),
+                        stderr_file="/home/{}/soma-workflow/logs/error_log.txt".format(login))
     jobs.append(job_final)
     dependencies.append((job_merge, job_final))
 

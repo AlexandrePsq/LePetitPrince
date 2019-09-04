@@ -287,7 +287,7 @@ if __name__ == '__main__':
                         name="Fit of the models with best alphas")
 
     workflow = Workflow(jobs=jobs,
-                    dependencies= dependencies,
+                    dependencies=dependencies,
                     root_group=[job_0, cv_alphas, significativity, job_merge, job_final])
     
     Helper.serialize(os.path.join(inputs_path, 'cluster_jobs.somawf'), workflow)

@@ -289,6 +289,11 @@ if __name__ == '__main__':
     workflow = Workflow(jobs=jobs,
                     dependencies=dependencies,
                     root_group=[job_0, cv_alphas, significativity, job_merge, job_final])
+                
+
+    print('jobs', jobs)
+    print('dependencies', dependencies)
+    print('root_group', [job_0, cv_alphas, significativity, job_merge, job_final])
     
     Helper.serialize(os.path.join(inputs_path, 'cluster_jobs.somawf'), workflow)
 

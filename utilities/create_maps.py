@@ -76,7 +76,7 @@ if __name__ =='__main__':
     alphas = np.mean(np.load(os.path.join(args.output, 'voxel2alpha.npy')), axis=0)
     r2 = np.load(os.path.join(args.output, 'r2.npy'))
     z_values = np.load(os.path.join(args.output, 'z_values.npy'))
-    significant_r2 = np.load(os.path.join(args.output, 'significant_r2.npy'))
+    significant_r2 = np.load(os.path.join(args.output, 'r2_significative.npy'))
     pca = int(args.pca) if type(args.pca)==str else None
     
     # creating maps

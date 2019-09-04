@@ -59,7 +59,7 @@ if __name__ =='__main__':
         run = int(info[1])
         voxels = eval(info[3].split('.')[0])
         scores[run, voxels] = np.load(files_r2[index])
-        distribution_array[run, :, voxels] = np.load(files_distribution[index])
+        distribution_array[run, :, voxels] = np.load(files_distribution[index]).T
     
     alphas_array = []
     for run in range(nb_runs):

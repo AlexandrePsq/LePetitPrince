@@ -73,8 +73,6 @@ if __name__ == '__main__':
     voxels = [int(voxel) for voxel in data['voxels']]
     run = int(data['run'])
     indexes = data['indexes']
-
-    indexes = [int(i) for i in indexes.split(',')]
     
     x_paths = [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]
     x = sorted([np.load(item[0]) for item in x_paths])

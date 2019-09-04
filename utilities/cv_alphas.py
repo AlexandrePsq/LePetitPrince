@@ -75,14 +75,14 @@ if __name__ == '__main__':
             start = time()
             model.set_params(alpha=alpha_tmp)
             model_fitted = model.fit(dm,fmri)
+            # to delete
+            with open(os.path.join(args.output, 'fitting_time.txt'), 'a+') as f:
+                f.write('dm shape={} - fmri shape={} - alpha = {}- Fitted in {} s.'.format(dm.shape, fmri.shape, alpha_tmp, time()- start))
+                f.write('\n')
+            # end of to delete
             r2 = get_r2_score(model_fitted, y[valid[0]], x[valid[0]])
             scores[:, cv_index, alpha_index] = r2
             alpha_index += 1
-            # to delete
-            with open(os.path.join(args.output, 'fitting_time.txt'), 'a+') as f:
-                f.write('alpha = {}- Fitted in {} s.'.format(alpha_tmp, time()- start))
-                f.write('\n')
-            # end of to delete
         cv_index += 1
     best_alphas_indexes = np.argmax(np.mean(scores, axis=1), axis=1)
     voxel2alpha = np.array([alphas[i] for i in best_alphas_indexes])

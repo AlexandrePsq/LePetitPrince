@@ -83,8 +83,8 @@ if __name__ == '__main__':
     y_train = np.vstack(y)[:, voxels]
     x_train = np.vstack(x)
 
-    x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run))))
-    y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run))))[:, voxels]
+    x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
+    y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]
 
     # y = fmri[:,voxel].reshape((fmri.shape[0],1))
     model.set_params(alpha=alpha)

@@ -80,9 +80,6 @@ if __name__ == '__main__':
     best_alphas_indexes = np.argmax(np.mean(scores, axis=1), axis=1)
     voxel2alpha = np.array([alphas[i] for i in best_alphas_indexes])
 
-    # sanity check
-    check_folder(args.output)
-
     # compute best alpha for each voxel and group them by alpha-value
     alpha2voxel = {key:[] for key in alphas}
     for index in range(len(voxel2alpha)):

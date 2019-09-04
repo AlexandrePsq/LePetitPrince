@@ -3,7 +3,7 @@
 # python cluster.py --login ap259944 --password XxxxX --fmri_data /home/ap259944/inputs/fmri_data/ --design_matrices /home/ap259944/inputs/design_matrices/ --model_name lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer --subject sub-057
 ########################
 
-from soma_workflow.client import Job, Workflow, Helper, Group, WorkflowController, FileTransfer, SharedResourcePath
+from soma_workflow.client import Job, Workflow, Helper, Group, WorkflowController
 import os
 import numpy as np
 import pandas as pd

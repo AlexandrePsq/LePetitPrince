@@ -63,7 +63,7 @@ if __name__ =='__main__':
         distribution_array[run, :, voxels] = np.load(files_distribution[index]).T
     
     alphas_array = []
-    for run in range(nb_runs):
+    for run in range(1, 1+nb_runs):
         alphas_array.append(np.load(os.path.join(args.yaml_files, 'voxel2alpha{}.npy'.format(run))))
     alphas_array = np.vstack(alphas_array)
     

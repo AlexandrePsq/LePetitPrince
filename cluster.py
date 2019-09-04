@@ -291,7 +291,7 @@ if __name__ == '__main__':
                     root_group=[job_0, cv_alphas, significativity, job_merge, job_final])
                 
 
-    print('jobs', len(jobs)))
+    print('jobs', len(jobs))
     print('dependencies', len(dependencies))
     print('root_group', [job_0, cv_alphas, significativity, job_merge, job_final])
     

@@ -71,7 +71,6 @@ if __name__ == '__main__':
         
         alpha_index = 0
         for alpha_tmp in alphas: # compute the r2 for a given alpha for all the voxel
-            start = time()
             model.set_params(alpha=alpha_tmp)
             model_fitted = model.fit(dm,fmri)
             r2 = get_r2_score(model_fitted, y[valid[0]], x[valid[0]])

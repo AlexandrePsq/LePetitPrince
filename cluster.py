@@ -244,7 +244,6 @@ if __name__ == '__main__':
     # significativity retrieval 
     files_list = sorted(['run_{}_alpha_{}.yml'.format(run, alpha) for run in range(1,10) for alpha in alpha_list])
     group_significativity = []
-    jobs = []
 
     for yaml_file in files_list:
         info = os.path.basename(yaml_file).split('_')
@@ -291,10 +290,6 @@ if __name__ == '__main__':
                     root_group=[job_0, cv_alphas, significativity, job_merge, job_final])
                 
 
-    print('jobs', [job.name for job in jobs])
-    print('dependencies', [(a.name, b.name) for (a,b) in dependencies])
-    print('root_group', [job_0, cv_alphas, significativity, job_merge, job_final])
-    
     Helper.serialize(os.path.join(inputs_path, 'cluster_jobs.somawf'), workflow)
 
 

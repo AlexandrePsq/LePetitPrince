@@ -63,7 +63,7 @@ if __name__ =='__main__':
     
     alphas_array = []
     for run in range(nb_runs):
-        alphas_array.append(np.load(os.path.join(args.output, 'voxel2alpha{}.npy'.format(run))))
+        alphas_array.append(np.load(os.path.join(os.path.dirname(args.output), 'voxel2alpha{}.npy'.format(run))))
     alphas_array = np.vstack(alphas_array)
     
     # computing significativity

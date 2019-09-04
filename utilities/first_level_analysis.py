@@ -204,8 +204,14 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
             
             cv1 = 0
             for alpha_tmp in tqdm(alpha_list): # compute the r2 for a given alpha for all the voxel
+                start = time()
                 model.set_params(alpha=alpha_tmp)
                 model_fitted = model.fit(dm,fmri)
+                # to delete
+                with open(os.path.join("/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/yaml_files", 'fitting_time.txt'), 'a+') as f:
+                    f.write('alpha = {}- Fitted in {} s on chris station.'.format(alpha_tmp, time()- start))
+                    f.write('\n')
+                # end of to delete
                 r2 = get_r2_score(model_fitted, fmri_data_train_[valid[0]], predictors_train_[valid[0]])
                 scores_cv1[:, cv2, cv1] = r2
                 cv1 += 1
@@ -218,11 +224,6 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
             y = fmri2[:,voxel].reshape((fmri2.shape[0],1))
             model.set_params(alpha=alphas_cv2[cv3, voxel])
             model_fitted = model.fit(dm2, y)
-            # to delete
-            with open(os.path.join("/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/yaml_files", 'fitting_time.txt'), 'a+') as f:
-                f.write('alpha = {}- Fitted in {} s on chris station.'.format(alpha_tmp, time()- start))
-                f.write('\n')
-            # end of to delete
             # scores_cv2[cv3, voxel] = get_r2_score(model_fitted, 
             #                                 fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
             #                                 design_matrices[test[0]])

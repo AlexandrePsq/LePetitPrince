@@ -36,6 +36,7 @@ if __name__ =='__main__':
     parser.add_argument("--input_r2", type=str, default=None, help="Path to the folder of input R2.")
     parser.add_argument("--input_distribution", type=str, default=None, help="Path to the folder of input distribution.")
     parser.add_argument("--output", type=str, default=None, help="Output folder path.")
+    parser.add_argument("--yaml_files", type=str, default=None, help="Yaml files folder path.")
     parser.add_argument("--nb_runs", type=str, default=None, help="Number of runs.")
     parser.add_argument("--nb_voxels", type=str, default=None, help="Number of voxels.")
     parser.add_argument("--n_permutations", type=str, default=None, help="Number of permutations.")
@@ -63,7 +64,7 @@ if __name__ =='__main__':
     
     alphas_array = []
     for run in range(nb_runs):
-        alphas_array.append(np.load(os.path.join(os.path.dirname(args.output), 'voxel2alpha{}.npy'.format(run))))
+        alphas_array.append(np.load(os.path.join(args.yaml_files, 'voxel2alpha{}.npy'.format(run))))
     alphas_array = np.vstack(alphas_array)
     
     # computing significativity

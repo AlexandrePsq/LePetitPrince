@@ -241,6 +241,7 @@ if __name__ == '__main__':
                                 "--input_r2", r2_path, 
                                 "--input_distribution", distribution_path, 
                                 "--output", output_path, 
+                                "--yaml_files", yaml_files_path,
                                 "--nb_runs", nb_runs, 
                                 "--nb_voxels", nb_voxels,
                                 "--n_permutations", nb_permutations, 

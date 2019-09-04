@@ -263,9 +263,9 @@ if __name__ == '__main__':
                     working_directory=scripts_path)
         group_significativity.append(job)
         jobs.append(job)
-        dependencies.append((job, job_merge))
         for job_cv in group_cv_alphas:
             dependencies.append((job_cv, job))
+        dependencies.append((job, job_merge))
             
     
     jobs.append(job_merge)
@@ -291,8 +291,8 @@ if __name__ == '__main__':
                     root_group=[job_0, cv_alphas, significativity, job_merge, job_final])
                 
 
-    print('jobs', len(jobs))
-    print('dependencies', len(dependencies))
+    print('jobs', [job.name for job in jobs])
+    print('dependencies', [(a.name, b.name) for (a,b) in dependencies])
     print('root_group', [job_0, cv_alphas, significativity, job_merge, job_final])
     
     Helper.serialize(os.path.join(inputs_path, 'cluster_jobs.somawf'), workflow)

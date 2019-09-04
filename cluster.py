@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
     for index in range(len(y)):
         np.save(os.path.join(fmri_path, 'y_run{}.npy'.format(index+1)), y[index])
-        np.save(os.path.join(design_matrices_path, 'x_run{}.npy'.format(index+1)), y[index])
+        np.save(os.path.join(design_matrices_path, 'x_run{}.npy'.format(index+1)), x[index])
 
     ##################
     ### Parameters ###

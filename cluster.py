@@ -209,20 +209,6 @@ if __name__ == '__main__':
 
     jobs.append(job_0)
 
-    # significativity retrieval 
-    job_generator = Job(command=["python", "generate_jobs.py", 
-                                    "--x", design_matrices_path, 
-                                    "--y", fmri_path, 
-                                    "--alphas", alphas, 
-                                    "--output", derivatives_path, 
-                                    "--nb_permutations", nb_permutations, 
-                                    "--alpha_percentile", alpha_percentile, 
-                                    "--login", login, 
-                                    "--password", password], 
-                        name="Launch the internal workflow to compute R2 and voxels distribution",
-                        working_directory=scripts_path)
-
-
     # cross-validation on alpha for each split 
     group_cv_alphas = []
 
@@ -243,10 +229,7 @@ if __name__ == '__main__':
         group_cv_alphas.append(job)
         jobs.append(job)
         dependencies.append((job_0, job))
-        dependencies.append((job, job_generator))
 
-    jobs.append(job_generator)
-                
     # Merging the results and compute significant r2
     job_merge = Job(command=["python", "merge_results.py", 
                                 "--input_r2", r2_path, 
@@ -258,8 +241,33 @@ if __name__ == '__main__':
             name="Merging all the r2 and distribution respectively together.",
             working_directory=scripts_path)
 
+    # significativity retrieval 
+    files_list = sorted(['run_{}_alpha_{}.yml'.format(run, alpha) for run in range(1,10) for alpha in alpha_list])
+    group_significativity = []
+    jobs = []
+
+    for yaml_file in files_list:
+        info = os.path.basename(yaml_file).split('_')
+        run = int(info[1])
+        alpha = int(info[3])
+        job = Job(command=["python", "significance_clusterized.py", 
+                            "--yaml_file", yaml_file, 
+                            "--output_r2", r2_path, 
+                            "--output_distribution", distribution_path, 
+                            "--x", design_matrices_path, 
+                            "--y", fmri_path, 
+                            "--shuffling", shuffling_path, 
+                            "--n_permutations", nb_permutations, 
+                            "--alpha_percentile", alpha_percentile], 
+                    name="job {} - alpha {}".format(run, alpha), 
+                    working_directory=scripts_path)
+        group_significativity.append(job)
+        jobs.append(job)
+        for job_cv in group_cv_alphas:
+            dependencies.append(job_cv, job)
+            dependencies.append((job, job_merge))
+    
     jobs.append(job_merge)
-    dependencies.append((job_generator, job_merge))
 
     # Plotting the maps
     job_final = Job(command=["python", "create_maps.py", 
@@ -274,10 +282,12 @@ if __name__ == '__main__':
 
     cv_alphas = Group(elements=group_cv_alphas,
                         name="CV on alphas")
+    significativity = Group(elements=group_significativity,
+                        name="Fit of the models with best alphas")
 
     workflow = Workflow(jobs=jobs,
                     dependencies= dependencies,
-                    root_group=[job_0, cv_alphas, job_generator, job_merge, job_final])
+                    root_group=[job_0, cv_alphas, significativity, job_merge, job_final])
     
     Helper.serialize(os.path.join(inputs_path, 'cluster_jobs.somawf'), workflow)
 

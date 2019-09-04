@@ -75,10 +75,10 @@ if __name__ == '__main__':
     indexes = data['indexes']
     
     x_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]])
-    x = [np.load(item[0]) for item in x_paths]
+    x = [np.load(item) for item in x_paths]
 
     y_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes]])
-    y = [np.load(item[0]) for item in y_paths]
+    y = [np.load(item) for item in y_paths]
     
     y_train = np.vstack(y)[:, voxels]
     x_train = np.vstack(x)

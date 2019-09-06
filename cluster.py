@@ -228,8 +228,6 @@ if __name__ == '__main__':
                                 "--output", yaml_files_path],  
                 name="Alphas CV - split {}".format(run), 
                 working_directory=scripts_path,
-                stdout_file="/home/{}/soma-workflow/logs/output_log.txt".format(login),
-                stderr_file="/home/{}/soma-workflow/logs/error_log.txt".format(login),
                 native_specification="-q Nspin_bigM")
 
         group_cv_alphas.append(job)
@@ -247,9 +245,7 @@ if __name__ == '__main__':
                                 "--n_permutations", nb_permutations, 
                                 "--alpha_percentile", alpha_percentile], 
             name="Merging all the r2 and distribution respectively together.",
-            working_directory=scripts_path,
-            stdout_file="/home/{}/soma-workflow/logs/output_log.txt".format(login),
-            stderr_file="/home/{}/soma-workflow/logs/error_log.txt".format(login))
+            working_directory=scripts_path)
 
     # significativity retrieval 
     files_list = sorted(['run_{}_alpha_{}.yml'.format(run, alpha) for run in range(1,10) for alpha in alpha_list])
@@ -270,8 +266,6 @@ if __name__ == '__main__':
                             "--alpha_percentile", alpha_percentile], 
                     name="job {} - alpha {}".format(run, alpha), 
                     working_directory=scripts_path,
-                    stdout_file="/home/{}/soma-workflow/logs/output_log.txt".format(login),
-                    stderr_file="/home/{}/soma-workflow/logs/error_log.txt".format(login),
                     native_specification="-q Nspin_short")
         group_significativity.append(job)
         jobs.append(job)
@@ -285,13 +279,10 @@ if __name__ == '__main__':
     # Plotting the maps
     job_final = Job(command=["python", "create_maps.py", 
                                 "--output", output_path, 
-                                "--subject", args.subject, 
-                                "--pca", args.pca, 
+                                "--subject", args.subject,
                                 "--fmri_data", fmri_path], 
                         name="Creating the maps.",
-                        working_directory=scripts_path,
-                        stdout_file="/home/{}/soma-workflow/logs/output_log.txt".format(login),
-                        stderr_file="/home/{}/soma-workflow/logs/error_log.txt".format(login))
+                        working_directory=scripts_path)
     jobs.append(job_final)
     dependencies.append((job_merge, job_final))
 

@@ -65,12 +65,14 @@ if __name__ == '__main__':
             data = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-            quit()
+    
+    if data['voxels']==[]:
+        quit()
 
     source = 'fMRI'
     model = Ridge()
     alpha = data['alpha']
-    voxels = [int(voxel) for voxel in data['voxels']]
+    voxels = data['voxels']
     run = int(data['run'])
     indexes = data['indexes']
     

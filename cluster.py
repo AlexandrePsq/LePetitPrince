@@ -190,7 +190,7 @@ if __name__ == '__main__':
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
     nb_permutations = str(300)
-    alpha_list = np.logspace(-3, 3, 100)
+    alpha_list = [round(tmp, 5) for tmp in np.logspace(-3, 3, 100)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(95)
 

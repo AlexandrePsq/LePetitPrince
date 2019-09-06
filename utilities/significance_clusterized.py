@@ -65,6 +65,7 @@ if __name__ == '__main__':
             data = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
+            quit()
     
     if data['voxels']==[]:
         quit()

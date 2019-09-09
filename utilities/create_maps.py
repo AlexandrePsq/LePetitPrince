@@ -82,7 +82,7 @@ if __name__ =='__main__':
     check_folder(output_parent_folder)
     
     # creating maps
-    create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3
+    create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca, vmax=1000) # alphas # argument deleted: , vmax=5e3
     create_maps(masker, r2, 'r2', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # r2 test
     create_maps(masker, z_values, 'z_values', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # p_values
     create_maps(masker, significant_r2, 'significant_r2', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significative

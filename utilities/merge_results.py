@@ -25,7 +25,7 @@ def get_significativity_value(r2_test_array, distribution_array, alpha_percentil
     distribution_array = np.mean(distribution_array, axis=0)
 
     z_values = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
-    mask = (r2_final > z_values).astype(int)
+    mask = (r2_final > z_values)
     
     return r2_final, mask, z_values, distribution_array
 

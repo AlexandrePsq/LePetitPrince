@@ -49,7 +49,7 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 
     nib.save(img, path2output_raw)
 
-    display = plot_glass_brain(img, display_mode='lzry', threshold=0, colorbar=True, black_bg=True, vmin=0., vmax=vmax)
+    display = plot_glass_brain(img, display_mode='lzry', threshold=0, colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
     display.savefig(path2output_png)
     display.close()
 

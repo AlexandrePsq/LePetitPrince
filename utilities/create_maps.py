@@ -34,7 +34,7 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     return masker
 
 
-def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=0.2, pca='', voxel_wise=False):
+def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=None, pca='', voxel_wise=False):
     model = os.path.basename(output_parent_folder)
     language = os.path.basename(os.path.dirname(output_parent_folder))
     data_type = os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder)))
@@ -49,7 +49,7 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 
     nib.save(img, path2output_raw)
 
-    display = plot_glass_brain(img, display_mode='lzry', threshold=0, colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
+    display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
     display.savefig(path2output_png)
     display.close()
 
@@ -103,9 +103,9 @@ if __name__ =='__main__':
     create_maps(masker, r2_significant_with_threshold, 'significant_r2_with_threshold', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significant
     create_maps(masker, r2_significant_with_pvalues, 'significant_r2_with_pvalues', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significant
     
-    create_maps(masker, pearson_corr, 'pearson_corr', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # pearson_corr 
-    create_maps(masker, pearson_corr_significant_with_threshold, 'significant_pearson_corr_with_threshold', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # pearson_corr_significant
-    create_maps(masker, pearson_corr_significant_with_pvalues, 'significant_pearson_corr_with_pvalues', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # pearson_corr_significant
+    create_maps(masker, pearson_corr, 'pearson_corr', args.subject, output_parent_folder, pca=pca,  voxel_wise=True) # pearson_corr 
+    create_maps(masker, pearson_corr_significant_with_threshold, 'significant_pearson_corr_with_threshold', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # pearson_corr_significant
+    create_maps(masker, pearson_corr_significant_with_pvalues, 'significant_pearson_corr_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # pearson_corr_significant
 
     create_maps(masker, thresholds_r2, 'thresholds_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)
     create_maps(masker, thresholds_pearson_corr, 'thresholds_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)

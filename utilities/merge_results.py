@@ -17,25 +17,37 @@ def check_folder(path):
         pass
 
 
-def get_significativity_value(r2_test_array, distribution_array, alpha_percentile, test=False):
-    # receive r2 computed on the test set and the entire distribution of r2 values computed accross
-    # all runs (with shuffled columns) and returns r2 averaged across CV, significative r2 and threshold
+def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2_array, distribution_pearson_corr_array, alpha_percentile, test=False):
 
     r2_final = np.mean(r2_test_array, axis=0)
-    distribution_array = np.mean(distribution_array, axis=0)
+    corr_final = np.mean(pearson_corr_array, axis=0)
 
-    z_values = np.percentile(distribution_array, alpha_percentile, axis=0) # list: 1 value for each voxel
-    mask = (r2_final > z_values)
+    distribution_r2_array_tmp = np.mean(distribution_r2_array, axis=0)
+    distribution_pearson_corr_array_tmp = np.mean(distribution_pearson_corr_array, axis=0)
+
+    thresholds_r2 = np.percentile(distribution_r2_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
+    thresholds_pearson_corr = np.percentile(distribution_pearson_corr_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
     
-    return r2_final, mask, z_values, distribution_array
+    p_values_r2 = np.sum(distribution_r2_array_tmp>r2_final, axis=0)/distribution_r2_array_tmp.shape[0] 
+    p_values_pearson_corr = np.sum(distribution_pearson_corr_array_tmp>corr_final, axis=0)/distribution_pearson_corr_array_tmp.shape[0]
+
+    z_values_r2 = (thresholds_r2 - np.mean(distribution_r2_array_tmp, axis=0))/np.std(distribution_r2_array_tmp, axis=0)
+    z_values_pearson_corr = (thresholds_pearson_corr - np.mean(distribution_pearson_corr_array_tmp, axis=0))/np.std(distribution_pearson_corr_array_tmp, axis=0)
+
+    mask_r2 = (r2_final > thresholds_r2)
+    mask_pearson_corr = (corr_final > thresholds_pearson_corr)
+
+    mask_pvalues_r2 = (p_values_r2 < 1-alpha_percentile/100)
+    mask_pvalues_pearson_corr = (p_values_pearson_corr < 1-alpha_percentile/100)
+
+    return r2_final, corr_final, mask_r2, mask_pearson_corr, mask_pvalues_r2, mask_pvalues_pearson_corr, thresholds_pearson_corr, thresholds_r2, p_values_r2, p_values_pearson_corr, z_values_r2, z_values_pearson_corr
 
 
 
 if __name__ =='__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate password from key (and optionnally the login).""")
-    parser.add_argument("--input_r2", type=str, default=None, help="Path to the folder of input R2.")
-    parser.add_argument("--input_distribution", type=str, default=None, help="Path to the folder of input distribution.")
+    parser.add_argument("--input_folder", type=str, default=None, help="Path to the inputs folder.")
     parser.add_argument("--output", type=str, default=None, help="Output folder path.")
     parser.add_argument("--yaml_files", type=str, default=None, help="Yaml files folder path.")
     parser.add_argument("--nb_runs", type=str, default=None, help="Number of runs.")
@@ -49,11 +61,20 @@ if __name__ =='__main__':
     nb_voxels = int(args.nb_voxels)
     nb_runs = int(args.nb_runs)
     scores = np.zeros((nb_runs, nb_voxels))
-    distribution_array = np.zeros((nb_runs, int(args.n_permutations), nb_voxels))
+    corr = np.zeros((nb_runs, nb_voxels))
+    distribution_r2_array = np.zeros((nb_runs, int(args.n_permutations), nb_voxels))
+    distribution_pearson_corr_array = np.zeros((nb_runs, int(args.n_permutations), nb_voxels))
+
+    input_r2 = os.path.join(args.input_folder, 'r2')
+    input_pearson_corr = os.path.join(args.input_folder, 'pearson_corr')
+    input_distribution_r2 = os.path.join(args.input_folder, 'distribution_r2')
+    input_distribution_pearson_corr = os.path.join(args.input_folder, 'distribution_pearson_corr')
     
     # retrieving data
-    files_r2 = sorted(glob.glob(os.path.join(args.input_r2, 'run_*_alpha_*.npy'))) # e.g. run_6_alpha_10.32.npy
-    files_distribution = sorted(glob.glob(os.path.join(args.input_distribution, 'run_*_alpha_*.npy')))
+    files_r2 = sorted(glob.glob(os.path.join(input_r2, 'run_*_alpha_*.npy'))) # e.g. run_6_alpha_10.32.npy
+    files_pearson_corr = sorted(glob.glob(os.path.join(input_pearson_corr, 'run_*_alpha_*.npy'))) # e.g. run_6_alpha_10.32.npy
+    files_distribution_r2 = sorted(glob.glob(os.path.join(input_distribution_r2, 'run_*_alpha_*.npy')))
+    files_distribution_pearson_corr = sorted(glob.glob(os.path.join(input_distribution_pearson_corr, 'run_*_alpha_*.npy')))
 
     # merging
     for index in range(len(files_r2)):
@@ -67,7 +88,9 @@ if __name__ =='__main__':
                 print(exc)
                 quit()
         scores[run-1, voxels] = np.load(files_r2[index])
-        distribution_array[run-1, :, voxels] = np.load(files_distribution[index]).T
+        corr[run-1, voxels] = np.load(files_pearson_corr[index])
+        distribution_r2_array[run-1, :, voxels] = np.load(files_distribution_r2[index]).T
+        distribution_pearson_corr_array[run-1, :, voxels] = np.load(files_distribution_pearson_corr[index]).T
     
     alphas_array = []
     for run in range(1, 1+nb_runs):
@@ -75,26 +98,81 @@ if __name__ =='__main__':
     alphas_array = np.vstack(alphas_array)
     
     # computing significativity
-    r2, mask, z_values, distribution_array = get_significativity_value(scores, 
-                                                                        distribution_array, 
-                                                                        int(args.alpha_percentile))
-    r2_significative = np.zeros(r2.shape)
-    r2_significative[mask] = r2[mask]
-    r2_significative[~mask] = -1
+    r2_final, corr_final, mask_r2, mask_pearson_corr, mask_pvalues_r2, mask_pvalues_pearson_corr, thresholds_pearson_corr, thresholds_r2, p_values_r2, p_values_pearson_corr, z_values_r2, z_values_pearson_corr = get_significativity_value(scores, 
+                                                                                                                                                                                                                                                corr,
+                                                                                                                                                                                                                                                distribution_r2_array,
+                                                                                                                                                                                                                                                distribution_pearson_corr_array, 
+                                                                                                                                                                                                                                                int(args.alpha_percentile))
+
+    r2_significant_with_threshold = np.zeros(r2_final.shape)
+    r2_significant_with_threshold[mask_r2] = r2_final[mask_r2]
+    r2_significant_with_threshold[~mask_r2] = np.nan
+
+    r2_significant_with_pvalues = np.zeros(r2_final.shape)
+    r2_significant_with_pvalues[mask_pvalues_r2] = r2_final[mask_pvalues_r2]
+    r2_significant_with_pvalues[~mask_pvalues_r2] = np.nan
+
+    pearson_corr_significant_with_threshold = np.zeros(corr_final.shape)
+    pearson_corr_significant_with_threshold[mask_pearson_corr] = corr_final[mask_pearson_corr]
+    pearson_corr_significant_with_threshold[~mask_pearson_corr] = np.nan
+
+    pearson_corr_significant_with_pvalues = np.zeros(corr_final.shape)
+    pearson_corr_significant_with_pvalues[mask_pvalues_pearson_corr] = corr_final[mask_pvalues_pearson_corr]
+    pearson_corr_significant_with_pvalues[~mask_pvalues_pearson_corr] = np.nan
 
     # defining paths
     check_folder(args.output)
     r2_output_path = os.path.join(args.output, 'r2.npy')
-    r2_significative_output_path = os.path.join(args.output, 'r2_significative.npy')
-    mask_output_path = os.path.join(args.output, 'mask.npy')
-    z_values_output_path = os.path.join(args.output, 'z_values.npy')
-    distribution_output_path = os.path.join(args.output, 'distribution.npy')
+    r2_significant_with_threshold_output_path = os.path.join(args.output, 'r2_significant_with_threshold.npy')
+    r2_significant_with_pvalues_output_path = os.path.join(args.output, 'r2_significant_with_pvalues.npy')
+
+    pearson_corr_output_path = os.path.join(args.output, 'pearson_corr.npy')
+    pearson_corr_significant_with_threshold_output_path = os.path.join(args.output, 'pearson_corr_significant_with_threshold.npy')
+    pearson_corr_significant_with_pvalues_output_path = os.path.join(args.output, 'pearson_corr_significant_with_pvalues.npy')
+
+    mask_r2_with_threshold_output_path = os.path.join(args.output, 'mask_r2_with_threshold.npy')
+    mask_r2_with_pvalues_output_path = os.path.join(args.output, 'mask_r2_with_pvalues.npy')
+    mask_pearson_corr_with_threshold_output_path = os.path.join(args.output, 'mask_pearson_corr_with_threshold.npy')
+    mask_pearson_corr_with_pvalues_output_path = os.path.join(args.output, 'mask_pearson_corr_with_pvalues.npy')
+
+    thresholds_r2_output_path = os.path.join(args.output, 'thresholds_r2.npy')
+    thresholds_pearson_corr_output_path = os.path.join(args.output, 'thresholds_pearson_corr.npy')
+
+    z_values_r2_output_path = os.path.join(args.output, 'z_values_r2.npy')
+    z_values_pearson_corr_output_path = os.path.join(args.output, 'z_values_pearson_corr.npy')
+
+    p_values_r2_output_path = os.path.join(args.output, 'p_values_r2.npy')
+    p_values_pearson_corr_output_path = os.path.join(args.output, 'p_values_pearson_corr.npy')
+
+    distribution_r2_output_path = os.path.join(args.output, 'distribution_r2.npy')
+    distribution_pearson_corr_output_path = os.path.join(args.output, 'distribution_pearson_corr.npy')
+
     alphas_path = os.path.join(args.output, 'voxel2alpha.npy')
 
     # saving
-    np.save(r2_output_path, r2)
-    np.save(r2_significative_output_path, r2_significative)
-    np.save(mask_output_path, mask)
-    np.save(z_values_output_path, z_values)
-    np.save(distribution_output_path, distribution_array)
+    np.save(r2_output_path, r2_final)
+    np.save(r2_significant_with_threshold_output_path, r2_significant_with_threshold)
+    np.save(r2_significant_with_pvalues_output_path, r2_significant_with_pvalues)
+
+    np.save(pearson_corr_output_path, corr_final)
+    np.save(pearson_corr_significant_with_threshold_output_path, pearson_corr_significant_with_threshold)
+    np.save(pearson_corr_significant_with_pvalues_output_path, pearson_corr_significant_with_pvalues)
+
+    np.save(mask_r2_with_threshold_output_path, mask_r2)
+    np.save(mask_r2_with_pvalues_output_path, mask_pvalues_r2)
+    np.save(mask_pearson_corr_with_threshold_output_path, mask_pearson_corr)
+    np.save(mask_pearson_corr_with_pvalues_output_path, mask_pvalues_pearson_corr)
+
+    np.save(thresholds_r2_output_path, thresholds_r2)
+    np.save(thresholds_pearson_corr_output_path, thresholds_pearson_corr)
+
+    np.save(z_values_r2_output_path, z_values_r2)
+    np.save(z_values_pearson_corr_output_path, z_values_pearson_corr)
+
+    np.save(p_values_r2_output_path, p_values_r2)
+    np.save(p_values_pearson_corr_output_path, p_values_pearson_corr)
+
+    np.save(distribution_r2_output_path, distribution_r2_array)
+    np.save(distribution_pearson_corr_output_path, distribution_pearson_corr_array)
+
     np.save(alphas_path, alphas_array)

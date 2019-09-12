@@ -10,18 +10,21 @@ warnings.simplefilter(action='ignore')
 
 import numpy as np
 from sklearn.metrics import r2_score
+from scipy.stats import pearsonr
 import pandas as pd
 from sklearn.linear_model import Ridge
 
 
-def get_r2_score(model, y_true, x, r2_min=0., r2_max=0.99):
+def get_score(model, y_true, x, r2_min=0., r2_max=0.99):
     # return the R2_score for each voxel (=list)
+    prediction = model.predict(x)
     r2 = r2_score(y_true,
-                    model.predict(x),
+                    prediction,
                     multioutput='raw_values')
+    pearson_corr = [pearsonr(y_true[:,i], prediction[:,i])[0] for i in range(y_true.shape[1])]
     # remove values with are too low and values too good to be true (e.g. voxels without variation)
     # return np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
-    return r2
+    return r2, pearson_corr
 
 def check_folder(path):
     # Create adequate folders if necessary
@@ -34,15 +37,17 @@ def sample_r2(model, x_test, y_test, shuffling, n_sample, alpha_percentile, test
     # It returns two values (or two lists depending on the parameter voxel_wised):
     # r2 value computed on test set and the distribution array
     if test:
-        r2_test = get_r2_score(model, y_test, x_test)
-        return r2_test, None
+        r2_test, pearson_corr = get_score(model, y_test, x_test)
+        return r2_test, pearson_corr, None
     else:
-        r2_test = get_r2_score(model, y_test, x_test)
-        distribution_array = None
+        r2_test, pearson_corr = get_score(model, y_test, x_test)
+        distribution_array_r2 = None
+        distribution_array_pearson_corr = None
         for index in range(n_sample):
-            r2_tmp = get_r2_score(model, y_test, x_test[:, shuffling[index]])
-            distribution_array = r2_tmp if distribution_array is None else np.vstack([distribution_array, r2_tmp])
-        return r2_test, distribution_array
+            r2_tmp, pearson_corr_tmp = get_score(model, y_test, x_test[:, shuffling[index]])
+            distribution_array_r2 = r2_tmp if distribution_array_r2 is None else np.vstack([distribution_array_r2, r2_tmp])
+            distribution_array_pearson_corr = pearson_corr_tmp if distribution_array_pearson_corr is None else np.vstack([distribution_array_pearson_corr, pearson_corr_tmp])
+        return r2_test, pearson_corr, distribution_array_r2, distribution_array_pearson_corr
         
 
 
@@ -50,8 +55,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--yaml_file", type=str, default=None, help="Path to the yaml file containing alpha, run values and the voxels associateds with.")
-    parser.add_argument("--output_r2", type=str, default='', help="Path to the folder of output R2.")
-    parser.add_argument("--output_distribution", type=str, default='', help="Path to the folder of output distribution.")
+    parser.add_argument("--output", type=str, default='', help="Path to the folder containing outputs.")
     parser.add_argument("--x", type=str, default='', help="Path to x folder.")
     parser.add_argument("--y", type=str, default='', help="Path to y folder.")
     parser.add_argument("--shuffling", type=str, default='', help="Path to shuffling array.")
@@ -92,19 +96,30 @@ if __name__ == '__main__':
     # y = fmri[:,voxel].reshape((fmri.shape[0],1))
     model.set_params(alpha=alpha)
     model_fitted = model.fit(x_train, y_train)
-    r2, distribution = sample_r2(model_fitted, 
-                                    x_test, 
-                                    y_test, 
-                                    shuffling=np.load(args.shuffling),
-                                    n_sample=int(args.n_permutations), 
-                                    alpha_percentile=int(args.alpha_percentile))
+    r2, pearson_corr, distribution_array_r2, distribution_array_pearson_corr = sample_r2(model_fitted, 
+                                                                                            x_test, 
+                                                                                            y_test, 
+                                                                                            shuffling=np.load(args.shuffling),
+                                                                                            n_sample=int(args.n_permutations), 
+                                                                                            alpha_percentile=int(args.alpha_percentile))
     # sanity check
-    check_folder(args.output_r2)
-    check_folder(args.output_distribution)
+    path2r2 = os.path.join(args.output, 'r2')
+    path2pearson_corr = os.path.join(args.output, 'pearson_corr')
+    path2distribution_array_r2 = os.path.join(args.output, 'distribution_r2')
+    path2distribution_array_pearson_corr = os.path.join(args.output, 'distribution_pearson_corr')
+
+    check_folder(path2r2)
+    check_folder(path2pearson_corr)
+    check_folder(path2distribution_array_r2)
+    check_folder(path2distribution_array_pearson_corr)
 
     # saving
-    r2_saving_path = os.path.join(args.output_r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
-    distribution_saving_path = os.path.join(args.output_distribution, 'run_{}_alpha_{}.npy'.format(run, alpha))
+    r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
+    pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
+    distribution_r2_saving_path = os.path.join(path2distribution_array_r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
+    distribution_pearson_corr_saving_path = os.path.join(path2distribution_array_pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
 
     np.save(r2_saving_path, r2)
-    np.save(distribution_saving_path, distribution)
+    np.save(pearson_corr_saving_path, pearson_corr)
+    np.save(distribution_r2_saving_path, distribution_array_r2)
+    np.save(distribution_pearson_corr_saving_path, distribution_array_pearson_corr)

@@ -139,7 +139,9 @@ if __name__ == '__main__':
     derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/ridge-indiv/english/{}/{}/".format(args.subject, args.model_name)
     shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/shuffling.npy".format(args.subject, args.model_name)
     r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/r2/".format(args.subject, args.model_name)
-    distribution_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/distribution/".format(args.subject, args.model_name)
+    pearson_corr_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/pearson_corr/".format(args.subject, args.model_name)
+    distribution_r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/distribution_r2/".format(args.subject, args.model_name)
+    distribution_pearson_corr_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/distribution_pearson_corr/".format(args.subject, args.model_name)
     yaml_files_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/yaml_files/".format(args.subject, args.model_name)
     output_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/outputs/".format(args.subject, args.model_name)
     log_error_path = "/home/{}/soma-workflow/logs/error_log.txt".format(login)
@@ -159,7 +161,9 @@ if __name__ == '__main__':
                     design_matrices_path, 
                     derivatives_path, 
                     r2_path, 
-                    distribution_path, 
+                    pearson_corr_path,
+                    distribution_r2_path, 
+                    distribution_pearson_corr_path, 
                     yaml_files_path, 
                     output_path,
                     os.path.dirname(log_error_path),
@@ -189,10 +193,10 @@ if __name__ == '__main__':
     nb_runs = str(len(fmri_runs))
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
-    nb_permutations = str(300)
+    nb_permutations = str(1000)
     alpha_list = [round(tmp, 5) for tmp in np.logspace(-3, 3, 100)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
-    alpha_percentile = str(95)
+    alpha_percentile = str(99)
 
 
     ################
@@ -236,8 +240,7 @@ if __name__ == '__main__':
 
     # Merging the results and compute significant r2
     job_merge = Job(command=["python", "merge_results.py", 
-                                "--input_r2", r2_path, 
-                                "--input_distribution", distribution_path, 
+                                "--input_folder", derivatives_path, 
                                 "--output", output_path, 
                                 "--yaml_files", yaml_files_path,
                                 "--nb_runs", nb_runs, 
@@ -257,8 +260,7 @@ if __name__ == '__main__':
         alpha = float(info[3][:-4])
         job = Job(command=["python", "significance_clusterized.py", 
                             "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
-                            "--output_r2", r2_path, 
-                            "--output_distribution", distribution_path, 
+                            "--output", derivatives_path, 
                             "--x", design_matrices_path, 
                             "--y", fmri_path, 
                             "--shuffling", shuffling_path, 

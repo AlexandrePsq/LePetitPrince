@@ -74,18 +74,46 @@ if __name__ =='__main__':
     # defining paths
     output_parent_folder = os.path.join(args.output, 'maps')
     alphas = np.mean(np.load(os.path.join(args.output, 'voxel2alpha.npy')), axis=0)
+
     r2 = np.load(os.path.join(args.output, 'r2.npy'))
-    z_values = np.load(os.path.join(args.output, 'z_values.npy'))
-    significant_r2 = np.load(os.path.join(args.output, 'r2_significative.npy'))
+    r2_significant_with_threshold = np.load(os.path.join(args.output, 'r2_significant_with_threshold.npy'))
+    r2_significant_with_pvalues = np.load(os.path.join(args.output, 'r2_significant_with_pvalues.npy'))
+
+    pearson_corr = np.load(os.path.join(args.output, 'pearson_corr.npy'))
+    pearson_corr_significant_with_threshold = np.load(os.path.join(args.output, 'pearson_corr_significant_with_threshold.npy'))
+    pearson_corr_significant_with_pvalues = np.load(os.path.join(args.output, 'pearson_corr_significant_with_pvalues.npy'))
+
+    thresholds_r2 = np.load( os.path.join(args.output, 'thresholds_r2.npy'))
+    thresholds_pearson_corr = np.load( os.path.join(args.output, 'thresholds_pearson_corr.npy'))
+
+    z_values_r2 = np.load(os.path.join(args.output, 'z_values_r2.npy'))
+    z_values_pearson_corr = np.load(os.path.join(args.output, 'z_values_pearson_corr.npy'))
+
+    p_values_r2 = np.load(os.path.join(args.output, 'p_values_r2.npy'))
+    p_values_pearson_corr = np.load(os.path.join(args.output, 'p_values_pearson_corr.npy'))
+
     pca = int(args.pca) if type(args.pca)==str else None
 
     check_folder(output_parent_folder)
     
     # creating maps
     create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca, vmax=1000) # alphas # argument deleted: , vmax=5e3
-    create_maps(masker, r2, 'r2', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # r2 test
-    create_maps(masker, z_values, 'z_values', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # p_values
-    create_maps(masker, significant_r2, 'significant_r2', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significative
 
+    create_maps(masker, r2, 'r2', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # r2 
+    create_maps(masker, r2_significant_with_threshold, 'significant_r2_with_threshold', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significant
+    create_maps(masker, r2_significant_with_pvalues, 'significant_r2_with_pvalues', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significant
+    
+    create_maps(masker, pearson_corr, 'pearson_corr', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # pearson_corr 
+    create_maps(masker, pearson_corr_significant_with_threshold, 'significant_pearson_corr_with_threshold', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # pearson_corr_significant
+    create_maps(masker, pearson_corr_significant_with_pvalues, 'significant_pearson_corr_with_pvalues', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # pearson_corr_significant
+
+    create_maps(masker, thresholds_r2, 'thresholds_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)
+    create_maps(masker, thresholds_pearson_corr, 'thresholds_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)
+
+    create_maps(masker, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+    create_maps(masker, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+
+    create_maps(masker, p_values_r2, 'p_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+    create_maps(masker, p_values_pearson_corr, 'p_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
 
     

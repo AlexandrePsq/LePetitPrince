@@ -13,6 +13,7 @@ from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker
 from nilearn.plotting import plot_glass_brain
 import nibabel as nib
+import yaml
 import glob
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
@@ -115,6 +116,7 @@ if __name__ == '__main__':
     parser.add_argument("--password", type=str, default=None, help="Password to connect to the cluster.")
     parser.add_argument("--model_name", type=str, default='', help="Name of the model.")
     parser.add_argument("--subject", type=str, default='sub-057', help="Subject name.")
+    parser.add_argument("--split_features", action='store_true', default=False, help="Full analysis of all the features included in the model.")
     parser.add_argument("--pca", type=str, default=None, help="Number of components to keep for the PCA.")
 
     args = parser.parse_args()
@@ -136,7 +138,8 @@ if __name__ == '__main__':
     scripts_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/utilities"
     fmri_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI/english/{}/func/".format(args.subject) 
     design_matrices_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/design-matrices/english/{}/".format(args.model_name)
-    derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/ridge-indiv/english/{}/{}/".format(args.subject, args.model_name)
+    derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/".format(args.subject, args.model_name)
+    subject_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/".format(args.subject)
     shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/shuffling.npy".format(args.subject, args.model_name)
     r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/r2/".format(args.subject, args.model_name)
     pearson_corr_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/pearson_corr/".format(args.subject, args.model_name)
@@ -166,6 +169,7 @@ if __name__ == '__main__':
                     distribution_pearson_corr_path, 
                     yaml_files_path, 
                     output_path,
+                    subject_path,
                     os.path.dirname(log_error_path),
                     os.path.dirname(log_output_path)]
     for path in all_paths:
@@ -193,10 +197,24 @@ if __name__ == '__main__':
     nb_runs = str(len(fmri_runs))
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
-    nb_permutations = str(1000)
+    nb_permutations = str(3000)
     alpha_list = [round(tmp, 5) for tmp in np.logspace(-3, 3, 100)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
+    features = sorted([['rms_model', 1], ['wordrate_model', 1]]) # add here basic features name + nb of column feature for each!!!
+    # could be: features = sorted([['lstm...hidden_first-layer', 300], ['lstm...cell_first-layer', 300]])
+
+    parameters_path = os.path.join(derivatives_path, 'parameters.yml')
+    parameters = {'models': []}
+    if args.split_features:
+        i = 0
+        for model in features:
+            parameters['models'].append({'name':model[0], 'indexes':[i, i+model[1]]})
+            i += model[1]
+    parameters['models'].append({'name':'', 'indexes':[0, nb_features]})
+
+    with open(parameters_path, 'w') as outfile:
+        yaml.dump(parameters, outfile, default_flow_style=False)
 
 
     ################
@@ -241,7 +259,7 @@ if __name__ == '__main__':
     # Merging the results and compute significant r2
     job_merge = Job(command=["python", "merge_results.py", 
                                 "--input_folder", derivatives_path, 
-                                "--output", output_path, 
+                                "--parameters", parameters_path, 
                                 "--yaml_files", yaml_files_path,
                                 "--nb_runs", nb_runs, 
                                 "--nb_voxels", nb_voxels,
@@ -264,6 +282,7 @@ if __name__ == '__main__':
                             "--x", design_matrices_path, 
                             "--y", fmri_path, 
                             "--shuffling", shuffling_path, 
+                            "--parameters", parameters_path,
                             "--n_permutations", nb_permutations, 
                             "--alpha_percentile", alpha_percentile], 
                     name="job {} - alpha {}".format(run, alpha), 
@@ -280,7 +299,8 @@ if __name__ == '__main__':
 
     # Plotting the maps
     job_final = Job(command=["python", "create_maps.py", 
-                                "--output", output_path, 
+                                "--input", derivatives_path, 
+                                "--parameters", parameters_path,
                                 "--subject", args.subject,
                                 "--fmri_data", fmri_path], 
                         name="Creating the maps.",

@@ -59,6 +59,7 @@ if __name__ == '__main__':
     parser.add_argument("--x", type=str, default='', help="Path to x folder.")
     parser.add_argument("--y", type=str, default='', help="Path to y folder.")
     parser.add_argument("--shuffling", type=str, default='', help="Path to shuffling array.")
+    parser.add_argument("--parameters", type=str, default='', help="Path to the yaml file containing the models names and column indexes.")
     parser.add_argument("--n_permutations", type=str, default=None, help="Number of permutations.")
     parser.add_argument("--alpha_percentile", type=str, default=None, help="Value for np.percentile.")
 
@@ -93,33 +94,44 @@ if __name__ == '__main__':
     x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
     y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]
 
-    # y = fmri[:,voxel].reshape((fmri.shape[0],1))
     model.set_params(alpha=alpha)
     model_fitted = model.fit(x_train, y_train)
-    r2, pearson_corr, distribution_array_r2, distribution_array_pearson_corr = sample_r2(model_fitted, 
-                                                                                            x_test, 
-                                                                                            y_test, 
-                                                                                            shuffling=np.load(args.shuffling),
-                                                                                            n_sample=int(args.n_permutations), 
-                                                                                            alpha_percentile=int(args.alpha_percentile))
-    # sanity check
-    path2r2 = os.path.join(args.output, 'r2')
-    path2pearson_corr = os.path.join(args.output, 'pearson_corr')
-    path2distribution_array_r2 = os.path.join(args.output, 'distribution_r2')
-    path2distribution_array_pearson_corr = os.path.join(args.output, 'distribution_pearson_corr')
+    with open(args.parameters, 'r') as stream:
+        try:
+            parameters = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+            quit()
+    tmp = model_fitted.coef_.copy()
+    for model in parameters['models']:
+        indexes = model['indexes']
+        model_name = model['name'] # model['name']=='' if we study the model as a whole
+        model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
+        model_fitted.coef_[:,indexes[0]:indexes[1]] = tmp[:,indexes[0]:indexes[1]]
+        r2, pearson_corr, distribution_array_r2, distribution_array_pearson_corr = sample_r2(model_fitted, 
+                                                                                                x_test, 
+                                                                                                y_test, 
+                                                                                                shuffling=np.load(args.shuffling),
+                                                                                                n_sample=int(args.n_permutations), 
+                                                                                                alpha_percentile=int(args.alpha_percentile))
+        # sanity check
+        path2r2 = os.path.join(args.output, model_name, 'r2')
+        path2pearson_corr = os.path.join(args.output, model_name, 'pearson_corr')
+        path2distribution_array_r2 = os.path.join(args.output, model_name, 'distribution_r2')
+        path2distribution_array_pearson_corr = os.path.join(args.output, model_name, 'distribution_pearson_corr')
 
-    check_folder(path2r2)
-    check_folder(path2pearson_corr)
-    check_folder(path2distribution_array_r2)
-    check_folder(path2distribution_array_pearson_corr)
+        check_folder(path2r2)
+        check_folder(path2pearson_corr)
+        check_folder(path2distribution_array_r2)
+        check_folder(path2distribution_array_pearson_corr)
 
-    # saving
-    r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
-    pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
-    distribution_r2_saving_path = os.path.join(path2distribution_array_r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
-    distribution_pearson_corr_saving_path = os.path.join(path2distribution_array_pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
+        # saving
+        r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
+        pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
+        distribution_r2_saving_path = os.path.join(path2distribution_array_r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
+        distribution_pearson_corr_saving_path = os.path.join(path2distribution_array_pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
 
-    np.save(r2_saving_path, r2)
-    np.save(pearson_corr_saving_path, pearson_corr)
-    np.save(distribution_r2_saving_path, distribution_array_r2)
-    np.save(distribution_pearson_corr_saving_path, distribution_array_pearson_corr)
+        np.save(r2_saving_path, r2)
+        np.save(pearson_corr_saving_path, pearson_corr)
+        np.save(distribution_r2_saving_path, distribution_array_r2)
+        np.save(distribution_pearson_corr_saving_path, distribution_array_pearson_corr)

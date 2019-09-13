@@ -107,7 +107,7 @@ if __name__ == '__main__':
         indexes = model['indexes']
         model_name = model['name'] # model['name']=='' if we study the model as a whole
         model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
-        model_fitted.coef_[:,indexes[0]:indexes[1]] = tmp[:,indexes[0]:indexes[1]]
+        model_fitted.coef_[:,int(indexes[0]):int(indexes[1])] = tmp[:,int(indexes[0]):int(indexes[1])]
         r2, pearson_corr, distribution_array_r2, distribution_array_pearson_corr = sample_r2(model_fitted, 
                                                                                                 x_test, 
                                                                                                 y_test, 

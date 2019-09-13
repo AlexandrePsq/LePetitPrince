@@ -211,7 +211,7 @@ if __name__ == '__main__':
         for model in features:
             parameters['models'].append({'name':model[0], 'indexes':[i, i+model[1]]})
             i += model[1]
-    parameters['models'].append({'name':'', 'indexes':[0, nb_features]})
+    parameters['models'].append({'name':'', 'indexes':[0, int(nb_features)]})
 
     with open(parameters_path, 'w') as outfile:
         yaml.dump(parameters, outfile, default_flow_style=False)

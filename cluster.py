@@ -186,6 +186,13 @@ if __name__ == '__main__':
     x = standardization(matrices, args.model_name, pca_components=args.pca)
     y = [masker.transform(f) for f in fmri_runs] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
 
+    # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element
+    for run in range(len(y)):
+        new = np.zeros(y[run].shape)
+        zero = np.zeros(y[run].shape)
+        new[0] = 1e-15
+        y[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, y[run])
+
     for index in range(len(y)):
         np.save(os.path.join(fmri_path, 'y_run{}.npy'.format(index+1)), y[index])
         np.save(os.path.join(design_matrices_path, 'x_run{}.npy'.format(index+1)), x[index])

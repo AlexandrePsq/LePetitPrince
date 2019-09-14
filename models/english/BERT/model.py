@@ -42,6 +42,7 @@ class BERT(object):
         self.model.eval()
         for line in open(path):
             line = line.strip() # Remove trailing characters
+
             line = '[CLS] ' + line + ' [SEP]'
             tokenized_text = self.tokenizer.wordpiece_tokenizer.tokenize(line)
             indexed_tokens = self.tokenizer.convert_tokens_to_ids(tokenized_text)
@@ -52,9 +53,7 @@ class BERT(object):
             segments_tensors = torch.tensor([segment_ids])
         
             with torch.no_grad():
-                encoded_layers, _ = self.model(tokens_tensor, segments_tensors)
-        # iterator = tokenize(path, language) 
-        iterator = list(textgrid['word']) # we suppose the textgrid dataframe (=csv file with onsets and offsets issue from original textgrid) has been created thanks to the tokennize function
+                encoded_layers, _ = self.model(tokens_tensor, segments_tensors) # dimension = layer_count * len(tokenized_text) * feature_count
         dataframes = [pd.DataFrame(function(iterator, language), columns=[function.__name__]) for function in self.functions]
         result = pd.concat([df for df in dataframes], axis = 1)
         return result

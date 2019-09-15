@@ -13,9 +13,8 @@ import pandas as pd
 import numpy as np
 import torch
 from pytorch_transformers import BertTokenizer, BertModel, BertForMaskedLM, WordpieceTokenizer
-import h5py
 from utils import match_tokenized_to_untokenized, extract_activations_from_tokenized
-
+from .tokenizer import tokenize 
 
 
 parameters = {'base':{'LAYER_COUNT':12, 'FEATURE_COUNT':768},
@@ -53,9 +52,10 @@ class BERT(object):
         """
         activations = []
         self.model.eval()
+        iterator = tokenize(path, language, path_like=True, train=False)
         if self.generation == 'bucket':
             # Here, we give as input the text line by line.
-            for line in open(path):
+            for line in iterator:
                 line = line.strip() # Remove trailing characters
 
                 line = '[CLS] ' + line + ' [SEP]'
@@ -75,7 +75,7 @@ class BERT(object):
                     activations += extract_activations_from_tokenized(encoded_layers.numpy(), mapping, tokenized_text)
         elif self.generation == 'sequential':
             # Here we give as input the sentence up to the actual word, incrementing by one at each step.
-            for line in open(path):
+            for line in iterator:
                 for index in range(1, len(line.split())):
                     tmp_line = " ".join(line.split()[:index])
                     tmp_line = tmp_line.strip() # Remove trailing characters

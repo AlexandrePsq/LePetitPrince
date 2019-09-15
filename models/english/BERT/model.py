@@ -34,13 +34,18 @@ class BERT(object):
             raise ValueError("BERT model must be base or large")
         self.model = BertModel.from_pretrained('bert-{}-cased'.format(bert_model))
         self.tokenizer = BertTokenizer.from_pretrained('bert-{}-cased'.format(bert_model))
+        self.model.config.output_hidden_states = True
+        self.model.save_pretrained('./')
+        self.tokenizer.save_pretrained('./')
+        self.model = BertModel.from_pretrained('./')
+        self.tokenizer = BertTokenizer.from_pretrained('./')
+        
         self.language = language
         self.LAYER_COUNT = parameters[bert_model]['LAYER_COUNT']
         self.FEATURE_COUNT = parameters[bert_model]['FEATURE_COUNT']
         self.name = name
         self.generation = self.name.split('-')[2].strip()
         self.loi = np.array(loi) if loi else np.arange(parameters[bert_model]['LAYER_COUNT']) # loi: layers of interest
-        self.model.config.output_hidden_states = True
 
     def __name__(self):
         return self.name

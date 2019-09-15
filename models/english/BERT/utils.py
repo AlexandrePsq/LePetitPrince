@@ -29,13 +29,13 @@ def match_tokenized_to_untokenized(tokenized_sent, untokenized_sent):
     return mapping
 
 
-def extract_activations_from_tokenized(activation, mapping, tokenized_text):
+def extract_activations_from_tokenized(activation, mapping):
     """Take the average activations of the tokens related to a given word."""
     nb_words = activation.shape[1]
     new_activations = []
     for word_index in range(nb_words):
         word_activation = []
-        word_activation.append([tokenized_text[o] for o in mapping[word_index]])
+        word_activation.append([activation[o] for o in mapping[word_index]])
         word_activation = np.vstack(word_activation)
         new_activations.append(np.mean(word_activation, axis=0).reshape(1,-1))
     return new_activations

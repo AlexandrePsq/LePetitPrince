@@ -39,7 +39,7 @@ class BERT(object):
         self.tokenizer.save_pretrained('./')
         self.model = BertModel.from_pretrained('./')
         self.tokenizer = BertTokenizer.from_pretrained('./')
-        
+
         self.language = language
         self.LAYER_COUNT = parameters[bert_model]['LAYER_COUNT']
         self.FEATURE_COUNT = parameters[bert_model]['FEATURE_COUNT']
@@ -79,7 +79,7 @@ class BERT(object):
                     # filtration
                     encoded_layers = np.vstack(encoded_layers[2][1:]) # retrieve all the hidden states (dimension = layer_count * len(tokenized_text) * feature_count)
                     encoded_layers = encoded_layers[self.loi, :, :]
-                    activations += utils.extract_activations_from_tokenized(encoded_layers, mapping, tokenized_text)
+                    activations += utils.extract_activations_from_tokenized(encoded_layers, mapping)
         elif self.generation == 'sequential':
             # Here we give as input the sentence up to the actual word, incrementing by one at each step.
             for line in iterator:

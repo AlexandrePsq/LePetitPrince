@@ -33,7 +33,7 @@ def extract_activations_from_tokenized(activation, mapping):
     """Take the average activations of the tokens related to a given word."""
     nb_words = activation.shape[1]
     new_activations = []
-    for word_index in range(nb_words):
+    for word_index in range(1, len(mapping.keys())):
         word_activation = []
         word_activation.append([activation[0,index, :] for index in mapping[word_index]])
         word_activation = np.vstack(word_activation)

@@ -145,7 +145,7 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'])
+		self.models = sorted(['bert_bucket_layer-5', 'bert_sequential_layer-5'])
 		#self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',

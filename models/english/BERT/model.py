@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 import torch
 from pytorch_transformers import BertTokenizer, BertModel, BertForMaskedLM, WordpieceTokenizer
-from utils import match_tokenized_to_untokenized, extract_activations_from_tokenized
+from . import utils
 from .tokenizer import tokenize 
 
 
@@ -62,7 +62,7 @@ class BERT(object):
                 tokenized_text = self.tokenizer.wordpiece_tokenizer.tokenize(line)
                 indexed_tokens = self.tokenizer.convert_tokens_to_ids(tokenized_text)
                 segment_ids = [1 for x in tokenized_text]
-                mapping = match_tokenized_to_untokenized(tokenized_text, line)
+                mapping = utils.match_tokenized_to_untokenized(tokenized_text, line)
 
                 # Convert inputs to PyTorch tensors
                 tokens_tensor = torch.tensor([indexed_tokens])
@@ -72,7 +72,7 @@ class BERT(object):
                     encoded_layers, _ = self.model(tokens_tensor, segments_tensors) # dimension = layer_count * len(tokenized_text) * feature_count
                     # filtration
                     encoded_layers = encoded_layers[self.loi, :, :]
-                    activations += extract_activations_from_tokenized(encoded_layers.numpy(), mapping, tokenized_text)
+                    activations += utils.extract_activations_from_tokenized(encoded_layers.numpy(), mapping, tokenized_text)
         elif self.generation == 'sequential':
             # Here we give as input the sentence up to the actual word, incrementing by one at each step.
             for line in iterator:

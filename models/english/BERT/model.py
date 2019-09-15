@@ -38,8 +38,9 @@ class BERT(object):
         self.LAYER_COUNT = parameters[bert_model]['LAYER_COUNT']
         self.FEATURE_COUNT = parameters[bert_model]['FEATURE_COUNT']
         self.name = name
-        self.generation = self.name.split('-')[2]
+        self.generation = self.name.split('-')[2].strip()
         self.loi = np.array(loi) if loi else np.arange(parameters[bert_model]['LAYER_COUNT']) # loi: layers of interest
+        self.model.config.output_hidden_states = True
 
     def __name__(self):
         return self.name
@@ -69,8 +70,9 @@ class BERT(object):
                 segments_tensors = torch.tensor([segment_ids])
 
                 with torch.no_grad():
-                    encoded_layers, _ = self.model(tokens_tensor, segments_tensors) # dimension = layer_count * len(tokenized_text) * feature_count
+                    encoded_layers = self.model(tokens_tensor, segments_tensors) # last_hidden_state, pooled_last_hidden_states, all_hidden_states
                     # filtration
+                    encoded_layers = np.vstack(encoded_layers[2][1:]) # retrieve all the hidden states (dimension = layer_count * len(tokenized_text) * feature_count)
                     encoded_layers = encoded_layers[self.loi, :, :]
                     activations += utils.extract_activations_from_tokenized(encoded_layers.numpy(), mapping, tokenized_text)
         elif self.generation == 'sequential':
@@ -90,8 +92,9 @@ class BERT(object):
                     segments_tensors = torch.tensor([segment_ids])
 
                     with torch.no_grad():
-                        encoded_layers, _ = self.model(tokens_tensor, segments_tensors) # dimension = layer_count * len(tokenized_text) * feature_count
+                        encoded_layers = self.model(tokens_tensor, segments_tensors) # dimension = layer_count * len(tokenized_text) * feature_count
                         # filtration
+                        encoded_layers = np.vstack(encoded_layers[2][1:])
                         encoded_layers = encoded_layers[self.loi, :, :]
                         activations.append(np.mean(encoded_layers.numpy(), axis=1).reshape(1,-1))
         result = pd.DataFrame(np.vstack(activations), columns=['layer-{}-{}'.format(layer, index) for layer in self.loi for index in range(self.FEATURE_COUNT)])

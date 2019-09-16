@@ -33,7 +33,7 @@ def generate(mod, run, language, textgrid, overwrite=False):
     save_all = None
     
     # Defining paths
-    model_name = 'bert_bucket_layer-5_model'
+    model_name = 'bert_sequential_layer-5'
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
     path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
     #### generating raw-features ####

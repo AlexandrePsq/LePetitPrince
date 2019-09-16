@@ -189,7 +189,7 @@ class Params:
 		# general parameters
 		self.test = True
 		self.overwrite = False
-		self.parallel = True
+		self.parallel = False
 		self.cuda = True
 		self.voxel_wise = True
 		self.force_glm = True

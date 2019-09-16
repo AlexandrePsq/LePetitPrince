@@ -188,9 +188,9 @@ if __name__ == '__main__':
 
     # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element
     for run in range(len(y)):
-        new = np.zeros(y[run].shape)
-        zero = np.zeros(y[run].shape)
-        new[0] = 1e-3
+        new = np.zeros(y[run].shape[0])
+        zero = np.zeros(y[run].shape[0])
+        new[0] = 1e-10
         y[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, y[run])
 
     for index in range(len(y)):

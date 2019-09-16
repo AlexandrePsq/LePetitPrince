@@ -30,6 +30,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     n_permutations = int(args.n_permutations)
+    np.random.seed(1111)
 
     columns_index = np.arange(int(args.nb_features))
     shuffling = []

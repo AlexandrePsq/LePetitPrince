@@ -1,4 +1,6 @@
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 
 import argparse
 import os
@@ -28,8 +30,8 @@ def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2
     thresholds_r2 = np.percentile(distribution_r2_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
     thresholds_pearson_corr = np.percentile(distribution_pearson_corr_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
     
-    p_values_r2 = np.sum(distribution_r2_array_tmp>r2_final, axis=0)/distribution_r2_array_tmp.shape[0] 
-    p_values_pearson_corr = np.sum(distribution_pearson_corr_array_tmp>corr_final, axis=0)/distribution_pearson_corr_array_tmp.shape[0]
+    p_values_r2 = (1.0 * np.sum(distribution_r2_array_tmp>r2_final, axis=0))/distribution_r2_array_tmp.shape[0] 
+    p_values_pearson_corr =  (1.0 * np.sum(distribution_pearson_corr_array_tmp>corr_final, axis=0))/distribution_pearson_corr_array_tmp.shape[0]
 
     z_values_r2 = (thresholds_r2 - np.mean(distribution_r2_array_tmp, axis=0))/np.std(distribution_r2_array_tmp, axis=0)
     z_values_pearson_corr = (thresholds_pearson_corr - np.mean(distribution_pearson_corr_array_tmp, axis=0))/np.std(distribution_pearson_corr_array_tmp, axis=0)

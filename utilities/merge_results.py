@@ -7,6 +7,7 @@ import os
 import numpy as np
 import yaml
 import glob
+import sys
 
 
 def check_folder(path):
@@ -30,6 +31,8 @@ def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2
     thresholds_r2 = np.percentile(distribution_r2_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
     thresholds_pearson_corr = np.percentile(distribution_pearson_corr_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
     
+    with open('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/python_version.txt', 'w') as f:
+        f.write(sys.version)
     np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/distri_R2_before.npy', distribution_r2_array_tmp)
     np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/r2_final_before.npy', r2_final)
     np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/distri_pearson_before.npy', distribution_pearson_corr_array_tmp)

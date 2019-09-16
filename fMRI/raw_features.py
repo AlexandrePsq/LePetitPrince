@@ -23,7 +23,8 @@ paths = Paths()
 params = Params()
 
 
-def compute_raw_features(module, run, output_parent_folder, input_data_type, output_data_type, language, model_name, model_category, extension, overwrite):
+def compute_raw_features(run, output_parent_folder, input_data_type, output_data_type, language, model_name, model_category, extension, overwrite):
+    module = importlib.import_module("models.{}.{}".format(language, model_name)) # import the right module depending on the model we want to use
     model = module.load() # load an already trained model
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
@@ -68,8 +69,6 @@ if __name__ == '__main__':
         input_data_type = 'wave'
     else:
         input_data_type = 'text'
-
-    module = importlib.import_module("models.{}.{}".format(args.language, model_name)) # import the right module depending on the model we want to use
     
     output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model_name)
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
@@ -78,9 +77,9 @@ if __name__ == '__main__':
 
     if not args.parallel:
         for i, run in enumerate(raw_data):
-            compute_raw_features(module, run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, model_category, extension, args.overwrite)
+            compute_raw_features(run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, model_category, extension, args.overwrite)
     else:
         Parallel(n_jobs=-2)(delayed(compute_raw_features) \
-                    (module, run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, model_category, extension, args.overwrite) for run in raw_data)
+                    (run, output_parent_folder, input_data_type, output_data_type, args.language, model_name, model_category, extension, args.overwrite) for run in raw_data)
 
 

@@ -190,7 +190,7 @@ if __name__ == '__main__':
     for run in range(len(y)):
         new = np.zeros(y[run].shape)
         zero = np.zeros(y[run].shape)
-        new[0] = 1e-15
+        new[0] = 1e-3
         y[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, y[run])
 
     for index in range(len(y)):

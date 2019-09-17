@@ -22,7 +22,7 @@ def check_folder(path):
 def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2_array, distribution_pearson_corr_array, alpha_percentile, test=False):
 
     r2_final = np.mean(r2_test_array, axis=0)
-    r2_final = [x if np.abs(x) < 1 else np.sign(x)*0.2 for x in r2_final] 
+    r2_final = np.array([x if np.abs(x) < 1 else np.sign(x)*0.2 for x in r2_final])
     corr_final = np.mean(pearson_corr_array, axis=0)
 
     distribution_r2_array_tmp = np.mean(distribution_r2_array, axis=0)

@@ -111,7 +111,7 @@ if __name__ =='__main__':
                     voxels = yaml.safe_load(stream)['voxels']
                 except yaml.YAMLError as exc:
                     print(exc)
-                    quit()
+                    break
             scores[run-1, voxels] = np.load(files_r2[index])
             corr[run-1, voxels] = np.load(files_pearson_corr[index])
             distribution_r2_array[run-1, :, voxels] = np.load(files_distribution_r2[index]).T

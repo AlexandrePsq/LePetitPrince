@@ -31,21 +31,9 @@ def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2
     thresholds_r2 = np.percentile(distribution_r2_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
     thresholds_pearson_corr = np.percentile(distribution_pearson_corr_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
     
-    with open('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/python_version.txt', 'w') as f:
-        f.write(sys.version)
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/distri_R2_before.npy', distribution_r2_array_tmp)
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/r2_final_before.npy', r2_final)
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/distri_pearson_before.npy', distribution_pearson_corr_array_tmp)
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/pearson_final_before.npy', corr_final)
     p_values_r2 = (1.0 * np.sum(distribution_r2_array_tmp>r2_final, axis=0))/distribution_r2_array_tmp.shape[0] 
     p_values_pearson_corr =  (1.0 * np.sum(distribution_pearson_corr_array_tmp>corr_final, axis=0))/distribution_pearson_corr_array_tmp.shape[0]
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/p_values_r2_check.npy', p_values_r2)
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/p_values_pearson_corr_check.npy', p_values_pearson_corr)
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/distri_R2_after.npy', distribution_r2_array_tmp)
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/r2_final_after.npy', r2_final)
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/distri_pearson_after.npy', distribution_pearson_corr_array_tmp)
-    np.save('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/pearson_final_after.npy', corr_final)
-
+    
     z_values_r2 = (thresholds_r2 - np.mean(distribution_r2_array_tmp, axis=0))/np.std(distribution_r2_array_tmp, axis=0)
     z_values_pearson_corr = (thresholds_pearson_corr - np.mean(distribution_pearson_corr_array_tmp, axis=0))/np.std(distribution_pearson_corr_array_tmp, axis=0)
 
@@ -127,7 +115,7 @@ if __name__ =='__main__':
                                                                                                                                                                                                                                                     corr,
                                                                                                                                                                                                                                                     distribution_r2_array,
                                                                                                                                                                                                                                                     distribution_pearson_corr_array, 
-                                                                                                                                                                                                                                                    int(args.alpha_percentile))
+                                                                                                                                                                                                                                                    float(args.alpha_percentile))
 
         r2_significant_with_threshold = np.zeros(r2_final.shape)
         r2_significant_with_threshold[mask_r2] = r2_final[mask_r2]

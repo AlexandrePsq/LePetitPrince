@@ -51,7 +51,7 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
     nib.save(img, path2output_raw)
 
     if not_glass_brain:
-        display = plot_img(img, colorbar=True, black_bg=True, cut_coords=(52, 22, -10))
+        display = plot_img(img, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))
         display.savefig(path2output_png)
         display.close()
     else:

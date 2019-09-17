@@ -9,7 +9,7 @@ import yaml
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker
-from nilearn.plotting import plot_glass_brain
+from nilearn.plotting import plot_glass_brain, plot_img
 import nibabel as nib
 
 import matplotlib.pyplot as plt
@@ -35,7 +35,7 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     return masker
 
 
-def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=None, pca='', voxel_wise=False):
+def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=None, pca='', voxel_wise=False, not_glass_brain=False):
     model = os.path.basename(output_parent_folder)
     language = os.path.basename(os.path.dirname(output_parent_folder))
     data_type = os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder)))
@@ -50,9 +50,14 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 
     nib.save(img, path2output_raw)
 
-    display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
-    display.savefig(path2output_png)
-    display.close()
+    if not not_glass_brain:
+        display = plot_img(img, colorbar=True, black_bg=True)
+        display.savefig(path2output_png)
+        display.close()
+    else:
+        display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
+        display.savefig(path2output_png)
+        display.close()
 
 
 
@@ -123,8 +128,8 @@ if __name__ =='__main__':
         create_maps(masker, thresholds_r2, 'thresholds_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)
         create_maps(masker, thresholds_pearson_corr, 'thresholds_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)
 
-        create_maps(masker, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
-        create_maps(masker, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+        create_maps(masker, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True, not_glass_brain=True)
+        create_maps(masker, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True, not_glass_brain=True)
 
         create_maps(masker, p_values_r2, 'p_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
         create_maps(masker, p_values_pearson_corr, 'p_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)

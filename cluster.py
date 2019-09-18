@@ -52,7 +52,7 @@ def standardization(matrices, model_name, pca_components="300"):
     else:
         print('Skipping PCA.')
         for index in range(len(matrices)):
-            scaler = StandardScaler(with_mean=True, with_std=True)
+            scaler = StandardScaler(with_mean=True, with_std=False)
             scaler.fit(matrices[index])
             matrices[index] = scaler.transform(matrices[index])
     return matrices
@@ -208,7 +208,8 @@ if __name__ == '__main__':
     alpha_list = [round(tmp, 5) for tmp in np.logspace(-3, 3, 100)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
-    features = sorted([['rms_model', 1], ['wordrate_model', 1]]) # add here basic features name + nb of column feature for each!!!
+    features = []
+    # features = sorted([['rms_model', 1], ['wordrate_model', 1]]) # add here basic features name + nb of column feature for each!!!
     # could be: features = sorted([['lstm...hidden_first-layer', 300], ['lstm...cell_first-layer', 300]])
 
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')
@@ -233,7 +234,7 @@ if __name__ == '__main__':
     jobs = []
 
     # first job: split the dataset
-    job_0 = Job(command=["python", "shuffling_preparation.py", 
+    job_0 = Job(command=["python3", "shuffling_preparation.py", 
                             "--nb_features", nb_features,
                             "--output", shuffling_path,
                             "--n_permutations", nb_permutations], 
@@ -248,7 +249,7 @@ if __name__ == '__main__':
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))
         indexes = ','.join([str(i) for i in np.delete(indexes, run-1, 0)]) 
-        job = Job(command=["python", "cv_alphas.py", 
+        job = Job(command=["python3", "cv_alphas.py", 
                                 "--indexes", indexes, 
                                 "--x", design_matrices_path, 
                                 "--y", fmri_path, 
@@ -264,7 +265,7 @@ if __name__ == '__main__':
         dependencies.append((job_0, job))
 
     # Merging the results and compute significant r2
-    job_merge = Job(command=["python", "merge_results.py", 
+    job_merge = Job(command=["python3", "merge_results.py", 
                                 "--input_folder", derivatives_path, 
                                 "--parameters", parameters_path, 
                                 "--yaml_files", yaml_files_path,
@@ -283,7 +284,8 @@ if __name__ == '__main__':
         info = os.path.basename(yaml_file).split('_')
         run = int(info[1])
         alpha = float(info[3][:-4])
-        job = Job(command=["python", "significance_clusterized.py", 
+        native_specification = "-q Nspin_short" if int(nb_permutations)<3000 else "-q Nspin_long"
+        job = Job(command=["python3", "significance_clusterized.py", 
                             "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
                             "--output", derivatives_path, 
                             "--x", design_matrices_path, 
@@ -294,7 +296,7 @@ if __name__ == '__main__':
                             "--alpha_percentile", alpha_percentile], 
                     name="job {} - alpha {}".format(run, alpha), 
                     working_directory=scripts_path,
-                    native_specification="-q Nspin_short")
+                    native_specification=native_specification)
         group_significativity.append(job)
         jobs.append(job)
         for job_cv in group_cv_alphas:
@@ -305,7 +307,7 @@ if __name__ == '__main__':
     jobs.append(job_merge)
 
     # Plotting the maps
-    job_final = Job(command=["python", "create_maps.py", 
+    job_final = Job(command=["python3", "create_maps.py", 
                                 "--input", derivatives_path, 
                                 "--parameters", parameters_path,
                                 "--subject", args.subject,

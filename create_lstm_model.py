@@ -35,7 +35,7 @@ if __name__ == '__main__':
             retrieve_entropy = (parameters==['entropy'])
 
             extension = parameters[0] + '_'
-            extension += layers_name[str(analyzed_layers)] if str(analyzed_layers) in layers_name.keys() else 'all_layers'
+            extension += layers_name[str(analyzed_layers)] if str(analyzed_layers) in layers_name.keys() else 'all-layers'
             model_name = 'lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}_'.format(embedding_size, nhid, nlayers, str(dropout).replace('.', '')) + extension
 
             if not os.path.isfile(model_name+'.py'):

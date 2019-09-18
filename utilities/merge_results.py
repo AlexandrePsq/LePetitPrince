@@ -7,6 +7,7 @@ import numpy as np
 import yaml
 import glob
 import sys
+import scipy
 
 
 def check_folder(path):
@@ -34,8 +35,8 @@ def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2
     p_values_r2 = (1.0 * np.sum(distribution_r2_array_tmp>r2_final, axis=0))/distribution_r2_array_tmp.shape[0] 
     p_values_pearson_corr =  (1.0 * np.sum(distribution_pearson_corr_array_tmp>corr_final, axis=0))/distribution_pearson_corr_array_tmp.shape[0]
     
-    z_values_r2 = (thresholds_r2 - np.mean(distribution_r2_array_tmp, axis=0))/np.std(distribution_r2_array_tmp, axis=0)
-    z_values_pearson_corr = (thresholds_pearson_corr - np.mean(distribution_pearson_corr_array_tmp, axis=0))/np.std(distribution_pearson_corr_array_tmp, axis=0)
+    z_values_r2 = np.apply_along_axis(lambda x: scipy.stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_r2)
+    z_values_pearson_corr = np.apply_along_axis(lambda x: scipy.stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_pearson_corr)
 
     mask_r2 = (r2_final > thresholds_r2)
     mask_pearson_corr = (corr_final > thresholds_pearson_corr)

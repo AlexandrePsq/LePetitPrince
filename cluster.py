@@ -234,7 +234,7 @@ if __name__ == '__main__':
     jobs = []
 
     # first job: split the dataset
-    job_0 = Job(command=["python3", "shuffling_preparation.py", 
+    job_0 = Job(command=["python", "shuffling_preparation.py", 
                             "--nb_features", nb_features,
                             "--output", shuffling_path,
                             "--n_permutations", nb_permutations], 
@@ -249,7 +249,7 @@ if __name__ == '__main__':
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))
         indexes = ','.join([str(i) for i in np.delete(indexes, run-1, 0)]) 
-        job = Job(command=["python3", "cv_alphas.py", 
+        job = Job(command=["python", "cv_alphas.py", 
                                 "--indexes", indexes, 
                                 "--x", design_matrices_path, 
                                 "--y", fmri_path, 
@@ -265,7 +265,7 @@ if __name__ == '__main__':
         dependencies.append((job_0, job))
 
     # Merging the results and compute significant r2
-    job_merge = Job(command=["python3", "merge_results.py", 
+    job_merge = Job(command=["python", "merge_results.py", 
                                 "--input_folder", derivatives_path, 
                                 "--parameters", parameters_path, 
                                 "--yaml_files", yaml_files_path,
@@ -285,7 +285,7 @@ if __name__ == '__main__':
         run = int(info[1])
         alpha = float(info[3][:-4])
         native_specification = "-q Nspin_short" if int(nb_permutations)<3000 else "-q Nspin_long"
-        job = Job(command=["python3", "significance_clusterized.py", 
+        job = Job(command=["python", "significance_clusterized.py", 
                             "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
                             "--output", derivatives_path, 
                             "--x", design_matrices_path, 
@@ -307,7 +307,7 @@ if __name__ == '__main__':
     jobs.append(job_merge)
 
     # Plotting the maps
-    job_final = Job(command=["python3", "create_maps.py", 
+    job_final = Job(command=["python", "create_maps.py", 
                                 "--input", derivatives_path, 
                                 "--parameters", parameters_path,
                                 "--subject", args.subject,

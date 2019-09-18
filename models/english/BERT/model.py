@@ -24,7 +24,7 @@ parameters = {'base':{'LAYER_COUNT':12, 'FEATURE_COUNT':768},
 
 
 class BERT(object):
-    """Container module with an encoder, a recurrent module, and a decoder."""
+    """Container module for BERT."""
 
     def __init__(self, bert_model, language, name, loi):
         super(BERT, self).__init__()
@@ -91,6 +91,7 @@ class BERT(object):
                     tokenized_text = self.tokenizer.wordpiece_tokenizer.tokenize(tmp_line)
                     indexed_tokens = self.tokenizer.convert_tokens_to_ids(tokenized_text)
                     segment_ids = [1 for x in tokenized_text]
+                    mapping = utils.match_tokenized_to_untokenized(tokenized_text, line)
 
                     # Convert inputs to PyTorch tensors
                     tokens_tensor = torch.tensor([indexed_tokens])
@@ -101,6 +102,6 @@ class BERT(object):
                         # filtration
                         encoded_layers = np.vstack(encoded_layers[2][1:])
                         encoded_layers = encoded_layers[self.loi, :, :]
-                        activations.append(np.mean(encoded_layers, axis=1).reshape(1,-1))
+                        activations.append(utils.extract_activations_from_tokenized(encoded_layers, mapping)[-1])
         result = pd.DataFrame(np.vstack(activations), columns=['layer-{}-{}'.format(layer, index) for layer in self.loi for index in range(self.FEATURE_COUNT)])
         return result

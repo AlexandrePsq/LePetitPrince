@@ -63,8 +63,7 @@ def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2
         mask_pvalues_r2 = (p_values_r2 < 1-alpha_percentile/100)
         mask_pvalues_pearson_corr = (p_values_pearson_corr < 1-alpha_percentile/100)
         write(checkpoints_path, '\tcomputing done')
-    except:
-        e = sys.exc_info()[0]
+    except Exception as e :
         write(checkpoints_path, e)
 
     return r2_final, corr_final, mask_r2, mask_pearson_corr, mask_pvalues_r2, mask_pvalues_pearson_corr, thresholds_pearson_corr, thresholds_r2, p_values_r2, p_values_pearson_corr, z_values_r2, z_values_pearson_corr

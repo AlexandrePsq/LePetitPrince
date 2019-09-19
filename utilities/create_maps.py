@@ -128,8 +128,8 @@ if __name__ =='__main__':
         create_maps(masker, thresholds_r2, 'thresholds_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)
         create_maps(masker, thresholds_pearson_corr, 'thresholds_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)
 
-        create_maps(masker, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True, not_glass_brain=True)
-        create_maps(masker, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True, not_glass_brain=True)
+        create_maps(masker, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True, not_glass_brain=False)
+        create_maps(masker, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True, not_glass_brain=False)
 
         create_maps(masker, p_values_r2, 'p_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
         create_maps(masker, p_values_pearson_corr, 'p_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)

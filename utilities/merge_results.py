@@ -50,6 +50,8 @@ def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2
         write(checkpoints_path, '\tcomputing done')
 
         write(checkpoints_path, 'computing z values')
+        write(checkpoints_path,  scipy.stats.norm.ppf(1-p_values_r2[0], loc=0, scale=1))
+        #write(checkpoints_path, np.apply_along_axis(lambda x: x, 0, p_values_r2))
         z_values_r2 = np.apply_along_axis(lambda x: scipy.stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_r2)
         z_values_pearson_corr = np.apply_along_axis(lambda x: scipy.stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_pearson_corr)
         write(checkpoints_path, '\tcomputing done')

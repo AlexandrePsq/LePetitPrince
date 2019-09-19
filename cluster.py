@@ -188,9 +188,8 @@ if __name__ == '__main__':
 
     # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element
     for run in range(len(y)):
-        new = np.zeros(y[run].shape[0])
+        new = np.random.random(y[run].shape[0])/1000
         zero = np.zeros(y[run].shape[0])
-        new[0] = 1e10
         y[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, y[run])
 
     for index in range(len(y)):
@@ -205,7 +204,7 @@ if __name__ == '__main__':
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
     nb_permutations = str(3000)
-    alpha_list = [round(tmp, 5) for tmp in np.logspace(-3, 3, 100)]
+    alpha_list = [round(tmp, 5) for tmp in np.logspace(0, 4, 100)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
     features = []

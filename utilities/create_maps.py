@@ -125,8 +125,8 @@ if __name__ =='__main__':
         create_maps(masker, pearson_corr_significant_with_threshold, 'significant_pearson_corr_with_threshold', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # pearson_corr_significant
         create_maps(masker, pearson_corr_significant_with_pvalues, 'significant_pearson_corr_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # pearson_corr_significant
 
-        create_maps(masker, thresholds_r2, 'thresholds_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)
-        create_maps(masker, thresholds_pearson_corr, 'thresholds_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True, vmax=0.2)
+        create_maps(masker, thresholds_r2, 'thresholds_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+        create_maps(masker, thresholds_pearson_corr, 'thresholds_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
 
         create_maps(masker, p_values_r2, 'p_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
         create_maps(masker, p_values_pearson_corr, 'p_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)

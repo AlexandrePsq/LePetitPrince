@@ -52,7 +52,7 @@ def standardization(matrices, model_name, pca_components="300"):
     else:
         print('Skipping PCA.')
         for index in range(len(matrices)):
-            scaler = StandardScaler(with_mean=True, with_std=True)
+            scaler = StandardScaler(with_mean=True, with_std=True) # with_std=True => computation slower
             scaler.fit(matrices[index])
             matrices[index] = scaler.transform(matrices[index])
     return matrices
@@ -283,7 +283,7 @@ if __name__ == '__main__':
         info = os.path.basename(yaml_file).split('_')
         run = int(info[1])
         alpha = float(info[3][:-4])
-        native_specification = "-q Nspin_short" if int(nb_permutations)<3000 else "-q Nspin_long"
+        native_specification = "-q Nspin_short" if ((int(nb_permutations)<3000) or (int(nb_features)>300)) else "-q Nspin_long"
         job = Job(command=["python", "significance_clusterized.py", 
                             "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
                             "--output", derivatives_path, 

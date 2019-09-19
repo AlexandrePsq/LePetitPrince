@@ -27,41 +27,45 @@ def write(path, text):
 
 
 def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2_array, distribution_pearson_corr_array, alpha_percentile, test=False):
-    write(checkpoints_path, 'computing r2 and pearson final')
-    r2_final = np.mean(r2_test_array, axis=0)
-    r2_final = np.array([x if np.abs(x) < 1 else np.sign(x)*0.2 for x in r2_final])
-    corr_final = np.mean(pearson_corr_array, axis=0)
-    write(checkpoints_path, '\tcomputing done')
+    try:
+        write(checkpoints_path, 'computing r2 and pearson final')
+        r2_final = np.mean(r2_test_array, axis=0)
+        r2_final = np.array([x if np.abs(x) < 1 else np.sign(x)*0.2 for x in r2_final])
+        corr_final = np.mean(pearson_corr_array, axis=0)
+        write(checkpoints_path, '\tcomputing done')
 
-    write(checkpoints_path, 'computing mean distributions')
-    distribution_r2_array_tmp = np.mean(distribution_r2_array, axis=0)
-    distribution_pearson_corr_array_tmp = np.mean(distribution_pearson_corr_array, axis=0)
-    write(checkpoints_path, '\tcomputing done')
+        write(checkpoints_path, 'computing mean distributions')
+        distribution_r2_array_tmp = np.mean(distribution_r2_array, axis=0)
+        distribution_pearson_corr_array_tmp = np.mean(distribution_pearson_corr_array, axis=0)
+        write(checkpoints_path, '\tcomputing done')
 
-    write(checkpoints_path, 'computing thresholds')
-    thresholds_r2 = np.percentile(distribution_r2_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
-    thresholds_pearson_corr = np.percentile(distribution_pearson_corr_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
-    write(checkpoints_path, '\tcomputing done')
-    
-    write(checkpoints_path, 'computing p values')
-    p_values_r2 = (1.0 * np.sum(distribution_r2_array_tmp>r2_final, axis=0))/distribution_r2_array_tmp.shape[0] 
-    p_values_pearson_corr =  (1.0 * np.sum(distribution_pearson_corr_array_tmp>corr_final, axis=0))/distribution_pearson_corr_array_tmp.shape[0]
-    write(checkpoints_path, '\tcomputing done')
+        write(checkpoints_path, 'computing thresholds')
+        thresholds_r2 = np.percentile(distribution_r2_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
+        thresholds_pearson_corr = np.percentile(distribution_pearson_corr_array_tmp, alpha_percentile, axis=0) # list: 1 value for each voxel
+        write(checkpoints_path, '\tcomputing done')
+        
+        write(checkpoints_path, 'computing p values')
+        p_values_r2 = (1.0 * np.sum(distribution_r2_array_tmp>r2_final, axis=0))/distribution_r2_array_tmp.shape[0] 
+        p_values_pearson_corr =  (1.0 * np.sum(distribution_pearson_corr_array_tmp>corr_final, axis=0))/distribution_pearson_corr_array_tmp.shape[0]
+        write(checkpoints_path, '\tcomputing done')
 
-    write(checkpoints_path, 'computing z values')
-    z_values_r2 = np.apply_along_axis(lambda x: scipy.stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_r2)
-    z_values_pearson_corr = np.apply_along_axis(lambda x: scipy.stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_pearson_corr)
-    write(checkpoints_path, '\tcomputing done')
+        write(checkpoints_path, 'computing z values')
+        z_values_r2 = np.apply_along_axis(lambda x: scipy.stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_r2)
+        z_values_pearson_corr = np.apply_along_axis(lambda x: scipy.stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_pearson_corr)
+        write(checkpoints_path, '\tcomputing done')
 
-    write(checkpoints_path, 'computing masks with thresholds')
-    mask_r2 = (r2_final > thresholds_r2)
-    mask_pearson_corr = (corr_final > thresholds_pearson_corr)
-    write(checkpoints_path, '\tcomputing done')
+        write(checkpoints_path, 'computing masks with thresholds')
+        mask_r2 = (r2_final > thresholds_r2)
+        mask_pearson_corr = (corr_final > thresholds_pearson_corr)
+        write(checkpoints_path, '\tcomputing done')
 
-    write(checkpoints_path, 'computing masks with p values')
-    mask_pvalues_r2 = (p_values_r2 < 1-alpha_percentile/100)
-    mask_pvalues_pearson_corr = (p_values_pearson_corr < 1-alpha_percentile/100)
-    write(checkpoints_path, '\tcomputing done')
+        write(checkpoints_path, 'computing masks with p values')
+        mask_pvalues_r2 = (p_values_r2 < 1-alpha_percentile/100)
+        mask_pvalues_pearson_corr = (p_values_pearson_corr < 1-alpha_percentile/100)
+        write(checkpoints_path, '\tcomputing done')
+    except:
+        e = sys.exc_info()[0]
+        write(checkpoints_path, e)
 
     return r2_final, corr_final, mask_r2, mask_pearson_corr, mask_pvalues_r2, mask_pvalues_pearson_corr, thresholds_pearson_corr, thresholds_r2, p_values_r2, p_values_pearson_corr, z_values_r2, z_values_pearson_corr
 
@@ -138,7 +142,7 @@ if __name__ =='__main__':
                     print(-1)
                     write(checkpoints_path, '--> error in yaml file <--')
                     break
-            write(checkpoints_path, 'yaml file read')
+            write(checkpoints_path, '\tyaml file read')
             scores[run-1, voxels] = np.load(files_r2[index])
             corr[run-1, voxels] = np.load(files_pearson_corr[index])
             distribution_r2_array[run-1, :, voxels] = np.load(files_distribution_r2[index]).T

@@ -108,6 +108,9 @@ if __name__ == '__main__':
     ### Parameters ###
     ##################
 
+    y = np.load(os.path.join(fmri_path,'y_run1.npy'))
+    x = np.load(os.path.join(design_matrices_path,'x_run1.npy'))
+
     nb_runs = str(len(fmri_runs))
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])

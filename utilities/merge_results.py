@@ -51,6 +51,8 @@ def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2
 
         write(checkpoints_path, 'computing z values')
         #write(checkpoints_path,  stats.norm.ppf(1-p_values_r2[0], loc=0, scale=1))
+        output_folder = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/outputs/'
+        check_folder(output_folder)
         p_values_r2_output_path = os.path.join(output_folder, 'p_values_r2.npy')
         np.save(p_values_r2_output_path, p_values_r2)
         #write(checkpoints_path, np.apply_along_axis(lambda x: x, 0, p_values_r2))

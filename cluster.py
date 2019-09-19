@@ -52,7 +52,7 @@ def standardization(matrices, model_name, pca_components="300"):
     else:
         print('Skipping PCA.')
         for index in range(len(matrices)):
-            scaler = StandardScaler(with_mean=True, with_std=False)
+            scaler = StandardScaler(with_mean=True, with_std=True)
             scaler.fit(matrices[index])
             matrices[index] = scaler.transform(matrices[index])
     return matrices

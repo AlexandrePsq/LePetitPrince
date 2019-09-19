@@ -72,8 +72,8 @@ if __name__ =='__main__':
     with open(args.parameters, 'r') as stream:
         try:
             parameters = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
+        except :
+            print(-1)
             quit()
     
     for model in parameters['models']:
@@ -98,8 +98,8 @@ if __name__ =='__main__':
             with open(os.path.join(args.yaml_files, 'run_{}_alpha_{}.yml'.format(run, alpha)), 'r') as stream:
                 try:
                     voxels = yaml.safe_load(stream)['voxels']
-                except yaml.YAMLError as exc:
-                    print(exc)
+                except :
+                    print(-1)
                     break
             scores[run-1, voxels] = np.load(files_r2[index])
             corr[run-1, voxels] = np.load(files_pearson_corr[index])

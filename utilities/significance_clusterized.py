@@ -68,8 +68,8 @@ if __name__ == '__main__':
     with open(args.yaml_file, 'r') as stream:
         try:
             data = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
+        except :
+            print(-1)
             quit()
     
     if data['voxels']==[]:
@@ -99,8 +99,8 @@ if __name__ == '__main__':
     with open(args.parameters, 'r') as stream:
         try:
             parameters = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
+        except :
+            print(-1)
             quit()
     tmp = model_fitted.coef_.copy()
     for model in parameters['models']:

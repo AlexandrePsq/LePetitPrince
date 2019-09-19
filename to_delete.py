@@ -76,6 +76,7 @@ if __name__ == '__main__':
     output_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/outputs/".format(args.subject, args.model_name)
     log_error_path = "/home/{}/soma-workflow/logs/error_log.txt".format(login)
     log_output_path = "/home/{}/soma-workflow/logs/output_log.txt".format(login)
+    parameters_path = os.path.join(derivatives_path, 'parameters.yml')
 
     design_matrices = sorted(glob.glob(os.path.join(design_matrices_path, 'design-matrices_*run*')))
     fmri_runs = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
@@ -112,8 +113,8 @@ if __name__ == '__main__':
     x = np.load(os.path.join(design_matrices_path,'x_run1.npy'))
 
     nb_runs = str(len(fmri_runs))
-    nb_voxels = str(y[0].shape[1])
-    nb_features = str(x[0].shape[1])
+    nb_voxels = str(y.shape[1])
+    nb_features = str(x.shape[1])
     nb_permutations = str(3000)
     alpha_list = [round(tmp, 5) for tmp in np.logspace(-3, 3, 100)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
@@ -160,8 +161,7 @@ if __name__ == '__main__':
     dependencies.append((job_merge, job_final))
 
     workflow = Workflow(jobs=jobs,
-                    dependencies=dependencies,
-                    root_group=[job_0, cv_alphas, significativity, job_merge, job_final])
+                    dependencies=dependencies)
                 
 
     Helper.serialize(os.path.join(inputs_path, 'delete.somawf'), workflow)

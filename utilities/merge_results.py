@@ -49,8 +49,8 @@ def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2
     write(checkpoints_path, '\tcomputing done')
 
     write(checkpoints_path, 'computing z values')
-    z_values_r2 = np.array([x if x != np.inf else 10 for x in np.apply_along_axis(lambda x: stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_r2)])
-    z_values_pearson_corr = np.array([x if x != np.inf else 10 for x in np.apply_along_axis(lambda x: stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_pearson_corr)])
+    z_values_r2 = np.array([x if np.abs(x) != np.inf else np.sign(x)*10 for x in np.apply_along_axis(lambda x: stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_r2)])
+    z_values_pearson_corr = np.array([x if np.abs(x) != np.inf else np.sign(x)*10 for x in np.apply_along_axis(lambda x: stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values_pearson_corr)])
     write(checkpoints_path, '\tcomputing done')
 
     write(checkpoints_path, 'computing masks with thresholds')

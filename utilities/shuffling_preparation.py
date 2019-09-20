@@ -40,5 +40,4 @@ if __name__ == '__main__':
         np.random.shuffle(columns_index)
         shuffling.append(columns_index.copy())
     np.save(args.output, shuffling)
-    #np.save(os.path.join(args.output, 'shuffling.npy'), shuffling)
     

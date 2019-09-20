@@ -91,7 +91,7 @@ if __name__ == '__main__':
         for alpha_tmp in alphas: # compute the r2 for a given alpha for all the voxel
             write(checkpoints_path, '\t\tSetting alpha for model')
             model.set_params(alpha=alpha_tmp)
-            write(checkpoints_path, '\t\tFitting model of size: {}...'.format(sys.getsizeof(model)))
+            #write(checkpoints_path, '\t\tFitting model of size: {}...'.format(sys.getsizeof(model)))
             model_fitted = model.fit(dm,fmri)
             write(checkpoints_path, '\t\tComputing r2 scores...')
             r2 = get_r2_score(model_fitted, y[valid[0]], x[valid[0]])
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                         'indexes': indexes}
 
         with open(yaml_path, 'w') as outfile:
-            write(checkpoints_path, '\tDumping yaml file for alpha={} with size: {} ...'.format(alpha, sys.getsizeof(yaml_file)))
+            #write(checkpoints_path, '\tDumping yaml file for alpha={} with size: {} ...'.format(alpha, sys.getsizeof(yaml_file)))
             yaml.dump(yaml_file, outfile, default_flow_style=False)
     write(checkpoints_path, '\t--> Done (computing best alphas & loop ove ralphas)')
     

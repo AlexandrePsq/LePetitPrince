@@ -47,8 +47,12 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
     
     path2output_raw = os.path.join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(data_type, language, model, distribution_name, pca, voxel_wise, subject)+'.nii.gz')
     path2output_png = os.path.join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(data_type, language, model, distribution_name, pca, voxel_wise, subject)+'.png')
+    path2output_hist_png = os.path.join(output_parent_folder, "hist_{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(data_type, language, model, distribution_name, pca, voxel_wise, subject)+'.png')
 
     nib.save(img, path2output_raw)
+
+    plt.hist(distribution, bins=50)
+    plt.savefig(path2output_hist_png)
 
     if not_glass_brain:
         display = plot_img(img, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))

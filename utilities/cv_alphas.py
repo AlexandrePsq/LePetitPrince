@@ -47,12 +47,12 @@ if __name__ == '__main__':
     parser.add_argument("--output", type=str, default=None, help="Output folder.")
 
     args = parser.parse_args()
-    write(checkpoints_path, 'Argparse --> Done')
+    #write(checkpoints_path, 'Argparse --> Done')
 
     #to delete
     checkpoints_path = os.path.join(os.path.dirname(args.input_folder), 'checkpoints_for_run_{}.txt'.format(args.run))
 
-    write(checkpoints_path, 'Entering variables definition...')
+    #write(checkpoints_path, 'Entering variables definition...')
 
     alphas = [float(alpha) for alpha in args.alphas.split(',')]
     model = Ridge()
@@ -70,15 +70,15 @@ if __name__ == '__main__':
     nb_alphas = len(alphas)
     nb_runs_cv = len(x)
 
-    write(checkpoints_path, '\t--> Done')
+    #write(checkpoints_path, '\t--> Done')
 
 
     logo = LeaveOneOut() # leave on run out !
     cv_index = 0
     logo2 = LeaveOneOut() # leave on run out !
-    write(checkpoints_path, 'Entering main for loop...')
+    #write(checkpoints_path, 'Entering main for loop...')
     for train, valid in logo2.split(y):
-        write(checkpoints_path, '\tSplit number: {}'.format(valid))
+        #write(checkpoints_path, '\tSplit number: {}'.format(valid))
         y_train = [y[i] for i in train] # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
         x_train = [x[i] for i in train]
         dm = np.vstack(x_train)
@@ -86,33 +86,33 @@ if __name__ == '__main__':
         scores = np.zeros((nb_voxels, nb_runs_cv, nb_alphas))
         
         alpha_index = 0
-        write(checkpoints_path, '\t\tData retrieval --> Done')
-        write(checkpoints_path, '\tEntering loop over alphas...')
+        #write(checkpoints_path, '\t\tData retrieval --> Done')
+        #write(checkpoints_path, '\tEntering loop over alphas...')
         for alpha_tmp in alphas: # compute the r2 for a given alpha for all the voxel
-            write(checkpoints_path, '\t\tSetting alpha for model')
+            #write(checkpoints_path, '\t\tSetting alpha for model')
             model.set_params(alpha=alpha_tmp)
-            #write(checkpoints_path, '\t\tFitting model of size: {}...'.format(sys.getsizeof(model)))
+            ##write(checkpoints_path, '\t\tFitting model of size: {}...'.format(sys.getsizeof(model)))
             model_fitted = model.fit(dm,fmri)
-            write(checkpoints_path, '\t\tComputing r2 scores...')
+            #write(checkpoints_path, '\t\tComputing r2 scores...')
             r2 = get_r2_score(model_fitted, y[valid[0]], x[valid[0]])
-            write(checkpoints_path, '\t\tConcatenating...')
+            #write(checkpoints_path, '\t\tConcatenating...')
             scores[:, cv_index, alpha_index] = r2
             alpha_index += 1
-            write(checkpoints_path, '\t\t\t--> Done')
+            #write(checkpoints_path, '\t\t\t--> Done')
         cv_index += 1
-        write(checkpoints_path, '\t\t--> Done')
-    write(checkpoints_path, '\t--> Done (main for loop)')
+        #write(checkpoints_path, '\t\t--> Done')
+    #write(checkpoints_path, '\t--> Done (main for loop)')
     best_alphas_indexes = np.argmax(np.mean(scores, axis=1), axis=1)
     voxel2alpha = np.array([alphas[i] for i in best_alphas_indexes])
-    write(checkpoints_path, 'Voxel2alpha computed. --> size: {}'.format(voxel2alpha.nbytes))
+    #write(checkpoints_path, 'Voxel2alpha computed. --> size: {}'.format(voxel2alpha.nbytes))
 
     # compute best alpha for each voxel and group them by alpha-value
-    write(checkpoints_path, 'Computing alpha2voxel...')
+    #write(checkpoints_path, 'Computing alpha2voxel...')
     alpha2voxel = {key:[] for key in alphas}
     for index in range(len(voxel2alpha)):
         alpha2voxel[voxel2alpha[index]].append(index)
-    write(checkpoints_path, 'alpha2voxel computed. --> size: {}'.format(alpha2voxel.nbytes))
-    write(checkpoints_path, '\tEntering loop over alphas...')
+    #write(checkpoints_path, 'alpha2voxel computed. --> size: {}'.format(alpha2voxel.nbytes))
+    #write(checkpoints_path, '\tEntering loop over alphas...')
     for alpha in alphas:
         yaml_path = os.path.join(args.output, 'run_{}_alpha_{}.yml'.format(run, alpha))
         yaml_file = {'alpha': alpha,
@@ -121,11 +121,11 @@ if __name__ == '__main__':
                         'indexes': indexes}
 
         with open(yaml_path, 'w') as outfile:
-            #write(checkpoints_path, '\tDumping yaml file for alpha={} with size: {} ...'.format(alpha, sys.getsizeof(yaml_file)))
+            ##write(checkpoints_path, '\tDumping yaml file for alpha={} with size: {} ...'.format(alpha, sys.getsizeof(yaml_file)))
             yaml.dump(yaml_file, outfile, default_flow_style=False)
-    write(checkpoints_path, '\t--> Done (computing best alphas & loop ove ralphas)')
+    #write(checkpoints_path, '\t--> Done (computing best alphas & loop ove ralphas)')
     
     # saving
-    write(checkpoints_path, 'Saving voxel2alpha...')
+    #write(checkpoints_path, 'Saving voxel2alpha...')
     np.save(os.path.join(args.output, 'voxel2alpha{}.npy'.format(run)), voxel2alpha)
-    write(checkpoints_path, '\t--> Done')
+    #write(checkpoints_path, '\t--> Done')

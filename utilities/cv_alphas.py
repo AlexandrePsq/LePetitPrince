@@ -91,6 +91,7 @@ if __name__ == '__main__':
             model.set_params(alpha=alpha_tmp)
             write(checkpoints_path, '\t\tFitting model of size: {}...'.format(sys.getsizeof(model)))
             model_fitted = model.fit(dm,fmri)
+            write(checkpoints_path, '\t\tModel fitted - size: {}...'.format(sys.getsizeof(model_fitted)))
             write(checkpoints_path, '\t\tComputing r2 scores...')
             r2 = get_r2_score(model_fitted, y[valid[0]], x[valid[0]])
             write(checkpoints_path, '\t\tConcatenating...')

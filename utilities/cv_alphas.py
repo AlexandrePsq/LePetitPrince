@@ -109,7 +109,7 @@ if __name__ == '__main__':
     alpha2voxel = {key:[] for key in alphas}
     for index in range(len(voxel2alpha)):
         alpha2voxel[voxel2alpha[index]].append(index)
-    write(checkpoints_path, 'alpha2voxel computed. --> size: {}'.format(alpha2voxel.nbytes))
+    write(checkpoints_path, 'alpha2voxel computed. --> size: {}'.format(sys.getsizeof(alpha2voxel)))
     write(checkpoints_path, '\tEntering loop over alphas...')
     for alpha in alphas:
         yaml_path = os.path.join(args.output, 'run_{}_alpha_{}.yml'.format(run, alpha))

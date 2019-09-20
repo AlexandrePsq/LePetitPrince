@@ -5,6 +5,7 @@ import glob
 import yaml
 import argparse
 import sys
+import psutil
 
 import warnings
 warnings.simplefilter(action='ignore')
@@ -87,14 +88,16 @@ if __name__ == '__main__':
         write(checkpoints_path, '\t\tData retrieval --> Done')
         write(checkpoints_path, '\tEntering loop over alphas...')
         for alpha_tmp in alphas: # compute the r2 for a given alpha for all the voxel
-            write(checkpoints_path, '\t\tSetting alpha for model')
+            write(checkpoints_path, '\n\t\tAlpha: {}'.format(alpha_tmp))
             model.set_params(alpha=alpha_tmp)
-            write(checkpoints_path, '\t\tFitting model of size: {}...'.format(sys.getsizeof(model)))
+            write(checkpoints_path, '\t\tFitting model')
+            c,z,e,r,t,y,u,i = tuple(psutil.virtual_memory())
+            write(checkpoints_path, '\t\ttotal={}MB, available={}MB, percent={}MB, used={}MB, free={}MB, active={}MB, inactive={}MB, wired={}MB'.format(c/2**20,z/2**20,e,r/2**20,t/2**20,y/2**20,u/2**20,i/2**20))
             model_fitted = model.fit(dm,fmri)
-            write(checkpoints_path, '\t\tModel fitted - size: {}...'.format(sys.getsizeof(model_fitted)))
-            write(checkpoints_path, '\t\tComputing r2 scores...')
+            write(checkpoints_path, '\t\tModel fitted')
+            c,z,e,r,t,y,u,i = tuple(psutil.virtual_memory())
+            write(checkpoints_path, '\t\ttotal={}MB, available={}MB, percent={}MB, used={}MB, free={}MB, active={}MB, inactive={}MB, wired={}MB'.format(c/2**20,z/2**20,e,r/2**20,t/2**20,y/2**20,u/2**20,i/2**20))
             r2 = get_r2_score(model_fitted, y[valid[0]], x[valid[0]])
-            write(checkpoints_path, '\t\tConcatenating...')
             scores[:, cv_index, alpha_index] = r2
             alpha_index += 1
             write(checkpoints_path, '\t\t\t--> Done')

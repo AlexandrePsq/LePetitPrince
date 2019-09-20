@@ -257,7 +257,7 @@ if __name__ == '__main__':
                                 "--output", yaml_files_path],  
                 name="Alphas CV - split {}".format(run), 
                 working_directory=scripts_path,
-                native_specification="-I -q Nspin_bigM")
+                native_specification="-q Nspin_bigM")
 
         group_cv_alphas.append(job)
         jobs.append(job)

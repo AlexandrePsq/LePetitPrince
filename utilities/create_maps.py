@@ -115,7 +115,7 @@ if __name__ =='__main__':
         check_folder(output_parent_folder)
         
         # creating maps
-        create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca, vmax=1000) # alphas # argument deleted: , vmax=5e3
+        create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca, vmax=10000) # alphas # argument deleted: , vmax=5e3
 
         create_maps(masker, r2, 'r2', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # r2 
         create_maps(masker, r2_significant_with_threshold, 'significant_r2_with_threshold', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significant

@@ -51,7 +51,7 @@ def log_word_freq(iterator, language, path):
         'gloomily': 'depressive', 
         'grumpily': 'irritable', 
         'panted': 'gasped', 
-        'False': 'false', 
+        'false': 'wrong', 
         'islet': 'isle', 
         'switchman': 'watchmaker', 
         'weathervane': 'weather', 

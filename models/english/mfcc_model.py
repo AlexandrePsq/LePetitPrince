@@ -39,5 +39,5 @@ def generate(mod, run, language, textgrid, overwrite=False):
         save_all = path
     #### Retrieving data of interest ####
     columns2retrieve = ['feature #{}'.format(i+1) for i in range(mod.num_cepstral)]
-    textgrid = pd.read_csv(join(paths.path2data, 'wave', language, MFCC, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format('wave', language, 'MFCC', run_name)+'.csv')) # df with onsets-offsets-word
+    textgrid = pd.read_csv(os.path.join(paths.path2data, 'wave', language, 'MFCC', 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format('wave', language, 'MFCC', run_name)+'.csv')) # df with onsets-offsets-word
     return raw_features[:textgrid.offsets.count()], columns2retrieve, save_all

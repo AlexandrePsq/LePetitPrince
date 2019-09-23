@@ -41,13 +41,22 @@ def log_word_freq(iterator, language, path):
     database = pd.read_csv(os.path.join(paths.path2data, 'text', language, 'lexique_database.tsv'), delimiter='\t')
     result = np.zeros(len(iterator))
     words = np.array(database['Word'])
+    word_with_issues = {
+        've': 'have'
+    }
     for index in range(len(iterator)):
         try:
-            print(np.argwhere(words==iterator[index]))
-            result[index] = database['Lg10WF'][np.argwhere(words==iterator[index])[0][0]]
+            word = iterator[index]
+            if word in word_with_issues:
+                word = word_with_issues[word]
+            print(np.argwhere(words==word))
+            print(word)
+            result[index] = database['Lg10WF'][np.argwhere(words==word)[0][0]]
         except:
-            print(np.argwhere(words==iterator[index].capitalize()))
-            result[index] = database['Lg10WF'][np.argwhere(words==iterator[index].capitalize())[0][0]]
+            word = iterator[index].capitalize()
+            print(np.argwhere(words==word.capitalize()))
+            print(word)
+            result[index] = database['Lg10WF'][np.argwhere(words==word.capitalize())[0][0]]
     return result
     
 def word_position(iterator, language, path):

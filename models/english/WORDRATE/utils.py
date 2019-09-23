@@ -45,7 +45,17 @@ def log_word_freq(iterator, language, path):
         've': 'have',
         'hadn': 'had',
         'indulgently': 'indulgent',
-        'abashed': 'confused'
+        'abashed': 'confused',
+        'sputtered': 'rapidly',
+        'Seabird': 'seagull', 
+        'Gloomily': 'depressive', 
+        'Grumpily': 'irritable', 
+        'Panted': 'gasped', 
+        'False': 'false', 
+        'Islet': 'isle', 
+        'Switchman': 'watchmaker', 
+        'Weathervane': 'weather', 
+        'Mustn': 'must' 
     }
     for index in range(len(iterator)):
         try:

@@ -42,7 +42,12 @@ def log_word_freq(iterator, language, path):
     result = np.zeros(len(iterator))
     words = np.array(database['Word'])
     for index in range(len(iterator)):
-        result[index] = database['Lg10WF'][np.argwhere(words==iterator[index])[0][0]]
+        try:
+            print(np.argwhere(words==iterator[index]))
+            result[index] = database['Lg10WF'][np.argwhere(words==iterator[index])[0][0]]
+        except:
+            print(np.argwhere(words==iterator[index].capitalize()))
+            result[index] = database['Lg10WF'][np.argwhere(words==iterator[index].capitalize())[0][0]]
     return result
     
 def word_position(iterator, language, path):

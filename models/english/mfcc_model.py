@@ -15,7 +15,7 @@ import pandas as pd
 from utilities.settings import Paths
 from utilities.utils import check_folder
 
-
+paths =  Paths()
 
 def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
@@ -35,8 +35,9 @@ def generate(mod, run, language, textgrid, overwrite=False):
     if (os.path.exists(path)) & (not overwrite):
         raw_features = pd.read_csv(path)
     else:
-        raw_features = mod.generate(run, language, textgrid)
+        raw_features = mod.generate(run, language)
         save_all = path
     #### Retrieving data of interest ####
     columns2retrieve = ['feature #{}'.format(i+1) for i in range(mod.num_cepstral)]
+    textgrid = pd.read_csv(join(paths.path2data, 'wave', language, MFCC, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format('wave', language, 'MFCC', run_name)+'.csv')) # df with onsets-offsets-word
     return raw_features[:textgrid.offsets.count()], columns2retrieve, save_all

@@ -31,7 +31,11 @@ def compute_raw_features(run, output_parent_folder, input_data_type, output_data
     path2output = get_path2output(output_parent_folder, output_data_type, language, model_name, run_name, extension)
     
     if compute(path2output, overwrite=overwrite):
-        textgrid = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension)) # df with onsets-offsets-word
+        try:
+            textgrid = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension)) # df with onsets-offsets-word
+        except:
+            textgrid = None
+            print('WARNING: textgrid still not computed.')
         raw_features, columns2retrieve, save_all = module.generate(model, run, language, textgrid, overwrite) # generate raw_features from model's predictions
 
         # using offsets of words instead of onsets so that the subject has heard the word

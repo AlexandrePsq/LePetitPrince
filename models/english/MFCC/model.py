@@ -36,7 +36,7 @@ class MFCC(object):
         return 'MFCC - {} features'.format(self.num_cepstral)
 
 
-    def generate(self, path, language, textgrid):
+    def generate(self, path, language):
         fs, signal = wav.read(path)
         # no overlapping
         mfcc = speechpy.feature.mfcc(signal, sampling_frequency=fs, frame_length=self.frame_length,

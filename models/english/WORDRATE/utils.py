@@ -47,15 +47,15 @@ def log_word_freq(iterator, language, path):
         'indulgently': 'indulgent',
         'abashed': 'confused',
         'sputtered': 'rapidly',
-        'Seabird': 'seagull', 
-        'Gloomily': 'depressive', 
-        'Grumpily': 'irritable', 
-        'Panted': 'gasped', 
+        'seabird': 'seagull', 
+        'gloomily': 'depressive', 
+        'grumpily': 'irritable', 
+        'panted': 'gasped', 
         'False': 'false', 
-        'Islet': 'isle', 
-        'Switchman': 'watchmaker', 
-        'Weathervane': 'weather', 
-        'Mustn': 'must' 
+        'islet': 'isle', 
+        'switchman': 'watchmaker', 
+        'weathervane': 'weather', 
+        'mustn': 'must' 
     }
     for index in range(len(iterator)):
         try:
@@ -66,6 +66,8 @@ def log_word_freq(iterator, language, path):
         except:
             try:
                 word = iterator[index].capitalize()
+                if word in word_with_issues:
+                    word = word_with_issues[word]
                 result[index] = database['Lg10WF'][np.argwhere(words==word.capitalize())[0][0]]
             except:
                 print(word)

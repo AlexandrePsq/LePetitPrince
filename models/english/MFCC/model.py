@@ -43,7 +43,7 @@ class MFCC(object):
              num_filters=40, fft_length=512, low_frequency=0, high_frequency=None, num_cepstral=self.num_cepstral)
         # create specific onsets-offsets
         source = 'wave'
-        model_category = 'RMS'
+        model_category = 'MFCC'
         for index in range(1,params.nb_runs + 1):
             length = int(mfcc.shape[0])
             offsets = np.cumsum(np.ones(length) * self.frame_length)

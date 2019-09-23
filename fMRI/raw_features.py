@@ -37,7 +37,8 @@ def compute_raw_features(run, output_parent_folder, input_data_type, output_data
             textgrid = None
             print('WARNING: textgrid still not computed.')
         raw_features, columns2retrieve, save_all = module.generate(model, run, language, textgrid, overwrite) # generate raw_features from model's predictions
-
+        if not textgrid:
+            textgrid = pd.read_csv(join(paths.path2data, input_data_type, language, model_category, 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format(input_data_type, language, model_category, run_name)+extension)) # df with onsets-offsets-word
         # using offsets of words instead of onsets so that the subject has heard the word
         if save_all:
             raw_features['offsets'] = textgrid['offsets']

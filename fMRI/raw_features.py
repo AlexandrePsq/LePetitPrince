@@ -65,7 +65,7 @@ if __name__ == '__main__':
     model_name = args.model_name
     model_category = args.model_category
 
-    if model_name.split('_')[0] in ['rms', 'f0']:
+    if model_name.split('_')[0] in ['rms', 'f0', 'mfcc']:
         input_data_type = 'wave'
     else:
         input_data_type = 'text'

@@ -25,7 +25,7 @@ paths = Paths()
 class MFCC(object):
     """Container module with an encoder, a recurrent module, and a decoder."""
 
-    def __init__(self, functions, language, num_cepstral=13, frame_length=0.02):
+    def __init__(self, language, num_cepstral=13, frame_length=0.02):
         super(MFCC, self).__init__()
         self.language = language
         self.num_cepstral = num_cepstral

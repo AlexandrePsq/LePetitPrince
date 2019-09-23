@@ -208,7 +208,7 @@ if __name__ == '__main__':
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
     # features = []
-    features = sorted([['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer', 100], ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer', 100], ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer', 100]]) # add here basic features name + nb of column feature for each!!!
+    features = sorted([['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_first-layer', 300], ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_second-layer', 300], ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_third-layer', 300]]) # add here basic features name + nb of column feature for each!!!
     # could be: features = sorted([['lstm...hidden_first-layer', 300], ['lstm...cell_first-layer', 300]])
 
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')

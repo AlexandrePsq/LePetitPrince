@@ -145,7 +145,7 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['bert_bucket_layer-5', 'bert_sequential_layer-5'])
+		self.models = sorted(['wordrate_all_model', 'rms_model', 'mfcc_model'])
 		#self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',
@@ -156,7 +156,7 @@ class Params:
 		# 						'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer',
 		#						'lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer'])
-		self.aggregated_models = self.models
+		self.aggregated_models = ['+'.join(self.models)] # self.models
 		self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'
 		self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
 										'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden',

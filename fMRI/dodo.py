@@ -64,7 +64,7 @@ def task_raw_features():
     
     for language in languages:
         for model in models:
-            if model.split('_')[0] in ['rms', 'f0']:
+            if model.split('_')[0] in ['rms', 'f0', 'mfcc']:
                 input_data_type = 'wave'
                 extension_input = '.wav'
             else:

@@ -208,7 +208,7 @@ if __name__ == '__main__':
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
     # features = []
-    features = sorted([['mfcc_model', 13], ['rms_model', 1], ['wordrate_all_model', 4]]) # add here basic features name + nb of column feature for each!!!
+    features = sorted([['mfcc_model', 13], ['rms_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]]) # add here basic features name + nb of column feature for each!!!
     # could be: features = sorted([['lstm...hidden_first-layer', 300], ['lstm...cell_first-layer', 300]])
 
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')

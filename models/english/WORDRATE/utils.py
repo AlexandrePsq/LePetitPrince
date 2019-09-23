@@ -23,7 +23,7 @@ def content_words(iterator, language, path):
     function_words_list = get_function_words_list(language)
     result = np.zeros(len(iterator))
     for index in range(len(iterator)):
-        result[index] = 0 if iterator[index] not in function_words_list else 1
+        result[index] = 0 if iterator[index] in function_words_list else 1
     return result
 
 def function_words(iterator, language, path):

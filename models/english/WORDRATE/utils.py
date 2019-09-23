@@ -52,14 +52,13 @@ def log_word_freq(iterator, language, path):
             word = iterator[index]
             if word in word_with_issues:
                 word = word_with_issues[word]
-            print(np.argwhere(words==word))
-            print(word)
             result[index] = database['Lg10WF'][np.argwhere(words==word)[0][0]]
         except:
-            word = iterator[index].capitalize()
-            print(np.argwhere(words==word.capitalize()))
-            print(word)
-            result[index] = database['Lg10WF'][np.argwhere(words==word.capitalize())[0][0]]
+            try:
+                word = iterator[index].capitalize()
+                result[index] = database['Lg10WF'][np.argwhere(words==word.capitalize())[0][0]]
+            except:
+                print(word)
     return result
     
 def word_position(iterator, language, path):

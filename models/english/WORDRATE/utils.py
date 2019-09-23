@@ -42,7 +42,8 @@ def log_word_freq(iterator, language, path):
     result = np.zeros(len(iterator))
     words = np.array(database['Word'])
     word_with_issues = {
-        've': 'have'
+        've': 'have',
+        'hadn': 'had'
     }
     for index in range(len(iterator)):
         try:

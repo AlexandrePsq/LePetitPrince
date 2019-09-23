@@ -44,7 +44,8 @@ def log_word_freq(iterator, language, path):
     word_with_issues = {
         've': 'have',
         'hadn': 'had',
-        'indulgently': 'indulgent'
+        'indulgently': 'indulgent',
+        'abashed': 'confused'
     }
     for index in range(len(iterator)):
         try:

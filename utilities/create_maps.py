@@ -53,6 +53,7 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 
     plt.hist(distribution, bins=50)
     plt.savefig(path2output_hist_png)
+    plt.close()
 
     if not_glass_brain:
         display = plot_img(img, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))

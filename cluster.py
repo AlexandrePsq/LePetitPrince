@@ -39,8 +39,8 @@ def transform_design_matrices(path):
     # Read design matrice csv file and add a column with only 1
     dm = pd.read_csv(path, header=0).values
     # add the constant
-    #const = np.ones((dm.shape[0], 1))
-    #dm = np.hstack((dm, const))
+    const = np.ones((dm.shape[0], 1))
+    dm = np.hstack((dm, const))
     return dm 
 
 
@@ -203,7 +203,7 @@ if __name__ == '__main__':
     nb_runs = str(len(fmri_runs))
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
-    nb_permutations = str(10)
+    nb_permutations = str(3000)
     alpha_list = [round(tmp, 5) for tmp in np.logspace(0, 4, 100)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)

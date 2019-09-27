@@ -23,8 +23,8 @@ if __name__ =='__main__':
 
     args = parser.parse_args()
 
-    input_folder = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/design-matrices/english/{}'.format(args.model_name)
-    output_folder = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/design-matrices/english/{}'.format(args.model_name)
+    input_folder = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/design-matrices/english/{}'.format(args.model_name)
+    output_folder = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/design-matrices/english/{}'.format(args.model_name)
 
     design_matrices = sorted(glob.glob(os.path.join(input_folder, 'design-matrices*')))
     i = 1

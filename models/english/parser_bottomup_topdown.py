@@ -43,4 +43,5 @@ def generate(mod, run, language, textgrid, overwrite=False):
         save_all = path
     #### Retrieving data of interest ####
     columns2retrieve = [function.__name__ for function in mod.functions]
+    textgrid = pd.read_csv(os.path.join(paths.path2data, 'text', language, 'PARSER', 'onsets-offsets', '{}_{}_{}_onsets-offsets_{}'.format('text', language, 'PARSER', run_name)+'.csv')) # df with onsets-offsets-word
     return raw_features[:textgrid.offsets.count()], columns2retrieve, save_all

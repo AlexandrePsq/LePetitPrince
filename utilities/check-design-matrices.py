@@ -54,7 +54,7 @@ if __name__ =='__main__':
         df["Condition_number"] = round(np.linalg.cond(m, p=None), 2)
         df_final.append(df)
         print("\n## Variance inflation factors:")
-        vifs = [vif(m, i) for i in range(m.shape[1])]
+        vifs = np.array([vif(m, i) for i in range(m.shape[1])])
         for i, label in enumerate(dtxmat.columns):
             print("%-15s" % label, round(vifs[i], 3))
         sns.heatmap(vifs)

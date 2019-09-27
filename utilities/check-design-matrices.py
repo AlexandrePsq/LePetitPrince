@@ -39,10 +39,13 @@ if __name__ =='__main__':
         dtxmat['constant'] = pd.Series(np.ones(dtxmat.shape[0]))
         m = dtxmat.values
         print('\n## Means and STD')
+        name = []
+        mean = []
+        std =[]
         for c in dtxmat:
-            mean = round(dtxmat[c].mean(), 3)
-            std = round(dtxmat[c].std(), 3)
-            name = "%-15s" % c
+            mean.append(round(dtxmat[c].mean(), 3))
+            std.append(round(dtxmat[c].std(), 3))
+            name.append("%-15s" % c)
             print(name, mean, std)
         print('\n## Pairwise Correlations')
         corr = dtxmat.corr()
@@ -51,7 +54,7 @@ if __name__ =='__main__':
         condition_number = round(np.linalg.cond(m, p=None), 2)
         print("\n## Variance inflation factors:")
         vifs = np.array([round(vif(m, i), 3) for i in range(m.shape[1])])
-        df = pd.DataFrame({'Feature_name': name, 'Mean':mean, 'Std':std, 'Condition_number':condition_number, 'Variance_inflation_factor':vifs}, index=np.ones(len(mean)*i))
+        df = pd.DataFrame({'Feature_name': name, 'Mean':mean, 'Std':std, 'Condition_number':np.ones(len(mean))*condition_number, 'Variance_inflation_factor':vifs}, index=np.ones(len(mean)*i))
         df_final.append(df)
         for i, label in enumerate(dtxmat.columns):
             print("%-15s" % label, vifs[i])

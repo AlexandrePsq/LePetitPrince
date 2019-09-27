@@ -54,7 +54,7 @@ if __name__ =='__main__':
         condition_number = round(np.linalg.cond(m, p=None), 2)
         print("\n## Variance inflation factors:")
         vifs = np.array([round(vif(m, i), 3) for i in range(m.shape[1])])
-        df = pd.DataFrame({'Feature_name': name, 'Mean':mean, 'Std':std, 'Condition_number':np.ones(len(mean))*condition_number, 'Variance_inflation_factor':vifs}, index=np.ones(len(mean)*i))
+        df = pd.DataFrame({'Feature_name': name, 'Mean':mean, 'Std':std, 'Condition_number':np.ones(len(mean))*condition_number, 'Variance_inflation_factor':vifs}, index=np.ones(len(mean))*i)
         df_final.append(df)
         for i, label in enumerate(dtxmat.columns):
             print("%-15s" % label, vifs[i])

@@ -64,4 +64,4 @@ if __name__ =='__main__':
         plt.close()
         i+=1
     df_final = pd.concat(df_final)
-    df_final.to_csv(os.path.join(output_folder), 'stats.csv')
+    df_final.to_csv(os.path.join(output_folder, 'stats.csv'))

@@ -36,7 +36,7 @@ def process_raw_features(run, tr, nscans):
                                 hrf_model='spm',
                                 frame_times=np.arange(0.0, nscans*tr, tr),
                                 oversampling=10)
-        result.append(pd.DataFrame(tmp[0], columns=['hrf{}'.format(count)]))
+        result.append(pd.DataFrame(tmp[0], columns=[col]))
         count += 1
     return pd.concat(result, axis=1)
 

@@ -145,7 +145,7 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['wordrate_all_model', 'rms_model', 'mfcc_model'])
+		self.models = sorted(['mfcc_model', 'other_sentence_onset', 'parser_bottomup_topdown', 'wordrate_all_model'])
 		#self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',

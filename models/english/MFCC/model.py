@@ -41,22 +41,24 @@ class MFCC(object):
         # no overlapping
         mfcc = speechpy.feature.mfcc(signal, sampling_frequency=fs, frame_length=self.frame_length,
              num_filters=40, fft_length=512, low_frequency=0, high_frequency=None, num_cepstral=self.num_cepstral)
+        mfcc_features = speechpy.feature.extract_derivative_feature(mfcc).reshape(mfcc.shape[0], -1)
         # create specific onsets-offsets
         source = 'wave'
         model_category = 'MFCC'
-        for index in range(1,params.nb_runs + 1):
-            length = int(mfcc.shape[0])
-            offsets = np.cumsum(np.ones(length) * self.frame_length)
-            offsets = np.array([round(x, 3) for x in offsets])
-            onsets = np.hstack([np.zeros(1), offsets[:-1]])
-            duration = np.zeros(length)
-            df = pd.DataFrame({})
-            df['onsets'] = onsets
-            df['offsets'] = offsets
-            df['duration'] = duration
-            saving_in = '{}_{}_{}_{}_run{}.csv'.format(source, language, model_category, 'onsets-offsets', index)
-            df.to_csv(os.path.join(paths.path2data, source, language, model_category, 'onsets-offsets', saving_in), index=False)
+        name = os.path.basename(os.path.splitext(path)[0])
+        run_name = name.split('_')[-1] # extract the name of the run
+        length = int(mfcc.shape[0])
+        offsets = np.cumsum(np.ones(length) * self.frame_length)
+        offsets = np.array([round(x, 3) for x in offsets])
+        onsets = np.hstack([np.zeros(1), offsets[:-1]])
+        duration = np.zeros(length)
+        df = pd.DataFrame({})
+        df['onsets'] = onsets
+        df['offsets'] = offsets
+        df['duration'] = duration
+        saving_in = '{}_{}_{}_{}_{}.csv'.format(source, language, model_category, 'onsets-offsets', run_name)
+        df.to_csv(os.path.join(paths.path2data, source, language, model_category, 'onsets-offsets', saving_in), index=False)
         
 
-        result = pd.DataFrame(mfcc, columns=['feature #{}'.format(i+1) for i in range(self.num_cepstral)])
+        result = pd.DataFrame(mfcc_features, columns=["mfcc #{}".format((i)//3) if i%3==0 else ("mfcc' #{}".format((i)//3) if i%3==1 else "mfcc'' #{}".format((i)//3)) for i in range(self.num_cepstral*3)])
         return result

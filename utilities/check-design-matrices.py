@@ -31,7 +31,7 @@ if __name__ =='__main__':
     df_final = []
 
     for dm in design_matrices:
-        df = pd.DataFrame({'Feature_name': [], 'Mean':[], 'Std':[], 'Condition_number':[]})
+        
         print('Run #{}'.format(i))
         file_name = dm.split('_')[-1]
         print('\n\n# ' + dm)
@@ -43,23 +43,21 @@ if __name__ =='__main__':
             mean = round(dtxmat[c].mean(), 3)
             std = round(dtxmat[c].std(), 3)
             name = "%-15s" % c
-            df["Feature_name"] = name
-            df["Mean"] = mean
-            df["Std"] = std
             print(name, mean, std)
         print('\n## Pairwise Correlations')
         corr = dtxmat.corr()
         print(round(corr, 3))
         print("\n## Condition number", round(np.linalg.cond(m, p=None), 2))
-        df["Condition_number"] = round(np.linalg.cond(m, p=None), 2)
-        df_final.append(df)
+        condition_number = round(np.linalg.cond(m, p=None), 2)
         print("\n## Variance inflation factors:")
         vifs = np.array([round(vif(m, i), 3) for i in range(m.shape[1])])
-        vifs = vifs.reshape(vifs.shape[0], 1)
+        df = pd.DataFrame({'Feature_name': name, 'Mean':mean, 'Std':std, 'Condition_number':condition_number, 'Variance_inflation_factor':vifs}, index=np.ones(len(mean)*i))
+        df_final.append(df)
         for i, label in enumerate(dtxmat.columns):
             print("%-15s" % label, vifs[i])
-        sns.heatmap(vifs)
+        sns.heatmap(corr)
         plt.savefig(os.path.join(output_folder, file_name)+'pairwise_correlations.png')
         plt.show()
         plt.close()
         i+=1
+    df_final = pd.concat(df_final)

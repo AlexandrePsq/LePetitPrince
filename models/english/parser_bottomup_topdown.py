@@ -15,7 +15,7 @@ import pandas as pd
 from utilities.settings import Paths
 from utilities.utils import check_folder
 
-
+paths = Paths()
 
 def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line

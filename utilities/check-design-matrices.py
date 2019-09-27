@@ -26,7 +26,7 @@ if __name__ =='__main__':
     input_folder = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/design-matrices/english/{}'.format(args.model_name)
     output_folder = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/design-matrices/english/{}'.format(args.model_name)
 
-    design_matrices = sorted(glob.glob(os.path.join(input_folder, '*design*')))
+    design_matrices = sorted(glob.glob(os.path.join(input_folder, 'design-matrices*')))
     i = 1
     df_final = []
 

@@ -59,5 +59,5 @@ if __name__ == '__main__':
             scaler = StandardScaler(with_mean=True, with_std=True)
             scaler.fit(matrices)
             matrices = scaler.transform(matrices)
-            merge.values = matrices
-            merge.to_csv(path2output, index=False)
+            result = pd.DataFrame(matrices, columns=merge.columns)
+            result.to_csv(path2output, index=False)

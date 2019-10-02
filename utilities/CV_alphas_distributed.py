@@ -54,6 +54,7 @@ if __name__ == '__main__':
 
     checkpoints_path = os.path.join('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057', 'checkpoints_for_run_{}_valid_{}.txt'.format(args.run, args.valid))
     write(checkpoints_path, 'Entering variables definition...')
+    write(checkpoints_path, '{}'.format(vars(args)))
 
     alphas = [float(alpha) for alpha in args.alphas.split(',')]
     model = Ridge()

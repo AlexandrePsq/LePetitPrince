@@ -12,7 +12,7 @@ if root not in sys.path:
 
 import argparse
 from os.path import join
-
+from sklearn.preprocessing import StandardScaler
 import warnings
 warnings.simplefilter(action='ignore' )
 
@@ -55,4 +55,9 @@ if __name__ == '__main__':
 
         if compute(path2output, overwrite=args.overwrite):
             merge = pd.concat([pd.read_csv(path2features, header=0) for path2features in runs[i]], axis=1) # concatenate horizontaly the read csv files of a run
+            matrices = merge.values
+            scaler = StandardScaler(with_mean=True, with_std=True)
+            scaler.fit(matrices)
+            matrices = scaler.transform(matrices)
+            merge.values = matrices
             merge.to_csv(path2output, index=False)

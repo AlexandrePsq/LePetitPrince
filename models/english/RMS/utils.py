@@ -20,7 +20,7 @@ paths = Paths()
 ###############################################################################
 
 def rms(iterator, language, parameters):
-    result = np.apply_along_axis(lambda y: np.sqrt(np.mean(np.square(y, dtype=np.float64))),1, iterator)
+    result = np.apply_along_axis(lambda y: np.sqrt(np.mean(np.square(y, dtype=np.float64))),1, iterator).reshape(-1, 1)
     scaler = StandardScaler(with_mean=True, with_std=True) 
     scaler.fit(result)
     result = scaler.transform(result)

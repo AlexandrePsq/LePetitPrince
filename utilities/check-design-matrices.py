@@ -60,7 +60,7 @@ if __name__ =='__main__':
             print("%-15s" % label, vifs[i])
         sns.heatmap(corr)
         plt.savefig(os.path.join(output_folder, file_name)+'pairwise_correlations.png')
-        plt.show()
+        # plt.show()
         plt.close()
         i+=1
     df_final = pd.concat(df_final)

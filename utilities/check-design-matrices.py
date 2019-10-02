@@ -56,8 +56,8 @@ if __name__ =='__main__':
         vifs = np.array([round(vif(m, i), 3) for i in range(m.shape[1])])
         df = pd.DataFrame({'Feature_name': name, 'Mean':mean, 'Std':std, 'Condition_number':np.ones(len(mean))*condition_number, 'Square_roor_Variance_inflation_factor':np.sqrt(vifs)}, index=np.ones(len(mean))*i)
         df_final.append(df)
-        for i, label in enumerate(dtxmat.columns):
-            print("%-15s" % label, vifs[i])
+        for j, label in enumerate(dtxmat.columns):
+            print("%-15s" % label, vifs[j])
         sns.heatmap(corr)
         plt.savefig(os.path.join(output_folder, file_name)+'pairwise_correlations.png')
         # plt.show()

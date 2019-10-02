@@ -36,7 +36,7 @@ class Bottomup(object):
         name = os.path.basename(os.path.splitext(path)[0])
         run_name = name.split('_')[-1] # extract the name of the run
         run_nb = run_name[-1]
-        data = pd.read_csv(os.path.join(paths.path2data, 'text', language, 'BOTTOMUP', '{}_bottomup.csv'.format(run_nb))).dropna(axis=0, inplace=True)
+        data = pd.read_csv(os.path.join(paths.path2data, 'text', language, 'BOTTOMUP', '{}_bottomup.csv'.format(run_nb))).dropna(axis=0)
         df = pd.DataFrame({})
         df['offsets'] = data['onset'].values # the formerly saved onset is in fact the offset...
         df['onsets'] = np.nan

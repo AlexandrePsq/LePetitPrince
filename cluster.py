@@ -11,6 +11,7 @@ from sklearn.preprocessing import StandardScaler
 from nilearn.masking import compute_epi_mask # cause warning
 from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker
+from sklearn.model_selection import LeaveOneOut
 from nilearn.plotting import plot_glass_brain
 import nibabel as nib
 import yaml
@@ -247,21 +248,52 @@ if __name__ == '__main__':
 
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))
-        indexes = ','.join([str(i) for i in np.delete(indexes, run-1, 0)]) 
-        job = Job(command=["python", "cv_alphas.py", 
-                                "--indexes", indexes, 
+        logo = LeaveOneOut() # leave on run out !
+        cv_index = 1
+        job_merge_cv = Job(command=["python", "merge_CV.py", 
+                            "--indexes", ','.join([str(i) for i in np.delete(indexes, run-1, 0)]), 
+                            "--nb_runs", str(len(indexes)), 
+                            "--run", str(run), 
+                            "--alphas", alphas, 
+                            "--nb_voxels", nb_voxels,
+                            "--input", yaml_files_path,
+                            "--output", yaml_files_path],  
+                    name="Merging alphas CV outputs - split {}".format(run), 
+                    working_directory=scripts_path,
+                    native_specification="-q Nspin_bigM")
+        for train, valid in logo.split(indexes):
+            job = Job(command=["python", "CV_alphas_distributed.py", 
+                                "--indexes", ','.join([str(i) for i in np.delete(indexes, run-1, 0)]), 
+                                "--train", ','.join([str(i) for i in train]), 
+                                "--valid", ','.join([str(i) for i in valid]), 
                                 "--x", design_matrices_path, 
-                                "--y", fmri_path, 
-                                "--run", str(run), 
-                                "--alphas", alphas, 
-                                "--output", yaml_files_path],  
-                name="Alphas CV - split {}".format(run), 
-                working_directory=scripts_path,
-                native_specification="-q Nspin_bigM")
+                                "--y", fmri_path,
+                                "--run", str(run),
+                                "--alphas", alphas,
+                                "--output", yaml_files_path, 
+                                "--nb_voxels", nb_voxels,
+                                "--cv_index", str(cv_index)],  
+                        name="Alphas CV - split {} - {}".format(run, cv_index), 
+                        working_directory=scripts_path,
+                        native_specification="-q Nspin_bigM")
+            cv_index += 1
+        #job = Job(command=["python", "cv_alphas.py", 
+        #                        "--indexes", indexes, 
+        #                        "--x", design_matrices_path, 
+        #                        "--y", fmri_path, 
+        #                        "--run", str(run), 
+        #                        "--alphas", alphas, 
+        #                        "--output", yaml_files_path],  
+        #        name="Alphas CV - split {}".format(run), 
+        #        working_directory=scripts_path,
+        #        native_specification="-q Nspin_bigM")
 
-        group_cv_alphas.append(job)
-        jobs.append(job)
-        dependencies.append((job_0, job))
+            group_cv_alphas.append(job)
+            jobs.append(job)
+            dependencies.append((job_0, job))
+            dependencies.append((job, job_merge_cv))
+        group_cv_alphas.append(job_merge_cv)
+        jobs.append(job_merge_cv)
 
     # Merging the results and compute significant r2
     job_merge = Job(command=["python", "merge_results.py", 

@@ -250,8 +250,9 @@ if __name__ == '__main__':
         indexes = np.arange(1, 1+int(nb_runs))
         logo = LeaveOneOut() # leave on run out !
         cv_index = 1
+        indexes_tmp = np.delete(indexes, run-1, 0)
         job_merge_cv = Job(command=["python", "merge_CV.py", 
-                            "--indexes", ','.join([str(i) for i in np.delete(indexes, run-1, 0)]), 
+                            "--indexes", ','.join([str(i) for i in indexes_tmp]), 
                             "--nb_runs", str(len(indexes)), 
                             "--run", str(run), 
                             "--alphas", alphas, 
@@ -261,9 +262,9 @@ if __name__ == '__main__':
                     name="Merging alphas CV outputs - split {}".format(run), 
                     working_directory=scripts_path,
                     native_specification="-q Nspin_bigM")
-        for train, valid in logo.split(indexes):
+        for train, valid in logo.split(indexes_tmp):
             job = Job(command=["python", "CV_alphas_distributed.py", 
-                                "--indexes", ','.join([str(i) for i in np.delete(indexes, run-1, 0)]), 
+                                "--indexes", ','.join([str(i) for i in indexes_tmp]), 
                                 "--train", ','.join([str(i) for i in train]), 
                                 "--valid", ','.join([str(i) for i in valid]), 
                                 "--x", design_matrices_path, 

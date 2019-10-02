@@ -203,12 +203,12 @@ if __name__ == '__main__':
     nb_runs = str(len(fmri_runs))
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
-    nb_permutations = str(2)
-    alpha_list = [round(tmp, 5) for tmp in np.logspace(0, 4, 100)]
+    nb_permutations = str(1000)
+    alpha_list = [round(tmp, 5) for tmp in np.logspace(1, 4, 100)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
     # features = [['rms_model', 1]]
-    features = sorted([['mfcc_model', 13], ['rms_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]]) # add here basic features name + nb of column feature for each!!!
+    features = sorted([['mfcc_model', 39], ['rms_model', 1], ['sentence_onset', 1], ['bottomup_model', 1], ['topdown_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]]) # add here basic features name + nb of column feature for each!!!
     # could be: features = sorted([['lstm...hidden_first-layer', 300], ['lstm...cell_first-layer', 300]])
 
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')

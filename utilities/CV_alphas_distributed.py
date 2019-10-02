@@ -69,7 +69,7 @@ if __name__ == '__main__':
     write(checkpoints_path, '\t\tx_train  ...')
     x_train = [np.load(item[0]) for item in x_paths]
     write(checkpoints_path, '\t\tx_valid ...')
-    write(checkpoints_path, '\tx_valid={}'.format(len([np.load(item[0]) for item in x_paths]))
+    write(checkpoints_path, '\tx_valid={}'.format(len([np.load(item[0]) for item in x_paths])))
     x_valid = [np.load(item[0]) for item in sorted([glob.glob(os.path.join(args.x, '*_run{}.npy'.format(indexes[i]))) for i in valid])][0]
 
     y_paths = sorted([glob.glob(os.path.join(args.y, '*_run{}.npy'.format(indexes[i]))) for i in train])

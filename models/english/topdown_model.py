@@ -28,7 +28,7 @@ def generate(mod, run, language, textgrid, overwrite=False):
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
-    model_name = 'topdown_parser'
+    model_name = 'topdown_model'
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
     path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
     #### generating raw-features ####

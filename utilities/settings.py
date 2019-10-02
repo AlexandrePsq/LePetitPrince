@@ -145,8 +145,8 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = sorted(['bottomup_model', 'mfcc_model', 'other_sentence_onset', 'topdown_model', 'wordrate_all_model'])
-		#self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
+		self.models = ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
+		# self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_200_nlayers_1_dropout_02_hidden_first-layer',
@@ -157,12 +157,12 @@ class Params:
 		#						'lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer'])
 		self.aggregated_models = ['+'.join(self.models)] # self.models
-		self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'
-		self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
-										'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden',
-										'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden',
-										'lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden'])
-		#self.aggregated_models = ['+'.join(model) for model in list(product(['+'.join(self.basic_features)], self.modelsOfInterest))]
+		# self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'
+		# self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
+		# 								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden',
+		# 								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden',
+		# 								'lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden'])
+		# self.aggregated_models = ['+'.join(model) for model in list(product(['+'.join(self.basic_features)], self.modelsOfInterest))]
 		# self.aggregated_models = ['+'.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
 		self.languages = ['english'] # ['english', 'french', 'chineese']
 

@@ -59,7 +59,7 @@ if __name__ == '__main__':
     files = sorted(glob.glob(os.path.join(args.input, 'score_run_{}_cv_index_*.npy'.format(args.run))))
     for score in files:
         r2_values = np.load(score)
-        cv_index = int(os.path.basename(score).split('_')[5].split('.')[0])
+        cv_index = int(os.path.basename(score).split('_')[5].split('.')[0]) - 1
         scores[:, cv_index, :] = r2_values
 
 

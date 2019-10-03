@@ -70,14 +70,14 @@ if __name__ == '__main__':
 
     dm = np.vstack(x_train)
     fmri = np.vstack(y_train)
-    scores = np.zeros((nb_voxels, 1, nb_alphas))
+    scores = np.zeros((nb_voxels, nb_alphas))
     
     alpha_index = 0
     for alpha_tmp in alphas: # compute the r2 for a given alpha for all the voxel
         model.set_params(alpha=alpha_tmp)
         model_fitted = model.fit(dm,fmri)
         r2 = get_r2_score(model_fitted, y_valid, x_valid)
-        scores[:, 0, alpha_index] = r2
+        scores[:, alpha_index] = r2
         alpha_index += 1
 
     saving_path = os.path.join(args.output, 'score_run_{}_cv_index_{}.npy'.format(run, args.cv_index))

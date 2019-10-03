@@ -253,7 +253,7 @@ if __name__ == '__main__':
         indexes_tmp = np.delete(indexes, run-1, 0)
         job_merge_cv = Job(command=["python", "merge_CV.py", 
                             "--indexes", ','.join([str(i) for i in indexes_tmp]), 
-                            "--nb_runs", str(len(indexes)), 
+                            "--nb_runs", str(len(indexes_tmp)), 
                             "--run", str(run), 
                             "--alphas", alphas, 
                             "--nb_voxels", nb_voxels,

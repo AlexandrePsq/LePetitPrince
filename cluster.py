@@ -204,12 +204,13 @@ if __name__ == '__main__':
     nb_runs = str(len(fmri_runs))
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
-    nb_permutations = str(1000)
+    nb_permutations = str(3000)
     alpha_list = [round(tmp, 5) for tmp in np.logspace(1, 4, 100)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
     # features = []
-    features = sorted([['mfcc_model', 39], ['rms_model', 1], ['sentence_onset', 1], ['bottomup_model', 1], ['topdown_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]]) # add here basic features name + nb of column feature for each!!!
+    features = sorted([['bert_bucket_layer-1', 768], ['bert_bucket_layer-2', 768], ['bert_bucket_layer-3', 768], ['bert_bucket_layer-4', 768], ['bert_bucket_layer-5', 768], ['bert_bucket_layer-6', 768], ['bert_bucket_layer-7', 768], ['bert_bucket_layer-8', 768], ['bert_bucket_layer-9', 768], ['bert_bucket_layer-10', 768], ['bert_bucket_layer-11', 768], ['bert_bucket_layer-12', 768]])
+    # features = sorted([['mfcc_model', 39], ['rms_model', 1], ['sentence_onset', 1], ['bottomup_model', 1], ['topdown_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]]) # add here basic features name + nb of column feature for each!!!
     # could be: features = sorted([['lstm...hidden_first-layer', 300], ['lstm...cell_first-layer', 300]])
 
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')

@@ -205,7 +205,7 @@ if __name__ == '__main__':
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
     nb_permutations = str(3000)
-    alpha_list = [round(tmp, 5) for tmp in np.logspace(1, 4, 100)]
+    alpha_list = [round(tmp, 5) for tmp in np.logspace(2, 4, 25)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
     # features = []
@@ -317,28 +317,27 @@ if __name__ == '__main__':
         info = os.path.basename(yaml_file).split('_')
         run = int(info[1])
         alpha = float(info[3][:-4])
-        native_specification = "-q Nspin_long" if ((int(nb_permutations)>3000) or (int(nb_features)>300)) else "-q Nspin_short"
-        for model in parameters['models']:
-            model_name = model['name']
-            voxels_indexes = ','.join([str(index) for index in model['indexes']])
-            job = Job(command=["python", "significance_clusterized.py", 
-                                "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
-                                "--output", derivatives_path, 
-                                "--x", design_matrices_path, 
-                                "--y", fmri_path, 
-                                "--shuffling", shuffling_path, 
-                                "--voxels_indexes", voxels_indexes,
-                                "--n_permutations", nb_permutations, 
-                                "--alpha_percentile", alpha_percentile,
-                                "--model_name", model_name], 
-                        name="job {} - alpha {} - model {}".format(run, alpha, model_name), 
-                        working_directory=scripts_path,
-                        native_specification=native_specification)
-            group_significativity.append(job)
-            jobs.append(job)
-            for job_cv in group_cv_alphas:
-                dependencies.append((job_cv, job))
-            dependencies.append((job, job_merge))
+        native_specification = "-q Nspin_long" # if ((int(nb_permutations)>1000) or (int(nb_features)>300)) else "-q Nspin_short"
+        #for model in parameters['models']:
+        #    model_name = model['name']
+        #    voxels_indexes = ','.join([str(index) for index in model['indexes']])
+        job = Job(command=["python", "significance_clusterized.py", 
+                            "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
+                            "--output", derivatives_path, 
+                            "--x", design_matrices_path, 
+                            "--y", fmri_path, 
+                            "--shuffling", shuffling_path, 
+                            "--parameters", parameters_path,
+                            "--n_permutations", nb_permutations, 
+                            "--alpha_percentile", alpha_percentile], 
+                    name="job {} - alpha {}".format(run, alpha), 
+                    working_directory=scripts_path,
+                    native_specification=native_specification)
+        group_significativity.append(job)
+        jobs.append(job)
+        for job_cv in group_cv_alphas:
+            dependencies.append((job_cv, job))
+        dependencies.append((job, job_merge))
             
     
     jobs.append(job_merge)

@@ -317,7 +317,7 @@ if __name__ == '__main__':
         info = os.path.basename(yaml_file).split('_')
         run = int(info[1])
         alpha = float(info[3][:-4])
-        native_specification = "-q Nspin_long" # if ((int(nb_permutations)>1000) or (int(nb_features)>300)) else "-q Nspin_short"
+        native_specification = "-q Nspin_bigM" # if ((int(nb_permutations)>1000) or (int(nb_features)>300)) else "-q Nspin_short"
         #for model in parameters['models']:
         #    model_name = model['name']
         #    voxels_indexes = ','.join([str(index) for index in model['indexes']])

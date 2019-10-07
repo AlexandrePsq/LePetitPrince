@@ -21,8 +21,8 @@ def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
     from .BERT import model
     language = 'english'
-    loi = [5]
-    name = 'BERT - base - sequential - layers {}'.format(loi)
+    loi = None
+    name = 'BERT - base - sequential - all-layers'
     #### parameters studied ####
     mod = model.BERT('base', language, name, loi)
     return mod
@@ -33,7 +33,7 @@ def generate(mod, run, language, textgrid, overwrite=False):
     save_all = None
     
     # Defining paths
-    model_name = 'bert_sequential_layer-5'
+    model_name = 'bert_sequential_all-layers'
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
     path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
     #### generating raw-features ####

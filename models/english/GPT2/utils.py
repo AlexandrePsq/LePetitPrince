@@ -36,7 +36,7 @@ def extract_activations_from_tokenized(activation, mapping):
     new_activations = []
     for word_index in range(len(mapping.keys())):
         word_activation = []
-        word_activation.append([activation[0,index, :] for index in mapping[word_index]])
+        word_activation.append([activation[:,index, :] for index in mapping[word_index]])
         word_activation = np.vstack(word_activation)
         new_activations.append(np.mean(word_activation, axis=0).reshape(1,-1))
     return new_activations

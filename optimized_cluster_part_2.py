@@ -133,6 +133,7 @@ if __name__ == '__main__':
     ### Create the workflow:
     dependencies = []
     jobs = []
+    jobs_tmp = []
 
     # Plotting the maps
     job_final = Job(command=["python", "create_maps.py", 
@@ -146,6 +147,7 @@ if __name__ == '__main__':
     # significativity retrieval 
     files_list = sorted(glob.glob(os.path.join(yaml_files_path, 'run_*_alpha_*.yml')))
     group_significativity = []
+    group_score = []
 
     for model in parameters['models']:
         model_name = model['name']
@@ -199,26 +201,28 @@ if __name__ == '__main__':
                                             name="distribution {} - alpha {} - model {} - startat {}".format(run, alpha, model_name, startat), 
                                             working_directory=scripts_path,
                                             native_specification=native_specification)
-                    jobs.append(job_permutations)
+                    jobs_tmp.append(job_permutations)
                     group_significativity.append(job_permutations)
                     dependencies.append((job, job_permutations))
                     dependencies.append((job_permutations, job_merge))
-                group_significativity.append(job)
+                group_score.append(job)
                 jobs.append(job)
                 dependencies.append((job, job_merge))
-            
+        jobs += jobs_tmp    
         group_significativity.append(job_merge)
         jobs.append(job_merge)
         dependencies.append((job_merge, job_final))
     jobs.append(job_final)
 
+    scores = Group(elements=group_score,
+                        name="group where test scores are calculated")
 
     significativity = Group(elements=group_significativity,
-                        name="Fit of the models with best alphas")
+                        name="group where distributions are calculated for significance")
 
     workflow = Workflow(jobs=jobs,
                         dependencies=dependencies,
-                        root_group=[significativity, job_final])
+                        root_group=[scores, significativity, job_final])
                 
 
     Helper.serialize(os.path.join(inputs_path, 'optimized_cluster_part_2.somawf'), workflow)

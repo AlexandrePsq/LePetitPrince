@@ -205,6 +205,8 @@ if __name__ == '__main__':
 
     # cross-validation on alpha for each split 
     group_cv_alphas = []
+    group_cv_merge = []
+    jobs_tmp = []
 
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))
@@ -242,15 +244,20 @@ if __name__ == '__main__':
             jobs.append(job)
             dependencies.append((job_0, job))
             dependencies.append((job, job_merge_cv))
-        group_cv_alphas.append(job_merge_cv)
-        jobs.append(job_merge_cv)
+        group_cv_merge.append(job_merge_cv)
+        jobs_tmp.append(job_merge_cv)
+    
+    jobs += jobs_tmp
 
     cv_alphas = Group(elements=group_cv_alphas,
                         name="CV on alphas")
+    
+    cv_merge = Group(elements=group_cv_merge,
+                        name="merge CV results")
 
     workflow = Workflow(jobs=jobs,
                     dependencies=dependencies,
-                    root_group=[job_0, cv_alphas])
+                    root_group=[job_0, cv_alphas, cv_merge])
                 
 
     Helper.serialize(os.path.join(inputs_path, 'optimized_cluster_part_1.somawf'), workflow)

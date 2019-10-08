@@ -73,6 +73,9 @@ def write(path, text):
 
 if __name__ == '__main__':
 
+    checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
+    write(checkpoints, 'starting')
+
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--yaml_file", type=str, default=None, help="Path to the yaml file containing alpha, run values and the voxels associateds with.")
     parser.add_argument("--output", type=str, default='', help="Path to the folder containing outputs.")
@@ -83,7 +86,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
+    
     write(checkpoints, 'opening yaml file')
 
     with open(args.yaml_file, 'r') as stream:

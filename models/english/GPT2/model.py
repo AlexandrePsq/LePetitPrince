@@ -32,19 +32,13 @@ class GPT2(object):
         # Crucially, do not do basic tokenization; PTB is tokenized. Just do wordpiece tokenization.
         if gpt2_model not in ['small', 'medium']:
             raise ValueError("GPT2 model must be small or medium")
-        self.model = GPT2Model.from_pretrained('gpt2{}'.format('' if gpt2_model=='small' else '-medium'))
+        self.model = GPT2Model.from_pretrained('gpt2{}'.format('' if gpt2_model=='small' else '-medium'), output_hidden_states=True)
         self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2{}'.format('' if gpt2_model=='small' else '-medium'))
-        self.model.config.output_hidden_states = True
-        self.model.save_pretrained('./')
-        self.tokenizer.save_pretrained('./')
-        self.model = GPT2Model.from_pretrained('./')
-        self.tokenizer = GPT2Tokenizer.from_pretrained('./')
 
         self.language = language
         self.LAYER_COUNT = parameters[gpt2_model]['LAYER_COUNT']
         self.FEATURE_COUNT = parameters[gpt2_model]['FEATURE_COUNT']
         self.name = name
-        self.generation = self.name.split('-')[2].strip()
         self.loi = np.array(loi) if loi else np.arange(parameters[gpt2_model]['LAYER_COUNT']) # loi: layers of interest
         self.cuda = cuda
 

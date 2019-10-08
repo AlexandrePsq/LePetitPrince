@@ -32,14 +32,9 @@ class BERT(object):
         # Crucially, do not do basic tokenization; PTB is tokenized. Just do wordpiece tokenization.
         if bert_model not in ['base', 'large']:
             raise ValueError("BERT model must be base or large")
-        self.model = BertModel.from_pretrained('bert-{}-cased'.format(bert_model))
+        self.model = BertModel.from_pretrained('bert-{}-cased'.format(bert_model), output_hidden_states=True)
         self.tokenizer = BertTokenizer.from_pretrained('bert-{}-cased'.format(bert_model))
-        self.model.config.output_hidden_states = True
-        self.model.save_pretrained('./')
-        self.tokenizer.save_pretrained('./')
-        self.model = BertModel.from_pretrained('./')
-        self.tokenizer = BertTokenizer.from_pretrained('./')
-
+        
         self.language = language
         self.LAYER_COUNT = parameters[bert_model]['LAYER_COUNT']
         self.FEATURE_COUNT = parameters[bert_model]['FEATURE_COUNT']

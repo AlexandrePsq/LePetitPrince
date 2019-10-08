@@ -56,14 +56,17 @@ def load_model(path, original_model, params):
         new_model = update(original_model, model_parameters)
     return new_model
 
-def save_model(path, model, params):
-    with h5py.File(path, "a") as fout:
-        fout.create_dataset('run_{}_alpha_{}/coef_'.format(run, alpha), model.coef_)
-        fout.create_dataset('run_{}_alpha_{}/intercept_'.format(run, alpha), model.intercept_)
-        parameters = vars(model).copy()
-        del parameters['coef_']
-        del parameters['intercept_']
-        fout.create_dataset('run_{}_alpha_{}/parameters'.format(run, alpha), data=json.dumps(parameters))
+def sample_r2(model, x_test, y_test, shuffling, n_sample, startat):
+    # receive a trained model, x_test and y_test (test set of the cross-validation).
+    # It returns two values (or two lists depending on the parameter voxel_wised):
+    # r2 value computed on test set and the distribution array
+    distribution_array_r2 = None
+    distribution_array_pearson_corr = None
+    for index in range(n_sample):
+        r2_tmp, pearson_corr_tmp = get_score(model, y_test, x_test[:, shuffling[startat + index]])
+        distribution_array_r2 = r2_tmp if distribution_array_r2 is None else np.vstack([distribution_array_r2, r2_tmp])
+        distribution_array_pearson_corr = pearson_corr_tmp if distribution_array_pearson_corr is None else np.vstack([distribution_array_pearson_corr, pearson_corr_tmp])
+    return distribution_array_r2, distribution_array_pearson_corr
 
 
 if __name__ == '__main__':
@@ -73,7 +76,10 @@ if __name__ == '__main__':
     parser.add_argument("--output", type=str, default='', help="Path to the folder containing outputs.")
     parser.add_argument("--x", type=str, default='', help="Path to x folder.")
     parser.add_argument("--y", type=str, default='', help="Path to y folder.")
+    parser.add_argument("--shuffling", type=str, default='', help="Path to shuffling array.")
+    parser.add_argument("--n_sample", type=str, default=None, help="Number of permutations.")
     parser.add_argument("--model_name", type=str, default=None, help="Name of the model.")
+    parser.add_argument("--startat", type=str, default=None, help="Specify starting points for sample generation.")
     parser.add_argument("--features_indexes", type=str, default=None, help="Indexes of the features to take into account.")
 
     args = parser.parse_args()
@@ -99,21 +105,7 @@ if __name__ == '__main__':
     model_loading_path = os.path.join(path2trained_model, 'ridge_models.hdf5')
     model_saving_path = model_loading_path
 
-    try :
-        model_fitted = load_model(model_loading_path, model, {'run':run, 'alpha':alpha})
-    except:
-        x_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]])
-        x = [np.load(item) for item in x_paths]
-
-        y_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes]])
-        y = [np.load(item) for item in y_paths]
-        
-        y_train = np.vstack(y)[:, voxels]
-        x_train = np.vstack(x)
-
-        model.set_params(alpha=alpha)
-        model_fitted = model.fit(x_train, y_train)
-        save_model(model_saving_path, model_fitted, {'run':run, 'alpha':alpha})
+    model_fitted = load_model(model_loading_path, model, {'run':run, 'alpha':alpha})
     
     x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
     y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]
@@ -124,19 +116,28 @@ if __name__ == '__main__':
     model_name = args.model_name
     model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
     model_fitted.coef_[:,int(indexes[0]):int(indexes[1])] = tmp[:,int(indexes[0]):int(indexes[1])]
-    r2, pearson_corr = get_score(model_fitted, y_test, x_test)
+    distribution_array_r2, distribution_array_pearson_corr = sample_r2(model_fitted, 
+                                                                        x_test, 
+                                                                        y_test, 
+                                                                        shuffling=np.load(args.shuffling),
+                                                                        n_sample=int(args.n_sample),
+                                                                        startat=int(args.startat))
     
     # sanity check
-    path2r2 = os.path.join(args.output, model_name, 'r2')
-    path2pearson_corr = os.path.join(args.output, model_name, 'pearson_corr')
+    path2distribution_array_r2 = os.path.join(args.output, model_name, 'distribution_r2')
+    path2distribution_array_pearson_corr = os.path.join(args.output, model_name, 'distribution_pearson_corr')
     
-    check_folder(path2r2)
-    check_folder(path2pearson_corr)
-    
+    check_folder(path2distribution_array_r2)
+    check_folder(path2distribution_array_pearson_corr)
+
     # saving
-    r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
-    pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
-    
-    np.save(r2_saving_path, r2)
-    np.save(pearson_corr_saving_path, pearson_corr)
-    
+    distribution_r2_saving_path = os.path.join(path2distribution_array_r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
+    distribution_pearson_corr_saving_path = os.path.join(path2distribution_array_pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
+
+    np.save(distribution_r2_saving_path, distribution_array_r2)
+    np.save(distribution_pearson_corr_saving_path, distribution_array_pearson_corr)
+
+
+
+
+

@@ -34,7 +34,7 @@ def match_tokenized_to_untokenized(tokenized_sent, untokenized_sent, connection_
 def extract_activations_from_tokenized(activation, mapping):
     """Take the average activations of the tokens related to a given word."""
     new_activations = []
-    for word_index in range(1, len(mapping.keys())):
+    for word_index in range(len(mapping.keys())):
         word_activation = []
         word_activation.append([activation[0,index, :] for index in mapping[word_index]])
         word_activation = np.vstack(word_activation)

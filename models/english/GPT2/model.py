@@ -32,14 +32,13 @@ class GPT2(object):
         # Crucially, do not do basic tokenization; PTB is tokenized. Just do wordpiece tokenization.
         if gpt2_model not in ['small', 'medium']:
             raise ValueError("GPT2 model must be small or medium")
-        gpt2_model = '' if gpt2_model=='small' else '-medium'
-        self.model = GPT2Model.from_pretrained('gpt2{}'.format(gpt2_model))
-        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2{}'.format(gpt2_model))
+        self.model = GPT2Model.from_pretrained('gpt2{}'.format('' if gpt2_model=='small' else '-medium'))
+        self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2{}'.format('' if gpt2_model=='small' else '-medium'))
         self.model.config.output_hidden_states = True
         self.model.save_pretrained('./')
         self.tokenizer.save_pretrained('./')
-        self.model = BertModel.from_pretrained('./')
-        self.tokenizer = BertTokenizer.from_pretrained('./')
+        self.model = GPT2Model.from_pretrained('./')
+        self.tokenizer = GPT2Tokenizer.from_pretrained('./')
 
         self.language = language
         self.LAYER_COUNT = parameters[gpt2_model]['LAYER_COUNT']
@@ -66,7 +65,7 @@ class GPT2(object):
         for line in iterator:
             line = line.strip() # Remove trailing characters
 
-            tokenized_text = self.tokenizer.wordpiece_tokenizer.tokenize(line)
+            tokenized_text = self.tokenizer.tokenize(line)
             indexed_tokens = self.tokenizer.convert_tokens_to_ids(tokenized_text)
             mapping = utils.match_tokenized_to_untokenized(tokenized_text, line)
 

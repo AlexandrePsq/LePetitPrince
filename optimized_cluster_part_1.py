@@ -157,8 +157,8 @@ if __name__ == '__main__':
     nb_runs = str(len(fmri_runs))
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
-    nb_permutations = str(2)
-    alpha_list = [round(tmp, 5) for tmp in np.logspace(2, 4, 25)]
+    nb_permutations = str(3000) # should be a multiple of 100
+    alpha_list = [round(tmp, 5) for tmp in np.logspace(2, 5, 25)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
     # features = []

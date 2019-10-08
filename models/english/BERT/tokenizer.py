@@ -32,7 +32,7 @@ def tokenize(path, language, path_like=True, train=False):
     else:
         text = path
     # iterator = [unk_transform(item, vocab).lower() for item in text.split()]
-    iterator = [item + '.' for item in tqdm(text.split('.'))] # vocab words not lowered
+    iterator = [item for item in tqdm(text.split('\n')[:-1])] # vocab words not lowered
     print('Tokenized.')
     return iterator
 
@@ -46,10 +46,16 @@ def preprocess(text, special_words, language):
     numbers = re.findall('\d+', text)
     for number in numbers:
         text = text.replace(number, transf.number_to_words(number))
-    punctuation = ['.', '\'', ',', ';', ':', '!', '?', '/', '-', '"', '‘', '’', '(', ')', '{', '}', '[', ']', '`', '“', '”', '—']
+    punctuation = ['\'', ',', ';', ':', '/', '-', '"', '‘', '’', '(', ')', '{', '}', '[', ']', '`', '“', '”', '—']
+    eos_punctuation =  ['.', '!', '?']
     for item in punctuation:
         text = text.replace(item, ' '+ item + ' ')
-    text = text.replace('.  .  .', '...')
+    text = text.replace('...', '<3 points>')
+    for item in eos_punctuation:
+        text = text.replace(item, ' '+ item + '\n')
+    text = text.replace('<3 points>', ' ...\n')
+    text = re.sub(' +', ' ', text)
+    
     ### tokenize without punctuation ###
     # for item in punctuation:
     #     text = text.replace(item, ' ')

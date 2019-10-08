@@ -157,13 +157,13 @@ if __name__ == '__main__':
     nb_runs = str(len(fmri_runs))
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
-    nb_permutations = str(3000) # should be a multiple of 100
+    nb_permutations = str(0) # should be a multiple of 100
     alpha_list = [round(tmp, 5) for tmp in np.logspace(2, 5, 25)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
     # features = []
-    features = sorted([['bert_bucket_layer-a-1', 768], ['bert_bucket_layer-a-2', 768], ['bert_bucket_layer-a-3', 768], ['bert_bucket_layer-a-4', 768], ['bert_bucket_layer-a-5', 768], ['bert_bucket_layer-a-6', 768], ['bert_bucket_layer-a-7', 768], ['bert_bucket_layer-a-8', 768], ['bert_bucket_layer-a-9', 768], ['bert_bucket_layer-b-10', 768], ['bert_bucket_layer-b-11', 768], ['bert_bucket_layer-b-12', 768]])
-    # features = sorted([['mfcc_model', 39], ['rms_model', 1], ['sentence_onset', 1], ['bottomup_model', 1], ['topdown_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]]) # add here basic features name + nb of column feature for each!!!
+    # features = sorted([['bert_bucket_layer-a-1', 768], ['bert_bucket_layer-a-2', 768], ['bert_bucket_layer-a-3', 768], ['bert_bucket_layer-a-4', 768], ['bert_bucket_layer-a-5', 768], ['bert_bucket_layer-a-6', 768], ['bert_bucket_layer-a-7', 768], ['bert_bucket_layer-a-8', 768], ['bert_bucket_layer-a-9', 768], ['bert_bucket_layer-b-10', 768], ['bert_bucket_layer-b-11', 768], ['bert_bucket_layer-b-12', 768]])
+    features = sorted([['mfcc_model', 39], ['rms_model', 1], ['sentence_onset', 1], ['bottomup_model', 1], ['topdown_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]]) # add here basic features name + nb of column feature for each!!!
     # could be: features = sorted([['lstm...hidden_first-layer', 300], ['lstm...cell_first-layer', 300]])
 
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')

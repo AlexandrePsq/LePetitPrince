@@ -167,39 +167,45 @@ if __name__ == '__main__':
             run = int(info[1])
             alpha = float(info[3][:-4])
             native_specification = "-q Nspin_long" # if ((int(nb_permutations)>1000) or (int(nb_features)>300)) else "-q Nspin_short"
-                
             features_indexes = ','.join([str(index) for index in model['indexes']])
-            job = Job(command=["python", "optimized_significance_clusterized.py", 
-                                "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
-                                "--output", derivatives_path, 
-                                "--x", design_matrices_path, 
-                                "--y", fmri_path, 
-                                "--features_indexes", features_indexes,
-                                "--model_name", model_name], 
-                        name="job {} - alpha {} - model {}".format(run, alpha, model_name), 
-                        working_directory=scripts_path,
-                        native_specification=native_specification)
-            for startat in range(int(nb_permutations)//step):
-                job_permutations = Job(command=["python", "optimized_generate_distribution.py", 
-                                                "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
-                                                "--output", derivatives_path, 
-                                                "--x", design_matrices_path, 
-                                                "--y", fmri_path, 
-                                                "--shuffling", shuffling_path, 
-                                                "--n_sample", str(step), 
-                                                "--model_name", model_name, 
-                                                "--startat", str(startat*step),
-                                                "--features_indexes", features_indexes], 
-                                        name="distribution {} - alpha {} - model {} - startat {}".format(run, alpha, model_name, startat), 
-                                        working_directory=scripts_path,
-                                        native_specification=native_specification)
-                jobs.append(job_permutations)
-                group_significativity.append(job_permutations)
-                dependencies.append((job, job_permutations))
-                dependencies.append((job_permutations, job_merge))
-            group_significativity.append(job)
-            jobs.append(job)
-            dependencies.append((job, job_merge))
+            with open(yaml_file, 'r') as stream:
+                try:
+                    data = yaml.safe_load(stream)
+                except :
+                    print(-1)
+                    quit()
+            if data['voxels']!=[]:
+                job = Job(command=["python", "optimized_significance_clusterized.py", 
+                                    "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
+                                    "--output", derivatives_path, 
+                                    "--x", design_matrices_path, 
+                                    "--y", fmri_path, 
+                                    "--features_indexes", features_indexes,
+                                    "--model_name", model_name], 
+                            name="job {} - alpha {} - model {}".format(run, alpha, model_name), 
+                            working_directory=scripts_path,
+                            native_specification=native_specification)
+                for startat in range(int(nb_permutations)//step):
+                    job_permutations = Job(command=["python", "optimized_generate_distribution.py", 
+                                                    "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
+                                                    "--output", derivatives_path, 
+                                                    "--x", design_matrices_path, 
+                                                    "--y", fmri_path, 
+                                                    "--shuffling", shuffling_path, 
+                                                    "--n_sample", str(step), 
+                                                    "--model_name", model_name, 
+                                                    "--startat", str(startat*step),
+                                                    "--features_indexes", features_indexes], 
+                                            name="distribution {} - alpha {} - model {} - startat {}".format(run, alpha, model_name, startat), 
+                                            working_directory=scripts_path,
+                                            native_specification=native_specification)
+                    jobs.append(job_permutations)
+                    group_significativity.append(job_permutations)
+                    dependencies.append((job, job_permutations))
+                    dependencies.append((job_permutations, job_merge))
+                group_significativity.append(job)
+                jobs.append(job)
+                dependencies.append((job, job_merge))
             
         group_significativity.append(job_merge)
         jobs.append(job_merge)

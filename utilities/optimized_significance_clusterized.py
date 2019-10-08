@@ -84,6 +84,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
+    write(checkpoints, 'opening yaml file')
 
     with open(args.yaml_file, 'r') as stream:
         try:
@@ -94,6 +95,8 @@ if __name__ == '__main__':
     
     if data['voxels']==[]:
         quit()
+
+    write(checkpoints, 'reading data')
 
     source = 'fMRI'
     model = Ridge()

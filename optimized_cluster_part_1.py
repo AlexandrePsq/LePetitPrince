@@ -172,7 +172,7 @@ if __name__ == '__main__':
                     'nb_voxels':nb_voxels, 
                     'nb_features':nb_features, 
                     'nb_permutations':nb_permutations, 
-                    'alpha_list':alpha_list,
+                    'alphas':alphas,
                     'alpha_percentile': alpha_percentile}
     if args.split_features:
         i = 0

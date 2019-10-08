@@ -109,6 +109,7 @@ if __name__ == '__main__':
     ##################
 
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')
+    print(parameters_path)
     with open(parameters_path, 'r') as stream:
         try:
             parameters = yaml.safe_load(stream)
@@ -120,8 +121,6 @@ if __name__ == '__main__':
     nb_voxels = str(parameters['nb_voxels'])
     nb_features = str(parameters['nb_features'])
     nb_permutations = str(parameters['nb_permutations'])
-    alpha_list = parameters['alpha_list']
-    alphas = ','.join([str(alpha) for alpha in alpha_list])
     alphas = str(parameters['alphas'])
     alpha_percentile = str(parameters['alpha_percentile'])
     step = 100

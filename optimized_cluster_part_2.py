@@ -134,6 +134,7 @@ if __name__ == '__main__':
     dependencies = []
     jobs = []
     jobs_tmp = []
+    jobs_tmp_bis = []
 
     # Plotting the maps
     job_final = Job(command=["python", "create_maps.py", 
@@ -209,9 +210,11 @@ if __name__ == '__main__':
                 jobs.append(job)
                 dependencies.append((job, job_merge))
         jobs += jobs_tmp    
-        group_significativity.append(job_merge)
-        jobs.append(job_merge)
+        group_merge.append(job_merge)
+        jobs_tmp_bis.append(job_merge)
         dependencies.append((job_merge, job_final))
+    
+    jobs += jobs_tmp_bis
     jobs.append(job_final)
 
     scores = Group(elements=group_score,
@@ -220,9 +223,12 @@ if __name__ == '__main__':
     significativity = Group(elements=group_significativity,
                         name="group where distributions are calculated for significance")
 
+    merge = Group(elements=group_merge,
+                        name="group where we merge results")
+
     workflow = Workflow(jobs=jobs,
                         dependencies=dependencies,
-                        root_group=[scores, significativity, job_final])
+                        root_group=[scores, significativity, merge, job_final])
                 
 
     Helper.serialize(os.path.join(inputs_path, 'optimized_cluster_part_2.somawf'), workflow)

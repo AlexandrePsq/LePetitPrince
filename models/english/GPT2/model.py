@@ -17,8 +17,8 @@ from . import utils
 from .tokenizer import tokenize 
 
 
-parameters = {'small':{'LAYER_COUNT':12+1, 'FEATURE_COUNT':768},
-                'medium':{'LAYER_COUNT':24+1, 'FEATURE_COUNT':1024}
+parameters = {'small':{'LAYER_COUNT':12, 'FEATURE_COUNT':768},
+                'medium':{'LAYER_COUNT':24, 'FEATURE_COUNT':1024}
             }
 
 

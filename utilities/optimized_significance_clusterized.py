@@ -65,6 +65,11 @@ def save_model(path, model, params):
         del parameters['intercept_']
         fout.create_dataset('run_{}_alpha_{}/parameters'.format(run, alpha), data=json.dumps(parameters))
 
+def write(path, text):
+    with open(path, 'a+') as f:
+        f.write(text)
+        f.write('\n')
+
 
 if __name__ == '__main__':
 
@@ -77,6 +82,8 @@ if __name__ == '__main__':
     parser.add_argument("--features_indexes", type=str, default=None, help="Indexes of the features to take into account.")
 
     args = parser.parse_args()
+
+    checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
 
     with open(args.yaml_file, 'r') as stream:
         try:
@@ -115,6 +122,8 @@ if __name__ == '__main__':
         model_fitted = model.fit(x_train, y_train)
         save_model(model_saving_path, model_fitted, {'run':run, 'alpha':alpha})
     
+    write(checkpoints, 'model fitted')
+    
     x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
     y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]
     
@@ -124,7 +133,9 @@ if __name__ == '__main__':
     model_name = args.model_name
     model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
     model_fitted.coef_[:,int(indexes[0]):int(indexes[1])] = tmp[:,int(indexes[0]):int(indexes[1])]
+    write(checkpoints, '\tcomputing score')
     r2, pearson_corr = get_score(model_fitted, y_test, x_test)
+    write(checkpoints, '\t\tscore computed')
     
     # sanity check
     path2r2 = os.path.join(args.output, model_name, 'r2')
@@ -137,6 +148,7 @@ if __name__ == '__main__':
     r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
     pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
     
+    write(checkpoints, '\t\t\tsaving')
     np.save(r2_saving_path, r2)
     np.save(pearson_corr_saving_path, pearson_corr)
     

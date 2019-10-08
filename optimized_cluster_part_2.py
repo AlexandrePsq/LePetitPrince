@@ -149,6 +149,7 @@ if __name__ == '__main__':
     files_list = sorted(glob.glob(os.path.join(yaml_files_path, 'run_*_alpha_*.yml')))
     group_significativity = []
     group_score = []
+    group_merge =[]
 
     for model in parameters['models']:
         model_name = model['name']

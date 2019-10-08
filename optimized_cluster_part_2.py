@@ -109,7 +109,7 @@ if __name__ == '__main__':
     ##################
 
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')
-    print(parameters_path)
+
     with open(parameters_path, 'r') as stream:
         try:
             parameters = yaml.safe_load(stream)

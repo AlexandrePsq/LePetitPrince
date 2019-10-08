@@ -90,6 +90,7 @@ if __name__ == '__main__':
         try:
             data = yaml.safe_load(stream)
         except :
+            write(checkpoints, 'error when reading')
             print(-1)
             quit()
     

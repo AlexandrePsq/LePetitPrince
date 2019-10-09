@@ -145,7 +145,7 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = ['bert_bucket_all-layers']# ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
+		self.models = ['bert_bucket_all-layers', 'bert_sequential_all-layers', 'gpt2_all-layers']# ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
 		# self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',

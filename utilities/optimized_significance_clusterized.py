@@ -58,8 +58,9 @@ def load_model(path, original_model, params):
 
 def save_model(path, model, params):
     with h5py.File(path, "a") as fout:
-        fout.create_dataset('run_{}_alpha_{}/coef_'.format(run, alpha), model.coef_)
-        fout.create_dataset('run_{}_alpha_{}/intercept_'.format(run, alpha), model.intercept_)
+        fout.create_group('run_{}_alpha_{}'.format(run, alpha))
+        fout.create_dataset('run_{}_alpha_{}/coef_'.format(run, alpha), model.coef_.shape, data=model.coef_)
+        fout.create_dataset('run_{}_alpha_{}/intercept_'.format(run, alpha), model.intercept_.shape, data=model.intercept_)
         parameters = vars(model).copy()
         del parameters['coef_']
         del parameters['intercept_']

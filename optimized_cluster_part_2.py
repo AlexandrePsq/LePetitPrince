@@ -133,8 +133,6 @@ if __name__ == '__main__':
     ### Create the workflow:
     dependencies = []
     jobs = []
-    jobs_tmp = []
-    jobs_tmp_bis = []
 
     # Plotting the maps
     job_final = Job(command=["python", "create_maps.py", 
@@ -150,9 +148,14 @@ if __name__ == '__main__':
     group_significativity = []
     group_score = []
     group_merge =[]
+    base_group = []
+    count = 1
 
     for model in parameters['models']:
         model_name = model['name']
+        # temporary buffers:
+        jobs_score = []
+        jobs_perm = []
 
         # Merging the results and compute significant r2
         job_merge = Job(command=["python", "optimized_merge_results.py", 
@@ -189,6 +192,9 @@ if __name__ == '__main__':
                             name="job {} - alpha {} - model {}".format(run, alpha, model_name), 
                             working_directory=scripts_path,
                             native_specification=native_specification)
+                jobs_score.append(job)
+                if count == 1:
+                    base_group.append(job)
                 for startat in range(int(nb_permutations)//step):
                     job_permutations = Job(command=["python", "optimized_generate_distribution.py", 
                                                     "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
@@ -203,19 +209,24 @@ if __name__ == '__main__':
                                             name="distribution {} - alpha {} - model {} - startat {}".format(run, alpha, model_name, startat), 
                                             working_directory=scripts_path,
                                             native_specification=native_specification)
-                    jobs_tmp.append(job_permutations)
-                    group_significativity.append(job_permutations)
+                    jobs_perm.append(job_permutations)
                     dependencies.append((job, job_permutations))
                     dependencies.append((job_permutations, job_merge))
-                group_score.append(job)
-                jobs.append(job)
-                dependencies.append((job, job_merge))
-        jobs += jobs_tmp    
+            dependencies.append((job, job_merge))
+
+        group_score += jobs_score
+        group_significativity += jobs_perm
         group_merge.append(job_merge)
-        jobs_tmp_bis.append(job_merge)
+
+        if count != 1:
+            relationships = zip(base_group, jobs_score)
+            for relation  in relationships:
+                dependencies.append(relation)
+
         dependencies.append((job_merge, job_final))
+        count -= 1
     
-    jobs += jobs_tmp_bis
+    jobs += group_score + group_significativity + group_merge
     jobs.append(job_final)
 
     scores = Group(elements=group_score,

@@ -46,25 +46,31 @@ def update(model, parameters):
     model.n_iter_ = parameters['n_iter_']
     return model
 
-def load_model(path, original_model, params):
-    with h5py.File(path, "a") as fin:
-        run = params['run']
-        alpha = params['alpha']
-        original_model.coef_ = fin['run_{}_alpha_{}/coef_'.format(run, alpha)][()]
-        original_model.intercept_ = fin['run_{}_alpha_{}/intercept_'.format(run, alpha)][()]
-        model_parameters = json.loads(fin['run_{}_alpha_{}/parameters'.format(run, alpha)][()])
+def load_model(path, original_model):
+    checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
+    with h5py.File(path, "r", swmr=True) as fin:
+        write(checkpoints, '\t\t\t\t loading dataset coef')
+        original_model.coef_ = fin['coef_'][()]
+        write(checkpoints, '\t\t\t\t loading dataset intercept')
+        original_model.intercept_ = fin['intercept_'][()]
+        model_parameters = json.loads(fin['parameters'][()])
+        write(checkpoints, '\t\t\t\t updating model parameters')
         new_model = update(original_model, model_parameters)
     return new_model
 
-def save_model(path, model, params):
-    with h5py.File(path, "a") as fout:
-        fout.create_group('run_{}_alpha_{}'.format(params['run'], params['alpha']))
-        fout.create_dataset('run_{}_alpha_{}/coef_'.format(params['run'], params['alpha']), model.coef_.shape, data=model.coef_)
-        fout.create_dataset('run_{}_alpha_{}/intercept_'.format(params['run'], params['alpha']), model.intercept_.shape, data=model.intercept_)
+def save_model(path, model):
+    checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
+    write(checkpoints, '\t\t\t\treading hdf5 file')
+    with h5py.File(path, "a", libver='latest') as fout:
+        write(checkpoints, '\t\t\t\tcreating dataset coef')
+        fout.create_dataset('coef_', model.coef_.shape, data=model.coef_)
+        write(checkpoints, '\t\t\t\tcreating dataset intercept')
+        fout.create_dataset('intercept_', model.intercept_.shape, data=model.intercept_)
         parameters = vars(model).copy()
         del parameters['coef_']
         del parameters['intercept_']
-        fout.create_dataset('run_{}_alpha_{}/parameters'.format(params['run'], params['alpha']), data=json.dumps(parameters))
+        write(checkpoints, '\t\t\t\tcreating dataset parameters')
+        fout.create_dataset('parameters', data=json.dumps(parameters))
 
 def write(path, text):
     with open(path, 'a+') as f:
@@ -104,11 +110,11 @@ if __name__ == '__main__':
     indexes = data['indexes']
     path2trained_model = os.path.join(args.output, 'model')
     check_folder(path2trained_model)
-    model_loading_path = os.path.join(path2trained_model, 'ridge_models.hdf5')
+    model_loading_path = os.path.join(path2trained_model, 'run_{}_alpha_{}'.format(run, alpha))
     model_saving_path = model_loading_path
 
     try :
-        model_fitted = load_model(model_loading_path, model, {'run':run, 'alpha':alpha})
+        model_fitted = load_model(model_loading_path, model)
     except:
         x_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]])
         x = [np.load(item) for item in x_paths]
@@ -121,7 +127,7 @@ if __name__ == '__main__':
 
         model.set_params(alpha=alpha)
         model_fitted = model.fit(x_train, y_train)
-        save_model(model_saving_path, model_fitted, {'run':run, 'alpha':alpha})
+        save_model(model_saving_path, model_fitted)
     
     write(checkpoints, 'model fitted')
     

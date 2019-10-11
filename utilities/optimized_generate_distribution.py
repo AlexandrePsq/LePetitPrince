@@ -46,13 +46,11 @@ def update(model, parameters):
     model.n_iter_ = parameters['n_iter_']
     return model
 
-def load_model(path, original_model, params):
-    with h5py.File(path, "a") as fin:
-        run = params['run']
-        alpha = params['alpha']
-        original_model.coef_ = fin['run_{}_alpha_{}/coef_'.format(run, alpha)][()]
-        original_model.intercept_ = fin['run_{}_alpha_{}/intercept_'.format(run, alpha)][()]
-        model_parameters = json.loads(fin['run_{}_alpha_{}/parameters'.format(run, alpha)][()])
+def load_model(path, original_model):
+    with h5py.File(path, "r", swmr=True) as fin:
+        original_model.coef_ = fin['coef_'][()]
+        original_model.intercept_ = fin['intercept_'][()]
+        model_parameters = json.loads(fin['parameters'][()])
         new_model = update(original_model, model_parameters)
     return new_model
 
@@ -102,10 +100,9 @@ if __name__ == '__main__':
     indexes = data['indexes']
     path2trained_model = os.path.join(args.output, 'model')
     check_folder(path2trained_model)
-    model_loading_path = os.path.join(path2trained_model, 'ridge_models.hdf5')
-    model_saving_path = model_loading_path
+    model_loading_path = os.path.join(path2trained_model, 'run_{}_alpha_{}.hdf5'.format(run, alpha))
 
-    model_fitted = load_model(model_loading_path, model, {'run':run, 'alpha':alpha})
+    model_fitted = load_model(model_loading_path, model)
     
     x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
     y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]

@@ -47,29 +47,20 @@ def update(model, parameters):
     return model
 
 def load_model(path, original_model):
-    checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
     with h5py.File(path, "r", swmr=True) as fin:
-        write(checkpoints, '\t\t\t\t loading dataset coef')
         original_model.coef_ = fin['coef_'][()]
-        write(checkpoints, '\t\t\t\t loading dataset intercept')
         original_model.intercept_ = fin['intercept_'][()]
         model_parameters = json.loads(fin['parameters'][()])
-        write(checkpoints, '\t\t\t\t updating model parameters')
         new_model = update(original_model, model_parameters)
     return new_model
 
 def save_model(path, model):
-    checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
-    write(checkpoints, '\t\t\t\treading hdf5 file')
     with h5py.File(path, "a", libver='latest') as fout:
-        write(checkpoints, '\t\t\t\tcreating dataset coef')
         fout.create_dataset('coef_', model.coef_.shape, data=model.coef_)
-        write(checkpoints, '\t\t\t\tcreating dataset intercept')
         fout.create_dataset('intercept_', model.intercept_.shape, data=model.intercept_)
         parameters = vars(model).copy()
         del parameters['coef_']
         del parameters['intercept_']
-        write(checkpoints, '\t\t\t\tcreating dataset parameters')
         fout.create_dataset('parameters', data=json.dumps(parameters))
 
 def write(path, text):
@@ -79,8 +70,6 @@ def write(path, text):
 
 
 if __name__ == '__main__':
-
-    checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--yaml_file", type=str, default=None, help="Path to the yaml file containing alpha, run values and the voxels associateds with.")
@@ -108,9 +97,9 @@ if __name__ == '__main__':
     voxels = data['voxels']
     run = int(data['run'])
     indexes = data['indexes']
-    path2trained_model = os.path.join(args.output, 'model')
+    path2trained_model = os.path.join(args.output, 'ridge_models')
     check_folder(path2trained_model)
-    model_loading_path = os.path.join(path2trained_model, 'run_{}_alpha_{}'.format(run, alpha))
+    model_loading_path = os.path.join(path2trained_model, 'run_{}_alpha_{}.hdf5'.format(run, alpha))
     model_saving_path = model_loading_path
 
     try :
@@ -128,9 +117,7 @@ if __name__ == '__main__':
         model.set_params(alpha=alpha)
         model_fitted = model.fit(x_train, y_train)
         save_model(model_saving_path, model_fitted)
-    
-    write(checkpoints, 'model fitted')
-    
+        
     x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
     y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]
     
@@ -140,9 +127,7 @@ if __name__ == '__main__':
     model_name = args.model_name
     model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
     model_fitted.coef_[:,int(indexes[0]):int(indexes[1])] = tmp[:,int(indexes[0]):int(indexes[1])]
-    write(checkpoints, '\tcomputing score')
     r2, pearson_corr = get_score(model_fitted, y_test, x_test)
-    write(checkpoints, '\t\tscore computed')
     
     # sanity check
     path2r2 = os.path.join(args.output, model_name, 'r2')
@@ -155,7 +140,6 @@ if __name__ == '__main__':
     r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
     pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
     
-    write(checkpoints, '\t\t\tsaving')
     np.save(r2_saving_path, r2)
     np.save(pearson_corr_saving_path, pearson_corr)
     

@@ -71,7 +71,6 @@ if __name__ == '__main__':
     parser.add_argument("--model_name", type=str, default='', help="Name of the model.")
     parser.add_argument("--subject", type=str, default='sub-057', help="Subject name.")
     parser.add_argument("--split_features", action='store_true', default=False, help="Full analysis of all the features included in the model.")
-    parser.add_argument("--pca", type=str, default=None, help="Number of components to keep for the PCA.")
 
     args = parser.parse_args()
 
@@ -89,18 +88,18 @@ if __name__ == '__main__':
     ######################
 
     inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
-    scripts_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/utilities"
-    fmri_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI/english/{}/func/".format(args.subject) 
-    design_matrices_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/design-matrices/english/{}/".format(args.model_name)
-    derivatives_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/".format(args.subject, args.model_name)
-    subject_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/".format(args.subject)
-    shuffling_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/shuffling.npy".format(args.subject, args.model_name)
-    r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/r2/".format(args.subject, args.model_name)
-    pearson_corr_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/pearson_corr/".format(args.subject, args.model_name)
-    distribution_r2_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/distribution_r2/".format(args.subject, args.model_name)
-    distribution_pearson_corr_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/distribution_pearson_corr/".format(args.subject, args.model_name)
-    yaml_files_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/yaml_files/".format(args.subject, args.model_name)
-    output_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/{}/{}/outputs/".format(args.subject, args.model_name)
+    scripts_path = os.path.join(inputs_path, "code/utilities")
+    fmri_path = os.path.join(inputs_path, "data/fMRI/english/{}/func/".format(args.subject) )
+    design_matrices_path = os.path.join(inputs_path, "derivatives/fMRI/design-matrices/english/{}/".format(args.model_name))
+    derivatives_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(args.subject, args.model_name))
+    subject_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/".format(args.subject))
+    shuffling_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/shuffling.npy".format(args.subject, args.model_name))
+    r2_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/r2/".format(args.subject, args.model_name))
+    pearson_corr_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/pearson_corr/".format(args.subject, args.model_name))
+    distribution_r2_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/distribution_r2/".format(args.subject, args.model_name))
+    distribution_pearson_corr_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/distribution_pearson_corr/".format(args.subject, args.model_name))
+    yaml_files_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/yaml_files/".format(args.subject, args.model_name))
+    output_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/outputs/".format(args.subject, args.model_name))
     log_error_path = "/home/{}/soma-workflow/logs/error_log.txt".format(login)
     log_output_path = "/home/{}/soma-workflow/logs/output_log.txt".format(login)
 

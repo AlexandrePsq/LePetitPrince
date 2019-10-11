@@ -58,13 +58,13 @@ def load_model(path, original_model, params):
 
 def save_model(path, model, params):
     with h5py.File(path, "a") as fout:
-        fout.create_group('run_{}_alpha_{}'.format(run, alpha))
-        fout.create_dataset('run_{}_alpha_{}/coef_'.format(run, alpha), model.coef_.shape, data=model.coef_)
-        fout.create_dataset('run_{}_alpha_{}/intercept_'.format(run, alpha), model.intercept_.shape, data=model.intercept_)
+        fout.create_group('run_{}_alpha_{}'.format(params['run'], params['alpha']))
+        fout.create_dataset('run_{}_alpha_{}/coef_'.format(params['run'], params['alpha']), model.coef_.shape, data=model.coef_)
+        fout.create_dataset('run_{}_alpha_{}/intercept_'.format(params['run'], params['alpha']), model.intercept_.shape, data=model.intercept_)
         parameters = vars(model).copy()
         del parameters['coef_']
         del parameters['intercept_']
-        fout.create_dataset('run_{}_alpha_{}/parameters'.format(run, alpha), data=json.dumps(parameters))
+        fout.create_dataset('run_{}_alpha_{}/parameters'.format(params['run'], params['alpha']), data=json.dumps(parameters))
 
 def write(path, text):
     with open(path, 'a+') as f:
@@ -75,7 +75,6 @@ def write(path, text):
 if __name__ == '__main__':
 
     checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints.txt'
-    write(checkpoints, 'starting')
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--yaml_file", type=str, default=None, help="Path to the yaml file containing alpha, run values and the voxels associateds with.")
@@ -87,21 +86,15 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    
-    write(checkpoints, 'opening yaml file')
-
     with open(args.yaml_file, 'r') as stream:
         try:
             data = yaml.safe_load(stream)
         except :
-            write(checkpoints, 'error when reading')
             print(-1)
             quit()
     
     if data['voxels']==[]:
         quit()
-
-    write(checkpoints, 'reading data')
 
     source = 'fMRI'
     model = Ridge()

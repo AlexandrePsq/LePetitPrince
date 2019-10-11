@@ -212,7 +212,6 @@ if __name__ == '__main__':
                     jobs_perm.append(job_permutations)
                     dependencies.append((job, job_permutations))
                     dependencies.append((job_permutations, job_merge))
-            dependencies.append((job, job_merge))
 
         group_score += jobs_score
         group_significativity += jobs_perm

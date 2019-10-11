@@ -98,7 +98,7 @@ if __name__ == '__main__':
     voxels = data['voxels']
     run = int(data['run'])
     indexes = data['indexes']
-    path2trained_model = os.path.join(args.output, 'model')
+    path2trained_model = os.path.join(args.output, 'ridge_models')
     check_folder(path2trained_model)
     model_loading_path = os.path.join(path2trained_model, 'run_{}_alpha_{}.hdf5'.format(run, alpha))
 

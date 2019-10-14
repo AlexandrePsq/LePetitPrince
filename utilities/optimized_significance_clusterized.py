@@ -13,7 +13,7 @@ from sklearn.metrics import r2_score
 from scipy.stats import pearsonr
 import pandas as pd
 from sklearn.linear_model import Ridge
-import h5py
+# import h5py
 import json
 
 
@@ -46,22 +46,31 @@ def update(model, parameters):
     model.n_iter_ = parameters['n_iter_']
     return model
 
-def load_model(path, original_model):
-    with h5py.File(path, "r", swmr=True) as fin:
-        original_model.coef_ = fin['coef_'][()]
-        original_model.intercept_ = fin['intercept_'][()]
-        model_parameters = json.loads(fin['parameters'][()])
-        new_model = update(original_model, model_parameters)
+def load_model(path2folder, original_model):
+    coef_path = os.path.join(path2folder, 'coef_.npy')
+    intercept_path = os.path.join(path2folder, 'intercept_.npy')
+    parameters_path = os.path.join(path2folder, 'parameters.json')
+
+    original_model.coef_ = np.load(coef_path)
+    original_model.intercept_ = np.load(intercept_path)
+    with open(parameters_path, 'r') as outfile:
+        parameters = json.load(outfile)
+    new_model = update(original_model, parameters)
     return new_model
 
-def save_model(path, model):
-    with h5py.File(path, "a", libver='latest') as fout:
-        fout.create_dataset('coef_', model.coef_.shape, data=model.coef_)
-        fout.create_dataset('intercept_', model.intercept_.shape, data=model.intercept_)
-        parameters = vars(model).copy()
-        del parameters['coef_']
-        del parameters['intercept_']
-        fout.create_dataset('parameters', data=json.dumps(parameters))
+def save_model(path2folder, model):
+    coef_path = os.path.join(path2folder, 'coef_.npy')
+    intercept_path = os.path.join(path2folder, 'intercept_.npy')
+    parameters_path = os.path.join(path2folder, 'parameters.json')
+    parameters = vars(model).copy()
+    del parameters['coef_']
+    del parameters['intercept_']
+
+    np.save(coef_path, model.coef_)
+    np.save(intercept_path, model.intercept_)
+    with open(parameters_path, 'a+') as outfile:
+        json.dump(parameters, outfile)
+        
 
 def write(path, text):
     with open(path, 'a+') as f:
@@ -97,9 +106,8 @@ if __name__ == '__main__':
     voxels = data['voxels']
     run = int(data['run'])
     indexes = data['indexes']
-    path2trained_model = os.path.join(args.output, 'ridge_models')
-    check_folder(path2trained_model)
-    model_loading_path = os.path.join(path2trained_model, 'run_{}_alpha_{}.hdf5'.format(run, alpha))
+    model_loading_path = os.path.join(args.output, 'ridge_models', 'run_{}_alpha_{}'.format(run, alpha))
+    check_folder(model_loading_path)
     model_saving_path = model_loading_path
 
     try :

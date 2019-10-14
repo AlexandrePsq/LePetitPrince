@@ -87,7 +87,7 @@ if __name__ == '__main__':
     ### Data retrieval ###
     ######################
 
-    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
+    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/" # "/Users/alexpsq/Code/NeuroSpin/LePetitPrince/" 
     scripts_path = os.path.join(inputs_path, "code/utilities")
     fmri_path = os.path.join(inputs_path, "data/fMRI/english/{}/func/".format(args.subject) )
     design_matrices_path = os.path.join(inputs_path, "derivatives/fMRI/design-matrices/english/{}/".format(args.model_name))
@@ -162,7 +162,8 @@ if __name__ == '__main__':
     alpha_percentile = str(99)
     # features = []
     # features = [['bert_bucket_layer-a-1', 768], ['bert_bucket_layer-a-2', 768], ['bert_bucket_layer-a-3', 768], ['bert_bucket_layer-a-4', 768], ['bert_bucket_layer-a-5', 768], ['bert_bucket_layer-a-6', 768], ['bert_bucket_layer-a-7', 768], ['bert_bucket_layer-a-8', 768], ['bert_bucket_layer-a-9', 768], ['bert_bucket_layer-b-10', 768], ['bert_bucket_layer-b-11', 768], ['bert_bucket_layer-b-12', 768]]
-    features = [['mfcc_model', 39], ['rms_model', 1], ['sentence_onset', 1], ['bottomup_model', 1], ['topdown_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]] # add here basic features name + nb of column feature for each!!!
+    features = [['gpt2_layer-a-1', 768], ['gpt2_layer-a-2', 768], ['gpt2_layer-a-3', 768], ['gpt2_layer-a-4', 768], ['gpt2_layer-a-5', 768], ['gpt2_layer-a-6', 768], ['gpt2_layer-a-7', 768], ['gpt2_layer-a-8', 768], ['gpt2_layer-a-9', 768], ['gpt2_layer-b-10', 768], ['gpt2_layer-b-11', 768], ['gpt2_layer-b-12', 768]]
+    # features = [['mfcc_model', 39], ['rms_model', 1], ['sentence_onset', 1], ['bottomup_model', 1], ['topdown_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]] # add here basic features name + nb of column feature for each!!!
     # could be: features = sorted([['lstm...hidden_first-layer', 300], ['lstm...cell_first-layer', 300]])
 
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')
@@ -264,7 +265,7 @@ if __name__ == '__main__':
 
     ### Submit the workflow to computing resource (configured in the client-server mode)
 
-    controller = WorkflowController("DSV_cluster_{}".format(login), login, password) #"DSV_cluster_ap259944", login, password
+    controller = WorkflowController("DSV_cluster_{}".format(login), login, password) #"DSV_cluster_ap259944", login, password 
 
     workflow_id = controller.submit_workflow(workflow=workflow,
                                             name="Cluster optimized part 1")

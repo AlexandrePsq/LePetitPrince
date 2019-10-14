@@ -60,7 +60,7 @@ if __name__ == '__main__':
     ### Data retrieval ###
     ######################
 
-    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
+    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/" # "/Users/alexpsq/Code/NeuroSpin/LePetitPrince/"
     scripts_path = os.path.join(inputs_path, "code/utilities")
     fmri_path = os.path.join(inputs_path, "data/fMRI/english/{}/func/".format(args.subject) )
     design_matrices_path = os.path.join(inputs_path, "derivatives/fMRI/design-matrices/english/{}/".format(args.model_name))

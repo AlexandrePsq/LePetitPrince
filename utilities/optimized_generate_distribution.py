@@ -58,14 +58,14 @@ def load_model(path2folder, original_model):
     new_model = update(original_model, parameters)
     return new_model
 
-def sample_r2(model, x_test, y_test, shuffling, n_sample, startat):
+def sample_r2(model, x_test, y_test, shuffling, n_sample):
     # receive a trained model, x_test and y_test (test set of the cross-validation).
     # It returns two values (or two lists depending on the parameter voxel_wised):
     # r2 value computed on test set and the distribution array
     distribution_array_r2 = None
     distribution_array_pearson_corr = None
     for index in range(n_sample):
-        r2_tmp, pearson_corr_tmp = get_score(model, y_test, x_test[:, shuffling[startat + index]])
+        r2_tmp, pearson_corr_tmp = get_score(model, y_test, x_test[:, shuffling[index]])
         distribution_array_r2 = r2_tmp if distribution_array_r2 is None else np.vstack([distribution_array_r2, r2_tmp])
         distribution_array_pearson_corr = pearson_corr_tmp if distribution_array_pearson_corr is None else np.vstack([distribution_array_pearson_corr, pearson_corr_tmp])
     return distribution_array_r2, distribution_array_pearson_corr
@@ -81,7 +81,6 @@ if __name__ == '__main__':
     parser.add_argument("--shuffling", type=str, default='', help="Path to shuffling array.")
     parser.add_argument("--n_sample", type=str, default=None, help="Number of permutations.")
     parser.add_argument("--model_name", type=str, default=None, help="Name of the model.")
-    parser.add_argument("--startat", type=str, default=None, help="Specify starting points for sample generation.")
     parser.add_argument("--features_indexes", type=str, default=None, help="Indexes of the features to take into account.")
 
     args = parser.parse_args()
@@ -120,8 +119,7 @@ if __name__ == '__main__':
                                                                         x_test, 
                                                                         y_test, 
                                                                         shuffling=np.load(args.shuffling),
-                                                                        n_sample=int(args.n_sample),
-                                                                        startat=int(args.startat))
+                                                                        n_sample=int(args.n_sample))
     
     # sanity check
     path2distribution_array_r2 = os.path.join(args.output, model_name, 'distribution_r2')

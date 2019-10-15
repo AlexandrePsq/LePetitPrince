@@ -121,7 +121,6 @@ if __name__ == '__main__':
     nb_permutations = str(parameters['nb_permutations'])
     alphas = str(parameters['alphas'])
     alpha_percentile = str(parameters['alpha_percentile'])
-    step = 100
 
 
     ################
@@ -171,7 +170,7 @@ if __name__ == '__main__':
             info = os.path.basename(yaml_file).split('_')
             run = int(info[1])
             alpha = float(info[3][:-4])
-            native_specification = "-q Nspin_long" # if ((int(nb_permutations)>1000) or (int(nb_features)>300)) else "-q Nspin_short"
+            native_specification = "-q Nspin_bigM" # if ((int(nb_permutations)>1000) or (int(nb_features)>300)) else "-q Nspin_short"
             features_indexes = ','.join([str(index) for index in model['indexes']])
             with open(yaml_file, 'r') as stream:
                 try:
@@ -193,23 +192,21 @@ if __name__ == '__main__':
                 jobs_score.append(job)
                 if count == 1:
                     base_group.append(job)
-                for startat in range(int(nb_permutations)//step):
-                    job_permutations = Job(command=["python", "optimized_generate_distribution.py", 
-                                                    "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
-                                                    "--output", derivatives_path, 
-                                                    "--x", design_matrices_path, 
-                                                    "--y", fmri_path, 
-                                                    "--shuffling", shuffling_path, 
-                                                    "--n_sample", str(step), 
-                                                    "--model_name", model_name, 
-                                                    "--startat", str(startat*step),
-                                                    "--features_indexes", features_indexes], 
-                                            name="distribution {} - alpha {} - model {} - startat {}".format(run, alpha, model_name, startat), 
-                                            working_directory=scripts_path,
-                                            native_specification=native_specification)
-                    jobs_perm.append(job_permutations)
-                    dependencies.append((job, job_permutations))
-                    dependencies.append((job_permutations, job_merge))
+                job_permutations = Job(command=["python", "optimized_generate_distribution.py", 
+                                                "--yaml_file", os.path.join(yaml_files_path, yaml_file), 
+                                                "--output", derivatives_path, 
+                                                "--x", design_matrices_path, 
+                                                "--y", fmri_path, 
+                                                "--shuffling", shuffling_path, 
+                                                "--n_sample", nb_permutations, 
+                                                "--model_name", model_name, 
+                                                "--features_indexes", features_indexes], 
+                                        name="distribution {} - alpha {} - model {} ".format(run, alpha, model_name), 
+                                        working_directory=scripts_path,
+                                        native_specification=native_specification)
+                jobs_perm.append(job_permutations)
+                dependencies.append((job, job_permutations))
+                dependencies.append((job_permutations, job_merge))
 
         group_score += jobs_score
         group_significativity += jobs_perm

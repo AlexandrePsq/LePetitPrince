@@ -60,7 +60,7 @@ if __name__ == '__main__':
     ### Data retrieval ###
     ######################
 
-    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/" # "/Users/alexpsq/Code/NeuroSpin/LePetitPrince/"
+    inputs_path = "/Users/alexpsq/Code/NeuroSpin/LePetitPrince/" #"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/" 
     scripts_path = os.path.join(inputs_path, "code/utilities")
     fmri_path = os.path.join(inputs_path, "data/fMRI/english/{}/func/".format(args.subject) )
     design_matrices_path = os.path.join(inputs_path, "derivatives/fMRI/design-matrices/english/{}/".format(args.model_name))
@@ -239,10 +239,10 @@ if __name__ == '__main__':
 
     Helper.serialize(os.path.join(inputs_path, 'optimized_cluster_part_2.somawf'), workflow)
 
-
+    print('c bon')
     ### Submit the workflow to computing resource (configured in the client-server mode)
 
-    controller = WorkflowController("DSV_cluster_{}".format(login), login, password) #"DSV_cluster_ap259944", login, password
+    controller = WorkflowController() #"DSV_cluster_ap259944", login, password
 
     workflow_id = controller.submit_workflow(workflow=workflow,
                                             name="Cluster optimized part 2")

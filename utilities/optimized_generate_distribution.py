@@ -77,8 +77,6 @@ def write(path, text):
 
 if __name__ == '__main__':
 
-    checkpoint = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints_distribution.txt'
-
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--yaml_file", type=str, default=None, help="Path to the yaml file containing alpha, run values and the voxels associateds with.")
     parser.add_argument("--output", type=str, default='', help="Path to the folder containing outputs.")
@@ -91,8 +89,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    write(checkpoint, 'reading yaml file ...')
-
     with open(args.yaml_file, 'r') as stream:
         try:
             data = yaml.safe_load(stream)
@@ -103,8 +99,6 @@ if __name__ == '__main__':
     if data['voxels']==[]:
         quit()
 
-    write(checkpoint, 'defining variables ...')
-
     source = 'fMRI'
     model = Ridge()
     alpha = data['alpha']
@@ -114,30 +108,22 @@ if __name__ == '__main__':
     model_loading_path = os.path.join(args.output, 'ridge_models', 'run_{}_alpha_{}'.format(run, alpha))
     check_folder(model_loading_path)
 
-    write(checkpoint, 'loading model ...')
-
     model_fitted = load_model(model_loading_path, model)
     
-    write(checkpoint, 'loading x and y ...')
-
     x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
     y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]
     
     tmp = model_fitted.coef_.copy()
 
-    write(checkpoint, 'dealing with model coef_ ...')
-
     indexes = args.features_indexes.split(',')
     model_name = args.model_name
     model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
     model_fitted.coef_[:,int(indexes[0]):int(indexes[1])] = tmp[:,int(indexes[0]):int(indexes[1])]
-    write(checkpoint, 'computing distribution')
     distribution_array_r2, distribution_array_pearson_corr = sample_r2(model_fitted, 
                                                                         x_test, 
                                                                         y_test, 
                                                                         shuffling=np.load(args.shuffling),
                                                                         n_sample=int(args.n_sample))
-    write(checkpoint, 'distribution computed - shape : r2:{}, pearson:{}'.format(distribution_array_r2.shape, distribution_array_pearson_corr.shape))
     # sanity check
     path2distribution_array_r2 = os.path.join(args.output, model_name, 'distribution_r2')
     path2distribution_array_pearson_corr = os.path.join(args.output, model_name, 'distribution_pearson_corr')
@@ -146,13 +132,11 @@ if __name__ == '__main__':
     check_folder(path2distribution_array_pearson_corr)
 
     # saving
-    write(checkpoint, 'saving ...')
     distribution_r2_saving_path = os.path.join(path2distribution_array_r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
     distribution_pearson_corr_saving_path = os.path.join(path2distribution_array_pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
 
     np.save(distribution_r2_saving_path, distribution_array_r2)
     np.save(distribution_pearson_corr_saving_path, distribution_array_pearson_corr)
-    write(checkpoint, 'saved. ')
 
 
 

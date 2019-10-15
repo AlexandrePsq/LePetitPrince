@@ -207,6 +207,7 @@ if __name__ == '__main__':
     group_cv_alphas = []
     group_cv_merge = []
     jobs_tmp = []
+    native_specification = "-q Nspin_bigM -l walltime=24:00:00" 
 
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))
@@ -223,7 +224,7 @@ if __name__ == '__main__':
                             "--output", yaml_files_path],  
                     name="Merging alphas CV outputs - split {}".format(run), 
                     working_directory=scripts_path,
-                    native_specification="-q Nspin_bigM")
+                    native_specification=native_specification)
         for train, valid in logo.split(indexes_tmp):
             job = Job(command=["python", "CV_alphas_distributed.py", 
                                 "--indexes", ','.join([str(i) for i in indexes_tmp]), 
@@ -238,7 +239,7 @@ if __name__ == '__main__':
                                 "--cv_index", str(cv_index)],  
                         name="Alphas CV - split {} - {}".format(run, cv_index), 
                         working_directory=scripts_path,
-                        native_specification="-q Nspin_bigM")
+                        native_specification=native_specification)
             cv_index += 1
             group_cv_alphas.append(job)
             jobs.append(job)

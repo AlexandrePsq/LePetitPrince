@@ -170,7 +170,7 @@ if __name__ == '__main__':
             info = os.path.basename(yaml_file).split('_')
             run = int(info[1])
             alpha = float(info[3][:-4])
-            native_specification = "-q Nspin_bigM" # if ((int(nb_permutations)>1000) or (int(nb_features)>300)) else "-q Nspin_short"
+            native_specification = "-q Nspin_bigM -l walltime=24:00:00" # if ((int(nb_permutations)>1000) or (int(nb_features)>300)) else "-q Nspin_short"
             features_indexes = ','.join([str(index) for index in model['indexes']])
             with open(yaml_file, 'r') as stream:
                 try:

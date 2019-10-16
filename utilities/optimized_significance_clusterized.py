@@ -80,6 +80,8 @@ def write(path, text):
 
 if __name__ == '__main__':
 
+    checkpoint = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoint_significance.txt'
+
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--yaml_file", type=str, default=None, help="Path to the yaml file containing alpha, run values and the voxels associateds with.")
     parser.add_argument("--output", type=str, default='', help="Path to the folder containing outputs.")
@@ -90,6 +92,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    write(checkpoint, 'reading yaml file...')
+
     with open(args.yaml_file, 'r') as stream:
         try:
             data = yaml.safe_load(stream)
@@ -99,6 +103,8 @@ if __name__ == '__main__':
     
     if data['voxels']==[]:
         quit()
+
+    write(checkpoint, 'defining variables...')
 
     source = 'fMRI'
     model = Ridge()
@@ -112,10 +118,13 @@ if __name__ == '__main__':
 
     try :
         model_fitted = load_model(model_loading_path, model)
+        write(checkpoint, 'model loaded.')
     except:
+        write(checkpoint, 'retrieving x ...')
         x_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]])
         x = [np.load(item) for item in x_paths]
 
+        write(checkpoint, 'retrieving y...')
         y_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes]])
         y = [np.load(item) for item in y_paths]
         
@@ -123,8 +132,11 @@ if __name__ == '__main__':
         x_train = np.vstack(x)
 
         model.set_params(alpha=alpha)
+        write(checkpoint, 'fitting model...')
         model_fitted = model.fit(x_train, y_train)
+        write(checkpoint, 'saving model...')
         save_model(model_saving_path, model_fitted)
+    write(checkpoint, 'loading x and y test...')
     
     x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
     y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]
@@ -135,9 +147,11 @@ if __name__ == '__main__':
     model_name = args.model_name
     model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
     model_fitted.coef_[:,int(indexes[0]):int(indexes[1])] = tmp[:,int(indexes[0]):int(indexes[1])]
+    write(checkpoint, 'computing scores...')
     r2, pearson_corr = get_score(model_fitted, y_test, x_test)
     
     # sanity check
+    write(checkpoint, 'defining paths...')
     path2r2 = os.path.join(args.output, model_name, 'r2')
     path2pearson_corr = os.path.join(args.output, model_name, 'pearson_corr')
     
@@ -147,7 +161,7 @@ if __name__ == '__main__':
     # saving
     r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
     pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
-    
+    write(checkpoint, 'saving...')
     np.save(r2_saving_path, r2)
     np.save(pearson_corr_saving_path, pearson_corr)
-    
+    write(checkpoint, 'saved.')

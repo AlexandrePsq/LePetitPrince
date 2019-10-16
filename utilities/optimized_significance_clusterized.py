@@ -13,11 +13,11 @@ if __name__ == '__main__':
     write(checkpoint, 'importing 1...')
 
     import os
-     write(checkpoint, 'importing 2...')
+    write(checkpoint, 'importing 2...')
     import yaml
-     write(checkpoint, 'importing 3...')
+    write(checkpoint, 'importing 3...')
     import glob
-     write(checkpoint, 'importing 4...')
+    write(checkpoint, 'importing 4...')
     import argparse
 
     write(checkpoint, 'importing 4+2...')

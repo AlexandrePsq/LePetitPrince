@@ -3,6 +3,11 @@
 
 if __name__ == '__main__':
 
+    def write(path, text):
+        with open(path, 'a+') as f:
+            f.write(text)
+            f.write('\n')
+
     checkpoint = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoint_significance.txt'
 
     write(checkpoint, 'importing 4...')
@@ -86,11 +91,6 @@ if __name__ == '__main__':
         with open(parameters_path, 'a+') as outfile:
             json.dump(parameters, outfile)
             
-
-    def write(path, text):
-        with open(path, 'a+') as f:
-            f.write(text)
-            f.write('\n')
     
     write(checkpoint, 'parsing...')
 

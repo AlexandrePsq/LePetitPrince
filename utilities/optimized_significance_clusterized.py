@@ -10,11 +10,14 @@ if __name__ == '__main__':
 
     checkpoint = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoint_significance.txt'
 
-    write(checkpoint, 'importing 4...')
+    write(checkpoint, 'importing 1...')
 
     import os
+     write(checkpoint, 'importing 2...')
     import yaml
+     write(checkpoint, 'importing 3...')
     import glob
+     write(checkpoint, 'importing 4...')
     import argparse
 
     write(checkpoint, 'importing 4+2...')

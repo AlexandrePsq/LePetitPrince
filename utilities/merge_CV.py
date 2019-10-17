@@ -5,7 +5,6 @@ import glob
 import yaml
 import argparse
 import sys
-import psutil
 
 import warnings
 warnings.simplefilter(action='ignore')
@@ -38,7 +37,10 @@ def write(path, text):
 
 
 if __name__ == '__main__':
+    
+    checkpoint = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoint_merge_alphas.txt'
 
+    write(checkpoint, 'parsing...')
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--indexes", type=str, default=None, help="List of run to use for CV (delimiter=',').")
     parser.add_argument("--nb_runs", type=str, default='', help="Number of runs.")
@@ -50,6 +52,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    
+    write(checkpoint, 'defining variables...')
 
     alphas = [float(alpha) for alpha in args.alphas.split(',')]
     nb_alphas = len(alphas)
@@ -57,20 +61,24 @@ if __name__ == '__main__':
 
     scores = np.zeros((int(args.nb_voxels), int(args.nb_runs), nb_alphas))
     files = sorted(glob.glob(os.path.join(args.input, 'score_run_{}_cv_index_*.npy'.format(args.run))))
+    write(checkpoint, 'merging...')
     for score in files:
         r2_values = np.load(score)
         cv_index = int(os.path.basename(score).split('_')[5].split('.')[0]) - 1
         scores[:, cv_index, :] = r2_values
 
-
+    write(checkpoint, 'merged.')
 
     best_alphas_indexes = np.argmax(np.mean(scores, axis=1), axis=1)
+    write(checkpoint, 'computing voxel2alpha...')
     voxel2alpha = np.array([alphas[i] for i in best_alphas_indexes])
 
     # compute best alpha for each voxel and group them by alpha-value
     alpha2voxel = {key:[] for key in alphas}
+    write(checkpoint, 'computing alpha2voxel...')
     for index in range(len(voxel2alpha)):
         alpha2voxel[voxel2alpha[index]].append(index)
+    write(checkpoint, 'entering loop...')
     for alpha in alphas:
         yaml_path = os.path.join(args.output, 'run_{}_alpha_{}.yml'.format(args.run, alpha))
         yaml_file = {'alpha': alpha,
@@ -80,6 +88,8 @@ if __name__ == '__main__':
 
         with open(yaml_path, 'w') as outfile:
             yaml.dump(yaml_file, outfile, default_flow_style=False)
+            write(checkpoint, '\tyaml file saved...')
     
     # saving
     np.save(os.path.join(args.output, 'voxel2alpha{}.npy'.format(args.run)), voxel2alpha)
+    write(checkpoint, 'saved.')

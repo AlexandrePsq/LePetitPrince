@@ -55,8 +55,6 @@ def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2
 
 if __name__ =='__main__':
 
-    checkpoint = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints_merge.txt'
-
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate password from key (and optionnally the login).""")
     parser.add_argument("--input_folder", type=str, default=None, help="Path to the inputs folder.")
     parser.add_argument("--yaml_files", type=str, default=None, help="Yaml files folder path.")
@@ -69,7 +67,6 @@ if __name__ =='__main__':
     args = parser.parse_args()
 
     # Variables
-    write(checkpoint, 'defining variables ...')
     nb_voxels = int(args.nb_voxels)
     nb_runs = int(args.nb_runs)
     scores = np.zeros((nb_runs, nb_voxels))
@@ -86,7 +83,6 @@ if __name__ =='__main__':
     input_distribution_pearson_corr = os.path.join(args.input_folder, model_name, 'distribution_pearson_corr')
     
     # retrieving data
-    write(checkpoint, 'retrieving data ...')
     files_r2 = sorted(glob.glob(os.path.join(input_r2, 'run_*_alpha_*.npy'))) # e.g. run_6_alpha_10.32.npy
     files_pearson_corr = sorted(glob.glob(os.path.join(input_pearson_corr, 'run_*_alpha_*.npy'))) # e.g. run_6_alpha_10.32.npy
     files_distribution_r2 = sorted(glob.glob(os.path.join(input_distribution_r2, 'run_*_alpha_*.npy')))
@@ -94,7 +90,6 @@ if __name__ =='__main__':
 
     # merging
     for index in range(len(files_r2)):
-        write(checkpoint, '\tentering loop ...')
         info = os.path.basename(files_r2[index]).split('_')
         run = int(info[1])
         alpha = float(info[3][:-4])
@@ -104,25 +99,21 @@ if __name__ =='__main__':
             except :
                 print(-1)
                 break
-        write(checkpoint, '\t\tloading data ...')
         scores[run-1, voxels] = np.load(files_r2[index])
         corr[run-1, voxels] = np.load(files_pearson_corr[index])
         distribution_r2_array[run-1, :, voxels] = np.load(files_distribution_r2[index]).T
         distribution_pearson_corr_array[run-1, :, voxels] = np.load(files_distribution_pearson_corr[index]).T
     alphas_array = []
     for run in range(1, 1+nb_runs):
-        write(checkpoint, 'dealing with alphas ...')
         alphas_array.append(np.load(os.path.join(args.yaml_files, 'voxel2alpha{}.npy'.format(run))))
     alphas_array = np.vstack(alphas_array)
     
     # computing significativity
-    write(checkpoint, 'computing significativity ...')
     r2_final, corr_final, mask_r2, mask_pearson_corr, mask_pvalues_r2, mask_pvalues_pearson_corr, thresholds_pearson_corr, thresholds_r2, p_values_r2, p_values_pearson_corr, z_values_r2, z_values_pearson_corr = get_significativity_value(scores, 
                                                                                                                                                                                                                                                 corr,
                                                                                                                                                                                                                                                 distribution_r2_array,
                                                                                                                                                                                                                                                 distribution_pearson_corr_array, 
                                                                                                                                                                                                                                                 float(args.alpha_percentile))
-    write(checkpoint, 'add some modifications ...')
     r2_significant_with_threshold = np.zeros(r2_final.shape)
     r2_significant_with_threshold[mask_r2] = r2_final[mask_r2]
     r2_significant_with_threshold[~mask_r2] = np.nan
@@ -140,7 +131,6 @@ if __name__ =='__main__':
     pearson_corr_significant_with_pvalues[~mask_pvalues_pearson_corr] = np.nan
 
     # defining paths
-    write(checkpoint, 'defining paths ...')
     output_folder = os.path.join(args.input_folder, model_name, 'outputs')
     check_folder(output_folder)
     r2_output_path = os.path.join(output_folder, 'r2.npy')
@@ -171,7 +161,6 @@ if __name__ =='__main__':
     alphas_path = os.path.join(output_folder, 'voxel2alpha.npy')
 
     # saving
-    write(checkpoint, 'saving  ...')
     np.save(r2_output_path, r2_final)
     np.save(r2_significant_with_threshold_output_path, r2_significant_with_threshold)
     np.save(r2_significant_with_pvalues_output_path, r2_significant_with_pvalues)
@@ -198,4 +187,3 @@ if __name__ =='__main__':
     np.save(distribution_pearson_corr_output_path, distribution_pearson_corr_array)
 
     np.save(alphas_path, alphas_array)
-    write(checkpoint, 'saved  ...')

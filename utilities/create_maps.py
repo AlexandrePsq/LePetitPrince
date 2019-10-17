@@ -73,8 +73,6 @@ def write(path, text):
 
 if __name__ =='__main__':
 
-    checkpoint = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints_maps.txt'
-
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate password from key (and optionnally the login).""")
     parser.add_argument("--input", type=str, default=None, help="Path to input folders.")
     parser.add_argument("--subject", type=str, default='sub-057', help="Subject name.")
@@ -84,8 +82,6 @@ if __name__ =='__main__':
 
     args = parser.parse_args()
 
-    write(checkpoint, 'reading yaml ...')
-
     with open(args.parameters, 'r') as stream:
         try:
             parameters = yaml.safe_load(stream)
@@ -93,17 +89,13 @@ if __name__ =='__main__':
             print(exc)
             quit()
 
-    write(checkpoint, 'retrieving fmri data ...')
     fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, 'fMRI_*run*')))
-    write(checkpoint, 'create masker ...')
     masker = compute_global_masker(list(fmri_runs))
 
     for model in parameters['models']:
-        write(checkpoint, '\tentering loop ...')
         model_name = model['name'] # model['name']=='' if we study the model as a whole
 
         # defining paths
-        write(checkpoint, 'defining paths and loading ...')
         output = os.path.join(args.input, model_name, 'outputs')
         output_parent_folder = os.path.join(output, 'maps')
         alphas = np.mean(np.load(os.path.join(output, 'voxel2alpha.npy')), axis=0)
@@ -130,7 +122,6 @@ if __name__ =='__main__':
         check_folder(output_parent_folder)
         
         # creating maps
-        write(checkpoint, 'creating maps ...')
         create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca, vmax=10000) # alphas # argument deleted: , vmax=5e3
 
         create_maps(masker, r2, 'r2', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # r2 
@@ -149,5 +140,3 @@ if __name__ =='__main__':
 
         create_maps(masker, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
         create_maps(masker, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
-
-        write(checkpoint, 'all maps created .')

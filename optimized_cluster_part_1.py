@@ -156,13 +156,14 @@ if __name__ == '__main__':
     nb_runs = str(len(fmri_runs))
     nb_voxels = str(y[0].shape[1])
     nb_features = str(x[0].shape[1])
-    nb_permutations = str(100) # should be a multiple of 100
+    nb_permutations = str(3000) # should be a multiple of 100
     alpha_list = [round(tmp, 5) for tmp in np.logspace(2, 5, 25)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
     # features = []
+    features = [['LSTM-E600-H100-L3-layer-1', 100], ['LSTM-E600-H100-L3-layer-2', 100], ['LSTM-E600-H100-L3-layer-3', 100]]
     # features = [['bert_bucket_layer-a-1', 768], ['bert_bucket_layer-a-2', 768], ['bert_bucket_layer-a-3', 768], ['bert_bucket_layer-a-4', 768], ['bert_bucket_layer-a-5', 768], ['bert_bucket_layer-a-6', 768], ['bert_bucket_layer-a-7', 768], ['bert_bucket_layer-a-8', 768], ['bert_bucket_layer-a-9', 768], ['bert_bucket_layer-b-10', 768], ['bert_bucket_layer-b-11', 768], ['bert_bucket_layer-b-12', 768]]
-    features = [['gpt2_layer-a-1', 768], ['gpt2_layer-a-2', 768], ['gpt2_layer-a-3', 768], ['gpt2_layer-a-4', 768], ['gpt2_layer-a-5', 768], ['gpt2_layer-a-6', 768], ['gpt2_layer-a-7', 768], ['gpt2_layer-a-8', 768], ['gpt2_layer-a-9', 768], ['gpt2_layer-b-10', 768], ['gpt2_layer-b-11', 768], ['gpt2_layer-b-12', 768]]
+    # features = [['gpt2_layer-a-1', 768], ['gpt2_layer-a-2', 768], ['gpt2_layer-a-3', 768], ['gpt2_layer-a-4', 768], ['gpt2_layer-a-5', 768], ['gpt2_layer-a-6', 768], ['gpt2_layer-a-7', 768], ['gpt2_layer-a-8', 768], ['gpt2_layer-a-9', 768], ['gpt2_layer-b-10', 768], ['gpt2_layer-b-11', 768], ['gpt2_layer-b-12', 768]]
     # features = [['mfcc_model', 39], ['rms_model', 1], ['sentence_onset', 1], ['bottomup_model', 1], ['topdown_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]] # add here basic features name + nb of column feature for each!!!
     # could be: features = sorted([['lstm...hidden_first-layer', 300], ['lstm...cell_first-layer', 300]])
 
@@ -207,7 +208,7 @@ if __name__ == '__main__':
     group_cv_alphas = []
     group_cv_merge = []
     jobs_tmp = []
-    native_specification = "-q Nspin_bigM -l walltime=24:00:00" 
+    native_specification = "-q Nspin_long -l walltime=24:00:00" 
 
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))

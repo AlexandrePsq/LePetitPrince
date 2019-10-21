@@ -362,12 +362,14 @@ if __name__ == '__main__':
         atlas = datasets.fetch_atlas_harvard_oxford(params.atlas)
         labels = atlas['labels']
         maps = nilearn.image.load_img(atlas['maps'])
-        analysis_name = 'Model comparison - Average per ROI - Pearson & R2'
 
         x_labels = labels[1:]
         for analysis in analysis_parameters['model_comparison']:
+            analysis_name = analysis['name']
             y_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
             y_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
+            y_significant_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
+            y_significantr2 = np.zeros((len(labels)-1, len(analysis['models'])))
             # extract data
             for index_mask in range(len(labels)-1):
                 mask = math_img('img > 50', img=index_img(maps, index_mask))  
@@ -379,6 +381,8 @@ if __name__ == '__main__':
                         subject = Subjects().get_subject(int(subject))
                         y_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_pearson_corr')))
                         y_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_r2')))
+                        y_significant_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_pearson_corr')))
+                        y_significantr2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_r2')))
                         index_model += 1
 
             # save plots
@@ -392,9 +396,9 @@ if __name__ == '__main__':
                 plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
                 plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Pearson')
                 check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '{}.png'.format(j)))
+                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1
             j=0
@@ -407,9 +411,41 @@ if __name__ == '__main__':
                 plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
                 plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - R2')
                 check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '{}.png'.format(j)))
+                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1
+            j=0
+            for (x,y) in batchify(x_labels, y_significant_pearson):
+                plt.figure(20*i + 2*j)
+                plot = plt.plot(x, y)
+                plt.title('Pearson coefficient per ROI')
+                plt.xlabel('Regions of interest (ROI)')
+                plt.ylabel('Pearson coefficient value')
+                plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
+                plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
+                plt.tight_layout()
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant Pearson')
+                check_folder(save_folder)
+                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
+                plt.close()
+                j += 1
+            j=0
+            for (x,y) in batchify(x_labels, y_significant_r2):
+                plt.figure(2*i + 2*j + 1)
+                plot = plt.plot(x, y)
+                plt.title('R2 per ROI')
+                plt.xlabel('Regions of interest (ROI)')
+                plt.ylabel('R2 value')
+                plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
+                plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
+                plt.tight_layout()
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant R2')
+                check_folder(save_folder)
+                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
+                plt.close()
+                j += 1
+            i+=1
+
             i+=1

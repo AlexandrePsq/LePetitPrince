@@ -343,6 +343,7 @@ model_complexity:
     name: model_complexity - LSTM E600H1800L1D02 - pca
 model_comparison:
   - title: LSTM E600-H*-L1 - all layers
+    name: Model comparison - Average per ROI
     models:
       - path: lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer
         surname: LSTM E600-H50-L1
@@ -359,6 +360,7 @@ model_comparison:
       - path: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
         surname: LSTM E600-H1800-L1
   - title: LSTM E600-H*-L3 - all layers
+    name: Model comparison - Average per ROI
     models:
       - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
         surname: LSTM E600-H100-L3
@@ -371,6 +373,7 @@ model_comparison:
       - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
         surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L3 - layer 1
+    name: Model comparison - Average per ROI
     models:
       - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
         surname: LSTM E600-H100-L3
@@ -383,6 +386,7 @@ model_comparison:
       - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
         surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L3 - layer 2
+    name: Model comparison - Average per ROI
     models:
       - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
         surname: LSTM E600-H100-L3
@@ -395,6 +399,7 @@ model_comparison:
       - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
         surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L3 - layer 3
+    name: Model comparison - Average per ROI
     models:
       - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
         surname: LSTM E600-H100-L3
@@ -407,6 +412,7 @@ model_comparison:
       - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
         surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L* - 300 units in total
+    name: Model comparison - Average per ROI
     models:
       - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
         surname: LSTM E600-H300-L1
@@ -417,6 +423,7 @@ model_comparison:
       - path: lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers
         surname: LSTM E600-H75-L4
   - title: BF - GLOVE - LSTM E600-H1800-L1 - LSTM E600-H600-L3 - BERT - GPT2
+    name: Model comparison - Average per ROI
     models:
       - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
         surname: Basic features

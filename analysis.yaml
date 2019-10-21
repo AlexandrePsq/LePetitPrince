@@ -347,10 +347,14 @@ model_comparison:
     models:
       - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
         surname: Basic features
+      - path: glove_embeddings
+        surname: GLOVE
       - path: lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer
         surname: LSTM E600-H50-L1
       - path: lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer
         surname: LSTM E600-H150-L1
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H300-L1
       - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_1_dropout_02_hidden_first-layer
         surname: LSTM E600-H400-L1
       - path: lstm_wikikristina_embedding-size_600_nhid_500_nlayers_1_dropout_02_hidden_first-layer
@@ -366,6 +370,8 @@ model_comparison:
     models:
       - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
         surname: Basic features
+      - path: glove_embeddings
+        surname: GLOVE
       - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
         surname: LSTM E600-H100-L3
       - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers
@@ -381,6 +387,8 @@ model_comparison:
     models:
       - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
         surname: Basic features
+      - path: glove_embeddings
+        surname: GLOVE
       - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-1
         surname: LSTM E600-H100-L3-layer-1
       - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-1
@@ -396,6 +404,8 @@ model_comparison:
     models:
       - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
         surname: Basic features
+      - path: glove_embeddings
+        surname: GLOVE
       - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-2
         surname: LSTM E600-H100-L3-layer-2
       - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-2
@@ -411,6 +421,8 @@ model_comparison:
     models:
       - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
         surname: Basic features
+      - path: glove_embeddings
+        surname: GLOVE
       - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-3
         surname: LSTM E600-H100-L3-layer-3
       - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-3

@@ -26,6 +26,7 @@ from joblib import Parallel, delayed
 import yaml
 import pandas as pd
 import argparse
+import glob
 from textwrap import wrap 
 
 import warnings
@@ -33,6 +34,13 @@ warnings.simplefilter(action='ignore')
 
 params = Params()
 paths = Paths()
+
+
+def fetch_ridge_maps(model, subject, value):
+    path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english', subject, model, 'outputs', 'maps', '*{}*.nii.gz'.format(value))
+    files = sorted(glob.glob(path))
+    return files[0]
+
 
 
 if __name__ == '__main__':
@@ -331,3 +339,54 @@ if __name__ == '__main__':
                     plt.close()
                     i += 1
 
+    ##########################################################################
+    ############################ Model Comparison ############################
+    ##########################################################################
+    
+    if 'model_comparison' in args.analysis[0]:
+        # retrieve default atlas  (= set of ROI)
+        atlas = datasets.fetch_atlas_harvard_oxford(params.atlas)
+        labels = atlas['labels']
+        maps = nilearn.image.load_img(atlas['maps'])
+        analysis_name = 'Model comparison - Average per ROI - Pearson & R2'
+
+        x = labels[:-1]
+        for analysis in analysis_parameters['model_comparison']:
+            y_pearson = np.zeros((len(labels)-1, len(analysis)))
+            y_r2 = np.zeros((len(labels)-1, len(analysis)))
+            # extract data
+            for index_mask in range(len(labels)-1):
+                mask = math_img('img > 50', img=index_img(maps, index_mask))  
+                masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=5)
+                masker.fit()
+                index_model = 0
+                for model in analysis['models']:
+                    for subject in subjects:
+                        subject = Subjects().get_subject(int(subject))
+                        y_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model, subject, 'maps_pearson_corr')))
+                        y_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model, subject, 'maps_r2')))
+                        index_model += 1
+
+            # save plots
+            plt.figure(2*i)
+            plot = plt.plot(x, y_pearson)
+            plt.title('Pearson coefficient per ROI')
+            plt.xlabel('Regions of interest (ROI)')
+            plt.ylabel('Pearson coefficient value')
+            plt.legend(plot, [model for model in analysis['models']], loc=1)
+            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
+            check_folder(save_folder)
+            plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '.png'))
+            plt.close()
+
+            plt.figure(2*i + 1)
+            plot = plt.plot(x, y_r2)
+            plt.title('R2 per ROI')
+            plt.xlabel('Regions of interest (ROI)')
+            plt.ylabel('R2 value')
+            plt.legend(plot, [model for model in analysis['models']], loc=1)
+            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
+            check_folder(save_folder)
+            plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '.png'))
+            plt.close()
+            i+=1

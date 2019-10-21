@@ -341,80 +341,55 @@ model_complexity:
       voxel_wise: not_voxel_wise
     title: 'R2 test = f(pca components)'
     name: model_complexity - LSTM E600H1800L1D02 - pca
-#  - model_category: LSTM
-#    complexity_variable:
-#      - 50
-#      - 100
-#      - 150
-#      - 200
-#      - 300
-#      - 400
-#      - 500
-#      - 600
-#      - 1200
-#      - 1800
-#    variable_name: nhid
-#    variable_of_interest: r2_test
-#    parameters: 
-#      rnn_type: LSTM
-#      ninp: 600
-#      nlayers: 1
-#      dropout: 0.2
-#      pca: no_pca
-#      which: hidden_first-layer
-#      voxel_wise: not_voxel_wise
-#    title: R2 test = f(nhid)
-#    name: model_complexity - LSTM E600HXL1D02 - nhid
-#  - model_category: LSTM
-#    complexity_variable:
-#      - 
-#      -
-#      -
-#      -
-#      -
-#      -
-#      -
-#      -
-#    variable_name: perplexity
-#    variable_of_interest: r2_test
-#    parameters: 
-#      rnn_type: LSTM
-#      ninp: 600
-#      nlayers: 1
-#      dropout: 0.2
-#      other: hidden_first-layer
-#    title: 'R2 test = f(perplexity)'
-#    name: model_complexity
-#  - model_category: LSTM
-#    complexity_variable:
-#      - 50
-#      - 100
-#      - 150
-#      - 200
-#      - 300
-#      - 400
-#      - 500
-#      - 600
-#      - 1200
-#      - 1800
-#    variable_name: nhid
-#    variable_of_interest: perplexity
-#    value_v-o-i: 
-#      - - 110.39
-#      - - 86.09
-#      - - 76.21
-#      - - 70.19
-#      - - 63.36
-#      - - 59.53
-#      - - 56.93
-#      - - 55.01
-#      - - 49.56
-#      - - 48.04
-#    parameters: 
-#      rnn_type: LSTM
-#      ninp: 600
-#      nlayers: 1
-#      dropout: 0.2
-#      other: hidden_first-layer
-#    title: 'Perplexity = f(n_hid)'
-#    name: model_complexity - LSTM E600HXL1D02 - nhid
+model_comparison:
+  - title: LSTM E600-H*-L1 - all layers
+    models:
+      - lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer
+      - lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer
+      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_1_dropout_02_hidden_first-layer
+      - lstm_wikikristina_embedding-size_600_nhid_500_nlayers_1_dropout_02_hidden_first-layer
+      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
+      - lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer
+      - lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+  - title: LSTM E600-H*-L3 - all layers
+    models:
+      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
+      - lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers
+      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers
+      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers
+      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
+  - title: LSTM E600-H*-L3 - layer 1
+    models:
+      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+      - lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+  - title: LSTM E600-H*-L3 - layer 2
+    models:
+      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+      - lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+  - title: LSTM E600-H*-L3 - layer 3
+    models:
+      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+      - lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+  - title: LSTM E600-H*-L* - 300 units in total
+    models:
+      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+      - lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_all-layers
+      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
+      - lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers
+  - title: BF - GLOVE - LSTM E600-H1800-L1 - LSTM E600-H600-L3 - BERT - GPT2
+    models:
+      - mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
+      - glove_embeddings
+      - lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
+      - bert_bucket_all-layers
+      - gpt2_all-layers

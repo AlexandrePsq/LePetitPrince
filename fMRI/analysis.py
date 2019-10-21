@@ -369,7 +369,7 @@ if __name__ == '__main__':
             y_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
             y_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
             y_significant_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
-            y_significantr2 = np.zeros((len(labels)-1, len(analysis['models'])))
+            y_significant_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
             # extract data
             for index_mask in range(len(labels)-1):
                 mask = math_img('img > 50', img=index_img(maps, index_mask))  
@@ -382,7 +382,7 @@ if __name__ == '__main__':
                         y_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_pearson_corr')))
                         y_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_r2')))
                         y_significant_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_pearson_corr')))
-                        y_significantr2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_r2')))
+                        y_significant_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_r2')))
                         index_model += 1
 
             # save plots

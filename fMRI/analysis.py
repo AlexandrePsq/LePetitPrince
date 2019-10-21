@@ -360,11 +360,11 @@ if __name__ == '__main__':
                 masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=5)
                 masker.fit()
                 index_model = 0
-                for model in analysis['models']['path']:
+                for model in analysis['models']:
                     for subject in subjects:
                         subject = Subjects().get_subject(int(subject))
-                        y_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model, subject, 'maps_pearson_corr')))
-                        y_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model, subject, 'maps_r2')))
+                        y_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_pearson_corr')))
+                        y_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_r2')))
                         index_model += 1
 
             # save plots
@@ -374,7 +374,7 @@ if __name__ == '__main__':
             plt.xlabel('Regions of interest (ROI)')
             plt.ylabel('Pearson coefficient value')
             plt.xticks(rotation=90)
-            plt.legend(plot, [model for model in analysis['models']['surname']], loc=1)
+            plt.legend(plot, [model['surname'] for model in analysis['models']], loc=1)
             save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
             check_folder(save_folder)
             plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '.png'))
@@ -386,7 +386,7 @@ if __name__ == '__main__':
             plt.xlabel('Regions of interest (ROI)')
             plt.ylabel('R2 value')
             plt.xticks(rotation=90)
-            plt.legend(plot, [model for model in analysis['models']['surname']], loc=1)
+            plt.legend(plot, [model['surname'] for model in analysis['models']], loc=1)
             save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
             check_folder(save_folder)
             plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '.png'))

@@ -360,7 +360,7 @@ if __name__ == '__main__':
                 masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=5)
                 masker.fit()
                 index_model = 0
-                for model in analysis['models']:
+                for model in analysis['models']['path']:
                     for subject in subjects:
                         subject = Subjects().get_subject(int(subject))
                         y_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model, subject, 'maps_pearson_corr')))
@@ -373,7 +373,8 @@ if __name__ == '__main__':
             plt.title('Pearson coefficient per ROI')
             plt.xlabel('Regions of interest (ROI)')
             plt.ylabel('Pearson coefficient value')
-            plt.legend(plot, [model for model in analysis['models']], loc=1)
+            plt.xticks(rotation=90)
+            plt.legend(plot, [model for model in analysis['models']['surname']], loc=1)
             save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
             check_folder(save_folder)
             plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '.png'))
@@ -384,7 +385,8 @@ if __name__ == '__main__':
             plt.title('R2 per ROI')
             plt.xlabel('Regions of interest (ROI)')
             plt.ylabel('R2 value')
-            plt.legend(plot, [model for model in analysis['models']], loc=1)
+            plt.xticks(rotation=90)
+            plt.legend(plot, [model for model in analysis['models']['surname']], loc=1)
             save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
             check_folder(save_folder)
             plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '.png'))

@@ -344,52 +344,89 @@ model_complexity:
 model_comparison:
   - title: LSTM E600-H*-L1 - all layers
     models:
-      - lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer
-      - lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer
-      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_1_dropout_02_hidden_first-layer
-      - lstm_wikikristina_embedding-size_600_nhid_500_nlayers_1_dropout_02_hidden_first-layer
-      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
-      - lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer
-      - lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+      - path: lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H50-L1
+      - path: lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H150-L1
+      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H400-L1
+      - path: lstm_wikikristina_embedding-size_600_nhid_500_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H500-L1
+      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H600-L1
+      - path: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H1200-L1
+      - path: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H1800-L1
   - title: LSTM E600-H*-L3 - all layers
     models:
-      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
-      - lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers
-      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers
-      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers
-      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
+      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
+        surname: LSTM E600-H100-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers
+        surname: LSTM E600-H200-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers
+        surname: LSTM E600-H300-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers
+        surname: LSTM E600-H400-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
+        surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L3 - layer 1
     models:
-      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
-      - lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
-      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
-      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
-      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+        surname: LSTM E600-H100-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+        surname: LSTM E600-H200-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+        surname: LSTM E600-H300-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+        surname: LSTM E600-H400-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+        surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L3 - layer 2
     models:
-      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
-      - lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
-      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
-      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
-      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+        surname: LSTM E600-H100-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+        surname: LSTM E600-H200-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+        surname: LSTM E600-H300-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+        surname: LSTM E600-H400-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+        surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L3 - layer 3
     models:
-      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
-      - lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
-      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
-      - lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
-      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+        surname: LSTM E600-H100-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+        surname: LSTM E600-H200-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+        surname: LSTM E600-H300-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+        surname: LSTM E600-H400-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+        surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L* - 300 units in total
     models:
-      - lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
-      - lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_all-layers
-      - lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
-      - lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H300-L1
+      - path: lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_all-layers
+        surname: LSTM E600-H150-L2
+      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
+        surname: LSTM E600-H100-L3
+      - path: lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers
+        surname: LSTM E600-H75-L4
   - title: BF - GLOVE - LSTM E600-H1800-L1 - LSTM E600-H600-L3 - BERT - GPT2
     models:
-      - mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
-      - glove_embeddings
-      - lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-      - lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
-      - bert_bucket_all-layers
-      - gpt2_all-layers
+      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
+        surname: Basic features
+      - path: glove_embeddings
+        surname: GLOVE
+      - path: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM E600-H1800-L1
+      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
+        surname: LSTM E600-H600-L3
+      - path: bert_bucket_all-layers
+        surname: BERT
+      - path: gpt2_all-layers
+        surname: GPT2

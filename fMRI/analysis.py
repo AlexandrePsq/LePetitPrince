@@ -41,6 +41,20 @@ def fetch_ridge_maps(model, subject, value):
     files = sorted(glob.glob(path))
     return files[0]
 
+def batchify(x, y, size=10):
+    if len(x) != len(y):
+        raise ValueError('vector length mismatch')
+    m = len(x)
+    x_batch = []
+    y_batch = []
+    last = 0
+    for i in range(m//size):
+        x_batch.append(x[last:last+size])
+        y_batch.append(y[last:last+size])
+        last = last+size
+    x_batch.append(x[last:])
+    y_batch.append(y[last:])
+    return zip(x_batch, y_batch)
 
 
 if __name__ == '__main__':
@@ -350,7 +364,7 @@ if __name__ == '__main__':
         maps = nilearn.image.load_img(atlas['maps'])
         analysis_name = 'Model comparison - Average per ROI - Pearson & R2'
 
-        x = labels[:-1]
+        x_labels = labels[1:]
         for analysis in analysis_parameters['model_comparison']:
             y_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
             y_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
@@ -368,27 +382,34 @@ if __name__ == '__main__':
                         index_model += 1
 
             # save plots
-            plt.figure(2*i)
-            plot = plt.plot(x, y_pearson)
-            plt.title('Pearson coefficient per ROI')
-            plt.xlabel('Regions of interest (ROI)')
-            plt.ylabel('Pearson coefficient value')
-            plt.xticks(rotation=90)
-            plt.legend(plot, [model['surname'] for model in analysis['models']], loc=1)
-            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
-            check_folder(save_folder)
-            plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '.png'))
-            plt.close()
-
-            plt.figure(2*i + 1)
-            plot = plt.plot(x, y_r2)
-            plt.title('R2 per ROI')
-            plt.xlabel('Regions of interest (ROI)')
-            plt.ylabel('R2 value')
-            plt.xticks(rotation=90)
-            plt.legend(plot, [model['surname'] for model in analysis['models']], loc=1)
-            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
-            check_folder(save_folder)
-            plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '.png'))
-            plt.close()
+            j=0
+            for (x,y) in batchify(x_labels, y_pearson):
+                plt.figure(20*i + 2*j)
+                plot = plt.plot(x, y)
+                plt.title('Pearson coefficient per ROI')
+                plt.xlabel('Regions of interest (ROI)')
+                plt.ylabel('Pearson coefficient value')
+                plt.xticks(rotation=90, fontsize=10)
+                plt.legend(plot, [model['surname'] for model in analysis['models']], loc=1)
+                plt.tight_layout()
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
+                check_folder(save_folder)
+                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '{}.png'.format(j)))
+                plt.close()
+                j += 1
+            j=0
+            for (x,y) in batchify(x_labels, y_r2):
+                plt.figure(2*i + 2*j + 1)
+                plot = plt.plot(x, y)
+                plt.title('R2 per ROI')
+                plt.xlabel('Regions of interest (ROI)')
+                plt.ylabel('R2 value')
+                plt.xticks(rotation=90, fontsize=10)
+                plt.legend(plot, [model['surname'] for model in analysis['models']], loc=1)
+                plt.tight_layout()
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name)
+                check_folder(save_folder)
+                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '{}.png'.format(j)))
+                plt.close()
+                j += 1
             i+=1

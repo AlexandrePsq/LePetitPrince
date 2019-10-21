@@ -375,41 +375,41 @@ model_comparison:
   - title: LSTM E600-H*-L3 - layer 1
     name: Model comparison - Average per ROI
     models:
-      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layers-1
+      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-1
         surname: LSTM E600-H100-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layers-1
+      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-1
         surname: LSTM E600-H200-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-1
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layer-1
         surname: LSTM E600-H300-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layers-1
+      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layer-1
         surname: LSTM E600-H400-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layers-1
+      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layer-1
         surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L3 - layer 2
     name: Model comparison - Average per ROI
     models:
-      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layers-2
+      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-2
         surname: LSTM E600-H100-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layers-2
+      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-2
         surname: LSTM E600-H200-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-2
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layer-2
         surname: LSTM E600-H300-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layers-2
+      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layer-2
         surname: LSTM E600-H400-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layers-2
+      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layer-2
         surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L3 - layer 3
     name: Model comparison - Average per ROI
     models:
-      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layers-3
+      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-3
         surname: LSTM E600-H100-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layers-3
+      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-3
         surname: LSTM E600-H200-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layers-3
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layer-3
         surname: LSTM E600-H300-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layers-3
+      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layer-3
         surname: LSTM E600-H400-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layers-3
+      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layer-3
         surname: LSTM E600-H600-L3
   - title: LSTM E600-H*-L* - 300 units in total
     name: Model comparison - Average per ROI

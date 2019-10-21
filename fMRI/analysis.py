@@ -352,8 +352,8 @@ if __name__ == '__main__':
 
         x = labels[:-1]
         for analysis in analysis_parameters['model_comparison']:
-            y_pearson = np.zeros((len(labels)-1, len(analysis)))
-            y_r2 = np.zeros((len(labels)-1, len(analysis)))
+            y_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
+            y_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
             # extract data
             for index_mask in range(len(labels)-1):
                 mask = math_img('img > 50', img=index_img(maps, index_mask))  

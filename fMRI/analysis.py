@@ -364,13 +364,18 @@ if __name__ == '__main__':
         maps = nilearn.image.load_img(atlas['maps'])
 
         x_labels = labels[1:]
+        df_pearson_final = []
+        df_r2_final = []
+        df_significant_pearson_final = []
+        df_significant_r2_final = []
 
-        df_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
-        df_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
-        df_significant_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
-        df_significant_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
 
         for analysis in analysis_parameters['model_comparison']:
+            df_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+            df_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+            df_significant_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+            df_significant_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+
             analysis_name = analysis['name']
             y_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
             y_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
@@ -402,8 +407,16 @@ if __name__ == '__main__':
                 df_r2[x_labels[index_mask]] = column[1] ; df_r2['model_names'] = model_names
                 df_significant_pearson[x_labels[index_mask]] = column[2] ; df_significant_pearson['model_names'] = model_names
                 df_significant_r2[x_labels[index_mask]] = column[3] ; df_significant_r2['model_names'] = model_names
+            df_pearson.append(df_pearson)
+            df_r2.append(df_r2)
+            df_significant_pearson.append(df_significant_pearson)
+            df_significant_r2.append(df_significant_r2)
 
 
+            df_pearson = pd.concat(df_pearson, axis=0)
+            df_r2 = pd.concat(df_r2, axis=0)
+            df_significant_pearson = pd.concat(df_significant_pearson, axis=0)
+            df_significant_r2 = pd.concat(df_significant_r2, axis=0)
 
             # save plots
             j=0

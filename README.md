@@ -1,11 +1,10 @@
 # LePetitPrince
 
-This repository includes the code of "Le Petit Prince" project.
-(LPP = Le Petit Prince)
+Code of the "Le Petit Prince" project.
 
 English, French and Chinese participants were scanned using fMRI while listening to the whole audiobook of the Little Prince (~90min), in their native language.
 
-Natural Language Processing models are used to generate predictors (lexical frequency, syntactic complexity, semantic features, etc.) that are correlated with the brain signals.
+Natural Language Processing models are used to generate predictors (lexical frequency, syntactic complexity, semantic features, etc.) that then used to predict brain signals.
 
 The audiobook was segmented into nine audiofiles, presented in successive runs:
 
@@ -19,42 +18,19 @@ The audiobook was segmented into nine audiofiles, presented in successive runs:
 - Chapters 23 to 25 --> run 8
 - Chapters 26 to 27 --> run 9
 
-The wave files (TODO: add pointer to their location) were annotated for words onset-onsets (TODO: add pointer to the TextGrid files)
+The wave files (`$LPP/data/wave/{english,french}/*.wav`) were annotated for words onset-onsets (`$LPP/data/wave/{french,english}/*.TextGrid`)
 
-
-### fMRI acquisition
+### fMRI data acquisition
 
 TODO: add the description of the sequences in English and in French
 
-- English Multiecho 
-
-- French Multiecho Siemens 3T
-
+- English Multiecho:  `$LPP/data/fMRI/english`
+- French Multiecho Siemens 3T `$LPP/data/fMRI/french`
 - Chinese
-
-
-## Data analyses
-
-
-### fMRI ###
-
-Analysis pipeline:
-
-* Generation of raw-features from the text (or audio) of "Le Petit Prince" from the selected models.
-* Concatenation of the raw-feature dataframe with an onset file (the result is called raw-features).
-* Convolution of the newly constructed dataframe with an 'hrf' kernel (the result is called features).
-* Construction of a design-matrix by concatenation of the features associated with the different models of interest (the result is called design-matrix).
-* Ridge (cross validated) regression between our design-matrix and the fMRI data (transformed thanks to Nilearn)(the result is called ridge-indiv).
-
-### MEG
-
-TODO
-
 
 ## File organization
 
- 
-Folders within the project main directory  (`$LPP`) are organized in the following way:
+ Folders within the project main directory  (`$LPP`) are organized in the following way:
 
 <pre>
 ├── <b>paradigm</b> <i>(code to run the experiment)</i>
@@ -102,58 +78,13 @@ Folders within the project main directory  (`$LPP`) are organized in the followi
 </pre>
 
 
-
 The script `create_architecture.py` automatically generates this tree structure (but does not fill it).
 
 
 
-- **code**
-
-1. Generation of raw-features from the text (or audio) of "Le Petit Prince" thanks to the selected models.
-2. Concatenation of the raw-feature dataframe with an onset file (the result is called raw-features).
-3. Convolution of the newly constructed dataframe with an 'hrf' kernel (the result is called features).
-4. Construction of a design-matrix by concatenation of the features associated with the different models of interest (the result is called design-matrix).
-5. Ridge (cross validated) regression between our design-matrix and the fMRI data (transformed thanks to Nilearn)(the result is called ridge-indiv**.
-
-### MEG ###
-
-
-**TODO**
-
-
-
-
-2. **data**
-    - we have the fMRI data organized following the BIDS standard except for the name of the final file
-    - the MEG should be added in a few months
-    - there is the text of LPP, the text divided into 9 runs, the original onset-offsets of LPP and training data for models
-    - wave files, meaning the content of the audio book with the textgrid files and training data for models
-
-3. **derivatives**
-    - MEG
-    - fMRI (every script of `code/fMRI/` fills a folder of the same name here, the same goes for `code/models/`)
-
-
-
-## Running the scripts ##
-
-
-To train a given model,  you need to create a module `model_name.py` in `$LPP/code/models/language/`, with the following functions:
-- `load`: that returns the trained model 
-- `generate`: that take as arguments a model, a path to the input run, a language and a textgrid dataframe and generate raw-features
-
-And add at the end of the script:
-
-```
-if __name__=='__main__':
-    train(model)
-```
-
-
 ### Model training ###
 
-
-###  Training a model
+TODO: explain what 'model training mean' means (I guess going from a corpus to a network weights (?)) 
 
 To train *model_name.py* in a given *language*, just write:
 
@@ -165,12 +96,11 @@ python models/language/model_name.py
 
 ### fMRI pipeline ###
 
-<<<<<<< HEAD
 ### Creating a new analysis
 
     1. Create a new directory in TODO and copy `code/utilities/settings_template.py` there.
  
-    2. If necessary add new data/raw features in TODO
+    2. If necessary add new data/raw features: TODO
 
     3. Create a link from code/utilities/settings.py to the setting.py you want 
 

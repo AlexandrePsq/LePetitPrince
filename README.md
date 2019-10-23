@@ -1,22 +1,21 @@
 # LePetitPrince
 
-
-This repository includes the code of "Le Petit Prince" project.
-(LPP = Le Petit Prince)
-
-
+This repository includes the code of "Le Petit Prince" (LPP) project.
 
 ## Project description
 
-This project is a cross-linguistics study involving NLP and Neurolinguistics experts (NeuroSpin, FAIR, INRIA, CORNELL, ...).
-It aims at better understanding the cortical bases of language comprehension through computational linguistics.
+English, French and Chinese participants were scanned with fMRI (and, for some, with EEG/MEG) while listening to an audiobook of 'The Little Prince' by Antoine de Saint Expury. 
+
+Natural Language Processing models are used to generate various types of predictors (e.g., syntactic complexity, semantics, ...) that are compared with the signals.
 
 
+## Method 
 
-## Data acquisition
+### Stimuli 
 
+The story was segmented into 9 audio files (TODO: add pointer to the wav files).
+:
 
-The story is segmented into 9 runs:
 - Chapters 1 to 3 --> run 1
 - Chapters 4 to 6 --> run 2
 - Chapters 7 to 9 --> run 3
@@ -28,50 +27,44 @@ The story is segmented into 9 runs:
 - Chapters 26 to 27 --> run 9
 
 
-This study includes:
-- 40 fMRI in English
-- 40 fMRI in French
-- 20 MEG in French
-each of 90 min long.
+The wave files were annotated for words onset-onsets. (TODO: add pointer to the TextGrid files)
 
-These data were acquired by passive listening of the audiobook of "Le Petit Prince", divided in 9 runs of approximately 10 min each.
 
-This huge dataset will be shared through neurovault.
+### fMRI acquisition
+
+TODO: add the description of the sequences in English and in French
 
 
 
-## Methodology
+## Data analyses
 
 In order to do so we followed the following methodology:
 
-**For fMRI**:
+### fMRI
 
 Selection and implementation of different Language Models.
 
 Analysis pipeline:
 
-Generation of raw-features from the text (or audio) of "Le Petit Prince" thanks to the selected models.
-Concatenation of the raw-feature dataframe with an onset file (the result is called raw-features).
-Convolution of the newly constructed dataframe with an 'hrf' kernel (the result is called features).
-Construction of a design-matrix by concatenation of the features associated with the different models of interest (the result is called design-matrix).
-Ridge (cross validated) regression between our design-matrix and the fMRI data (transformed thanks to Nilearn)(the result is called ridge-indiv).
+* Generation of raw-features from the text (or audio) of "Le Petit Prince" thanks to the selected models.
+* Concatenation of the raw-feature dataframe with an onset file (the result is called raw-features).
+* Convolution of the newly constructed dataframe with an 'hrf' kernel (the result is called features).
+* Construction of a design-matrix by concatenation of the features associated with the different models of interest (the result is called design-matrix).
+* Ridge (cross validated) regression between our design-matrix and the fMRI data (transformed thanks to Nilearn)(the result is called ridge-indiv).
 
-**For MEG**:
+### MEG
 
-(Not done yet)
+TODO
 
 
 
-## Data architecture
+## File organization
 
-Due to the high amount of data and analysis, this project data-code-derivatives recquire to be organized in a intuitively way.
-To do so, we first created the script create_architecture.py that will do so automatically (we will see how to execute the script later).
-
-Here you have a glance at the overall architecture:
+ 
+Folders within the project main directory  (`$LPP`) are organized in the following way:
 
 <pre>
-├── <b>paradigm</b> <i>(experiences information, stimuli)</i>
-├── <b>oldstuff</b> <i>(oldscripts, personnal data/code, ...)</i>
+├── <b>paradigm</b> <i>(code to run the experiment)</i>
 ├── <b>code</b> <i>(all the code of all the analysis)</i>
 │   ├── <b>MEG</b> <i>(code of the MEG analysis pipeline)</i>
 │   ├── <b>fMRI</b> <i>(code of the fMRI analysis pipeline)</i>
@@ -115,7 +108,9 @@ Here you have a glance at the overall architecture:
             └── <b>english</b>
 </pre>
 
-To give more insights on the three main parts of the project:
+Note: The script `create_architecture.py` creates this structure.
+
+
 
 - **code**
     - MEG data analysis pipeline
@@ -153,57 +148,59 @@ To give more insights on the three main parts of the project:
 
 ## Executing scripts
 
-If you want to train a given model called *model_name.py* in a given *language* and use it in the pipeline, you need to create a module *model_name.py* in <pre>$LPP/code/models/<i>language</i>/</pre>, and define in it the functions:
+To train a given model,  you need to create a module `model_name.py` in `$LPP/code/models/language/`, with the following functions:
 - `load`: that returns the trained model 
 - `generate`: that take as arguments a model, a path to the input run, a language and a textgrid dataframe and generate raw-features
 
 And add at the end of the script:
-<pre>
+
+```
 if __name__=='__main__':
     train(model)
-</pre>
+```
 
 
-### Model training
+###  Training a model
 
-To train a given model called *model_name.py* in a given *language*, just write:
-($LPP is the path to the LPP project home directory)
+To train *model_name.py* in a given *language*, just write:
 
-<pre>
+```
 cd $LPP
 cd code
-python models/<i>language</i>/<i>model_name.py</i>
-</pre>
+python models/language/model_name.py
+```
 
 
-### fMRI pipeline
+### Creating a new analysis
 
-To start the fMRI pipeline analysis, first:
-    - start by modifying the `code/utilities/settings.py` file with the parameters, paths, subjects and models that you want to study.
+    1. Create a new directory in TODO and copy `code/utilities/settings_template.py` there.
+ 
+    2. If necessary add new data/raw features in TODO
 
-<pre>
+    3. Create a link from code/utilities/settings.py to the setting.py you want 
+
+---
 cd $LPP
 cd code/fMRI
 doit
-</pre>
+---
+  
+`doit` behaves like the make utility: it will only recompute the necessary files
+    based on their timestamps.  If you still want to recreate all the files, run:
 
-Normally, the dodo.py will not run a file that has already been run except if it has been modified.
-If you still want to do so, run:
-
-<pre>
+---
 cd $LPP
 cd code/fMRI
 doit clean
 doit forget
-</pre>
+---
 
 Running `doit` will first create the adequate architecture and then start the fMRI pipeline.
 
+### Results
 
-
-### Analysis
-
-Available analysis so far:
+    Available tools:
+    
 - scatter plot comparison of r2 distributions per ROI in the brain for 2 given models
 
 To run such an analysis, you should first fill in the `analysis.yaml` file with the name of the model you want to study and the name of the study that this scatter plot is suppose to enlighten (e.g. syntax VS semantic).

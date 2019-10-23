@@ -407,16 +407,16 @@ if __name__ == '__main__':
                 df_r2[x_labels[index_mask]] = column[1] ; df_r2['model_names'] = model_names
                 df_significant_pearson[x_labels[index_mask]] = column[2] ; df_significant_pearson['model_names'] = model_names
                 df_significant_r2[x_labels[index_mask]] = column[3] ; df_significant_r2['model_names'] = model_names
-            df_pearson.append(df_pearson)
-            df_r2.append(df_r2)
-            df_significant_pearson.append(df_significant_pearson)
-            df_significant_r2.append(df_significant_r2)
+            df_pearson_final.append(df_pearson)
+            df_r2_final.append(df_r2)
+            df_significant_pearson_final.append(df_significant_pearson)
+            df_significant_r2_final.append(df_significant_r2)
 
 
-            df_pearson = pd.concat(df_pearson, axis=0)
-            df_r2 = pd.concat(df_r2, axis=0)
-            df_significant_pearson = pd.concat(df_significant_pearson, axis=0)
-            df_significant_r2 = pd.concat(df_significant_r2, axis=0)
+            df_pearson_final = pd.concat(df_pearson_final, axis=0)
+            df_r2_final = pd.concat(df_r2_final, axis=0)
+            df_significant_pearson_final = pd.concat(df_significant_pearson_final, axis=0)
+            df_significant_r2_final = pd.concat(df_significant_r2_final, axis=0)
 
             # save plots
             j=0
@@ -431,8 +431,8 @@ if __name__ == '__main__':
                 plt.tight_layout()
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Pearson')
                 check_folder(save_folder)
-                df_pearson.drop_duplicates(inplace=True)
-                df_pearson.to_csv(os.path.join(save_folder, 'pearson_data.csv'), index=False)
+                df_pearson_final.drop_duplicates(inplace=True)
+                df_pearson_final.to_csv(os.path.join(save_folder, 'pearson_data.csv'), index=False)
                 plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1
@@ -448,8 +448,8 @@ if __name__ == '__main__':
                 plt.tight_layout()
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - R2')
                 check_folder(save_folder)
-                df_r2.drop_duplicates(inplace=True)
-                df_r2.to_csv(os.path.join(save_folder, 'r2_data.csv'), index=False)
+                df_r2_final.drop_duplicates(inplace=True)
+                df_r2_final.to_csv(os.path.join(save_folder, 'r2_data.csv'), index=False)
                 plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1
@@ -465,8 +465,8 @@ if __name__ == '__main__':
                 plt.tight_layout()
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant Pearson')
                 check_folder(save_folder)
-                df_significant_pearson.drop_duplicates(inplace=True)
-                df_significant_pearson.to_csv(os.path.join(save_folder, 'significant_pearson_data.csv'), index=False)
+                df_significant_pearson_final.drop_duplicates(inplace=True)
+                df_significant_pearson_final.to_csv(os.path.join(save_folder, 'significant_pearson_data.csv'), index=False)
                 plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1
@@ -482,8 +482,8 @@ if __name__ == '__main__':
                 plt.tight_layout()
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant R2')
                 check_folder(save_folder)
-                df_significant_r2.drop_duplicates(inplace=True)
-                df_significant_r2.to_csv(os.path.join(save_folder, 'significant_r2_data.csv'), index=False)
+                df_significant_r2_final.drop_duplicates(inplace=True)
+                df_significant_r2_final.to_csv(os.path.join(save_folder, 'significant_r2_data.csv'), index=False)
                 plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1

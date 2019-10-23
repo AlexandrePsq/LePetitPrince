@@ -392,12 +392,12 @@ if __name__ == '__main__':
                         y_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_r2')))
                         y_significant_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_pearson_corr_with_pvalues')))
                         y_significant_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_r2_with_pvalues')))
-                        index_model += 1
                         model_names.append(model['surname'])
                         column[0].append(y_pearson[index_mask, index_model])
                         column[1].append(y_r2[index_mask, index_model])
                         column[2].append(y_significant_pearson[index_mask, index_model])
                         column[3].append(y_significant_r2[index_mask, index_model])
+                        index_model += 1
                 df_pearson[x_labels[index_mask]] = column[0] ; df_pearson['model_names'] = model_names
                 df_r2[x_labels[index_mask]] = column[1] ; df_r2['model_names'] = model_names
                 df_significant_pearson[x_labels[index_mask]] = column[2] ; df_significant_pearson['model_names'] = model_names

@@ -5,9 +5,10 @@ This repository includes the code of "Le Petit Prince" project.
 
 English, French and Chinese participants were scanned using fMRI while listening to the whole audiobook of the Little Prince (~90min), in their native language.
 
-The audio stream was segmented into nine parts presented in 9 successive runs:
+Natural Language Processing models are used to generate predictors (lexical frequency, syntactic complexity, semantic features, etc.) that are correlated with the brain signals.
 
->>>>>>> 0ea1583a4143587bdd2c5c3570e5cd329ee666cc
+The audiobook was segmented into nine audiofiles, presented in successive runs:
+
 - Chapters 1 to 3 --> run 1
 - Chapters 4 to 6 --> run 2
 - Chapters 7 to 9 --> run 3
@@ -18,8 +19,7 @@ The audio stream was segmented into nine parts presented in 9 successive runs:
 - Chapters 23 to 25 --> run 8
 - Chapters 26 to 27 --> run 9
 
-
-The wave files were annotated for words onset-onsets. (TODO: add pointer to the TextGrid files)
+The wave files (TODO: add pointer to their location) were annotated for words onset-onsets (TODO: add pointer to the TextGrid files)
 
 
 ### fMRI acquisition
@@ -36,14 +36,11 @@ TODO: add the description of the sequences in English and in French
 ## Data analyses
 
 
-
 ### fMRI ###
-
-Selection and implementation of different Language Models.
 
 Analysis pipeline:
 
-* Generation of raw-features from the text (or audio) of "Le Petit Prince" thanks to the selected models.
+* Generation of raw-features from the text (or audio) of "Le Petit Prince" from the selected models.
 * Concatenation of the raw-feature dataframe with an onset file (the result is called raw-features).
 * Convolution of the newly constructed dataframe with an 'hrf' kernel (the result is called features).
 * Construction of a design-matrix by concatenation of the features associated with the different models of interest (the result is called design-matrix).

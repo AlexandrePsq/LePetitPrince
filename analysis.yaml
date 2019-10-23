@@ -468,7 +468,7 @@ model_comparison:
         surname: mfcc_model
       - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/rms_model
         surname: rms_model
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/other_sentence_onset
+      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/sentence_onset
         surname: other_sentence_onset
       - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/bottomup_model
         surname: bottomup_model
@@ -478,7 +478,7 @@ model_comparison:
         surname: content_words
       - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/function_words
         surname: function_words
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/log_word_freq
+      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/log_frequencies
         surname: log_word_freq
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/word_position
+      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/position_in_sentence
         surname: word_position

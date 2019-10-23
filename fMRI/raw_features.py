@@ -24,7 +24,7 @@ params = Params()
 
 
 def compute_raw_features(run, output_parent_folder, input_data_type, output_data_type, language, model_name, model_category, extension, overwrite):
-    module = importlib.import_module("models.{}.{}".format(language, model_name)) # import the right module depending on the model we want to use
+    module = importlib.import_module("models.{}".format(model_name)) # import the right module depending on the model we want to use
     model = module.load() # load an already trained model
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run

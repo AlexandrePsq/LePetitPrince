@@ -1,21 +1,13 @@
 # LePetitPrince
 
-This repository includes the code of "Le Petit Prince" (LPP) project.
+This repository includes the code of "Le Petit Prince" project.
+(LPP = Le Petit Prince)
 
-## Project description
+English, French and Chinese participants were scanned using fMRI while listening to the whole audiobook of the Little Prince (~90min), in their native language.
 
-English, French and Chinese participants were scanned with fMRI (and, for some, with EEG/MEG) while listening to an audiobook of 'The Little Prince' by Antoine de Saint Expury. 
+The audio stream was segmented into nine parts presented in 9 successive runs:
 
-Natural Language Processing models are used to generate various types of predictors (e.g., syntactic complexity, semantics, ...) that are compared with the signals.
-
-
-## Method 
-
-### Stimuli 
-
-The story was segmented into 9 audio files (TODO: add pointer to the wav files).
-:
-
+>>>>>>> 0ea1583a4143587bdd2c5c3570e5cd329ee666cc
 - Chapters 1 to 3 --> run 1
 - Chapters 4 to 6 --> run 2
 - Chapters 7 to 9 --> run 3
@@ -34,13 +26,18 @@ The wave files were annotated for words onset-onsets. (TODO: add pointer to the 
 
 TODO: add the description of the sequences in English and in French
 
+- English Multiecho 
+
+- French Multiecho Siemens 3T
+
+- Chinese
 
 
 ## Data analyses
 
-In order to do so we followed the following methodology:
 
-### fMRI
+
+### fMRI ###
 
 Selection and implementation of different Language Models.
 
@@ -55,7 +52,6 @@ Analysis pipeline:
 ### MEG
 
 TODO
-
 
 
 ## File organization
@@ -108,45 +104,42 @@ Folders within the project main directory  (`$LPP`) are organized in the followi
             └── <b>english</b>
 </pre>
 
-Note: The script `create_architecture.py` creates this structure.
+
+
+The script `create_architecture.py` automatically generates this tree structure (but does not fill it).
 
 
 
 - **code**
-    - MEG data analysis pipeline
-    - fMRI data analysis pipeline
-        - raw-features.py *(generate raw-features and concatenate them with onsets for a given model)*
-        - features.py *(convolve the raw-features with a 'hrf' kernel for a given model)*
-        - design-matrices.py *(concatenate features of different models of interest)*
-        - glm-indiv.py *(GLM model fitted on fMRI data with a design-matrix)*
-        - ridge-indiv.py *(Ridge model fitted on fMRI data with a design-matrix)*
-        - dodo.py *(this files in the python analog of makefile script)*
-    - utilities
-        - utils.py *(utility functions)*
-        - settings.py *(where we change the parameters)*
-        - first_level_analysis.py *(functions for first level analysis of fMRI)*
-        - splitter.py *(splitter for multi-groups Ridge CV)*
-    - models
-        - \*XXXX\* : framework associated with a kind of model (e.g. LSTM)*
-            - model.py *(class definition)*
-            - train.py *(train the model)*
-            - tokenizer.py *(adequate tokenizer for the model training and generation)*
-            - utils.py *(utilities functions)*
-        - \*xxxx\* : instantiation of a given class model
 
-- **data**
+1. Generation of raw-features from the text (or audio) of "Le Petit Prince" thanks to the selected models.
+2. Concatenation of the raw-feature dataframe with an onset file (the result is called raw-features).
+3. Convolution of the newly constructed dataframe with an 'hrf' kernel (the result is called features).
+4. Construction of a design-matrix by concatenation of the features associated with the different models of interest (the result is called design-matrix).
+5. Ridge (cross validated) regression between our design-matrix and the fMRI data (transformed thanks to Nilearn)(the result is called ridge-indiv**.
+
+### MEG ###
+
+
+**TODO**
+
+
+
+
+2. **data**
     - we have the fMRI data organized following the BIDS standard except for the name of the final file
     - the MEG should be added in a few months
     - there is the text of LPP, the text divided into 9 runs, the original onset-offsets of LPP and training data for models
     - wave files, meaning the content of the audio book with the textgrid files and training data for models
 
-- **derivatives**
+3. **derivatives**
     - MEG
     - fMRI (every script of `code/fMRI/` fills a folder of the same name here, the same goes for `code/models/`)
 
 
 
-## Executing scripts
+## Running the scripts ##
+
 
 To train a given model,  you need to create a module `model_name.py` in `$LPP/code/models/language/`, with the following functions:
 - `load`: that returns the trained model 
@@ -160,6 +153,9 @@ if __name__=='__main__':
 ```
 
 
+### Model training ###
+
+
 ###  Training a model
 
 To train *model_name.py* in a given *language*, just write:
@@ -170,7 +166,9 @@ cd code
 python models/language/model_name.py
 ```
 
+### fMRI pipeline ###
 
+<<<<<<< HEAD
 ### Creating a new analysis
 
     1. Create a new directory in TODO and copy `code/utilities/settings_template.py` there.
@@ -195,19 +193,18 @@ doit clean
 doit forget
 ---
 
-Running `doit` will first create the adequate architecture and then start the fMRI pipeline.
-
 ### Results
 
-    Available tools:
+Available tools:
     
+
 - scatter plot comparison of r2 distributions per ROI in the brain for 2 given models
 
 To run such an analysis, you should first fill in the `analysis.yaml` file with the name of the model you want to study and the name of the study that this scatter plot is suppose to enlighten (e.g. syntax VS semantic).
 Then run the following command line:
 
-<pre>
-cd $LPP
-cd code/fMRI
-python analysis.py $LPP/code/analysis.yaml
-</pre>
+
+
+     cd $LPP/code/fMRI
+     python analysis.py $LPP/code/analysis.yaml
+

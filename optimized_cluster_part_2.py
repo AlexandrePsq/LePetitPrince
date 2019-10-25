@@ -185,7 +185,6 @@ if __name__ == '__main__':
         job_merge = Job(command=["python", "optimized_merge_results.py", 
                                     "--input_folder", derivatives_path, 
                                     "--yaml_files", yaml_files_path,
-                                    "--yaml_files_path", yaml_files_path,
                                     "--nb_runs", nb_runs, 
                                     "--nb_voxels", nb_voxels,
                                     "--n_permutations", nb_permutations, 
@@ -195,10 +194,11 @@ if __name__ == '__main__':
                         working_directory=scripts_path)
 
         for run in job2launch.keys():
-            native_specification = "-q Nspin_long  -l walltime=24:00:00" # 
+            native_specification = "-q Nspin_bigM  -l walltime=24:00:00" # 
             features_indexes = ','.join([str(index) for index in model['indexes']])
             job = Job(command=["python", "optimized_significance_clusterized.py", 
                                 "--job2launch", job2launch_path, 
+                                "--yaml_files_path", yaml_files_path,
                                 "--run", run,
                                 "--output", derivatives_path, 
                                 "--x", design_matrices_path, 

@@ -145,7 +145,45 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = ['bert_bucket_all-layers', 'bert_sequential_all-layers', 'gpt2_all-layers']# ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
+		self.models = ['bert_bucket_all-layers', 
+						'bert_bucket_embeddings', 
+						'bert_bucket_layer-1', 
+						'bert_bucket_layer-2',
+						'bert_bucket_layer-3',
+						'bert_bucket_layer-4',
+						'bert_bucket_layer-5',
+						'bert_bucket_layer-6',
+						'bert_bucket_layer-7',
+						'bert_bucket_layer-8',
+						'bert_bucket_layer-9',
+						'bert_bucket_layer-10',
+						'bert_bucket_layer-11',
+						'bert_bucket_layer-12',
+						'gpt2_all-layers',
+						'gpt2_embeddings',
+						'gpt2_layer-1',
+						'gpt2_layer-2',
+						'gpt2_layer-3',
+						'gpt2_layer-4',
+						'gpt2_layer-5',
+						'gpt2_layer-6',
+						'gpt2_layer-7',
+						'gpt2_layer-8',
+						'gpt2_layer-9',
+						'gpt2_layer-10',
+						'gpt2_layer-11',
+						'gpt2_layer-12',
+						'mfcc_model',
+						'rms_model',
+						'wordrate_all_model',
+						'wordrate_content-word',
+						'wordrate_function-word',
+						'wordrate_model',
+						'wordrate_log_word_freq',
+						'wordrate_word_position',
+						'topdown_model',
+						'bottomup_model',
+						'other_sentence_onset']# ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
 		# self.models = sorted(['lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer',
@@ -156,7 +194,7 @@ class Params:
 		# 						'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer',
 		#						'lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer',
 		# 						'lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer'])
-		self.aggregated_models = ['+'.join(self.models)] # self.models
+		self.aggregated_models = self.models # ['+'.join(self.models)] # 
 		# self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'
 		# self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
 		# 								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden',

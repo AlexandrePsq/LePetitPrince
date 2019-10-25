@@ -61,6 +61,10 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     masker.fit()
     return masker
 
+def write(path, text):
+    with open(path, 'a+') as f:
+        f.write(text)
+        f.write('\n')
 
 
 if __name__ == '__main__':
@@ -106,6 +110,7 @@ if __name__ == '__main__':
     design_matrices = sorted(glob.glob(os.path.join(design_matrices_path, 'design-matrices_*run*')))
     fmri_runs = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
 
+    write(inputs_path, 'cluster part 1 run for subject: {} and model: {}'.format(args.subject, args.model_name))
 
     ####################
     ### Sanity check ###

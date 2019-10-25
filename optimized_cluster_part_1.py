@@ -160,8 +160,8 @@ if __name__ == '__main__':
     alpha_list = [round(tmp, 5) for tmp in np.logspace(2, 5, 25)]
     alphas = ','.join([str(alpha) for alpha in alpha_list]) 
     alpha_percentile = str(99)
-    # features = []
-    features = [['LSTM-E600-H100-L3-layer-1', 100], ['LSTM-E600-H100-L3-layer-2', 100], ['LSTM-E600-H100-L3-layer-3', 100]]
+    features = []
+    # features = [['LSTM-E600-H100-L3-layer-1', 100], ['LSTM-E600-H100-L3-layer-2', 100], ['LSTM-E600-H100-L3-layer-3', 100]]
     # features = [['bert_bucket_layer-a-1', 768], ['bert_bucket_layer-a-2', 768], ['bert_bucket_layer-a-3', 768], ['bert_bucket_layer-a-4', 768], ['bert_bucket_layer-a-5', 768], ['bert_bucket_layer-a-6', 768], ['bert_bucket_layer-a-7', 768], ['bert_bucket_layer-a-8', 768], ['bert_bucket_layer-a-9', 768], ['bert_bucket_layer-b-10', 768], ['bert_bucket_layer-b-11', 768], ['bert_bucket_layer-b-12', 768]]
     # features = [['gpt2_layer-a-1', 768], ['gpt2_layer-a-2', 768], ['gpt2_layer-a-3', 768], ['gpt2_layer-a-4', 768], ['gpt2_layer-a-5', 768], ['gpt2_layer-a-6', 768], ['gpt2_layer-a-7', 768], ['gpt2_layer-a-8', 768], ['gpt2_layer-a-9', 768], ['gpt2_layer-b-10', 768], ['gpt2_layer-b-11', 768], ['gpt2_layer-b-12', 768]]
     # features = [['mfcc_model', 39], ['rms_model', 1], ['sentence_onset', 1], ['bottomup_model', 1], ['topdown_model', 1], ['content_words', 1], ['function_words', 1], ['log_frequencies', 1], ['position_in_sentence', 1]] # add here basic features name + nb of column feature for each!!!
@@ -212,57 +212,71 @@ if __name__ == '__main__':
 
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))
-        logo = LeaveOneOut() # leave on run out !
-        cv_index = 1
         indexes_tmp = np.delete(indexes, run-1, 0)
-        job_merge_cv = Job(command=["python", "merge_CV.py", 
-                            "--indexes", ','.join([str(i) for i in indexes_tmp]), 
-                            "--nb_runs", str(len(indexes_tmp)), 
+        # For really huge model, pass as comment the following block and uncomment what is commented
+        job = Job(command=["python", "cv_alphas.py", 
+                            "--indexes", indexes_tmp, 
+                            "--x", design_matrices_path, 
+                            "--y", fmri_path, 
                             "--run", str(run), 
                             "--alphas", alphas, 
-                            "--nb_voxels", nb_voxels,
-                            "--input", yaml_files_path,
                             "--output", yaml_files_path],  
-                    name="Merging alphas CV outputs - split {}".format(run), 
+                    name="Alphas CV - split {}".format(run), 
                     working_directory=scripts_path,
                     native_specification=native_specification)
-        for train, valid in logo.split(indexes_tmp):
-            job = Job(command=["python", "CV_alphas_distributed.py", 
-                                "--indexes", ','.join([str(i) for i in indexes_tmp]), 
-                                "--train", ','.join([str(i) for i in train]), 
-                                "--valid", ','.join([str(i) for i in valid]), 
-                                "--x", design_matrices_path, 
-                                "--y", fmri_path,
-                                "--run", str(run),
-                                "--alphas", alphas,
-                                "--output", yaml_files_path, 
-                                "--nb_voxels", nb_voxels,
-                                "--cv_index", str(cv_index)],  
-                        name="Alphas CV - split {} - {}".format(run, cv_index), 
-                        working_directory=scripts_path,
-                        native_specification=native_specification)
-            cv_index += 1
-            group_cv_alphas.append(job)
-            jobs.append(job)
-            dependencies.append((job_0, job))
-            dependencies.append((job, job_merge_cv))
-        group_cv_merge.append(job_merge_cv)
-        jobs_tmp.append(job_merge_cv)
-    
-    jobs += jobs_tmp
+        #logo = LeaveOneOut() # leave on run out !
+        #cv_index = 1
+#
+        #job_merge_cv = Job(command=["python", "merge_CV.py", 
+        #                    "--indexes", ','.join([str(i) for i in indexes_tmp]), 
+        #                    "--nb_runs", str(len(indexes_tmp)), 
+        #                    "--run", str(run), 
+        #                    "--alphas", alphas, 
+        #                    "--nb_voxels", nb_voxels,
+        #                    "--input", yaml_files_path,
+        #                    "--output", yaml_files_path],  
+        #            name="Merging alphas CV outputs - split {}".format(run), 
+        #            working_directory=scripts_path,
+        #            native_specification=native_specification)
+        #for train, valid in logo.split(indexes_tmp):
+        #    job = Job(command=["python", "CV_alphas_distributed.py", 
+        #                        "--indexes", ','.join([str(i) for i in indexes_tmp]), 
+        #                        "--train", ','.join([str(i) for i in train]), 
+        #                        "--valid", ','.join([str(i) for i in valid]), 
+        #                        "--x", design_matrices_path, 
+        #                        "--y", fmri_path,
+        #                        "--run", str(run),
+        #                        "--alphas", alphas,
+        #                        "--output", yaml_files_path, 
+        #                        "--nb_voxels", nb_voxels,
+        #                        "--cv_index", str(cv_index)],  
+        #                name="Alphas CV - split {} - {}".format(run, cv_index), 
+        #                working_directory=scripts_path,
+        #                native_specification=native_specification)
+        #    cv_index += 1
+        #    group_cv_alphas.append(job)
+        #    jobs.append(job)
+        #    dependencies.append((job_0, job))
+        #    dependencies.append((job, job_merge_cv))
+        #group_cv_merge.append(job_merge_cv)
+        #jobs_tmp.append(job_merge_cv)
+        jobs.append(job)
 
-    cv_alphas = Group(elements=group_cv_alphas,
-                        name="CV on alphas")
-    
-    cv_merge = Group(elements=group_cv_merge,
-                        name="merge CV results")
-
-    workflow = Workflow(jobs=jobs,
-                    dependencies=dependencies,
-                    root_group=[job_0, cv_alphas, cv_merge])
+    #jobs += jobs_tmp
+#
+    #cv_alphas = Group(elements=group_cv_alphas,
+    #                    name="CV on alphas")
+    #
+    #cv_merge = Group(elements=group_cv_merge,
+    #                    name="merge CV results")
+#
+    #workflow = Workflow(jobs=jobs,
+    #                dependencies=dependencies,
+    #                root_group=[job_0, cv_alphas, cv_merge])
+    workflow = Workflow(jobs=jobs)
                 
 
-    Helper.serialize(os.path.join(inputs_path, 'optimized_cluster_part_1.somawf'), workflow)
+    #Helper.serialize(os.path.join(inputs_path, 'optimized_cluster_part_1.somawf'), workflow)
 
 
     ### Submit the workflow to computing resource (configured in the client-server mode)

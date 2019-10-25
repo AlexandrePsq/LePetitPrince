@@ -79,7 +79,9 @@ def write(path, text):
 if __name__ == '__main__':
             
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
-    parser.add_argument("--yaml_file", type=str, default=None, help="Path to the yaml file containing alpha, run values and the voxels associateds with.")
+    parser.add_argument("--job2launch", type=str, default=None, help="Path to the yaml file containing alphas and run values.")
+    parser.add_argument("--run", type=str, default='', help="Number of the run.")
+    parser.add_argument("--yaml_files_path", type=str, default='', help="Path to the folder containing yaml files.")
     parser.add_argument("--output", type=str, default='', help="Path to the folder containing outputs.")
     parser.add_argument("--x", type=str, default='', help="Path to x folder.")
     parser.add_argument("--y", type=str, default='', help="Path to y folder.")
@@ -88,63 +90,66 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    with open(args.yaml_file, 'r') as stream:
+    with open(args.job2launch, 'r') as stream:
         try:
             data = yaml.safe_load(stream)
         except :
             print(-1)
             quit()
     
-    if data['voxels']==[]:
-        quit()
+    for alpha in data[args.run]:
+        with open(os.path.join(args.yaml_files_path, 'run_{}_alpha_{}.yml'.format(args.run, alpha)), 'r') as stream:
+            try:
+                yaml_file = yaml.safe_load(stream)
+            except :
+                print(-1)
+                quit()
 
-    source = 'fMRI'
-    model = Ridge()
-    alpha = data['alpha']
-    voxels = data['voxels']
-    run = int(data['run'])
-    indexes = data['indexes']
-    model_loading_path = os.path.join(args.output, 'ridge_models', 'run_{}_alpha_{}'.format(run, alpha))
-    check_folder(model_loading_path)
-    model_saving_path = model_loading_path
+        source = 'fMRI'
+        model = Ridge()
+        voxels = yaml_file['voxels']
+        indexes = yaml_file['indexes']
+        model_loading_path = os.path.join(args.output, 'ridge_models', 'run_{}_alpha_{}'.format(args.run, alpha))
+        check_folder(model_loading_path)
+        model_saving_path = model_loading_path
 
-    try :
-        model_fitted = load_model(model_loading_path, model)
-    except:
-        x_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]])
-        x = [np.load(item) for item in x_paths]
+        try :
+            model_fitted = load_model(model_loading_path, model)
+        except:
+            x_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]])
+            x = [np.load(item) for item in x_paths]
 
-        y_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes]])
-        y = [np.load(item) for item in y_paths]
+            y_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes]])
+            y = [np.load(item) for item in y_paths]
+            
+            y_train = np.vstack(y)[:, voxels]
+            x_train = np.vstack(x)
+
+            model.set_params(alpha=alpha)
+            model_fitted = model.fit(x_train, y_train)
+            save_model(model_saving_path, model_fitted)
         
-        y_train = np.vstack(y)[:, voxels]
-        x_train = np.vstack(x)
+        x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(args.run)))[0])
+        y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(args.run)))[0])[:, voxels]
+        
+        tmp = model_fitted.coef_.copy()
 
-        model.set_params(alpha=alpha)
-        model_fitted = model.fit(x_train, y_train)
-        save_model(model_saving_path, model_fitted)
-    
-    x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
-    y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]
-    
-    tmp = model_fitted.coef_.copy()
+        indexes = args.features_indexes.split(',')
+        model_name = args.model_name
+        model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
+        model_fitted.coef_[:,int(indexes[0]):int(indexes[1])] = tmp[:,int(indexes[0]):int(indexes[1])]
+        r2, pearson_corr = get_score(model_fitted, y_test, x_test)
+        
+        # sanity check
+        path2r2 = os.path.join(args.output, model_name, 'r2')
+        path2pearson_corr = os.path.join(args.output, model_name, 'pearson_corr')
+        
+        check_folder(path2r2)
+        check_folder(path2pearson_corr)
+        
+        # saving
+        r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(args.run, alpha))
+        pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(args.run, alpha))
 
-    indexes = args.features_indexes.split(',')
-    model_name = args.model_name
-    model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
-    model_fitted.coef_[:,int(indexes[0]):int(indexes[1])] = tmp[:,int(indexes[0]):int(indexes[1])]
-    r2, pearson_corr = get_score(model_fitted, y_test, x_test)
-    
-    # sanity check
-    path2r2 = os.path.join(args.output, model_name, 'r2')
-    path2pearson_corr = os.path.join(args.output, model_name, 'pearson_corr')
-    
-    check_folder(path2r2)
-    check_folder(path2pearson_corr)
-    
-    # saving
-    r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(run, alpha))
-    pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(run, alpha))
-
-    np.save(r2_saving_path, r2)
-    np.save(pearson_corr_saving_path, pearson_corr)
+        np.save(r2_saving_path, r2)
+        np.save(pearson_corr_saving_path, pearson_corr)

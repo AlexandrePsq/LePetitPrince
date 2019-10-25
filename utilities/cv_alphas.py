@@ -43,7 +43,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    #to delete
     alphas = [float(alpha) for alpha in args.alphas.split(',')]
     model = Ridge()
 

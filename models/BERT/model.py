@@ -72,7 +72,7 @@ class BERT(object):
                 with torch.no_grad():
                     encoded_layers = self.model(tokens_tensor, segments_tensors) # last_hidden_state, pooled_last_hidden_states, all_hidden_states
                     # filtration
-                    encoded_layers = np.vstack(encoded_layers[2][1:]) # retrieve all the hidden states (dimension = layer_count * len(tokenized_text) * feature_count)
+                    encoded_layers = np.vstack(encoded_layers[2]) # retrieve all the hidden states (dimension = layer_count * len(tokenized_text) * feature_count)
                     encoded_layers = encoded_layers[self.loi, :, :]
                     activations += utils.extract_activations_from_tokenized(encoded_layers, mapping)
         elif self.generation == 'sequential':

@@ -110,7 +110,7 @@ if __name__ == '__main__':
     design_matrices = sorted(glob.glob(os.path.join(design_matrices_path, 'design-matrices_*run*')))
     fmri_runs = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
 
-    write(inputs_path, 'cluster part 1 run for subject: {} and model: {}'.format(args.subject, args.model_name))
+    write(os.path.join(inputs_path, 'models_run_cluster_part_1.txt'), 'cluster part 1 run for subject: {} and model: {}'.format(args.subject, args.model_name))
 
     ####################
     ### Sanity check ###

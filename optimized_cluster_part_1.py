@@ -220,7 +220,7 @@ if __name__ == '__main__':
         indexes_tmp = np.delete(indexes, run-1, 0)
         # For really huge model, pass as comment the following block and uncomment what is commented
         job = Job(command=["python", "cv_alphas.py", 
-                            "--indexes", indexes_tmp, 
+                            "--indexes", ','.join([str(i) for i in indexes_tmp]), 
                             "--x", design_matrices_path, 
                             "--y", fmri_path, 
                             "--run", str(run), 
@@ -278,7 +278,8 @@ if __name__ == '__main__':
     #workflow = Workflow(jobs=jobs,
     #                dependencies=dependencies,
     #                root_group=[job_0, cv_alphas, cv_merge])
-    workflow = Workflow(jobs=jobs)
+    workflow = Workflow(jobs=jobs,
+                        dependencies=dependencies)
                 
 
     #Helper.serialize(os.path.join(inputs_path, 'optimized_cluster_part_1.somawf'), workflow)
@@ -289,7 +290,7 @@ if __name__ == '__main__':
     controller = WorkflowController("DSV_cluster_{}".format(login), login, password) #"DSV_cluster_ap259944", login, password 
 
     workflow_id = controller.submit_workflow(workflow=workflow,
-                                            name="Cluster optimized part 1")
+                                            name="Subject: {} - Model: {}".format(args.subject, args.model_name))
 
     
     print("Finished !!!")

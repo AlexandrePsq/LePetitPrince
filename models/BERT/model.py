@@ -40,7 +40,7 @@ class BERT(object):
         self.FEATURE_COUNT = parameters[bert_model]['FEATURE_COUNT']
         self.name = name
         self.generation = self.name.split('-')[2].strip()
-        self.loi = np.array(loi) if loi else np.arange(parameters[bert_model]['LAYER_COUNT']) # loi: layers of interest
+        self.loi = np.array(loi) if loi else np.arange(1 + parameters[bert_model]['LAYER_COUNT']) # loi: layers of interest
 
     def __name__(self):
         return self.name
@@ -95,7 +95,7 @@ class BERT(object):
                     with torch.no_grad():
                         encoded_layers = self.model(tokens_tensor, segments_tensors) # dimension = layer_count * len(tokenized_text) * feature_count
                         # filtration
-                        encoded_layers = np.vstack(encoded_layers[2][1:])
+                        encoded_layers = np.vstack(encoded_layers[2])
                         encoded_layers = encoded_layers[self.loi, :, :]
                         activations.append(utils.extract_activations_from_tokenized(encoded_layers, mapping)[-1])
         result = pd.DataFrame(np.vstack(activations), columns=['layer-{}-{}'.format(layer, index) for layer in self.loi for index in range(self.FEATURE_COUNT)])

@@ -39,7 +39,7 @@ class GPT2(object):
         self.LAYER_COUNT = parameters[gpt2_model]['LAYER_COUNT']
         self.FEATURE_COUNT = parameters[gpt2_model]['FEATURE_COUNT']
         self.name = name
-        self.loi = np.array(loi) if loi else np.arange(parameters[gpt2_model]['LAYER_COUNT']) # loi: layers of interest
+        self.loi = np.array(loi) if loi else np.arange(1 + parameters[gpt2_model]['LAYER_COUNT']) # loi: layers of interest
         self.cuda = cuda
 
     def __name__(self):
@@ -71,7 +71,7 @@ class GPT2(object):
                 # filtration
                 if self.cuda:
                     encoded_layers = encoded_layers.to('cpu')
-                encoded_layers = np.vstack(encoded_layers[2][1:]) # retrieve all the hidden states (dimension = layer_count * len(tokenized_text) * feature_count)
+                encoded_layers = np.vstack(encoded_layers[2]) # retrieve all the hidden states (dimension = layer_count * len(tokenized_text) * feature_count)
                 encoded_layers = encoded_layers[self.loi, :, :]
                 activations += utils.extract_activations_from_tokenized(encoded_layers, mapping)
        

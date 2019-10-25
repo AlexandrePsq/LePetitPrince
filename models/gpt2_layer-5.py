@@ -33,11 +33,11 @@ def generate(mod, run, language, textgrid, overwrite=False):
     save_all = None
     
     # Defining paths
-    model_name = 'gpt2_layer-5'
+    model_name = 'gpt2_all-layers'
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
     path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
     #### generating raw-features ####
-    if (os.path.exists(path)) & (not overwrite):
+    if (os.path.exists(path)):
         raw_features = pd.read_csv(path)
     else:
         raw_features = mod.generate(run, language, textgrid)

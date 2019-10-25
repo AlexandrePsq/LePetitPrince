@@ -204,7 +204,7 @@ if __name__ == '__main__':
                             "--nb_features", nb_features,
                             "--output", shuffling_path,
                             "--n_permutations", nb_permutations], 
-                name="Preparing permutations for significance analysis",
+                name="Shuffling {} - {}".format(args.subject, args.model_name),
                 working_directory=scripts_path)
 
     jobs.append(job_0)
@@ -226,7 +226,7 @@ if __name__ == '__main__':
                             "--run", str(run), 
                             "--alphas", alphas, 
                             "--output", yaml_files_path],  
-                    name="Alphas CV - split {}".format(run), 
+                    name="Alphas CV - split {} - subject {} - Model {}".format(run, args.subject, args.model_name), 
                     working_directory=scripts_path,
                     native_specification=native_specification)
         #logo = LeaveOneOut() # leave on run out !

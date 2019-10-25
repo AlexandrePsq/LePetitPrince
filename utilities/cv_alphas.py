@@ -5,7 +5,6 @@ import glob
 import yaml
 import argparse
 import sys
-import psutil
 
 import warnings
 warnings.simplefilter(action='ignore')

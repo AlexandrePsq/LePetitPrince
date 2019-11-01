@@ -34,7 +34,7 @@ def function_words(iterator, language, path):
     return result
 
 def get_function_words_list(language):
-    function_words_list = open(os.path.join(paths.path2code, 'models/{}/WORDRATE/'.format(language), 'function_words.txt'), 'r').read()
+    function_words_list = open(os.path.join(paths.path2data, 'text/{}/WORDRATE/'.format(language), 'function_words.txt'), 'r').read()
     return function_words_list.split('\n')
 
 def log_word_freq(iterator, language, path):

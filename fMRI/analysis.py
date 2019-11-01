@@ -8,7 +8,7 @@ if root not in sys.path:
 
 from utilities.settings import Subjects, Paths, Params
 from utilities.utils import get_output_parent_folder, get_path2output
-from models.english.LSTM.tokenizer import tokenize
+from models.LSTM.tokenizer import tokenize
 
 from itertools import combinations, product
 import matplotlib.pyplot as plt
@@ -364,7 +364,18 @@ if __name__ == '__main__':
         maps = nilearn.image.load_img(atlas['maps'])
 
         x_labels = labels[1:]
+        df_pearson_final = []
+        df_r2_final = []
+        df_significant_pearson_final = []
+        df_significant_r2_final = []
+
+
         for analysis in analysis_parameters['model_comparison']:
+            df_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+            df_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+            df_significant_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+            df_significant_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+
             analysis_name = analysis['name']
             y_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
             y_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
@@ -376,6 +387,9 @@ if __name__ == '__main__':
                 masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=5)
                 masker.fit()
                 index_model = 0
+                column = [[], [], [], []]
+                model_names = []
+
                 for model in analysis['models']:
                     for subject in subjects:
                         subject = Subjects().get_subject(int(subject))
@@ -383,7 +397,20 @@ if __name__ == '__main__':
                         y_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_r2')))
                         y_significant_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_pearson_corr_with_pvalues')))
                         y_significant_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_r2_with_pvalues')))
+                        model_names.append(model['surname'])
+                        column[0].append(y_pearson[index_mask, index_model])
+                        column[1].append(y_r2[index_mask, index_model])
+                        column[2].append(y_significant_pearson[index_mask, index_model])
+                        column[3].append(y_significant_r2[index_mask, index_model])
                         index_model += 1
+                df_pearson[x_labels[index_mask]] = column[0] ; df_pearson['model_names'] = model_names
+                df_r2[x_labels[index_mask]] = column[1] ; df_r2['model_names'] = model_names
+                df_significant_pearson[x_labels[index_mask]] = column[2] ; df_significant_pearson['model_names'] = model_names
+                df_significant_r2[x_labels[index_mask]] = column[3] ; df_significant_r2['model_names'] = model_names
+            df_pearson_final.append(df_pearson)
+            df_r2_final.append(df_r2)
+            df_significant_pearson_final.append(df_significant_pearson)
+            df_significant_r2_final.append(df_significant_r2)
 
             # save plots
             j=0
@@ -396,9 +423,9 @@ if __name__ == '__main__':
                 plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
                 plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Pearson')
-                check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
+                save_folder_pearson = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Pearson')
+                check_folder(save_folder_pearson)
+                plt.savefig(os.path.join(save_folder_pearson, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1
             j=0
@@ -411,9 +438,9 @@ if __name__ == '__main__':
                 plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
                 plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - R2')
-                check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
+                save_folder_r2 = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - R2')
+                check_folder(save_folder_r2)
+                plt.savefig(os.path.join(save_folder_r2, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1
             j=0
@@ -426,9 +453,9 @@ if __name__ == '__main__':
                 plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
                 plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant Pearson')
-                check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
+                save_folder_significant_pearson = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant Pearson')
+                check_folder(save_folder_significant_pearson)
+                plt.savefig(os.path.join(save_folder_significant_pearson, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1
             j=0
@@ -441,11 +468,22 @@ if __name__ == '__main__':
                 plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
                 plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant R2')
-                check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
+                save_folder_significant_r2 = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant R2')
+                check_folder(save_folder_significant_r2)
+                plt.savefig(os.path.join(save_folder_significant_r2, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
                 plt.close()
                 j += 1
             i+=1
-
-            i+=1
+        df_pearson_final = pd.concat(df_pearson_final, axis=0)
+        df_r2_final = pd.concat(df_r2_final, axis=0)
+        df_significant_pearson_final = pd.concat(df_significant_pearson_final, axis=0)
+        df_significant_r2_final = pd.concat(df_significant_r2_final, axis=0)
+        
+        df_pearson_final.drop_duplicates(inplace=True)
+        df_pearson_final.to_csv(os.path.join(save_folder_pearson, 'pearson_data.csv'), index=False)
+        df_r2_final.drop_duplicates(inplace=True)
+        df_r2_final.to_csv(os.path.join(save_folder_r2, 'r2_data.csv'), index=False)
+        df_significant_pearson_final.drop_duplicates(inplace=True)
+        df_significant_pearson_final.to_csv(os.path.join(save_folder_significant_pearson, 'significant_pearson_data.csv'), index=False)
+        df_significant_r2_final.drop_duplicates(inplace=True)
+        df_significant_r2_final.to_csv(os.path.join(save_folder_significant_r2, 'significant_r2_data.csv'), index=False)

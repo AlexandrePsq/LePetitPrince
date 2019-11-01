@@ -5,7 +5,6 @@ import glob
 import yaml
 import argparse
 import sys
-import psutil
 
 import warnings
 warnings.simplefilter(action='ignore')
@@ -43,7 +42,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    #to delete
     alphas = [float(alpha) for alpha in args.alphas.split(',')]
     model = Ridge()
 

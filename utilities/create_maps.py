@@ -30,7 +30,7 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     # return a MultiNiftiMasker object
     masks = [compute_epi_mask(f) for f in files]
     global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
-    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
+    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=5) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
     masker.fit()
     return masker
 

@@ -20,25 +20,25 @@ from utilities.utils import check_folder
 def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
     from .WORDRATE import model
-    from .WORDRATE.utils import function_words
+    from .WORDRATE.utils import log_word_freq
     language = 'english'
-    mod = model.Wordrate([function_words], language)
+    mod = model.Wordrate([log_word_freq], language)
     return mod
 
 def generate(mod, run, language, textgrid, overwrite=False):
     from .WORDRATE import model
-    from .WORDRATE.utils import function_words
+    from .WORDRATE.utils import log_word_freq
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
-    mod = model.Wordrate([function_words], language) # all functions
-    model_name = 'wordrate_function-word'
+    mod = model.Wordrate([log_word_freq], language) # all functions
+    model_name = 'wordrate_all_model'
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
     path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
     #### parameters studied ####
-    parameters = sorted([function_words])
+    parameters = sorted([log_word_freq])
     #### generating raw-features ####
-    if (os.path.exists(path)) & (not overwrite):
+    if (os.path.exists(path)):
         raw_features = pd.read_csv(path)
     else:
         raw_features = mod.generate(run, language, textgrid)

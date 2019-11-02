@@ -349,7 +349,7 @@ model_comparison:
     models:
       - path: bert_bucket_all-layers
         surname: BERT - ALL
-      - path: bert_bucket_layer_embeddings
+      - path: bert_bucket_embeddings
         surname: BERT - embeddings
       - path: bert_bucket_layer-1
         surname: BERT - Layer 1
@@ -380,7 +380,7 @@ model_comparison:
     models:
       - path: gpt2_all-layers
         surname: GPT2 - ALL
-      - path: gpt2_layer_embeddings
+      - path: gpt2_embeddings
         surname: GPT2 - embeddings
       - path: gpt2_layer-1
         surname: GPT2 - Layer 1

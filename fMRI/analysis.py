@@ -369,30 +369,29 @@ if __name__ == '__main__':
         df_significant_pearson_final = []
         df_significant_r2_final = []
 
+        for subject in subjects:
+            subject = Subjects().get_subject(int(subject))
+            for analysis in analysis_parameters['model_comparison']:
+                df_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+                df_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+                df_significant_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+                df_significant_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
 
-        for analysis in analysis_parameters['model_comparison']:
-            df_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
-            df_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
-            df_significant_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
-            df_significant_r2 = pd.DataFrame(data=[], columns=x_labels+['model_names'])
+                analysis_name = analysis['name']
+                y_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
+                y_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
+                y_significant_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
+                y_significant_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
+                # extract data
+                for index_mask in range(len(labels)-1):
+                    mask = math_img('img > 50', img=index_img(maps, index_mask))  
+                    masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=5)
+                    masker.fit()
+                    index_model = 0
+                    column = [[], [], [], []]
+                    model_names = []
 
-            analysis_name = analysis['name']
-            y_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
-            y_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
-            y_significant_pearson = np.zeros((len(labels)-1, len(analysis['models'])))
-            y_significant_r2 = np.zeros((len(labels)-1, len(analysis['models'])))
-            # extract data
-            for index_mask in range(len(labels)-1):
-                mask = math_img('img > 50', img=index_img(maps, index_mask))  
-                masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=5)
-                masker.fit()
-                index_model = 0
-                column = [[], [], [], []]
-                model_names = []
-
-                for model in analysis['models']:
-                    for subject in subjects:
-                        subject = Subjects().get_subject(int(subject))
+                    for model in analysis['models']:
                         y_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_pearson_corr')))
                         y_r2[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_r2')))
                         y_significant_pearson[index_mask, index_model] = np.mean(masker.transform(fetch_ridge_maps(model['path'], subject, 'maps_significant_pearson_corr_with_pvalues')))
@@ -403,77 +402,81 @@ if __name__ == '__main__':
                         column[2].append(y_significant_pearson[index_mask, index_model])
                         column[3].append(y_significant_r2[index_mask, index_model])
                         index_model += 1
-                df_pearson[x_labels[index_mask]] = column[0] ; df_pearson['model_names'] = model_names
-                df_r2[x_labels[index_mask]] = column[1] ; df_r2['model_names'] = model_names
-                df_significant_pearson[x_labels[index_mask]] = column[2] ; df_significant_pearson['model_names'] = model_names
-                df_significant_r2[x_labels[index_mask]] = column[3] ; df_significant_r2['model_names'] = model_names
-            df_pearson_final.append(df_pearson)
-            df_r2_final.append(df_r2)
-            df_significant_pearson_final.append(df_significant_pearson)
-            df_significant_r2_final.append(df_significant_r2)
+                    df_pearson[x_labels[index_mask]] = column[0] ; df_pearson['model_names'] = model_names
+                    df_r2[x_labels[index_mask]] = column[1] ; df_r2['model_names'] = model_names
+                    df_significant_pearson[x_labels[index_mask]] = column[2] ; df_significant_pearson['model_names'] = model_names
+                    df_significant_r2[x_labels[index_mask]] = column[3] ; df_significant_r2['model_names'] = model_names
+                    df_pearson['subject'] = subject
+                    df_r2['subject'] = subject
+                    df_significant_pearson['subject'] = subject
+                    df_significant_r2['subject'] = subject
+                df_pearson_final.append(df_pearson)
+                df_r2_final.append(df_r2)
+                df_significant_pearson_final.append(df_significant_pearson)
+                df_significant_r2_final.append(df_significant_r2)
 
-            # save plots
-            j=0
-            for (x,y) in batchify(x_labels, y_pearson):
-                plt.figure(20*i + 2*j)
-                plot = plt.plot(x, y)
-                plt.title('Pearson coefficient per ROI')
-                plt.xlabel('Regions of interest (ROI)')
-                plt.ylabel('Pearson coefficient value')
-                plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
-                plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
-                plt.tight_layout()
-                save_folder_pearson = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Pearson')
-                check_folder(save_folder_pearson)
-                plt.savefig(os.path.join(save_folder_pearson, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
-                plt.close()
-                j += 1
-            j=0
-            for (x,y) in batchify(x_labels, y_r2):
-                plt.figure(2*i + 2*j + 1)
-                plot = plt.plot(x, y)
-                plt.title('R2 per ROI')
-                plt.xlabel('Regions of interest (ROI)')
-                plt.ylabel('R2 value')
-                plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
-                plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
-                plt.tight_layout()
-                save_folder_r2 = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - R2')
-                check_folder(save_folder_r2)
-                plt.savefig(os.path.join(save_folder_r2, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
-                plt.close()
-                j += 1
-            j=0
-            for (x,y) in batchify(x_labels, y_significant_pearson):
-                plt.figure(20*i + 2*j)
-                plot = plt.plot(x, y)
-                plt.title('Pearson coefficient per ROI')
-                plt.xlabel('Regions of interest (ROI)')
-                plt.ylabel('Pearson coefficient value')
-                plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
-                plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
-                plt.tight_layout()
-                save_folder_significant_pearson = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant Pearson')
-                check_folder(save_folder_significant_pearson)
-                plt.savefig(os.path.join(save_folder_significant_pearson, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
-                plt.close()
-                j += 1
-            j=0
-            for (x,y) in batchify(x_labels, y_significant_r2):
-                plt.figure(2*i + 2*j + 1)
-                plot = plt.plot(x, y)
-                plt.title('R2 per ROI')
-                plt.xlabel('Regions of interest (ROI)')
-                plt.ylabel('R2 value')
-                plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
-                plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
-                plt.tight_layout()
-                save_folder_significant_r2 = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant R2')
-                check_folder(save_folder_significant_r2)
-                plt.savefig(os.path.join(save_folder_significant_r2, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
-                plt.close()
-                j += 1
-            i+=1
+                # save plots
+                j=0
+                for (x,y) in batchify(x_labels, y_pearson):
+                    plt.figure(20*i + 2*j)
+                    plot = plt.plot(x, y)
+                    plt.title('Pearson coefficient per ROI')
+                    plt.xlabel('Regions of interest (ROI)')
+                    plt.ylabel('Pearson coefficient value')
+                    plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
+                    plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
+                    plt.tight_layout()
+                    save_folder_pearson = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Pearson')
+                    check_folder(save_folder_pearson)
+                    plt.savefig(os.path.join(save_folder_pearson, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
+                    plt.close()
+                    j += 1
+                j=0
+                for (x,y) in batchify(x_labels, y_r2):
+                    plt.figure(2*i + 2*j + 1)
+                    plot = plt.plot(x, y)
+                    plt.title('R2 per ROI')
+                    plt.xlabel('Regions of interest (ROI)')
+                    plt.ylabel('R2 value')
+                    plt.xticks(rotation=60, fontsize=6, horizontalalignment='right')
+                    plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
+                    plt.tight_layout()
+                    save_folder_r2 = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - R2')
+                    check_folder(save_folder_r2)
+                    plt.savefig(os.path.join(save_folder_r2, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
+                    plt.close()
+                    j += 1
+                j=0
+                for (x,y) in batchify(x_labels, y_significant_pearson):
+                    plt.figure(20*i + 2*j)
+                    plot = plt.plot(x, y)
+                    plt.title('Pearson coefficient per ROI')
+                    plt.xlabel('Regions of interest (ROI)')
+                    plt.ylabel('Pearson coefficient value')
+                    plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
+                    plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
+                    plt.tight_layout()
+                    save_folder_significant_pearson = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant Pearson')
+                    check_folder(save_folder_significant_pearson)
+                    plt.savefig(os.path.join(save_folder_significant_pearson, analysis['title'] + ' - pearson - ' + subject  + '_{}.png'.format(j)))
+                    plt.close()
+                    j += 1
+                j=0
+                for (x,y) in batchify(x_labels, y_significant_r2):
+                    plt.figure(2*i + 2*j + 1)
+                    plot = plt.plot(x, y)
+                    plt.title('R2 per ROI')
+                    plt.xlabel('Regions of interest (ROI)')
+                    plt.ylabel('R2 value')
+                    plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
+                    plt.legend(plot, [model['surname'] for model in analysis['models']], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
+                    plt.tight_layout()
+                    save_folder_significant_r2 = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', analysis_name + ' - Significant R2')
+                    check_folder(save_folder_significant_r2)
+                    plt.savefig(os.path.join(save_folder_significant_r2, analysis['title'] + ' - R2 - ' + subject  + '_{}.png'.format(j)))
+                    plt.close()
+                    j += 1
+                i+=1
         df_pearson_final = pd.concat(df_pearson_final, axis=0)
         df_r2_final = pd.concat(df_r2_final, axis=0)
         df_significant_pearson_final = pd.concat(df_significant_pearson_final, axis=0)

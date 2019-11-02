@@ -344,27 +344,6 @@ model_complexity:
     title: 'R2 test = f(pca components)'
     name: model_complexity - LSTM E600H1800L1D02 - pca
 model_comparison:
-  - title: BF
-    name: Model comparison - Average per ROI
-    models:
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/mfcc_model
-        surname: mfcc_model
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/rms_model
-        surname: rms_model
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/sentence_onset
-        surname: other_sentence_onset
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/bottomup_model
-        surname: bottomup_model
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/topdown_model
-        surname: topdown_model
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/content_words
-        surname: content_words
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/function_words
-        surname: function_words
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/log_frequencies
-        surname: log_word_freq
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/position_in_sentence
-        surname: word_position
   - title: BERT
     name: Model comparison - Average per ROI
     models:
@@ -546,3 +525,24 @@ model_comparison:
   #      surname: BERT
   #    - path: gpt2_all-layers
   #      surname: GPT2
+  #- title: BF
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/mfcc_model
+  #      surname: mfcc_model
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/rms_model
+  #      surname: rms_model
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/sentence_onset
+  #      surname: other_sentence_onset
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/bottomup_model
+  #      surname: bottomup_model
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/topdown_model
+  #      surname: topdown_model
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/content_words
+  #      surname: content_words
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/function_words
+  #      surname: function_words
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/log_frequencies
+  #      surname: log_word_freq
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/position_in_sentence
+  #      surname: word_position

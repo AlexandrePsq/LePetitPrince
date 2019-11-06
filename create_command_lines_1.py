@@ -90,6 +90,7 @@ if __name__=='__main__':
 
             # Defining 'parameters.yml'file
             parameters_path = f"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/parameters.yml"
+            check_folder(os.path.dirname(parameters_path))
             parameters = {'models': [], 
                             'nb_runs':nb_runs, 
                             'nb_voxels':nb_voxels, 

@@ -1,5 +1,7 @@
 subjects:
   - 57
+  - 113
+  - 114
 source: fMRI
 language: english
 scatter_plots:
@@ -342,143 +344,205 @@ model_complexity:
     title: 'R2 test = f(pca components)'
     name: model_complexity - LSTM E600H1800L1D02 - pca
 model_comparison:
-  - title: LSTM E600-H*-L1 - all layers
+  - title: BERT
     name: Model comparison - Average per ROI
     models:
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
-        surname: Basic features
-      - path: glove_embeddings
-        surname: GLOVE
-      - path: lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H50-L1
-      - path: lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H150-L1
-      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H300-L1
-      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H400-L1
-      - path: lstm_wikikristina_embedding-size_600_nhid_500_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H500-L1
-      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H600-L1
-      - path: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H1200-L1
-      - path: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H1800-L1
-  - title: LSTM E600-H*-L3 - all layers
-    name: Model comparison - Average per ROI
-    models:
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
-        surname: Basic features
-      - path: glove_embeddings
-        surname: GLOVE
-      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
-        surname: LSTM E600-H100-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers
-        surname: LSTM E600-H200-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers
-        surname: LSTM E600-H300-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers
-        surname: LSTM E600-H400-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
-        surname: LSTM E600-H600-L3
-  - title: LSTM E600-H*-L3 - layer 1
-    name: Model comparison - Average per ROI
-    models:
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
-        surname: Basic features
-      - path: glove_embeddings
-        surname: GLOVE
-      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-1
-        surname: LSTM E600-H100-L3-layer-1
-      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-1
-        surname: LSTM E600-H200-L3-layer-1
-      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layer-1
-        surname: LSTM E600-H300-L3-layer-1
-      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layer-1
-        surname: LSTM E600-H400-L3-layer-1
-      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layer-1
-        surname: LSTM E600-H600-L3-layer-1
-  - title: LSTM E600-H*-L3 - layer 2
-    name: Model comparison - Average per ROI
-    models:
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
-        surname: Basic features
-      - path: glove_embeddings
-        surname: GLOVE
-      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-2
-        surname: LSTM E600-H100-L3-layer-2
-      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-2
-        surname: LSTM E600-H200-L3-layer-2
-      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layer-2
-        surname: LSTM E600-H300-L3-layer-2
-      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layer-2
-        surname: LSTM E600-H400-L3-layer-2
-      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layer-2
-        surname: LSTM E600-H600-L3-layer-2
-  - title: LSTM E600-H*-L3 - layer 3
-    name: Model comparison - Average per ROI
-    models:
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
-        surname: Basic features
-      - path: glove_embeddings
-        surname: GLOVE
-      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-3
-        surname: LSTM E600-H100-L3-layer-3
-      - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-3
-        surname: LSTM E600-H200-L3-layer-3
-      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layer-3
-        surname: LSTM E600-H300-L3-layer-3
-      - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layer-3
-        surname: LSTM E600-H400-L3-layer-3
-      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layer-3
-        surname: LSTM E600-H600-L3-layer-3
-  - title: LSTM E600-H*-L* - 300 units in total
-    name: Model comparison - Average per ROI
-    models:
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
-        surname: Basic features
-      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H300-L1
-      - path: lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_all-layers
-        surname: LSTM E600-H150-L2
-      - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
-        surname: LSTM E600-H100-L3
-      - path: lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers
-        surname: LSTM E600-H75-L4
-  - title: BF - GLOVE - LSTM E600-H1800-L1 - LSTM E600-H600-L3 - BERT - GPT2
-    name: Model comparison - Average per ROI
-    models:
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
-        surname: Basic features
-      - path: glove_embeddings
-        surname: GLOVE
-      - path: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
-        surname: LSTM E600-H1800-L1
-      - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
-        surname: LSTM E600-H600-L3
       - path: bert_bucket_all-layers
-        surname: BERT
-      - path: gpt2_all-layers
-        surname: GPT2
-  - title: BF
+        surname: BERT - ALL
+      - path: bert_bucket_embeddings
+        surname: BERT - embeddings
+      - path: bert_bucket_layer-1
+        surname: BERT - Layer 1
+      - path: bert_bucket_layer-2
+        surname: BERT - Layer 2
+      - path: bert_bucket_layer-3
+        surname: BERT - Layer 3
+      - path: bert_bucket_layer-4
+        surname: BERT - Layer 4
+      - path: bert_bucket_layer-5
+        surname: BERT - Layer 5
+      - path: bert_bucket_layer-6
+        surname: BERT - Layer 6
+      - path: bert_bucket_layer-7
+        surname: BERT - Layer 7
+      - path: bert_bucket_layer-8
+        surname: BERT - Layer 8
+      - path: bert_bucket_layer-9
+        surname: BERT - Layer 9
+      - path: bert_bucket_layer-10
+        surname: BERT - Layer 10
+      - path: bert_bucket_layer-11
+        surname: BERT - Layer 11
+      - path: bert_bucket_layer-12
+        surname: BERT - Layer 12
+  - title: GPT2
     name: Model comparison - Average per ROI
     models:
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/mfcc_model
-        surname: mfcc_model
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/rms_model
-        surname: rms_model
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/sentence_onset
-        surname: other_sentence_onset
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/bottomup_model
-        surname: bottomup_model
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/topdown_model
-        surname: topdown_model
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/content_words
-        surname: content_words
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/function_words
-        surname: function_words
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/log_frequencies
-        surname: log_word_freq
-      - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/position_in_sentence
-        surname: word_position
+      - path: gpt2_all-layers
+        surname: GPT2 - ALL
+      - path: gpt2_embeddings
+        surname: GPT2 - embeddings
+      - path: gpt2_layer-1
+        surname: GPT2 - Layer 1
+      - path: gpt2_layer-2
+        surname: GPT2 - Layer 2
+      - path: gpt2_layer-3
+        surname: GPT2 - Layer 3
+      - path: gpt2_layer-4
+        surname: GPT2 - Layer 4
+      - path: gpt2_layer-5
+        surname: GPT2 - Layer 5
+      - path: gpt2_layer-6
+        surname: GPT2 - Layer 6
+      - path: gpt2_layer-7
+        surname: GPT2 - Layer 7
+      - path: gpt2_layer-8
+        surname: GPT2 - Layer 8
+      - path: gpt2_layer-9
+        surname: GPT2 - Layer 9
+      - path: gpt2_layer-10
+        surname: GPT2 - Layer 10
+      - path: gpt2_layer-11
+        surname: GPT2 - Layer 11
+      - path: gpt2_layer-12
+        surname: GPT2 - Layer 12
+  #- title: LSTM E600-H*-L1 - all layers
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
+  #      surname: Basic features
+  #    - path: glove_embeddings
+  #      surname: GLOVE
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_50_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H50-L1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_150_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H150-L1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H300-L1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H400-L1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_500_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H500-L1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H600-L1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_1200_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H1200-L1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H1800-L1
+  #- title: LSTM E600-H*-L3 - all layers
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
+  #      surname: Basic features
+  #    - path: glove_embeddings
+  #      surname: GLOVE
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
+  #      surname: LSTM E600-H100-L3
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers
+  #      surname: LSTM E600-H200-L3
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers
+  #      surname: LSTM E600-H300-L3
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers
+  #      surname: LSTM E600-H400-L3
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
+  #      surname: LSTM E600-H600-L3
+  #- title: LSTM E600-H*-L3 - layer 1
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
+  #      surname: Basic features
+  #    - path: glove_embeddings
+  #      surname: GLOVE
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-1
+  #      surname: LSTM E600-H100-L3-layer-1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-1
+  #      surname: LSTM E600-H200-L3-layer-1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layer-1
+  #      surname: LSTM E600-H300-L3-layer-1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layer-1
+  #      surname: LSTM E600-H400-L3-layer-1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layer-1
+  #      surname: LSTM E600-H600-L3-layer-1
+  #- title: LSTM E600-H*-L3 - layer 2
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
+  #      surname: Basic features
+  #    - path: glove_embeddings
+  #      surname: GLOVE
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-2
+  #      surname: LSTM E600-H100-L3-layer-2
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-2
+  #      surname: LSTM E600-H200-L3-layer-2
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layer-2
+  #      surname: LSTM E600-H300-L3-layer-2
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layer-2
+  #      surname: LSTM E600-H400-L3-layer-2
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layer-2
+  #      surname: LSTM E600-H600-L3-layer-2
+  #- title: LSTM E600-H*-L3 - layer 3
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
+  #      surname: Basic features
+  #    - path: glove_embeddings
+  #      surname: GLOVE
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H100-L3-layer-3
+  #      surname: LSTM E600-H100-L3-layer-3
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H200-L3-layer-3
+  #      surname: LSTM E600-H200-L3-layer-3
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H300-L3-layer-3
+  #      surname: LSTM E600-H300-L3-layer-3
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_400_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H400-L3-layer-3
+  #      surname: LSTM E600-H400-L3-layer-3
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers/LSTM-E600-H600-L3-layer-3
+  #      surname: LSTM E600-H600-L3-layer-3
+  #- title: LSTM E600-H*-L* - 300 units in total
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
+  #      surname: Basic features
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H300-L1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_all-layers
+  #      surname: LSTM E600-H150-L2
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers
+  #      surname: LSTM E600-H100-L3
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers
+  #      surname: LSTM E600-H75-L4
+  #- title: BF - GLOVE - LSTM E600-H1800-L1 - LSTM E600-H600-L3 - BERT - GPT2
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model
+  #      surname: Basic features
+  #    - path: glove_embeddings
+  #      surname: GLOVE
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_1800_nlayers_1_dropout_02_hidden_first-layer
+  #      surname: LSTM E600-H1800-L1
+  #    - path: lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden_all-layers
+  #      surname: LSTM E600-H600-L3
+  #    - path: bert_bucket_all-layers
+  #      surname: BERT
+  #    - path: gpt2_all-layers
+  #      surname: GPT2
+  #- title: BF
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/mfcc_model
+  #      surname: mfcc_model
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/rms_model
+  #      surname: rms_model
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/sentence_onset
+  #      surname: other_sentence_onset
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/bottomup_model
+  #      surname: bottomup_model
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/topdown_model
+  #      surname: topdown_model
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/content_words
+  #      surname: content_words
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/function_words
+  #      surname: function_words
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/log_frequencies
+  #      surname: log_word_freq
+  #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/position_in_sentence
+  #      surname: word_position

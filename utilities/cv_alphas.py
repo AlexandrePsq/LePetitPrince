@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 import os
 import glob
@@ -83,14 +83,15 @@ if __name__ == '__main__':
     for index in range(len(voxel2alpha)):
         alpha2voxel[voxel2alpha[index]].append(index)
     for alpha in alphas:
-        yaml_path = os.path.join(args.output, 'run_{}_alpha_{}.yml'.format(run, alpha))
-        yaml_file = {'alpha': alpha,
-                        'voxels': alpha2voxel[alpha],
-                        'run': run,
-                        'indexes': indexes}
+        if alpha2voxel[alpha] != []:
+            yaml_path = os.path.join(args.output, 'run_{}_alpha_{}.yml'.format(run, alpha))
+            yaml_file = {'alpha': alpha,
+                            'voxels': alpha2voxel[alpha],
+                            'run': run,
+                            'indexes': indexes}
 
-        with open(yaml_path, 'w') as outfile:
-            yaml.dump(yaml_file, outfile, default_flow_style=False)
+            with open(yaml_path, 'w') as outfile:
+                yaml.dump(yaml_file, outfile, default_flow_style=False)
     
     # saving
     np.save(os.path.join(args.output, 'voxel2alpha{}.npy'.format(run)), voxel2alpha)

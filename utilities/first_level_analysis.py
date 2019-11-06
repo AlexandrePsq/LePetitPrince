@@ -30,7 +30,17 @@ paths = Paths()
 ################ Figures ################
 #########################################
 
-def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=0.2, pca='', voxel_wise=False):
+def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=None, pca='', voxel_wise=False):
+    """Compute maps from numpy vector. Plots glass brain representation using a masker extracted from fMRI data.
+    :masker: (MultiNiftiMasker) function that can project a 3D representation to 1D and 1D to 3D.
+    :distribution: (numpy array) distribution to plot.
+    :distribution_name: (str) distribution name.
+    :subject: (str) name of the subject (e.g.: sub-xxx).
+    :output_parent_folder: (str) path to the folder containing the outputs of the function.
+    :vmax: maximum value on the colored bar of the plot.
+    :pca: (str) number of components used for the PCA ('' if no PCA).
+    :voxel_wise: (bool) precise if we specified a model per voxel.
+    """
     model = os.path.basename(output_parent_folder)
     language = os.path.basename(os.path.dirname(output_parent_folder))
     data_type = os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder)))
@@ -56,15 +66,10 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 #########################################
 
 
-def compute_global_masker(files): # [[path, path2], [path3, path4]]
-    # return a MultiNiftiMasker object
-
-    #spm_dir = '/neurospin/unicog/protocols/IRMf/Meyniel_MarkovGuess_2014'
-    #mask = join(spm_dir, 'spm12/tpm/mask_ICV.nii')
-    #global_mask = math_img('img>0', img=mask)
-    #masker = MultiNiftiMasker(mask_img=global_mask)
-    #masker.fit()
-
+def compute_global_masker(files):
+    """Return a MultiNiftiMasker object.
+    :files: (list) (e.g.: [[path, path2], [path3, path4]])
+    """
     masks = [compute_epi_mask(f) for f in files]
     global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
     masker = MultiNiftiMasker(global_mask, detrend=params.pref.detrend, standardize=params.pref.standardize) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
@@ -73,28 +78,34 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
 
 
 def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_parent_folder, model, voxel_wised=False, alpha_list=np.logspace(-3, -1, 30), pca=params.n_components_default):
-    # Compute r2 maps for all subject for a given model
-    #   - subject : e.g. : 'sub-060'
-    #   - fmri_runs: list of fMRI data runs (1 for each run)
-    #   - matrices: list of design matrices (1 for each run)
-    #   - masker: MultiNiftiMasker object
+    """Main function for computing r2 and pearson maps for a subject for a given set of design-matrices (associated with one model)
+    and creating the associated maps.
+    :subject : (str) Name of the subject (e.g.: sub-xxx).
+    :fmri_runs: (list) Paths of the fMRI data runs (1 for each run).
+    :matrices: (list) list of numpy array design matrices (1 for each run).
+    :masker: (MultiNiftiMasker object) function that can project a 3D representation to 1D and 1D to 3D.
+    """
     fmri_runs = [masker.transform(f) for f in fmri_filenames] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
     
-    # compute r2 maps and save them under .nii.gz and .png formats
     if voxel_wised:
-        alphas, r2_test, distribution_array = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
+        alphas, r2_test, pearson_corr, distribution_array = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
         alphas = np.mean(alphas, axis=0)
-        create_maps(masker, alphas, 'alphas', subject, output_parent_folder, pca=pca) # alphas # argument deleted: , vmax=5e3
+        create_maps(masker, alphas, 'alphas', subject, output_parent_folder, pca=pca)
     else:
-        r2_test, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
+        r2, pearson_corr, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
     optional = '_' + str(params.pref.alpha_default) if ((type(model) == sklearn.linear_model.Ridge) & (not params.voxel_wise)) else ''
-    r2_test, mask, z_values = get_significativity_value(r2_test, 
+
+    # Compute r2 and pearson maps and save them under .nii.gz and .png formats
+    create_maps(masker, r2, 'r2{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) 
+    create_maps(masker, pearson_corr, 'pearson{}'.format(optional), subject, output_parent_folder, vmax=0.55, pca=pca,  voxel_wise=voxel_wised) 
+
+    # Compute significant values
+    try:
+        r2, mask, z_values = get_significativity_value(r2, 
                                                         distribution_array, 
                                                         params.alpha_percentile)
-    create_maps(masker, r2_test, 'r2_test{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) # r2 test
-    try:
-        r2_significative = np.zeros(r2_test.shape)
-        r2_significative[mask] = r2_test[mask]
+        r2_significative = np.zeros(r2.shape)
+        r2_significative[mask] = r2[mask]
         r2_significative[~mask] = -1
         path2mask = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder))), 
                                                                                     os.path.basename(os.path.dirname(output_parent_folder)), 
@@ -112,8 +123,11 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
 
 
 def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
-    #   - fmri_runs: list of fMRI data runs (1 for each run)
-    #   - matrices: list of design matrices (1 for each run)
+    """Compute r2 and pearson coefficient given a list of design-matrices 
+    associated with a given model.
+    :fmri_runs: (list of numpy arrays) list of fMRI data runs (1 for each run).
+    :design_matrices: (list of numpy arrays) list of design matrices (1 for each run).
+    """
     distribution_array = None
     nb_runs = len(fmri_runs)
     nb_voxels = fmri_runs[0].shape[1]
@@ -153,9 +167,6 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
                                         shuffling=shuffling,
                                         n_sample=n_sample, 
                                         alpha_percentile=params.alpha_percentile)
-
-        # log the results
-        # log(subject, voxel='whole brain', alpha=None, r2=r2)
 
         scores_cv[cv, :] = r2 # r2 is a 1d array: 1 value for each voxel
         distribution_array[cv, :, :] = distribution # distribution is a 2d array: n_sample values for each voxel

@@ -1,6 +1,6 @@
 ############################################
 # First level analysis 
-# --> R2 maps for GLM models
+# --> R2 and pearson maps for GLM models
 #
 ############################################
 
@@ -38,6 +38,11 @@ subjects_list = Subjects()
 
 
 if __name__ == '__main__':
+    """First level analysis using a GLM.
+    We fit the design-matrices to the fMRI data for each subject and cross-validate 
+    accross the runs. PCA transform can be applied, but we recommend not to as 
+    interpretability would be damaged (use Ridge model instead).
+    """
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--subjects", nargs='+', action='append', default=[], help="Subjects list on whom we are running a test: list of 'sub-002...")
@@ -55,6 +60,8 @@ if __name__ == '__main__':
     model_name = args.model_name
     subjects = args.subjects[0]
 
+
+    # Retrieving data
     dm = get_data(args.language, input_data_type, model=model_name, source='fMRI')
     if (not params.force_glm) and (len(dm)==0 or len(pd.read_csv(dm[0]).columns) > 20):
         print("You have a lot of features: Linear regression will give you an empty mask (highly negative r2)... you should use a Ridge regression")
@@ -65,18 +72,20 @@ if __name__ == '__main__':
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
     matrices = [transform_design_matrices(run) for run in dm] # list of design matrices (dataframes) where we added a constant column equal to 1
+
+    # PCA transformation
     if (matrices[0].shape[1] > args.pca) & (params.pca):
         print('PCA analysis running...')
         matrices = pca(matrices, model_name, n_components=args.pca)
         print('PCA done.')
     else:
         print('Skipping PCA.')
-        for index in range(len(matrices)):
-            scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
-            scaler.fit(matrices[index])
-            matrices[index] = scaler.transform(matrices[index])
-    masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object ... computation is sloow
 
+    # Computing masker
+    masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object 
+
+
+    # Fitting the GLM model
     if args.parallel:
             Parallel(n_jobs=-2)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, output_parent_folder, model, pca=args.pca) for sub in subjects)
     else:

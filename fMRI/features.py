@@ -25,10 +25,15 @@ scans = Scans()
 
 
 def process_raw_features(run, tr, nscans):
+    """For each column in the raw-features, compute the convolution
+    with an hrf kernel specified in settings.py
+    :run: (str) path to the raw-feature file
+    :tr: (float) sampling period for scan
+    :nscans: (int) number of scans to generate
+    """
     # compute convolution of raw_features with hrf kernel
     df = pd.read_csv(run)
     result = []
-    count = 0
     raw_features_columns = [col for col in df.columns if col not in ['offsets', 'duration']]
     for col in raw_features_columns:
         conditions = np.vstack((df.offsets, df.duration, df[col]))
@@ -37,14 +42,23 @@ def process_raw_features(run, tr, nscans):
                                 frame_times=np.arange(0.0, nscans*tr, tr),
                                 oversampling=10)
         result.append(pd.DataFrame(tmp[0], columns=[col]))
-        count += 1
     return pd.concat(result, axis=1)
 
-def compute_features(run, output_parent_folder, output_data_type, language, model, extension, tr, overwrite):
+def compute_features(run, output_parent_folder, step, language, model_name, extension, tr, overwrite):
+    """Compute features (regressors) from raw-features.
+    :run: (str) path to the raw-feature file
+    :tr: (float) sampling period for scan
+    :output_parent_folder: (str) path to the folder where derivatives will be saved
+    :step: (str) step of the pipeline that is being computed
+    :language: (str) language 
+    :model_name: (str) name of the model being studied
+    :extension: (str) extension used for the derivatives that will be saved
+    :overwrite: (boolean) for overwriting existing data
+    """
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     nscans = scans.get_nscans(language, run_name) # retrieve the number of scans for the run
-    path2output = get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension)
+    path2output = get_path2output(output_parent_folder, step, language, model_name, run_name, extension)
     
     if compute(path2output, overwrite=overwrite):
         df = process_raw_features(run, tr, nscans)
@@ -62,22 +76,26 @@ if __name__ =='__main__':
 
     args = parser.parse_args()
 
-    input_data_type = 'raw-features'
-    output_data_type = 'features'
+    last_step = 'raw-features'
+    step = 'features'
     extension = '.csv'
     source = 'fMRI'
     model = args.model
 
-    output_parent_folder = get_output_parent_folder(source, output_data_type, args.language, model)
+
+    # Retrieving data
+    output_parent_folder = get_output_parent_folder(source, step, args.language, model)
     check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
 
-    raw_features = get_data(args.language, input_data_type, model=model, source='fMRI')
+    raw_features = get_data(args.language, last_step, model=model, source='fMRI')
     
+
+    # Computing Features
     if not args.parallel:
         for i, run in enumerate(raw_features):
-            compute_features(run, output_parent_folder, output_data_type, args.language, model, extension, args.tr, args.overwrite)
+            compute_features(run, output_parent_folder, step, args.language, model, extension, args.tr, args.overwrite)
     else:
         Parallel(n_jobs=-2)(delayed(compute_features) \
-                    (run, output_parent_folder, output_data_type, args.language, model, extension, args.tr, args.overwrite) for run in raw_features)
+                    (run, output_parent_folder, step, args.language, model, extension, args.tr, args.overwrite) for run in raw_features)
 
 

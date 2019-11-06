@@ -20,6 +20,10 @@ from os.path import join
 ############################################################################
 ################################# SETTINGS #################################
 ############################################################################
+### Here are retrieved the parameters from the $LePetitPrince/code/utilities/settings.py
+### file.
+### For any parameter modification, modify the source file indicated just above.
+
 
 params = Params()
 
@@ -45,10 +49,18 @@ optional_parallel = '--parallel ' if parallel else ''
 ############################################################################
 ################################# PIPELINE #################################
 ############################################################################
+### Here is defined the pipeline architecture, where each function (starting 
+### with 'task_') represents one step of the pipeline.
+### Each step of the pipeline will be call the as many times as there is 
+### elements in the 'actions' key of the dictionary that is yielded.
+
 
 paths = Paths()
 
 def task_check_architecture():
+    """Create the folders necessary to the architecture of the project.
+    You might want to run this task first, then put your input data where 
+    it should be and finally run the whole pipeline."""
     yield {
             'name': 'architecture',
             'file_dep': ['../create_data_architecture.py'],
@@ -57,7 +69,8 @@ def task_check_architecture():
 
 
 def task_raw_features():
-    """Step 1: Generate raw features from raw data (text, wave) model predictions."""
+    """Step 1: Generate raw features from raw data (text, wave) model 
+    predictions."""
     extension = '.csv'
     output_data_type = 'raw-features'
     source = 'fMRI'
@@ -83,7 +96,9 @@ def task_raw_features():
 
 
 def task_features():
-    """Step 2: Generate features (=fMRI regressors) from raw_features (csv file with 3 columns onset-amplitude-duration) by convolution with an hrf kernel."""
+    """Step 2: Generate features (=fMRI regressors) from raw_features 
+    (csv file with 3 columns onset-amplitude-duration) by convolution 
+    with an hrf kernel."""
     input_data_type = 'raw-features'
     output_data_type = 'features'
     extension = '.csv'
@@ -126,113 +141,72 @@ def task_design_matrices():
             }
 
 
-#def task_glm_indiv():
-#    """Step 4: Generate r2 maps from design matrices and fMRI data in a given language for a given model."""
-#    source = 'fMRI'
-#    input_data_type = 'design-matrices'
-#    output_data_type = 'glm-indiv'
-#    extension = '.csv'
-#    subjects = Subjects()
-#
-#    for language in languages:
-#        for models in aggregated_models:
-#            pca_list = params.n_components_list if params.pca else ['']
-#            for pca in pca_list:
-#                pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
-#                output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
-#                input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-#                dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
-#                targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-#                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
-#                pca_argument = ' --pca {} '.format(pca) if params.pca else ''
-#                yield {
-#                    'name': models + '_pca_' + str(pca) if params.pca else models + '_no_pca',
-#                    'file_dep': ['glm-indiv.py'] + dependencies,
-#                    'targets': targets,
-#                    'actions': ['python glm-indiv.py --language {} --model_name {} '.format(language, models) + optional + optional_parallel + pca_argument + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))],
-#                }
+def task_glm_indiv():
+    """Step 4: Generate r2 maps from design matrices and fMRI data in a given 
+    language for a given model. By default, it will only be called for models 
+    with less than 20 features (see settings.py)."""
+    source = 'fMRI'
+    input_data_type = 'design-matrices'
+    output_data_type = 'glm-indiv'
+    extension = '.csv'
+    subjects = Subjects()
+
+    for language in languages:
+        for models in aggregated_models:
+            pca_list = params.n_components_list if params.pca else ['']
+            for pca in pca_list:
+                pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
+                output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
+                input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
+                dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
+                targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
+                pca_argument = ' --pca {} '.format(pca) if params.pca else ''
+                yield {
+                    'name': models + '_pca_' + str(pca) if params.pca else models + '_no_pca',
+                    'file_dep': ['glm-indiv.py'] + dependencies,
+                    'targets': targets,
+                    'actions': ['python glm-indiv.py --language {} --model_name {} '.format(language, models) + optional + optional_parallel + pca_argument + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))],
+                }
 
 
-#def task_ridge_indiv():
-#    """Step 4 bis: Generate r2 & alphas maps (if voxel wised enabled) from design matrices and fMRI data in a given language for a given model."""
-#    source = 'fMRI'
-#    input_data_type = 'design-matrices'
-#    output_data_type = 'ridge-indiv'
-#    extension = '.csv'
-#    subjects = Subjects()
-#
-#    for language in languages:
-#        for models in aggregated_models:
-#            pca_list = params.n_components_list if params.pca else ['']
-#            for pca in pca_list:
-#                pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
-#                output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
-#                input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-#                dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
-#                targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-#                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
-#                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'alphas', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-#                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'alphas', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
-#                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'p-values', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-#                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'p-values', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
-#                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'significative_r2', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-#                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'significative_r2', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
-#                pca_argument = ' --pca {} '.format(pca) if params.pca else ''
-#                alphas_argument =  ' --alphas ' + ' '.join(str(alpha) for alpha in alphas) if params.voxel_wise else ''
-#                yield {
-#                    'name': models + '_pca_' + str(pca) if params.pca else models + '_no_pca',
-#                    'file_dep': ['ridge-indiv.py'] + dependencies,
-#                    'targets': targets,
-#                    'actions': ['python ridge-indiv.py --language {} --model_name {} '.format(language, models) \
-#                        + optional + optional_parallel \
-#                            + pca_argument \
-#                                + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))\
-#                                    + alphas_argument + " --voxel_wised"]
-#
-#                }
+def task_ridge_indiv():
+    """Step 4 bis: Generate r2, pearson & alphas maps (if voxel wised enabled) 
+    from design matrices and fMRI data in a given language for a given model.
+    However, if you need significant values, you should consider using the 
+    optimized version (which is distributed) described in the main README.md."""
+    source = 'fMRI'
+    input_data_type = 'design-matrices'
+    output_data_type = 'ridge-indiv'
+    extension = '.csv'
+    subjects = Subjects()
 
+    for language in languages:
+        for models in aggregated_models:
+            pca_list = params.n_components_list if params.pca else ['']
+            for pca in pca_list:
+                pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
+                output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
+                input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
+                dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
+                targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'alphas', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'alphas', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'p-values', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'p-values', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'significative_r2', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'significative_r2', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
+                pca_argument = ' --pca {} '.format(pca) if params.pca else ''
+                alphas_argument =  ' --alphas ' + ' '.join(str(alpha) for alpha in alphas) if params.voxel_wise else ''
+                yield {
+                    'name': models + '_pca_' + str(pca) if params.pca else models + '_no_pca',
+                    'file_dep': ['ridge-indiv.py'] + dependencies,
+                    'targets': targets,
+                    'actions': ['python ridge-indiv.py --language {} --model_name {} '.format(language, models) \
+                        + optional + optional_parallel \
+                            + pca_argument \
+                                + ' --subjects ' + ' '.join(subject for subject in subjects.get_all(language, test))\
+                                    + alphas_argument + " --voxel_wised"]
 
-#def task_glm_group():
-#    """Step 5: Compute GLM group analysis."""
-#    source = 'fMRI'
-#    input_data_type = 'glm-indiv'
-#    output_data_type = 'glm-group'
-#
-#    for language in languages:
-#        for models in aggregated_models:
-#            output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
-#            input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-#            dependencies = [get_path2output(input_parent_folder, input_data_type, language, model, run_name, extension) for run_name in run_names]
-#            targets = [get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension) for run_name in run_names]
-#            yield {
-#                'name': models,
-#                'file_dep': ['glm-group.py'] + dependencies,
-#                'targets': targets,
-#                'actions': ['python glm-group.py --language {} --model_name {} '.format(language, models) + optional],
-#            }
-
-
-#def task_ridge_group():
-#    """Step 5 bis: Compute Ridge group analysis."""
-#    source = 'fMRI'
-#    input_data_type = 'ridge-indiv'
-#    output_data_type = 'ridge-group'
-#
-#    for language in languages:
-#        for models in aggregated_models:
-#            output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
-#            input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-#            dependencies = [get_path2output(input_parent_folder, input_data_type, language, model, run_name, extension) for run_name in run_names]
-#            targets = [get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension) for run_name in run_names]
-#            yield {
-#                'name': models,
-#                'file_dep': ['ridge-group.py'] + dependencies,
-#                'targets': targets,
-#                'actions': ['python ridge-group.py --language {} --model_name {} '.format(language, models) + optional],
-#            }
-
-
-
-############################################################################
-############################################################################
-############################################################################
+                }

@@ -81,6 +81,38 @@ if __name__=='__main__':
             yaml_files_path = f"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/yaml_files/"
             design_matrices_path = f"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/design-matrices/{language}/{model_name}/"
             fmri_path = f"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI/{language}/{subject}/func/" 
+
+            ######################
+            ### Data retrieval ###
+            ######################
+            inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
+            derivatives_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(subject, model_name))
+            shuffling_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/shuffling.npy".format(subject, model_name))
+            r2_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/r2/".format(subject, model_name))
+            pearson_corr_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/pearson_corr/".format(subject, model_name))
+            distribution_r2_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/distribution_r2/".format(subject, model_name))
+            distribution_pearson_corr_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/distribution_pearson_corr/".format(subject, model_name))
+            yaml_files_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/yaml_files/".format(subject, model_name))
+            output_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/outputs/".format(subject, model_name))
+
+            ####################
+            ### Sanity check ###
+            ####################
+
+            all_paths = [inputs_path, 
+                            fmri_path, 
+                            design_matrices_path, 
+                            derivatives_path, 
+                            r2_path, 
+                            pearson_corr_path,
+                            distribution_r2_path, 
+                            distribution_pearson_corr_path, 
+                            yaml_files_path, 
+                            output_path]
+            for path in all_paths:
+                check_folder(path)
+
+
             y = np.load(os.path.join(fmri_path, 'y_run1.npy'))
             x = np.load(os.path.join(design_matrices_path, 'x_run1.npy'))
             nb_voxels = str(y.shape[1])

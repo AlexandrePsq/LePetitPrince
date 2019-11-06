@@ -69,6 +69,7 @@ subjects2run = ['sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101'
 language = "english"
 alpha_percentile = str(99)
 nb_permutations = 3000
+nb_runs = 9
 job2launch = []
 
 if __name__=='__main__':
@@ -86,7 +87,7 @@ if __name__=='__main__':
             nb_features = str(x.shape[1])
             alpha_list = [round(tmp, 5) for tmp in np.logspace(2, 5, 25)]
             alphas = ','.join([str(alpha) for alpha in alpha_list]) 
-            nb_runs = 9
+            
 
             # Defining 'parameters.yml'file
             parameters_path = f"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/parameters.yml"
@@ -131,7 +132,7 @@ if __name__=='__main__':
         output_log=f'/home/ap259944/logs/log_o_{job}'
         error_log=f'/home/ap259944/logs/log_e_{job}'
         job_name=f'{job}'
-        write(job2launchpath, f"qsub -q {queue} -N {job_name} -l walltime={walltime} -o {output_log} -e {error_log} {job}")
+        write(job2launchpath, f"qsub -q {queue} -N {os.path.basename(job_name).split('.')[0]} -l walltime={walltime} -o {output_log} -e {error_log} {job}")
         jobs_state.iloc[index] = [os.path.basename(job).split('_')[1], os.path.basename(job).split('_')[2], job, 0]
     jobs_state =  jobs_state.astype({'state':int}) 
 

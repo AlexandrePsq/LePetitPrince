@@ -99,6 +99,7 @@ if __name__=='__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nScheduler that checks the state of all the jobs and planned the jobs that need to be run.""")
     parser.add_argument("--jobs_state_folder", type=str, default="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/jobs_state/", help="Folder where jobs state are saved.")
+    parser.add_argument("--overwrite", type=bool, default=False, help="Overwrite existing data.")
 
     args = parser.parse_args()
 
@@ -124,14 +125,13 @@ if __name__=='__main__':
         check_folder(fmri_path)
         runs = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
 
-        if len(glob.glob(os.path.join(fmri_path, 'y_run*.npy'))) != 9:
+        if len(glob.glob(os.path.join(fmri_path, 'y_run*.npy'))) != 9 or args.overwrite:
 
             ###########################
             ### Data transformation ###
             ###########################
 
             y = [masker.transform(f) for f in runs] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
-            print(y[0].shape)
             # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element
             for run in range(len(y)):
                 new = np.random.random(y[run].shape[0])/10000
@@ -140,7 +140,7 @@ if __name__=='__main__':
 
             for index in range(len(y)):
                 np.save(os.path.join(fmri_path, 'y_run{}.npy'.format(index+1)), y[index])
-        print('--> Done', flush=True)
+        print('--> Done (dim: {})'.format(y[0].shape), flush=True)
         for model_name in model_names:
 
             ######################
@@ -168,7 +168,7 @@ if __name__=='__main__':
             for path in all_paths:
                 check_folder(path)
 
-            if not os.path.isfile(parameters_path):
+            if not os.path.isfile(parameters_path) or args.overwrite:
                 y = np.load(os.path.join(fmri_path, 'y_run1.npy'))
                 x = np.load(os.path.join(design_matrices_path, 'x_run1.npy'))
                 nb_voxels = str(y.shape[1])
@@ -193,7 +193,7 @@ if __name__=='__main__':
                 jobs_state.iloc[index] = [subject, model_name, '5']
                 index += 1
     
-    if not os.path.isfile(jobs_state_path):
+    if not os.path.isfile(jobs_state_path) or args.overwrite:
         jobs_state.to_csv(jobs_state_path, index=False)
     else:
         jobs_state = pd.read_csv(jobs_state_path)
@@ -293,6 +293,6 @@ if __name__=='__main__':
                 job_name=f'{job}'
                 write(job2launchpath4, f"qsub -q {queue} -N {os.path.basename(job_name).split('.')[0]} -l walltime={walltime} -o {output_log} -e {error_log} {job}")
 
-        time.sleep(900)
+            time.sleep(900)
     except:
         print('---------------------- Ridge pipeline scheduler is off. ----------------------')

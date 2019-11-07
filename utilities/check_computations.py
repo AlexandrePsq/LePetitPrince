@@ -192,12 +192,11 @@ if __name__=='__main__':
                 # Saving
                 with open(parameters_path, 'w') as outfile:
                     yaml.dump(parameters, outfile, default_flow_style=False)
-                    print('\t\tParameters for model {} is Done.'.format(model_name))
 
             if not os.path.isfile(jobs_state_path) or args.overwrite:
                 jobs_state.iloc[index_jobs_state] = [subject, model_name, '5']
                 index_jobs_state += 1
-    
+        print('\t\tParameters for all models are computed.')
     if not os.path.isfile(jobs_state_path) or args.overwrite:
         jobs_state.to_csv(jobs_state_path, index=False)
     else:
@@ -298,6 +297,7 @@ if __name__=='__main__':
                 job_name=f'{job}'
                 write(job2launchpath4, f"qsub -q {queue} -N {os.path.basename(job_name).split('.')[0]} -l walltime={walltime} -o {output_log} -e {error_log} {job}")
             print('\t--> Done')
+            print('\t\t\t\t\t\t.\n\t\t\t\t\t\t.\n\t\t\t\t\t\t.')
             time.sleep(900)
     except:
         print('---------------------- Ridge pipeline scheduler is off. ----------------------')

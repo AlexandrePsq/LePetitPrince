@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import argparse
+import warnings
+warnings.simplefilter(action='ignore')
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker
@@ -153,6 +155,7 @@ if __name__=='__main__':
             yaml_files_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/yaml_files/")
             output_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/outputs/")
             design_matrices_path = os.path.join(inputs_path, f"derivatives/fMRI/design-matrices/{language}/{model_name}/")
+            parameters_path = f"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/parameters.yml"
             
             ####################
             ### Sanity check ###
@@ -161,7 +164,7 @@ if __name__=='__main__':
             all_paths = [inputs_path, design_matrices_path, derivatives_path, 
                             r2_path, pearson_corr_path, distribution_r2_path, 
                             distribution_pearson_corr_path, yaml_files_path, output_path,
-                            jobs_state_folder]
+                            jobs_state_folder, os.path.dirname(parameters_path)]
             for path in all_paths:
                 check_folder(path)
 
@@ -173,8 +176,6 @@ if __name__=='__main__':
                 alpha_list = [round(tmp, 5) for tmp in np.logspace(2, 5, 25)]
                 alphas = ','.join([str(alpha) for alpha in alpha_list]) 
                 # Defining 'parameters.yml' file
-                parameters_path = f"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/parameters.yml"
-                check_folder(os.path.dirname(parameters_path))
                 parameters = {'models': [], 
                                 'nb_runs':nb_runs, 
                                 'nb_voxels':nb_voxels, 

@@ -195,7 +195,10 @@ if __name__=='__main__':
                     print('\t\tParameters for model {} is Done.'.format(model_name))
 
             if not os.path.isfile(jobs_state_path) or args.overwrite:
+                print([subject, model_name, '5'])
                 jobs_state.iloc[index] = [subject, model_name, '5']
+                print(jobs_state.iloc[index])
+                print('\n\n', jobs_state, '\n\n')
                 index += 1
     
     if not os.path.isfile(jobs_state_path) or args.overwrite:

@@ -137,7 +137,7 @@ if __name__=='__main__':
                 yaml.dump(parameters, outfile, default_flow_style=False)
 
 
-            command = f"python shuffling_preparation.py --nb_features {nb_features} --output {shuffling_path} --n_permutations {nb_permutations}"
+            command = f"python {os.path.join(inputs_path, 'code/utilities/shuffling_preparation.py')} --nb_features {nb_features} --output {shuffling_path} --n_permutations {nb_permutations}"
             path4model_subject = f"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/1_{subject}_{model_name}_{language}.sh"
             job2launch.append(path4model_subject)
             check_folder(os.path.dirname(path4model_subject))
@@ -148,7 +148,7 @@ if __name__=='__main__':
             for run in range(1, 1+int(nb_runs)):
                 indexes = np.arange(1, 1+int(nb_runs))
                 indexes_tmp = np.delete(indexes, run-1, 0)
-                command = f"python cv_alphas.py --indexes {','.join([str(i) for i in indexes_tmp])} " + \
+                command = f"python {os.path.join(inputs_path, 'code/utilities/cv_alphas.py')} --indexes {','.join([str(i) for i in indexes_tmp])} " + \
                                                 f"--output {yaml_files_path} " + \
                                                 f"--x {design_matrices_path} " + \
                                                 f"--y {fmri_path} " + \

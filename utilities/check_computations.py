@@ -297,7 +297,7 @@ if __name__=='__main__':
                 job_name=f'{job}'
                 write(job2launchpath4, f"qsub -q {queue} -N {os.path.basename(job_name).split('.')[0]} -l walltime={walltime} -o {output_log} -e {error_log} {job}")
             print('\t--> Done')
-            print('\t\t\t\t\t\t.\n\t\t\t\t\t\t.\n\t\t\t\t\t\t.')
+            print('\t\t.\n\t\t.\n\t\t.')
             time.sleep(900)
     except:
         print('---------------------- Ridge pipeline scheduler is off. ----------------------')

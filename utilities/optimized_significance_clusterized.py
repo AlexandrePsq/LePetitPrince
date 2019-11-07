@@ -30,9 +30,12 @@ def get_score(model, y_true, x, r2_min=0., r2_max=0.99):
 
 def check_folder(path):
     # Create adequate folders if necessary
-    if not os.path.isdir(path):
-        check_folder(os.path.dirname(path))
-        os.mkdir(path)
+    try:
+        if not os.path.isdir(path):
+            check_folder(os.path.dirname(path))
+            os.mkdir(path)
+    except:
+        pass
 
 def update(model, parameters):
     model.alpha = parameters['alpha']
@@ -77,11 +80,8 @@ def write(path, text):
         f.write('\n')
 
 if __name__ == '__main__':
-
-    checkpoints = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/checkpoints_significance.txt'
             
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
-    parser.add_argument("--job2launch", type=str, default=None, help="Path to the yaml file containing alphas and run values.")
     parser.add_argument("--run", type=str, default='', help="Number of the run.")
     parser.add_argument("--yaml_files_path", type=str, default='', help="Path to the folder containing yaml files.")
     parser.add_argument("--output", type=str, default='', help="Path to the folder containing outputs.")
@@ -92,16 +92,13 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    with open(args.job2launch, 'r') as stream:
-        try:
-            data = yaml.safe_load(stream)
-        except :
-            print(-1)
-            quit()
-    
-    for alpha in data[args.run]:
+    checkpoints = os.path.join(args.yaml_files_path, f"{args.run}/checkpoints_significance.txt")
+    check_folder(os.path.dirname(checkpoints))
+    files = sorted(glob.glob(os.path.join(args.yaml_files_path, f'run_{args.run}_alpha_*.yml')))
+    for file_ in files:
+        alpha = os.path.basename(file_).split('_')[-1].split('.')[0]
         write(checkpoints, 'alpha={}'.format(alpha))
-        with open(os.path.join(args.yaml_files_path, 'run_{}_alpha_{}.yml'.format(args.run, alpha)), 'r') as stream:
+        with open(file_, 'r') as stream:
             try:
                 yaml_file = yaml.safe_load(stream)
             except :

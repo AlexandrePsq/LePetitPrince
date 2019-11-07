@@ -28,7 +28,7 @@ def check_folder(path):
 
 if __name__=='__main__':
 
-    parser = argparse.ArgumentParser(description="""Objective:\nCreate the command line for the second part of the ridge analysis.""")
+    parser = argparse.ArgumentParser(description="""Objective:\nCreate the command line for the fourth part of the ridge analysis.""")
     parser.add_argument("--model_name", type=str, default='', help="Name of the model.")
     parser.add_argument("--subject", type=str, default=None, help="Subject name.")
     parser.add_argument("--language", type=str, default=None, help="Subject name.")
@@ -49,7 +49,7 @@ if __name__=='__main__':
     jobs_state_folder = os.path.join(inputs_path, "command_lines/jobs_state/")
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')
 
-    path4model_subject = os.path.join(inputs_path, f"command_lines/2_{subject}_{model_name}_{language}.sh")
+    path4model_subject = os.path.join(inputs_path, f"command_lines/4_{subject}_{model_name}_{language}.sh")
     
     # Retrieve data
     with open(parameters_path, 'r') as stream:
@@ -60,21 +60,29 @@ if __name__=='__main__':
             quit()
     model = parameters['models'][0]
     name = model['name']
+    nb_voxels = parameters['nb_voxels']
+    alpha_percentile = parameters['alpha_percentile']
+    nb_permutations = parameters['nb_permutations']
     nb_runs = parameters['nb_runs']
-    check_before =  f"echo '3-->2' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')}"
-    check_after =  f"echo '~2' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')} "
+    check_before =  f"echo '1-->0' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')}"
+    check_after =  f"echo '~0' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')} "
     write(path4model_subject, "#!/bin/sh")
     write(path4model_subject, check_before)
 
     # Create bash script for this model and subject
-    for run in range(1, 1+int(nb_runs)):
-        features_indexes = ','.join([str(index) for index in model['indexes']])
-        command = f"python {os.path.join(inputs_path, 'code/utilities/optimized_significance_clusterized.py')} --features_indexes {features_indexes} " + \
-                                        f"--output {derivatives_path} " + \
-                                        f"--yaml_files_path {yaml_files_path} " + \
-                                        f"--run {run} " + \
-                                        f"--x {design_matrices_path} " + \
-                                        f"--y {fmri_path} " + \
-                                        f"--model_name {name} "   
-        write(path4model_subject, command)
+    command_merge = f"python {os.path.join(inputs_path, 'code/utilities/optimized_merge_results.py')} --input_folder {derivatives_path} " + \
+                                    f"--nb_runs {nb_runs} " + \
+                                    f"--yaml_files {yaml_files_path} " + \
+                                    f"--nb_voxels {nb_voxels} " + \
+                                    f"--n_permutations {nb_permutations} " + \
+                                    f"--alpha_percentile {alpha_percentile} " + \
+                                    f"--model_name {name} "
+
+    command_create_maps = f"python {os.path.join(inputs_path, 'code/utilities/create_maps.py')} --input {derivatives_path} " + \
+                                    f"--parameters {parameters_path} " + \
+                                    f"--subject {subject} " + \
+                                    f"--fmri_data {fmri_path} " 
+        
+    write(path4model_subject, command_merge)
+    write(path4model_subject, command_create_maps)
     write(path4model_subject, check_after)

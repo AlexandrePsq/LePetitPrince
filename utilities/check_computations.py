@@ -214,7 +214,7 @@ if __name__=='__main__':
             delete_file(job2launchpath2)
             delete_file(job2launchpath3)
             delete_file(job2launchpath4)
-            # Update state CSV
+            print('Updating state CSV...', end=' ', flush=True)
             for state_file in state_files:
                 model_name = os.path.basename(state_file).split('_')[0]
                 subject = os.path.basename(state_file).split('_')[1].split('.')[0]
@@ -244,8 +244,9 @@ if __name__=='__main__':
                 sel = (jobs_state.subject == subject) & (jobs_state.model_name == model_name)
                 jobs_state.loc[sel, 'state'] = state
                 os.system(f"rm {state_file}")
+            print('\t--> Done')
             
-            # List new jobs to run
+            print('Listing new jobs to run...', end=' ', flush=True)
             for state_file in state_files:
                 model_name = os.path.basename(state_file).split('_')[0]
                 subject = os.path.basename(state_file).split('_')[1].split('.')[0]
@@ -263,9 +264,9 @@ if __name__=='__main__':
                 elif state=='1':
                     os.system(f"python {os.path.join(derivatives_path, 'code/create_command_lines_4.py')} --model_name {model_name} --subject {subject} --language {language}")
                     job2launch4.append(os.path.join(inputs_path, f"command_lines/4_{subject}_{model_name}_{language}.sh"))
+            print('\t--> Done')
 
-
-
+            print("Grouping 'qsub' commands...", end=' ', flush=True)
             for index, job in enumerate(job2launch1):
                 queue='Nspin_bigM' if 'all-layers' in job else ('Nspin_long' if (('bert' in job) or ('gpt2' in job) or ('lstm' in job)) else 'Nspin_short')
                 walltime='80:00:00' if queue in ['Nspin_bigM', 'Nspin_long'] else '01:00:00'
@@ -297,7 +298,7 @@ if __name__=='__main__':
                 error_log=f'/home/ap259944/logs/log_e_{job}'
                 job_name=f'{job}'
                 write(job2launchpath4, f"qsub -q {queue} -N {os.path.basename(job_name).split('.')[0]} -l walltime={walltime} -o {output_log} -e {error_log} {job}")
-
+            print('\t--> Done')
             time.sleep(900)
     except:
         print('---------------------- Ridge pipeline scheduler is off. ----------------------')

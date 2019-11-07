@@ -109,7 +109,7 @@ if __name__=='__main__':
     for subject in subjects:
         fmri_path = os.path.join(inputs_path, "data/fMRI/{language}/{subject}/func/")
         check_folder(fmri_path)
-        fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language, subject), 'fMRI_*run*')))
+        fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language=language, subject=subject), 'fMRI_*run*')))
     masker = compute_global_masker(list(fmri_runs.values()))
 
     jobs_state = pd.DataFrame(data=np.full((len(model_names)*len(subjects),3), np.nan)  , columns=['subject', 'model', 'state'])

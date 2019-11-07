@@ -67,15 +67,15 @@ if __name__=='__main__':
 
     # Create bash script for this model and subject
     command = f"python {os.path.join(inputs_path, 'code/utilities/shuffling_preparation.py')} --nb_features {nb_features} --output {shuffling_path} --n_permutations {nb_permutations}"
-    check_before =  f"echo '5-->4' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')}"
-    check_after =  f"echo '~4' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')} "
+    check_before =  f"echo '5-->4' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'_tmp.txt')}"
+    check_after =  f"echo '~4' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'_tmp.txt')} "
     write(path4model_subject, "#!/bin/sh")
     write(path4model_subject, check_before)
     write(path4model_subject, command)
     write(path4model_subject, check_after)
 
-    check_before =   f"echo '4-->3' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')}"
-    check_after =  f"echo '~3' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')} "
+    check_before =   f"echo '4-->3' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'_tmp.txt')}"
+    check_after =  f"echo '~3' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'_tmp.txt')} "
     write(path4model_subject, check_before)
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))

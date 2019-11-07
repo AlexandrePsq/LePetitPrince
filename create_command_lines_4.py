@@ -64,8 +64,8 @@ if __name__=='__main__':
     alpha_percentile = parameters['alpha_percentile']
     nb_permutations = parameters['nb_permutations']
     nb_runs = parameters['nb_runs']
-    check_before =  f"echo '1-->0' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')}"
-    check_after =  f"echo '~0' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'.txt')} "
+    check_before =  f"echo '1-->0' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'_tmp.txt')}"
+    check_after =  f"echo '~0' >  {os.path.join(jobs_state_folder, '_'.join([model_name, subject])+'_tmp.txt')} "
     write(path4model_subject, "#!/bin/sh")
     write(path4model_subject, check_before)
 

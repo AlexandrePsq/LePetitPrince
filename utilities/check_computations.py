@@ -194,7 +194,7 @@ if __name__=='__main__':
                     yaml.dump(parameters, outfile, default_flow_style=False)
                     print('\t\tParameters for model {} is Done.'.format(model_name))
 
-            if not os.path.isfile(jobs_state_path):
+            if not os.path.isfile(jobs_state_path) or args.overwrite:
                 jobs_state.iloc[index] = [subject, model_name, '5']
                 index += 1
     
@@ -203,7 +203,7 @@ if __name__=='__main__':
     else:
         jobs_state = pd.read_csv(jobs_state_path)
 
-    state_files = sorted(glob.glob(os.path.join(args.jobs_state_folder, '*.txt')))
+    state_files = sorted(glob.glob(os.path.join(args.jobs_state_folder, '*_tmp.txt')))
 
     ################ INFINITE LOOP ################
     print('---------------------- Ridge pipeline scheduler is on... ----------------------')

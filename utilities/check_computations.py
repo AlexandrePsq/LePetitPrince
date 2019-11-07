@@ -103,7 +103,7 @@ if __name__=='__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nScheduler that checks the state of all the jobs and planned the jobs that need to be run.""")
     parser.add_argument("--jobs_state_folder", type=str, default="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/jobs_state/", help="Folder where jobs state are saved.")
-    parser.add_argument("--overwrite", type=bool, default=False, help="Overwrite existing data.")
+    parser.add_argument("--overwrite", action='store_true', default=False, help="Overwrite existing data.")
 
     args = parser.parse_args()
 

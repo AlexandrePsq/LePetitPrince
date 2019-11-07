@@ -1,6 +1,9 @@
 import os
 import pandas as pd
 import argparse
+from nilearn.masking import compute_epi_mask
+from nilearn.image import math_img, mean_img
+from nilearn.input_data import MultiNiftiMasker
 import glob
 import yaml
 import numpy as np
@@ -23,6 +26,14 @@ def check_folder(path):
             os.mkdir(path)
     except:
         pass
+
+def compute_global_masker(files): # [[path, path2], [path3, path4]]
+    # return a MultiNiftiMasker object
+    masks = [compute_epi_mask(f) for f in files]
+    global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
+    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=5) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
+    masker.fit()
+    return masker
 
 
 
@@ -93,9 +104,41 @@ if __name__=='__main__':
     jobs_state_path = os.path.join(inputs_path, "command_lines/jobs_state.csv")
     jobs_state_folder = os.path.join(inputs_path, "command_lines/jobs_state/")
 
-    jobs_state = pd.DataFrame(data=np.full((len(model_names)*len(subjects),4), np.nan)  , columns=['subject', 'model', 'state'])
-    index = 0
+    print('Computing global masker...', end=' ', flush=True)
+    fmri_runs = {}
     for subject in subjects:
+        fmri_path = os.path.join(inputs_path, "data/fMRI/{language}/{subject}/func/")
+        check_folder(fmri_path)
+        fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language, subject), 'fMRI_*run*')))
+    masker = compute_global_masker(list(fmri_runs.values()))
+
+    jobs_state = pd.DataFrame(data=np.full((len(model_names)*len(subjects),3), np.nan)  , columns=['subject', 'model', 'state'])
+    index = 0
+    print('--> Done', flush=True)
+    print('Iterating over subjects...\nTransforming fMRI data...', flush=True)
+    for subject in subjects:
+        print('\tSubject: {} ...'.format(subject), end=' ', flush=True)
+        fmri_path = os.path.join(inputs_path, f"data/fMRI/{language}/{subject}/func/")
+        check_folder(fmri_path)
+        runs = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
+
+        if len(glob.glob(os.path.join(fmri_path, 'y_run*.npy'))) != 9:
+
+            ###########################
+            ### Data transformation ###
+            ###########################
+
+            y = [masker.transform(f) for f in runs] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
+            print(y[0].shape)
+            # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element
+            for run in range(len(y)):
+                new = np.random.random(y[run].shape[0])/10000
+                zero = np.zeros(y[run].shape[0])
+                y[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, y[run])
+
+            for index in range(len(y)):
+                np.save(os.path.join(fmri_path, 'y_run{}.npy'.format(index+1)), y[index])
+        print('--> Done', flush=True)
         for model_name in model_names:
 
             ######################
@@ -110,14 +153,12 @@ if __name__=='__main__':
             yaml_files_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/yaml_files/")
             output_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/outputs/")
             design_matrices_path = os.path.join(inputs_path, f"derivatives/fMRI/design-matrices/{language}/{model_name}/")
-            fmri_path = os.path.join(inputs_path, f"data/fMRI/{language}/{subject}/func/")
             
-
             ####################
             ### Sanity check ###
             ####################
 
-            all_paths = [inputs_path, fmri_path, design_matrices_path, derivatives_path, 
+            all_paths = [inputs_path, design_matrices_path, derivatives_path, 
                             r2_path, pearson_corr_path, distribution_r2_path, 
                             distribution_pearson_corr_path, yaml_files_path, output_path,
                             jobs_state_folder]
@@ -145,6 +186,7 @@ if __name__=='__main__':
                 # Saving
                 with open(parameters_path, 'w') as outfile:
                     yaml.dump(parameters, outfile, default_flow_style=False)
+                    print('\t\tParameters for model {} is Done.'.format(model_name))
 
             if not os.path.isfile(jobs_state_path):
                 jobs_state.iloc[index] = [subject, model_name, '5']

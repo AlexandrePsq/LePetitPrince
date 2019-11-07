@@ -120,7 +120,7 @@ if __name__=='__main__':
     masker = compute_global_masker(list(fmri_runs.values()))
 
     jobs_state = pd.DataFrame(data=np.full((len(model_names)*len(subjects),3), np.nan)  , columns=['subject', 'model_name', 'state'])
-    index = 0
+    index_jobs_state = 0
     print('--> Done', flush=True)
     print('Iterating over subjects...\nTransforming fMRI data...', flush=True)
     for subject in subjects:
@@ -195,11 +195,8 @@ if __name__=='__main__':
                     print('\t\tParameters for model {} is Done.'.format(model_name))
 
             if not os.path.isfile(jobs_state_path) or args.overwrite:
-                print([subject, model_name, '5'])
-                jobs_state.iloc[index] = [subject, model_name, '5']
-                print(jobs_state.iloc[index])
-                print('\n\n', jobs_state, '\n\n')
-                index += 1
+                jobs_state.iloc[index_jobs_state] = [subject, model_name, '5']
+                index_jobs_state += 1
     
     if not os.path.isfile(jobs_state_path) or args.overwrite:
         jobs_state.to_csv(jobs_state_path, index=False)

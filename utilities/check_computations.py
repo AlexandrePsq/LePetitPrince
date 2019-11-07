@@ -140,7 +140,8 @@ if __name__=='__main__':
 
             for index in range(len(y)):
                 np.save(os.path.join(fmri_path, 'y_run{}.npy'.format(index+1)), y[index])
-        print('--> Done (dim: {})'.format(y[0].shape), flush=True)
+            print('(dim: {})'.format(y[0].shape), end=' ', flush=True)
+        print('--> Done', flush=True)
         for model_name in model_names:
 
             ######################

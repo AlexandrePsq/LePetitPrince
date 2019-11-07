@@ -12,6 +12,10 @@ import numpy as np
 import time
 
 
+def delete_file(path):
+    if os.path.isfile(path):
+        os.system(f"rm {path}")
+
 # Functions definition
 def write(path, text):
     """Write in text file at 'path'."""
@@ -206,10 +210,10 @@ if __name__=='__main__':
     print('--------------------------- (Iteration every 15 min)---------------------------')
     try:
         while True:
-            os.system(f'rm {job2launchpath1}')
-            os.system(f'rm {job2launchpath2}')
-            os.system(f'rm {job2launchpath3}')
-            os.system(f'rm {job2launchpath4}')
+            delete_file(job2launchpath1)
+            delete_file(job2launchpath2)
+            delete_file(job2launchpath3)
+            delete_file(job2launchpath4)
             # Update state CSV
             for state_file in state_files:
                 model_name = os.path.basename(state_file).split('_')[0]

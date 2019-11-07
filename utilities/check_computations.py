@@ -249,7 +249,7 @@ if __name__=='__main__':
             for index, row in jobs_state.iterrows():
                 model_name = row['model_name']
                 subject = row['subject']
-                state = row['state']
+                state = str(row['state'])
                 if state in ['5', '4']:
                     os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_1.py')} --model_name {model_name} --subject {subject} --language {language}")
                     job2launch1.append(os.path.join(inputs_path, f"command_lines/1_{subject}_{model_name}_{language}.sh"))

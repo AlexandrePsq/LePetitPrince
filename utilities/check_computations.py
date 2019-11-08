@@ -266,15 +266,15 @@ if __name__=='__main__':
 
             print("Grouping 'qsub' commands...", end=' ', flush=True)
             for index, job in enumerate(job2launch1):
-                queue='Nspin_bigM' if 'all-layers' in job else ('Nspin_long' if (('bert' in job) or ('gpt2' in job) or ('lstm' in job)) else 'Nspin_short')
-                walltime='80:00:00' if queue in ['Nspin_bigM', 'Nspin_long'] else '01:00:00'
+                queue='Nspin_bigM' if 'all-layers' in job else 'Nspin_long'
+                walltime='80:00:00'
                 output_log=f'/home/ap259944/logs/log_o_{job}'
                 error_log=f'/home/ap259944/logs/log_e_{job}'
                 job_name=f'{job}'
                 write(job2launchpath1, f"qsub -q {queue} -N {os.path.basename(job_name).split('.')[0]} -l walltime={walltime} -o {output_log} -e {error_log} {job}")
 
             for index, job in enumerate(job2launch2):
-                queue='Nspin_bigM' if 'all-layers' in job else ('Nspin_long' if (('bert' in job) or ('gpt2' in job) or ('lstm' in job)) else 'Nspin_short')
+                queue='Nspin_bigM' if (('bert' in job) or ('gpt2' in job) or ('lstm' in job)) else 'Nspin_long'
                 walltime='99:00:00' if queue in ['Nspin_bigM', 'Nspin_long'] else '01:00:00'
                 output_log=f'/home/ap259944/logs/log_o_{job}'
                 error_log=f'/home/ap259944/logs/log_e_{job}'

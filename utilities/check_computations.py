@@ -216,8 +216,8 @@ if __name__=='__main__':
             delete_file(job2launchpath4)
             print('Updating state CSV...', end=' ', flush=True)
             for state_file in state_files:
-                model_name = os.path.basename(state_file).split('_')[0]
-                subject = os.path.basename(state_file).split('_')[1]
+                model_name = os.path.basename(state_file).split('+')[0]
+                subject = os.path.basename(state_file).split('+')[1].split('_')[0]
                 state = str(open(state_file, 'r').read())
                 derivatives_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(subject, model_name))
                 if state=='~4':

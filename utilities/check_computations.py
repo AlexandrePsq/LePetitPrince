@@ -217,7 +217,7 @@ if __name__=='__main__':
             print('Updating state CSV...', end=' ', flush=True)
             for state_file in state_files:
                 model_name = os.path.basename(state_file).split('_')[0]
-                subject = os.path.basename(state_file).split('_')[1].split('.')[0]
+                subject = os.path.basename(state_file).split('_')[1]
                 state = str(open(state_file, 'r').read())
                 derivatives_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(subject, model_name))
                 if state=='~4':

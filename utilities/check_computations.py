@@ -297,6 +297,7 @@ if __name__=='__main__':
                 error_log=f'/home/ap259944/logs/log_e_{job}'
                 job_name=f'{job}'
                 write(job2launchpath4, f"qsub -q {queue} -N {os.path.basename(job_name).split('.')[0]} -l walltime={walltime} -o {output_log} -e {error_log} {job}")
+            jobs_state.to_csv(jobs_state_path, index=False)
             print('\t--> Done')
             print('\t\t.\n\t\t.\n\t\t.')
             time.sleep(900)

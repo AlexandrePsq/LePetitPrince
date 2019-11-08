@@ -218,7 +218,7 @@ if __name__=='__main__':
             for state_file in state_files:
                 model_name = os.path.basename(state_file).split('_')[0]
                 subject = os.path.basename(state_file).split('_')[1].split('.')[0]
-                state = open(state_file, 'r').read()
+                state = str(open(state_file, 'r').read())
                 derivatives_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(subject, model_name))
                 if state=='~4':
                     result = os.path.isfile(os.path.join(derivatives_path, 'shuffling.npy'))
@@ -242,7 +242,7 @@ if __name__=='__main__':
                     result = True
                 state = state[1:] if result else str(int(state[1:])+1)
                 sel = (jobs_state.subject == subject) & (jobs_state.model_name == model_name)
-                jobs_state.loc[sel, 'state'] = state
+                jobs_state.loc[sel, 'state'] = str(state)
                 os.system(f"rm {state_file}")
             print('\t--> Done')
             

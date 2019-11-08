@@ -13,6 +13,7 @@ import time
 
 
 def delete_file(path):
+    """Safe delete a file."""
     if os.path.isfile(path):
         os.system(f"rm {path}")
 
@@ -34,7 +35,7 @@ def check_folder(path):
         pass
 
 def compute_global_masker(files): # [[path, path2], [path3, path4]]
-    # return a MultiNiftiMasker object
+    """Returns a MultiNiftiMasker object."""
     masks = [compute_epi_mask(f) for f in files]
     global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
     masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=5) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
@@ -299,5 +300,6 @@ if __name__=='__main__':
             print('\t--> Done')
             print('\t\t.\n\t\t.\n\t\t.')
             time.sleep(900)
-    except:
+    except Exception as e:
         print('---------------------- Ridge pipeline scheduler is off. ----------------------')
+        print(e)

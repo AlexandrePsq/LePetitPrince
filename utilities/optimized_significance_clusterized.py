@@ -92,12 +92,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    checkpoints = os.path.join(args.yaml_files_path, f"{args.run}/checkpoints_significance.txt")
-    check_folder(os.path.dirname(checkpoints))
     files = sorted(glob.glob(os.path.join(args.yaml_files_path, f'run_{args.run}_alpha_*.yml')))
     for file_ in files:
         alpha = os.path.basename(file_).split('_')[-1].split('.')[0]
-        write(checkpoints, 'alpha={}'.format(alpha))
         with open(file_, 'r') as stream:
             try:
                 yaml_file = yaml.safe_load(stream)
@@ -113,46 +110,34 @@ if __name__ == '__main__':
         check_folder(model_loading_path)
         model_saving_path = model_loading_path
 
-        write(checkpoints, '\tvariables defined.')
-
         try :
             model_fitted = load_model(model_loading_path, model)
-            write(checkpoints, '\tmodel loaded.')
         except:
-            write(checkpoints, '\tloading x...')
             x_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]])
             x = [np.load(item) for item in x_paths]
 
-            write(checkpoints, '\tloading y...')
             y_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes]])
             y = [np.load(item) for item in y_paths]
             
-            write(checkpoints, '\rretrieving voxels...')
             y_train = np.vstack(y)[:, voxels]
             x_train = np.vstack(x)
 
             model.set_params(alpha=alpha)
-            write(checkpoints, '\tfitting model...')
             model_fitted = model.fit(x_train, y_train)
-            write(checkpoints, '\tsaving model...')
             save_model(model_saving_path, model_fitted)
         
-        write(checkpoints, '\tloading test data...')
         x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(args.run)))[0])
         y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(args.run)))[0])[:, voxels]
         
         tmp = model_fitted.coef_.copy()
 
-        write(checkpoints, '\tmodel coef manipulation x...')
         indexes = args.features_indexes.split(',')
         model_name = args.model_name
         model_fitted.coef_ = np.zeros(model_fitted.coef_.shape)
         model_fitted.coef_[:,int(indexes[0]):int(indexes[1])] = tmp[:,int(indexes[0]):int(indexes[1])]
-        write(checkpoints, '\tcomputing scores...')
         r2, pearson_corr = get_score(model_fitted, y_test, x_test)
         
         # sanity check
-        write(checkpoints, '\trest of computations...')
         path2r2 = os.path.join(args.output, model_name, 'r2')
         path2pearson_corr = os.path.join(args.output, model_name, 'pearson_corr')
         
@@ -163,7 +148,5 @@ if __name__ == '__main__':
         r2_saving_path = os.path.join(path2r2, 'run_{}_alpha_{}.npy'.format(args.run, alpha))
         pearson_corr_saving_path = os.path.join(path2pearson_corr, 'run_{}_alpha_{}.npy'.format(args.run, alpha))
 
-        write(checkpoints, '\tsaving ...')
         np.save(r2_saving_path, r2)
         np.save(pearson_corr_saving_path, pearson_corr)
-        write(checkpoints, '\tsaved.')

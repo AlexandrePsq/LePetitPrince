@@ -245,6 +245,7 @@ if __name__=='__main__':
                 sel = (jobs_state.subject == subject) & (jobs_state.model_name == model_name)
                 jobs_state.loc[sel, 'state'] = str(state)
                 os.system(f"rm {state_file}")
+            jobs_state.to_csv(jobs_state_path, index=False)
             print('\t--> Done')
             
             print('Listing new jobs to run...', end=' ', flush=True)
@@ -264,7 +265,6 @@ if __name__=='__main__':
                 elif state=='1':
                     os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_4.py')} --model_name {model_name} --subject {subject} --language {language}")
                     job2launch4.append(os.path.join(inputs_path, f"command_lines/4_{subject}_{model_name}_{language}.sh"))
-            jobs_state.to_csv(jobs_state_path, index=False)
             print('\t--> Done')
 
             print("Grouping 'qsub' commands...", end=' ', flush=True)

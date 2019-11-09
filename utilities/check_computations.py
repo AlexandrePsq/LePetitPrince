@@ -248,7 +248,7 @@ if __name__=='__main__':
             jobs_state.to_csv(jobs_state_path, index=False)
             print('\t--> Done')
             
-            print('Listing new jobs to run...', end=' ', flush=True)
+            print('Listing new jobs to run...', flush=True)
             for index, row in tqdm(jobs_state.iterrows()):
                 model_name = row['model_name']
                 subject = row['subject']

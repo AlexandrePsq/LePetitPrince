@@ -7,6 +7,7 @@ from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker
 import glob
+from tqdm import tqdm
 import yaml
 import numpy as np
 import time
@@ -247,7 +248,7 @@ if __name__=='__main__':
             print('\t--> Done')
             
             print('Listing new jobs to run...', end=' ', flush=True)
-            for index, row in jobs_state.iterrows():
+            for index, row in tqdm(jobs_state.iterrows()):
                 model_name = row['model_name']
                 subject = row['subject']
                 state = str(row['state'])
@@ -263,6 +264,7 @@ if __name__=='__main__':
                 elif state=='1':
                     os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_4.py')} --model_name {model_name} --subject {subject} --language {language}")
                     job2launch4.append(os.path.join(inputs_path, f"command_lines/4_{subject}_{model_name}_{language}.sh"))
+            jobs_state.to_csv(jobs_state_path, index=False)
             print('\t--> Done')
 
             print("Grouping 'qsub' commands...", end=' ', flush=True)
@@ -297,7 +299,6 @@ if __name__=='__main__':
                 error_log=f'/home/ap259944/logs/log_e_{job}'
                 job_name=f'{job}'
                 write(job2launchpath4, f"qsub -q {queue} -N {os.path.basename(job_name).split('.')[0]} -l walltime={walltime} -o {output_log} -e {error_log} {job}")
-            jobs_state.to_csv(jobs_state_path, index=False)
             print('\t--> Done')
             print('\t\t.\n\t\t.\n\t\t.')
             time.sleep(900)

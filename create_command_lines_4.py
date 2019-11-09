@@ -9,21 +9,16 @@ import argparse
 
 
 # Functions definition
-def write(path, text):
+def write(path, text, end='\n'):
     """Write in text file at 'path'."""
     with open(path, 'a+') as f:
         f.write(text)
-        f.write('\n')
+        f.write(end)
 
-
-def check_folder(path):
-    """Create adequate folders if necessary."""
-    try:
-        if not os.path.isdir(path):
-            check_folder(os.path.dirname(path))
-            os.mkdir(path)
-    except:
-        pass
+def delete_file(path):
+    """Safe delete a file."""
+    if os.path.isfile(path):
+        os.system(f"rm {path}")
 
 
 if __name__=='__main__':
@@ -50,6 +45,7 @@ if __name__=='__main__':
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')
 
     path4model_subject = os.path.join(inputs_path, f"command_lines/4_{subject}_{model_name}_{language}.sh")
+    delete_file(path4model_subject)
     
     # Retrieve data
     with open(parameters_path, 'r') as stream:
@@ -67,7 +63,7 @@ if __name__=='__main__':
     check_before =  f"echo '1-->0' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')}"
     check_after =  f"echo '~0' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
     write(path4model_subject, "#!/bin/sh")
-    write(path4model_subject, check_before)
+    write(path4model_subject, check_before, end='')
 
     # Create bash script for this model and subject
     command_merge = f"python {os.path.join(inputs_path, 'code/utilities/optimized_merge_results.py')} --input_folder {derivatives_path} " + \
@@ -85,4 +81,4 @@ if __name__=='__main__':
         
     write(path4model_subject, command_merge)
     write(path4model_subject, command_create_maps)
-    write(path4model_subject, check_after)
+    write(path4model_subject, check_after, end='')

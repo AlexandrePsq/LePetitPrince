@@ -66,13 +66,13 @@ if __name__=='__main__':
     check_before =  f"echo '5-->4' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')}"
     check_after =  f"echo '~4' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
     write(path4model_subject, "#!/bin/sh")
-    write(path4model_subject, check_before, end='')
+    write(path4model_subject, check_before)
     write(path4model_subject, command)
-    write(path4model_subject, check_after, end='')
+    write(path4model_subject, check_after)
 
     check_before =   f"echo '4-->3' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')}"
     check_after =  f"echo '~3' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
-    write(path4model_subject, check_before, end='')
+    write(path4model_subject, check_before)
     for run in range(1, 1+int(nb_runs)):
         indexes = np.arange(1, 1+int(nb_runs))
         indexes_tmp = np.delete(indexes, run-1, 0)
@@ -83,4 +83,4 @@ if __name__=='__main__':
                                         f"--run {run} " + \
                                         f"--alphas {alphas}"
         write(path4model_subject, command)
-    write(path4model_subject, check_after, end='')
+    write(path4model_subject, check_after)

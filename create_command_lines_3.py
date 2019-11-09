@@ -62,7 +62,7 @@ if __name__=='__main__':
     check_before =  f"echo '2-->1' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')}"
     check_after =  f"echo '~1' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
     write(path4model_subject, "#!/bin/sh")
-    write(path4model_subject, check_before, end='')
+    write(path4model_subject, check_before)
     files_list = sorted(glob.glob(os.path.join(yaml_files_path, 'run_*_alpha_*.yml')))
 
     # Create bash script for this model and subject
@@ -80,5 +80,5 @@ if __name__=='__main__':
                                         f"--y {fmri_path} " + \
                                         f"--model_name {name} "
         write(path4model_subject, command)
-    write(path4model_subject, check_after, end='')
+    write(path4model_subject, check_after)
     

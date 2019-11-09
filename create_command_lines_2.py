@@ -60,7 +60,7 @@ if __name__=='__main__':
     check_before =  f"echo '3-->2' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')}"
     check_after =  f"echo '~2' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
     write(path4model_subject, "#!/bin/sh")
-    write(path4model_subject, check_before, end='')
+    write(path4model_subject, check_before)
 
     # Create bash script for this model and subject
     for run in range(1, 1+int(nb_runs)):
@@ -73,4 +73,4 @@ if __name__=='__main__':
                                         f"--y {fmri_path} " + \
                                         f"--model_name {name} "   
         write(path4model_subject, command)
-    write(path4model_subject, check_after, end='')
+    write(path4model_subject, check_after)

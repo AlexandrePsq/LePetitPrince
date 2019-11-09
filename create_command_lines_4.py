@@ -63,7 +63,7 @@ if __name__=='__main__':
     check_before =  f"echo '1-->0' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')}"
     check_after =  f"echo '~0' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
     write(path4model_subject, "#!/bin/sh")
-    write(path4model_subject, check_before, end='')
+    write(path4model_subject, check_before)
 
     # Create bash script for this model and subject
     command_merge = f"python {os.path.join(inputs_path, 'code/utilities/optimized_merge_results.py')} --input_folder {derivatives_path} " + \
@@ -81,4 +81,4 @@ if __name__=='__main__':
         
     write(path4model_subject, command_merge)
     write(path4model_subject, command_create_maps)
-    write(path4model_subject, check_after, end='')
+    write(path4model_subject, check_after)

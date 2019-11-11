@@ -204,13 +204,13 @@ if __name__=='__main__':
     else:
         jobs_state = pd.read_csv(jobs_state_path)
 
-    state_files = sorted(glob.glob(os.path.join(args.jobs_state_folder, '*_tmp.txt')))
-
     ################ INFINITE LOOP ################
     print('---------------------- Ridge pipeline scheduler is on... ----------------------')
     print('--------------------------- (Iteration every 15 min)---------------------------')
     try:
         while True:
+            state_files = sorted(glob.glob(os.path.join(args.jobs_state_folder, '*_tmp.txt')))
+            
             delete_file(job2launchpath1)
             delete_file(job2launchpath2)
             delete_file(job2launchpath3)

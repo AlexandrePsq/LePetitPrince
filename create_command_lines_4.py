@@ -72,7 +72,7 @@ if __name__=='__main__':
                                     f"--nb_voxels {nb_voxels} " + \
                                     f"--n_permutations {nb_permutations} " + \
                                     f"--alpha_percentile {alpha_percentile} " + \
-                                    f"--model_name {name} "
+                                    f"--model_name '{name}' "
 
     command_create_maps = f"python {os.path.join(inputs_path, 'code/utilities/create_maps.py')} --input {derivatives_path} " + \
                                     f"--parameters {parameters_path} " + \

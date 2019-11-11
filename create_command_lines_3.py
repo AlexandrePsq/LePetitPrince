@@ -78,7 +78,7 @@ if __name__=='__main__':
                                         f"--n_sample {nb_permutations} " + \
                                         f"--shuffling {shuffling_path} " + \
                                         f"--y {fmri_path} " + \
-                                        f"--model_name {name} "
+                                        f"--model_name '{name}' "
         write(path4model_subject, command)
     write(path4model_subject, check_after)
     

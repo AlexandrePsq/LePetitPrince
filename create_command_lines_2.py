@@ -71,6 +71,6 @@ if __name__=='__main__':
                                         f"--run {run} " + \
                                         f"--x {design_matrices_path} " + \
                                         f"--y {fmri_path} " + \
-                                        f"--model_name {name} "   
+                                        f"--model_name '{name}' "   
         write(path4model_subject, command)
     write(path4model_subject, check_after)

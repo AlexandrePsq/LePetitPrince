@@ -72,12 +72,10 @@ if __name__=='__main__':
         command = f"python {os.path.join(inputs_path, 'code/utilities/optimized_generate_distribution.py')} --features_indexes {features_indexes} " + \
                                         f"--output {derivatives_path} " + \
                                         f"--yaml_file {file_} " + \
-                                        f"--run {run} " + \
                                         f"--x {design_matrices_path} " + \
                                         f"--y {fmri_path} " + \
                                         f"--n_sample {nb_permutations} " + \
                                         f"--shuffling {shuffling_path} " + \
-                                        f"--y {fmri_path} " + \
                                         f"--model_name '{name}' "
         write(path4model_subject, command)
     write(path4model_subject, check_after)

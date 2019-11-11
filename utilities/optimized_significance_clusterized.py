@@ -92,7 +92,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    files = sorted(glob.glob(os.path.join(args.yaml_files_path, f'run_{args.run}_alpha_*.yml')))
+    files = sorted(glob.glob(os.path.join(args.yaml_files_path, "run_{}_alpha_*.yml".format(args.run))))
     for file_ in files:
         alpha = os.path.basename(file_).split('_')[-1].split('.')[0]
         with open(file_, 'r') as stream:

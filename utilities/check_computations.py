@@ -90,10 +90,6 @@ nb_runs = 9
 language = 'english'
 nb_permutations = 3000
 alpha_percentile = str(99)
-job2launch1 = []
-job2launch2 = []
-job2launch3 = []
-job2launch4 = []
 
 job2launchpath1 = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/job2launch1.txt"
 job2launchpath2 = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/job2launch2.txt"
@@ -210,7 +206,10 @@ if __name__=='__main__':
     try:
         while True:
             state_files = sorted(glob.glob(os.path.join(args.jobs_state_folder, '*_tmp.txt')))
-            
+            job2launch1 = []
+            job2launch2 = []
+            job2launch3 = []
+            job2launch4 = []
             delete_file(job2launchpath1)
             delete_file(job2launchpath2)
             delete_file(job2launchpath3)

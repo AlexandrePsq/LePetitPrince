@@ -109,17 +109,19 @@ if __name__=='__main__':
     jobs_state_path = os.path.join(inputs_path, "command_lines/jobs_state.csv")
     jobs_state_folder = os.path.join(inputs_path, "command_lines/jobs_state/")
 
-    print('Computing global masker...', end=' ', flush=True)
-    fmri_runs = {}
-    for subject in subjects:
-        fmri_path = os.path.join(inputs_path, "data/fMRI/{language}/{subject}/func/")
-        check_folder(fmri_path)
-        fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language=language, subject=subject), 'fMRI_*run*')))
-    masker = compute_global_masker(list(fmri_runs.values()))
+    if args.overwrite:
+        print('Computing global masker...', end=' ', flush=True)
+        fmri_runs = {}
+        for subject in subjects:
+            fmri_path = os.path.join(inputs_path, "data/fMRI/{language}/{subject}/func/")
+            check_folder(fmri_path)
+            fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language=language, subject=subject), 'fMRI_*run*')))
+        masker = compute_global_masker(list(fmri_runs.values()))
 
-    jobs_state = pd.DataFrame(data=np.full((len(model_names)*len(subjects),3), np.nan)  , columns=['subject', 'model_name', 'state'])
-    index_jobs_state = 0
-    print('--> Done', flush=True)
+        jobs_state = pd.DataFrame(data=np.full((len(model_names)*len(subjects),3), np.nan)  , columns=['subject', 'model_name', 'state'])
+        index_jobs_state = 0
+        print('--> Done', flush=True)
+
     print('Iterating over subjects...\nTransforming fMRI data...', flush=True)
     for subject in subjects:
         print('\tSubject: {} ...'.format(subject), end=' ', flush=True)
@@ -236,7 +238,7 @@ if __name__=='__main__':
                     distribution_pearson_corr_files = sorted(glob.glob(os.path.join(derivatives_path, 'distribution_pearson_corr/*.npy')))
                     result = ((len(yaml_files)==len(distribution_r2_files)) and (len(yaml_files)==len(distribution_pearson_corr_files)))
                 elif state=='~0':
-                    result = (len(glob.glob(os.path.join(derivatives_path, 'outputs/maps/*')))==39)
+                    result = (len(glob.glob(os.path.join(derivatives_path, 'outputs/maps/*')))==30)
                 else:
                     state = '~' + state
                     result = True

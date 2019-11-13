@@ -94,6 +94,7 @@ if __name__ =='__main__':
             quit()
     
     fmri_runs = {}
+    language = 'english'
     inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
     for subject in subjects:
         fmri_path = os.path.join(inputs_path, "data/fMRI/{language}/{subject}/func/")

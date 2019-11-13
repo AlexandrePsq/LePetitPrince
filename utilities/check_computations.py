@@ -238,7 +238,7 @@ if __name__=='__main__':
                     distribution_pearson_corr_files = sorted(glob.glob(os.path.join(derivatives_path, 'distribution_pearson_corr/*.npy')))
                     result = ((len(yaml_files)==len(distribution_r2_files)) and (len(yaml_files)==len(distribution_pearson_corr_files)))
                 elif state=='~0':
-                    result = (len(glob.glob(os.path.join(derivatives_path, 'outputs/maps/*')))==30)
+                    result = (len(glob.glob(os.path.join(derivatives_path, 'outputs/maps/*')))==27)
                 else:
                     state = '~' + state
                     result = True

@@ -17,7 +17,7 @@ import warnings
 warnings.simplefilter(action='ignore' )
 
 from utilities.settings import Paths, Params
-from utilities.utils import get_data, check_folder, compute, get_output_parent_folder, get_path2output
+from utilities.utils import get_data, compute, get_path2output
 import pandas as pd
 
 paths = Paths()
@@ -57,11 +57,9 @@ if __name__ == '__main__':
     # Computing design-matrices
     for i in range(len(runs)):
         model_name = '+'.join(models)
-        output_parent_folder = get_output_parent_folder(source, step, args.language, model_name)
-        check_folder(output_parent_folder) # check if the output_parent_folder exists and create it if not
         name = os.path.basename(os.path.splitext(runs[i][0])[0])
         run_name = name.split('_')[-1] # extract the name of the run
-        path2output = get_path2output(output_parent_folder, step, args.language, model_name, run_name, extension)
+        path2output = get_path2output(source, step, args.language, model_name, run_name, extension)
 
         if compute(path2output, overwrite=args.overwrite):
             merge = pd.concat([pd.read_csv(path2features, header=0) for path2features in runs[i]], axis=1) # concatenate horizontaly the read csv files of a run

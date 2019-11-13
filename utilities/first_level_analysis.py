@@ -88,11 +88,11 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
     fmri_runs = [masker.transform(f) for f in fmri_filenames] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
     
     if voxel_wised:
-        alphas, r2_test, pearson_corr, distribution_array = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
+        alphas, r2, pearson_corr, distribution_array_r2, distribution_array_pearson = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
         alphas = np.mean(alphas, axis=0)
         create_maps(masker, alphas, 'alphas', subject, output_parent_folder, pca=pca)
     else:
-        r2, pearson_corr, distribution_array = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
+        r2, pearson_corr, distribution_array_r2, distribution_array_pearson = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
     optional = '_' + str(params.pref.alpha_default) if ((type(model) == sklearn.linear_model.Ridge) & (not params.voxel_wise)) else ''
 
     # Compute r2 and pearson maps and save them under .nii.gz and .png formats
@@ -101,22 +101,39 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
 
     # Compute significant values
     try:
-        r2, mask, z_values = get_significativity_value(r2, 
-                                                        distribution_array, 
+        r2, mask_r, z_values_r = get_significativity_value(r2, 
+                                                        distribution_array_r2, 
+                                                        params.alpha_percentile)
+        pearson_corr, mask_p, z_values_p = get_significativity_value(pearson_corr, 
+                                                        distribution_array_pearson, 
                                                         params.alpha_percentile)
         r2_significative = np.zeros(r2.shape)
-        r2_significative[mask] = r2[mask]
-        r2_significative[~mask] = -1
-        path2mask = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder))), 
+        r2_significative[mask_r] = r2[mask_r]
+        r2_significative[~mask_r] = -1
+
+        pearson_significative = np.zeros(pearson.shape)
+        pearson_significative[mask_p] = pearson[mask_p]
+        pearson_significative[~mask_p] = -1
+        path2mask_r = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder))), 
                                                                                     os.path.basename(os.path.dirname(output_parent_folder)), 
                                                                                     os.path.basename(output_parent_folder), 
-                                                                                    'mask', 
+                                                                                    'mask_r2', 
                                                                                     'pca_' + str(pca) if params.pca else 'no_pca',
                                                                                     'voxel_wise' if voxel_wised else 'not_voxel_wise',
                                                                                     subject)
                                                                                     +'.npy')
-        np.save(path2mask, mask) # mask
-        create_maps(masker, z_values, 'z-values{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # z_values
+        path2mask_p = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder))), 
+                                                                                    os.path.basename(os.path.dirname(output_parent_folder)), 
+                                                                                    os.path.basename(output_parent_folder), 
+                                                                                    'mask_pearson', 
+                                                                                    'pca_' + str(pca) if params.pca else 'no_pca',
+                                                                                    'voxel_wise' if voxel_wised else 'not_voxel_wise',
+                                                                                    subject)
+                                                                                    +'.npy')
+        np.save(path2mask, mask_r) # save mask r2
+        np.save(path2mask, mask_p) # save mask pearson
+        create_maps(masker, z_values_r, 'z-values-r2{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # z_values
+        create_maps(masker, z_values_p, 'z-values-pearson{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # z_values
         create_maps(masker, r2_significative, 'significative_r2{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=voxel_wised) # r2_significative
     except:
         print('Test Done.')

@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import csv
 from sklearn.metrics import r2_score
+from scipy.stats import pearsonr
 from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
@@ -23,42 +24,13 @@ params = Params()
 
 
 #########################################
-############ Data retrieving ############
-#########################################
-
-def get_data(language, data_type, subject=None, source='', model=''):
-    # General function for data retrieving
-    # Output: list of path to the different data files
-    extension = extensions.get_extension(data_type)
-    sub_dir = os.listdir(paths.path2data)
-    if data_type in sub_dir:
-        base_path = paths.path2data
-        if data_type in ['fMRI', 'MEG']:
-            file_pattern = '{2}/func/{0}_{1}_{2}_run*'.format(data_type, language, subject) + extension
-        else:
-            file_pattern = '{}_{}_{}_run*'.format(data_type, language, model) + extension
-    else:
-        base_path = join(paths.path2derivatives, source)
-        file_pattern = '{}_{}_{}_run*'.format(data_type, language, model) + extension
-    data = sorted(glob.glob(join(base_path, '{0}/{1}/{2}'.format(data_type, language, model), file_pattern)))
-    return data
-
-
-def get_output_parent_folder(source, output_data_type, language, model):
-    return join(paths.path2derivatives, '{0}/{1}/{2}/{3}'.format(source, output_data_type, language, model))
-
-
-def get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension):
-    return join(output_parent_folder, '{0}_{1}_{2}_{3}'.format(output_data_type, language, model, run_name) + extension)
-
-
-
-#########################################
-###### Computation functionalities ######
+############### Utilities ###############
 #########################################
 
 def compute(path, overwrite=False):
-    # Tell us if we can compute or not
+    """Verify if we can follow computations,
+    or not.
+    """
     result = True
     if os.path.isfile(path):
         result = overwrite
@@ -66,16 +38,13 @@ def compute(path, overwrite=False):
 
 
 def check_folder(path):
-    # Create adequate folders if necessary
+    """Create the adequate folders for
+    the path to exist.
+    """
     if not os.path.isdir(path):
         check_folder(os.path.dirname(path))
         os.mkdir(path)
 
-
-
-#########################################
-################## Log ##################
-#########################################
 
 def log(subject, voxel, alpha, r2):
     """ log stats per fold to a csv file """
@@ -87,22 +56,127 @@ def log(subject, voxel, alpha, r2):
         logcsvwriter.writerow([subject, voxel, alpha, r2])
 
 
+
+#########################################
+############ Data retrieving ############
+#########################################
+
+def get_data(language, data_type, subject=None, source='', model=''):
+    """Retrieve the requested data depending on its type. This function relies
+    on the predefined architecture of the project.
+    :language : (str) language used.
+    :data_type: (str) Type of data (fMRI, MEG, text, wave) or step of the pipeline 
+    (raw-features, features, design-matrices, glm-indiv, ridge-indiv, etc...).
+    :subject: (str - optional) Name of the subject (e.g.: sub-xxx).
+    :source: (str - optional) Source of acquisition used (fMRI or MEG).
+    :model: (str - optional) Name of the model, if the data we want to retrieve.
+    is related to a model.
+    """
+    extension = extensions.get_extension(data_type)
+    sub_dir = os.listdir(paths.path2data)
+    output_parent_folder = get_output_parent_folder(source, data_type, language, model)
+    if data_type in sub_dir:
+        if data_type in ['fMRI', 'MEG']:
+            file_pattern = '{2}/func/{0}_{1}_{2}_run*'.format(data_type, language, subject) + extension
+        else:
+            file_pattern = '{}_{}_{}_run*'.format(data_type, language, model) + extension
+    else:
+        file_pattern = '{}_{}_{}_run*'.format(data_type, language, model) + extension
+    data = sorted(glob.glob(join(output_parent_folder, file_pattern)))
+    return data
+
+
+def get_output_parent_folder(source, data_type, language, model):
+    """Return the parent folder of the data determined by: its source
+    of acquisition, its type, its language and the related model (optional).
+    :language : (str) language used.
+    :data_type: (str) Type of data (fMRI, MEG, text, wave) or step of the pipeline 
+    (raw-features, features, design-matrices, glm-indiv, ridge-indiv, etc...).
+    :source: (str - optional) Source of acquisition used (fMRI or MEG).
+    :model: (str - optional) Name of the model, if the data we want to retrieve.
+    """
+    sub_dir = os.listdir(paths.path2data)
+    base_path = paths.path2data if data_type in sub_dir else os.path.join(paths.path2derivatives, source)
+    return os.path.join(base_path, '{0}/{1}/{2}'.format(data_type, language, model))
+
+
+def get_path2output(source, data_type, language, model, run_name, extension):
+    """Return the path where to save the data depending on: its source
+    of acquisition, its type, its language, its extension and the related model and run.
+    :language : (str) language used.
+    :data_type: (str) Type of data (fMRI, MEG, text, wave) or step of the pipeline 
+    (raw-features, features, design-matrices, glm-indiv, ridge-indiv, etc...).
+    :source: (str - optional) Source of acquisition used (fMRI or MEG).
+    :model: (str - optional) Name of the model, if the data we want to retrieve.
+    :run_name: (str) Name of the run (e.g.: run1).
+    :extension: (str) Extension of the file saved (.csv, .txt, etc ...).
+    """
+    output_parent_folder = get_output_parent_folder(source, data_type, language, model)
+    check_folder(output_parent_folder)
+    return os.path.join(output_parent_folder, '{0}_{1}_{2}_{3}'.format(data_type, language, model, run_name) + extension)
+
+
+
 #########################################
 ########## Classical functions ##########
 #########################################
 
 
-def get_r2_score(model, y_true, x, r2_min=0., r2_max=0.99):
-    # return the R2_score for each voxel (=list)
+def get_scores(model, y_true, x, r2_min=-0.5, r2_max=0.99, pearson_min=-0.2, pearson_max=0.99):
+    """Return the r2 score and pearson correlation coefficient 
+    for each voxel. (=list)
+    :model: (sklearn.linear_model) Model trained on a set of voxels.
+    :y_true: (np.array) Set of voxels for which to predict the activations.
+    :x: (np.array) Design-matrix.
+    :r2_min: (float) Min value to filter R2 values.
+    :r2_max: (float) Max value to filter R2 values.
+    :pearson_min: (float) Min value to filter pearson correlation coefficients.
+    :pearson_max: (float) Max value to filter pearson correlation coefficients.
+    """
+    prediction = model.predict(x)
     r2 = r2_score(y_true,
-                    model.predict(x),
+                    prediction,
                     multioutput='raw_values')
+    pearson = [pearsonr(y_true[:,i], prediction[:,i])[0] for i in range(y_true.shape[1])]
     # remove values with are too low and values too good to be true (e.g. voxels without variation)
-    # return np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
-    return r2
+    r2 = np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
+    pearson = np.array([0 if (x < pearson_min or x >= pearson_max) else x for x in pearson])
+    return r2, pearsonr
+
+
+def get_significativity_value(distribution, distribution_array, alpha_percentile, n_sample=3000):
+    """Return significant values for a given distribution by generating prediction 
+    over randomly shuffled samples."""
+    np.random.seed(1111)
+    n_permutations = n_sample
+    
+    columns_index = np.arange(int(args.nb_features))
+    shuffling = []
+
+    # computing permutations
+    for _ in range(n_permutations):
+        np.random.shuffle(columns_index)
+        shuffling.append(columns_index.copy())
+    np.save(args.output, shuffling)
+
+
+def sample_r2(model, x_test, y_test, shuffling, n_sample):
+    # receive a trained model, x_test and y_test (test set of the cross-validation).
+    # It returns two values (or two lists depending on the parameter voxel_wised):
+    # r2 value computed on test set and the distribution array
+    distribution_array_r2 = None
+    distribution_array_pearson_corr = None
+    for index in range(n_sample):
+        r2_tmp, pearson_corr_tmp = get_score(model, y_test, x_test[:, shuffling[index]])
+        distribution_array_r2 = r2_tmp if distribution_array_r2 is None else np.vstack([distribution_array_r2, r2_tmp])
+        distribution_array_pearson_corr = pearson_corr_tmp if distribution_array_pearson_corr is None else np.vstack([distribution_array_pearson_corr, pearson_corr_tmp])
+    return distribution_array_r2, distribution_array_pearson_corr
+
 
 
 def transform_design_matrices(path):
+    """
+    """
     # Read design matrice csv file and add a column with only 1
     dm = pd.read_csv(path, header=0).values
     # add the constant
@@ -111,11 +185,17 @@ def transform_design_matrices(path):
     return dm 
 
 def standardization(matrices, model_name, pca_components=300):
+    """Do a PCA transformation over a list of matrices if requested
+    and/or do a scaling of each matrix (mean and variance).
+    :matrices: (list of np.array)
+    :model_name: (str) Name of the model studied.
+    :pca_components: (int - optional) Number of components to keep.
+    """
     if (matrices[0].shape[1] > pca_components) & (params.pca):
         print('PCA analysis running...')
         matrices = pca(matrices, model_name, n_components=pca_components)
         print('PCA done.')
-    else:
+    else: # remove the else depending on yair answer
         print('Skipping PCA.')
         for index in range(len(matrices)):
             scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
@@ -126,14 +206,17 @@ def standardization(matrices, model_name, pca_components=300):
 
 
 def shift(column, n_rows, column_name):
-    # shift the rows of a column and padd with 0
+    """Shift by 'n_rows' the elements of a column
+    and padd with '0'.
+    :column: (pandas.Serie) Pandas serie whom elements need to be shifted.
+    :n_rows: (int) Number of indexes to shift by the column elements.
+    :column_name: (str) Name of the serie.
+    """
     df2 = pd.DataFrame([0]*np.abs(n_rows), columns=[column_name]) 
     tmp = column.iloc[-min(0, n_rows):len(column)-max(0,n_rows)]
     if n_rows >=0:
         result = df2.append(pd.DataFrame(tmp, columns=[column_name]), ignore_index=True)
     else:
-        print(pd.DataFrame(tmp, columns=[column_name]))
-        print(df2)
         result = pd.DataFrame(tmp, columns=[column_name]).append(df2, ignore_index=True)
     return result
 
@@ -142,15 +225,17 @@ def shift(column, n_rows, column_name):
 #########################################
 ################## PCA ##################
 #########################################
-# Compute a Dual-STATIS analysis 
-# takes account of the similarities between the variance-covariance matrices of the groups
 
 
 def pca(X, data_name, n_components=50):
-    """
+    """Compute a Dual-STATIS analysis. It takes account of the 
+    similarities between the variance-covariance matrices of the groups.
     See paper:
     General overview of methods of analysis of multi-group datasets
     Aida Eslami, El Mostafa Qannari, Achim Kohler, Stephanie Bougeard
+    :X: (list of np.array) List of matrices on which to perform the PCA.
+    :data_name: (str) Name of the model studied.
+    :n_components: (int - optional) Number of components to keep.
     """
     M = len(X) # number of groups
     # Computing variance-covariance matrix for each group
@@ -170,10 +255,6 @@ def pca(X, data_name, n_components=50):
     eig_values_Vc, A = np.linalg.eig(Vc)
     # u,s,v = np.linalg.svd(X_std.T)
     # diag_matrix = np.diag(eig_values_Vc)
-    ########## testing ##########
-    #for matrix in cov_matrices:
-    #    for index in range(A.shape[0]):
-    #        print(np.dot(np.dot(A[index], matrix), A[index].T))
     #############################
     eig_pairs = [(np.abs(eig_values_Vc[i]), A[:,i]) for i in range(len(eig_values_Vc))]
     eig_pairs.sort()

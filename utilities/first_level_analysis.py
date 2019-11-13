@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from time import time
 from tqdm import tqdm
-from .utils import get_r2_score, log, sample_r2, get_significativity_value
+from .utils import get_scores, get_significativity_value, generate_random_prediction, get_output_parent_folder
 from .settings import Params, Paths
 import os
 import pickle
@@ -77,43 +77,48 @@ def compute_global_masker(files):
     return masker
 
 
-def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_parent_folder, model, voxel_wised=False, alpha_list=np.logspace(-3, -1, 30), pca=params.n_components_default):
+def do_single_subject(subject, fmri_filenames, matrices, masker, source, data_type, language, model, voxel_wised=False, alpha_list=np.logspace(-3, -1, 30), pca=params.n_components_default):
     """Main function for computing r2 and pearson maps for a subject for a given set of design-matrices (associated with one model)
     and creating the associated maps.
     :subject : (str) Name of the subject (e.g.: sub-xxx).
-    :fmri_runs: (list) Paths of the fMRI data runs (1 for each run).
+    :fmri_filenames: (list) Paths of the fMRI data runs (1 for each run).
     :matrices: (list) list of numpy array design matrices (1 for each run).
     :masker: (MultiNiftiMasker object) function that can project a 3D representation to 1D and 1D to 3D.
+    :source: (str - optional) Source of acquisition used (fMRI or MEG).
+    :language : (str) language used.
+    :data_type: (str) Type of data (fMRI, MEG, text, wave) or step of the pipeline 
+    (raw-features, features, design-matrices, glm-indiv, ridge-indiv, etc...).
+    :model: (sklearn.linear_model) Model trained on a set of voxels.
+    :voxel_wised: (bool) Precise if we fit a model per voxel or for the whole brain.
+    :alpha_list: (np.array) List of alpha to test for voxel-wised model.
+    :pca: (int) Number of components to keep if a pca was applied.
     """
     fmri_runs = [masker.transform(f) for f in fmri_filenames] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
+    output_parent_folder = get_output_parent_folder(source, data_type, language, model)
     
     if voxel_wised:
-        alphas, r2, pearson_corr, distribution_array_r2, distribution_array_pearson = per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list)
+        alphas, r2, pearson_corr, distribution_array_r2, distribution_array_pearson = per_voxel_analysis(model, fmri_runs, matrices, subject, alpha_list)
         alphas = np.mean(alphas, axis=0)
         create_maps(masker, alphas, 'alphas', subject, output_parent_folder, pca=pca)
     else:
-        r2, pearson_corr, distribution_array_r2, distribution_array_pearson = whole_brain_analysis(model, fmri_runs, design_matrices, subject)
+        r2, pearson_corr, distribution_array_r2, distribution_array_pearson = whole_brain_analysis(model, fmri_runs, matrices, subject)
     optional = '_' + str(params.pref.alpha_default) if ((type(model) == sklearn.linear_model.Ridge) & (not params.voxel_wise)) else ''
-
+    r2 = np.mean(r2, axis=0)
+    pearson_corr = np.mean(pearson_corr, axis=0)
+    distribution_array_r2 = np.mean(distribution_array_r2, axis=0)
+    distribution_array_pearson = np.mean(distribution_array_pearson, axis=0)
     # Compute r2 and pearson maps and save them under .nii.gz and .png formats
     create_maps(masker, r2, 'r2{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=voxel_wised) 
     create_maps(masker, pearson_corr, 'pearson{}'.format(optional), subject, output_parent_folder, vmax=0.55, pca=pca,  voxel_wise=voxel_wised) 
 
     # Compute significant values
     try:
-        r2, mask_r, z_values_r = get_significativity_value(r2, 
-                                                        distribution_array_r2, 
-                                                        params.alpha_percentile)
-        pearson_corr, mask_p, z_values_p = get_significativity_value(pearson_corr, 
-                                                        distribution_array_pearson, 
-                                                        params.alpha_percentile)
-        r2_significative = np.zeros(r2.shape)
-        r2_significative[mask_r] = r2[mask_r]
-        r2_significative[~mask_r] = -1
-
-        pearson_significative = np.zeros(pearson.shape)
-        pearson_significative[mask_p] = pearson[mask_p]
-        pearson_significative[~mask_p] = -1
+        r2_significative, mask_r, z_values_r, p_values_r = get_significativity_value(r2, 
+                                                                                        distribution_array_r2, 
+                                                                                        params.alpha_percentile)
+        pearson_significative, mask_p, z_values_p, p_values_p = get_significativity_value(pearson_corr, 
+                                                                                            distribution_array_pearson, 
+                                                                                            params.alpha_percentile)
         path2mask_r = join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}_{6}".format(os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder))), 
                                                                                     os.path.basename(os.path.dirname(output_parent_folder)), 
                                                                                     os.path.basename(output_parent_folder), 
@@ -130,35 +135,38 @@ def do_single_subject(subject, fmri_filenames, design_matrices, masker, output_p
                                                                                     'voxel_wise' if voxel_wised else 'not_voxel_wise',
                                                                                     subject)
                                                                                     +'.npy')
-        np.save(path2mask, mask_r) # save mask r2
-        np.save(path2mask, mask_p) # save mask pearson
-        create_maps(masker, z_values_r, 'z-values-r2{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # z_values
-        create_maps(masker, z_values_p, 'z-values-pearson{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # z_values
-        create_maps(masker, r2_significative, 'significative_r2{}'.format(optional), subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=voxel_wised) # r2_significative
-    except:
-        print('Test Done.')
+        np.save(path2mask_r, mask_r) # save mask r2
+        np.save(path2mask_p, mask_p) # save mask pearson
+        create_maps(masker, z_values_r, 'z-values-r2{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # z_values r2
+        create_maps(masker, z_values_p, 'z-values-pearson{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # z_values pearson
+        create_maps(masker, p_values_r, 'p-values-r2{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # p_values r2
+        create_maps(masker, p_values_p, 'p-values-pearson{}'.format(optional), subject, output_parent_folder, pca=pca, voxel_wise=voxel_wised) # p_values pearson
+        create_maps(masker, r2_significative, 'significative_r2{}'.format(optional), subject, output_parent_folder, vmax=0.30, pca=pca, voxel_wise=voxel_wised) # r2_significative
+        create_maps(masker, pearson_significative, 'significative_pearson{}'.format(optional), subject, output_parent_folder, vmax=0.55, pca=pca, voxel_wise=voxel_wised) # r2_significative
+    except Exception as e:
+        print('R2 and Pearson safely computed.')
+        print(e)
 
 
 def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
     """Compute r2 and pearson coefficient given a list of design-matrices 
     associated with a given model.
+    :model: (sklearn.linear_model) Model trained on a set of voxels.
     :fmri_runs: (list of numpy arrays) list of fMRI data runs (1 for each run).
     :design_matrices: (list of numpy arrays) list of design matrices (1 for each run).
+    :subject : (str) Name of the subject (e.g.: sub-xxx).
     """
-    distribution_array = None
-    nb_runs = len(fmri_runs)
-    nb_voxels = fmri_runs[0].shape[1]
-    n_sample = params.n_sample
-    scores_cv = np.zeros((nb_runs, nb_voxels))
-    distribution_array = np.zeros((nb_runs, n_sample, nb_voxels))
+    nb_runs     = len(fmri_runs)
+    nb_voxels   = fmri_runs[0].shape[1]
+    n_sample    = params.n_sample
 
+    distribution_array_r2       = np.zeros((nb_runs, n_sample, nb_voxels))
+    distribution_array_pearson  = np.zeros((nb_runs, n_sample, nb_voxels))
+    r2                          = np.zeros((nb_runs, nb_voxels))
+    pearson_corr                = np.zeros((nb_runs, nb_voxels))
+    
     logo = LeaveOneGroupOut() # leave on run out !
-    columns_index = np.arange(design_matrices[0].shape[1])
-    shuffling = []
     cv = 0
-    for _ in range(n_sample):
-        np.random.shuffle(columns_index)
-        shuffling.append(columns_index)
     for train, test in tqdm(logo.split(fmri_runs, groups=range(1, nb_runs+1))):
         fmri_data_train = np.vstack([fmri_runs[i] for i in train]) # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
         predictors_train = np.vstack([design_matrices[i] for i in train])
@@ -167,56 +175,51 @@ def whole_brain_analysis(model, fmri_runs, design_matrices, subject):
             nb_samples = np.cumsum([0] + [[fmri_runs[i] for i in train][i].shape[0] for i in range(len([fmri_runs[i] for i in train]))]) # list of cumulative lenght
             indexes = {'run{}'.format(run+1): [nb_samples[i], nb_samples[i+1]] for i, run in enumerate(train)}
             model.cv = Splitter(indexes_dict=indexes, n_splits=nb_runs-1) # adequate splitter for cross-validate alpha taking into account groups
-        print('Fitting model...')
-        start = time()
         model_fitted = model.fit(predictors_train, fmri_data_train)
-        # pickle.dump(model_fitted, open(join(paths.path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '{}.sav'.format(test[0])), 'wb'))
-        with open(os.path.join(paths.path2derivatives, 'fMRI', 'time2fit.txt'), 'w') as f:
-            f.write(str(model_fitted))
-            f.write('Model fitted in {}.'.format(time()-start))
-        print('Model fitted in {}.'.format(time()-start))
 
-        # return the R2_score for each voxel (=list)
-        #r2 = get_r2_score(model_fitted, fmri_runs[test[0]], design_matrices[test[0]])
-        r2, distribution = sample_r2(model_fitted, 
-                                        design_matrices[test[0]], 
-                                        fmri_runs[test[0]], 
-                                        shuffling=shuffling,
-                                        n_sample=n_sample, 
-                                        alpha_percentile=params.alpha_percentile)
-
-        scores_cv[cv, :] = r2 # r2 is a 1d array: 1 value for each voxel
-        distribution_array[cv, :, :] = distribution # distribution is a 2d array: n_sample values for each voxel
+        # return the r2 score and pearson correlation coefficient for each voxel (=list)
+        r2_split, pearson_corr_split = get_scores(model_fitted, fmri_runs[test[0]], 
+                                        design_matrices[test[0]], r2_min=-0.5, 
+                                        r2_max=0.99, pearson_min=-0.2, pearson_max=0.99, 
+                                        output='both')
+        # Compute distribution over the randomly shuffled columns of x_test
+        distribution_array_r2_split, distribution_array_pearson_corr_split = generate_random_prediction(model_fitted, 
+                                                                                                        design_matrices[test[0]], 
+                                                                                                        fmri_runs[test[0]])
+        
+        # Update
+        r2[cv, :]                           = r2_split # r2_split is a 1d array: 1 value for each voxel
+        pearson_corr[cv, :]                 = pearson_corr_split # pearson_corr_split is a 1d array: 1 value for each voxel
+        distribution_array_r2[cv, :, :]     = distribution_array_r2_split # distribution is a 2d array: n_sample values for each voxel
+        distribution_array_pearson[cv, :, :]= distribution_array_pearson_corr_split # distribution is a 2d array: n_sample values for each voxel
         cv += 1
-    # result = pd.DataFrame(scores, columns=['voxel #{}'.format(i) for i in range(scores.shape[1])])
-    # result.to_csv(join(paths.path2derivatives, 'fMRI/glm-indiv/english', str(model).split('(')[0] + '.csv'))
-    return scores_cv, distribution_array # 2D arrays : (nb_runs_test, nb_voxels)
+    return r2, pearson_corr, distribution_array_r2, distribution_array_pearson
 
 
 def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
-    # compute alphas and test score with cross validation
-    #   - fmri_runs: list of fMRI data runs (1 for each run)
-    #   - design_matrices: list of design matrices (1 for each run)
-    #   - nb_voxels: number of voxels
-    #   - indexes: dict specifying row indexes for each run
-    # n_sample = min(max(100 * design_matrices[0].shape[1], design_matrices[0].shape[0]), 8000)
+    """Compute r2 and pearson coefficient given a list of design-matrices 
+    associated with a given model, fitting a model per voxel.
+    :model: (sklearn.linear_model) Model trained on a set of voxels.
+    :fmri_runs: (list of numpy arrays) list of fMRI data runs (1 for each run).
+    :design_matrices: (list of numpy arrays) list of design matrices (1 for each run).
+    :subject : (str) Name of the subject (e.g.: sub-xxx).
+    :alpha_list: (np.array) List of alpha to test for voxel-wised model.
+    """
     n_sample = params.n_sample
     nb_voxels = fmri_runs[0].shape[1]
     nb_alphas = len(alpha_list)
-    nb_runs_test = len(fmri_runs)
-    nb_runs_valid = nb_runs_test -1 
-    alphas_cv2 = np.zeros((nb_runs_test, nb_voxels))
-    scores_cv2 = np.zeros((nb_runs_test, nb_voxels))
-    distribution_array = np.zeros((nb_runs_test, n_sample, nb_voxels))
-    
+    nb_runs = len(fmri_runs)
+    nb_runs_valid = nb_runs -1 
+
+    alphas                      = np.zeros((nb_runs, nb_voxels))
+    distribution_array_r2       = np.zeros((nb_runs, n_sample, nb_voxels))
+    distribution_array_pearson  = np.zeros((nb_runs, n_sample, nb_voxels))
+    r2                          = np.zeros((nb_runs, nb_voxels))
+    pearson_corr                = np.zeros((nb_runs, nb_voxels))
+
     # loop for r2 computation
     cv3 = 0
     logo = LeaveOneOut() # leave on run out !
-    columns_index = np.arange(design_matrices[0].shape[1])
-    shuffling = []
-    for _ in range(n_sample):
-        np.random.shuffle(columns_index)
-        shuffling.append(columns_index)
     for train_, test in logo.split(fmri_runs):
         fmri_data_train_ = [fmri_runs[i] for i in train_] # fmri_runs liste 2D colonne = voxels et chaque row = un t_i
         predictors_train_ = [design_matrices[i] for i in train_]
@@ -232,42 +235,37 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
             
             cv1 = 0
             for alpha_tmp in tqdm(alpha_list): # compute the r2 for a given alpha for all the voxel
-                start = time()
                 model.set_params(alpha=alpha_tmp)
                 model_fitted = model.fit(dm,fmri)
-                # to delete
-                with open(os.path.join("/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/english/sub-057/yaml_files", 'fitting_time.txt'), 'a+') as f:
-                    f.write('alpha = {}- Fitted in {} s on chris station.'.format(alpha_tmp, time()- start))
-                    f.write('\n')
-                # end of to delete
-                r2 = get_r2_score(model_fitted, fmri_data_train_[valid[0]], predictors_train_[valid[0]])
+                r2 = get_scores(model_fitted, fmri_data_train_[valid[0]], predictors_train_[valid[0]], output='r2')
                 scores_cv1[:, cv2, cv1] = r2
                 cv1 += 1
             cv2 += 1
         best_alphas_indexes = np.argmax(np.mean(scores_cv1, axis=1), axis=1)
-        alphas_cv2[cv3, :] = np.array([alpha_list[i] for i in best_alphas_indexes])
+        alphas[cv3, :] = np.array([alpha_list[i] for i in best_alphas_indexes])
         fmri2 = np.vstack(fmri_data_train_)
         dm2 = np.vstack(predictors_train_)
         for voxel in tqdm(range(nb_voxels)): # loop through the voxels and fit the model with the best alpha for this voxel
             y = fmri2[:,voxel].reshape((fmri2.shape[0],1))
-            model.set_params(alpha=alphas_cv2[cv3, voxel])
+            model.set_params(alpha=alphas[cv3, voxel])
             model_fitted = model.fit(dm2, y)
-            # scores_cv2[cv3, voxel] = get_r2_score(model_fitted, 
-            #                                 fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
-            #                                 design_matrices[test[0]])
-            r2, distribution = sample_r2(model_fitted, 
-                                            design_matrices[test[0]], 
-                                            fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
-                                            shuffling=shuffling,
-                                            n_sample=n_sample, 
-                                            alpha_percentile=params.alpha_percentile,
-                                            test=True)
-            scores_cv2[cv3, voxel] = r2[0]
-            distribution_array[cv3, :, voxel] = distribution
 
-            # log the results
-            # log(subject, voxel=voxel, alpha=alphas_cv2[cv3, voxel], r2=scores_cv2[cv3, voxel])
+            # return the r2 score and pearson correlation coefficient for each voxel
+            r2_split, pearson_corr_split = get_scores(model_fitted, 
+                                                        fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)), 
+                                                        design_matrices[test[0]], r2_min=-0.5, 
+                                                        r2_max=0.99, pearson_min=-0.2, pearson_max=0.99, 
+                                                        output='both')
+            # Compute distribution over the randomly shuffled columns of x_test
+            distribution_array_r2_split, distribution_array_pearson_split = generate_random_prediction(model_fitted, 
+                                                                                                            design_matrices[test[0]], 
+                                                                                                            fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)))
+            r2[cv3, voxel] = r2_split[0]
+            pearson_corr[cv3, voxel] = pearson_corr_split[0]
+            distribution_array_r2[cv3, :, voxel] = distribution_array_r2_split
+            distribution_array_pearson[cv3, :, voxel] = distribution_array_pearson_split
+
         cv3 += 1
         
-    return alphas_cv2, scores_cv2, distribution_array # 2D arrays : (nb_runs_test, nb_voxels)
+    return alphas, r2, pearson_corr, distribution_array_r2, distribution_array_pearson
     

@@ -10,6 +10,7 @@ from tqdm import tqdm
 from time import time
 import numpy as np
 import pandas as pd
+from scipy import stats
 import csv
 from sklearn.metrics import r2_score
 from scipy.stats import pearsonr
@@ -122,7 +123,7 @@ def get_path2output(source, data_type, language, model, run_name, extension):
 #########################################
 
 
-def get_scores(model, y_true, x, r2_min=-0.5, r2_max=0.99, pearson_min=-0.2, pearson_max=0.99):
+def get_scores(model, y_true, x, r2_min=-0.5, r2_max=0.99, pearson_min=-0.2, pearson_max=0.99, output='both'):
     """Return the r2 score and pearson correlation coefficient 
     for each voxel. (=list)
     :model: (sklearn.linear_model) Model trained on a set of voxels.
@@ -134,75 +135,97 @@ def get_scores(model, y_true, x, r2_min=-0.5, r2_max=0.99, pearson_min=-0.2, pea
     :pearson_max: (float) Max value to filter pearson correlation coefficients.
     """
     prediction = model.predict(x)
-    r2 = r2_score(y_true,
-                    prediction,
-                    multioutput='raw_values')
-    pearson = [pearsonr(y_true[:,i], prediction[:,i])[0] for i in range(y_true.shape[1])]
-    # remove values with are too low and values too good to be true (e.g. voxels without variation)
-    r2 = np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
-    pearson = np.array([0 if (x < pearson_min or x >= pearson_max) else x for x in pearson])
+    r2 = None
+    pearson = None
+    if output in ['r2', 'both']:
+        r2 = r2_score(y_true,
+                        prediction,
+                        multioutput='raw_values')
+        r2 = np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
+    if output in ['pearson', 'both']:
+        pearson = [pearsonr(y_true[:,i], prediction[:,i])[0] for i in range(y_true.shape[1])]
+        pearson = np.array([0 if (x < pearson_min or x >= pearson_max) else x for x in pearson])
     return r2, pearsonr
 
 
-def get_significativity_value(distribution, distribution_array, alpha_percentile, n_sample=3000):
-    """Return significant values for a given distribution by generating prediction 
-    over randomly shuffled samples."""
+def generate_random_prediction(model, x_test, y_test, n_sample=3000):
+    """Generate predictions over randomly shuffled columns.
+    :model: (sklearn.linear_model) Model trained on a set of voxels.
+    :x_test: (np.array) Input values for prediction (test).
+    :y_test: (np.array) True values to predict.
+    :n_sample: (int) Number of sample to generate.
+    """
     np.random.seed(1111)
     n_permutations = n_sample
     
-    columns_index = np.arange(int(args.nb_features))
+    columns_index = np.arange(x_test.shape[1])
     shuffling = []
 
     # computing permutations
     for _ in range(n_permutations):
         np.random.shuffle(columns_index)
         shuffling.append(columns_index.copy())
-    np.save(args.output, shuffling)
-
-
-def sample_r2(model, x_test, y_test, shuffling, n_sample):
-    # receive a trained model, x_test and y_test (test set of the cross-validation).
-    # It returns two values (or two lists depending on the parameter voxel_wised):
-    # r2 value computed on test set and the distribution array
+    
+    # Computing significant values
     distribution_array_r2 = None
     distribution_array_pearson_corr = None
     for index in range(n_sample):
-        r2_tmp, pearson_corr_tmp = get_score(model, y_test, x_test[:, shuffling[index]])
+        r2_tmp, pearson_corr_tmp = get_scores(model, y_test, x_test[:, shuffling[index]])
         distribution_array_r2 = r2_tmp if distribution_array_r2 is None else np.vstack([distribution_array_r2, r2_tmp])
         distribution_array_pearson_corr = pearson_corr_tmp if distribution_array_pearson_corr is None else np.vstack([distribution_array_pearson_corr, pearson_corr_tmp])
+
     return distribution_array_r2, distribution_array_pearson_corr
+
+
+def get_significativity_value(distribution, distribution_array, alpha):
+    """Return significant values for a given distribution by generating prediction 
+    over randomly shuffled samples.
+    :distribution: (np.array - dim:(1,-1)) Distribution from which to extract significant values.
+    :distribution_array: (np.array - dim:(1,-1)) Samples generated to extract significant values from distribution.
+    :alpha: (int) Percentile (0-100).
+    """
+    p_values = (1.0 * np.sum(distribution_array>distribution, axis=0))/distribution_array.shape[0] 
+    z_values = np.array([x if np.abs(x) != np.inf else np.sign(x)*10 for x in np.apply_along_axis(lambda x: stats.norm.ppf(1-x, loc=0, scale=1), 0, p_values)])
+    mask = (p_values < 1-alpha/100)
+
+    significative = np.zeros(distribution.shape)
+    significative[mask] = distribution[mask]
+    significative[~mask] = np.nan
+
+    return significative, mask, z_values, p_values
+
+
 
 
 
 def transform_design_matrices(path):
+    """Read a design matrix and perform 
+    a desired transformation.
+    :path: (str) Path to the matrix.
     """
-    """
-    # Read design matrice csv file and add a column with only 1
     dm = pd.read_csv(path, header=0).values
-    # add the constant
-    const = np.ones((dm.shape[0], 1))
-    dm = np.hstack((dm, const))
+    # Perform the wanted transformation
+    #const = np.ones((dm.shape[0], 1))
+    #dm = np.hstack((dm, const))
     return dm 
 
+
 def standardization(matrices, model_name, pca_components=300):
-    """Do a PCA transformation over a list of matrices if requested
-    and/or do a scaling of each matrix (mean and variance).
+    """Standardize a list of matrices and do a PCA transformation 
+    if requested.
     :matrices: (list of np.array)
     :model_name: (str) Name of the model studied.
     :pca_components: (int - optional) Number of components to keep.
     """
+    for index in range(len(matrices)):
+        scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
+        scaler.fit(matrices[index])
+        matrices[index] = scaler.transform(matrices[index])
     if (matrices[0].shape[1] > pca_components) & (params.pca):
         print('PCA analysis running...')
         matrices = pca(matrices, model_name, n_components=pca_components)
         print('PCA done.')
-    else: # remove the else depending on yair answer
-        print('Skipping PCA.')
-        for index in range(len(matrices)):
-            scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
-            scaler.fit(matrices[index])
-            matrices[index] = scaler.transform(matrices[index])
     return matrices
-
 
 
 def shift(column, n_rows, column_name):

@@ -81,11 +81,10 @@ if __name__ == '__main__':
     # Computing masker
     masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object 
 
-
     # Fitting the GLM model
     if args.parallel:
-            Parallel(n_jobs=-2)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, source, model, pca=args.pca) for sub in subjects)
+            Parallel(n_jobs=-2)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, source, input_data_type, args.language, model, pca=args.pca) for sub in subjects)
     else:
         for sub in subjects:
             print('Processing subject {}...'.format(sub))
-            do_single_subject(sub, fmri_runs[sub], matrices, masker, source, model, pca=args.pca)
+            do_single_subject(sub, fmri_runs[sub], matrices, masker, source, input_data_type, args.language, model, pca=args.pca)

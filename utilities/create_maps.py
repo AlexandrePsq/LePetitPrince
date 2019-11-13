@@ -17,6 +17,9 @@ import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
 
+subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
+
+
 def check_folder(path):
     # Create adequate folders if necessary
     try:
@@ -89,9 +92,14 @@ if __name__ =='__main__':
         except yaml.YAMLError as exc:
             print(exc)
             quit()
-
-    fmri_runs = sorted(glob.glob(os.path.join(args.fmri_data, 'fMRI_*run*')))
-    masker = compute_global_masker(list(fmri_runs))
+    
+    fmri_runs = {}
+    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
+    for subject in subjects:
+        fmri_path = os.path.join(inputs_path, "data/fMRI/{language}/{subject}/func/")
+        check_folder(fmri_path)
+        fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language=language, subject=subject), 'fMRI_*run*')))
+    masker = compute_global_masker(list(fmri_runs.values()))
 
     for model in parameters['models']:
         model_name = model['name'] # model['name']=='' if we study the model as a whole

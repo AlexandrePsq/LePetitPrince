@@ -55,7 +55,7 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
 
     nib.save(img, path2output_raw)
 
-    plt.hist(distribution, bins=50)
+    plt.hist(distribution[~np.isnan(distribution)], bins=50)
     plt.savefig(path2output_hist_png)
     plt.close()
 

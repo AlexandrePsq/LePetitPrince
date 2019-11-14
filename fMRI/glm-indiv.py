@@ -70,14 +70,6 @@ if __name__ == '__main__':
 
     matrices = [transform_design_matrices(run) for run in dm] # list of design matrices (dataframes) where we added a constant column equal to 1
 
-    # PCA transformation
-    if (matrices[0].shape[1] > args.pca) & (params.pca):
-        print('PCA analysis running...')
-        matrices = pca(matrices, model_name, n_components=args.pca)
-        print('PCA done.')
-    else:
-        print('Skipping PCA.')
-
     # Computing masker
     masker = compute_global_masker(list(fmri_runs.values()))  # return a MultiNiftiMasker object 
 

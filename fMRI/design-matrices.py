@@ -78,5 +78,5 @@ if __name__ == '__main__':
         path2output = get_path2output(source, step, args.language, model_name, run_name, extension)
 
         if compute(path2output, overwrite=args.overwrite):
-            result = pd.DataFrame(matrices[i], columns=dataframes[i].columns)
+            result = pd.DataFrame(matrices[i], columns=['{}_component-{}'.format(model_name, index) for index in range(params.n_components_default)])
             result.to_csv(path2output, index=False)

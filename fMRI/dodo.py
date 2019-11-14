@@ -83,7 +83,7 @@ def task_raw_features():
             else:
                 input_data_type = 'text'
                 extension_input = '.txt'
-            dependecies = [get_path2output(source='', data_type=input_data_type, language=language, model=params.get_category(model), run_name=run_name, extension=extension_input) for run_name in run_names]
+            dependencies = [get_path2output(source='', data_type=input_data_type, language=language, model=params.get_category(model), run_name=run_name, extension=extension_input) for run_name in run_names]
             targets = [get_path2output(source=source, data_type=output_data_type, language=language, model=model, run_name=run_name, extension=extension) for run_name in run_names]
             yield {
                 'name': model,

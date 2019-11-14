@@ -75,7 +75,7 @@ def get_data(language, data_type, subject=None, source='', model=''):
     """
     extension = extensions.get_extension(data_type)
     sub_dir = os.listdir(paths.path2data)
-    output_parent_folder = get_output_parent_folder(source, data_type, language, model)
+    output_parent_folder = get_output_parent_folder(data_type, language, source, model)
     if data_type in sub_dir:
         if data_type in ['fMRI', 'MEG']:
             file_pattern = '{2}/func/{0}_{1}_{2}_run*'.format(data_type, language, subject) + extension
@@ -87,7 +87,7 @@ def get_data(language, data_type, subject=None, source='', model=''):
     return data
 
 
-def get_output_parent_folder(source, data_type, language, model):
+def get_output_parent_folder(data_type, language, source='', model=''):
     """Return the parent folder of the data determined by: its source
     of acquisition, its type, its language and the related model (optional).
     :language : (str) language used.
@@ -112,7 +112,7 @@ def get_path2output(source, data_type, language, model, run_name, extension):
     :run_name: (str) Name of the run (e.g.: run1).
     :extension: (str) Extension of the file saved (.csv, .txt, etc ...).
     """
-    output_parent_folder = get_output_parent_folder(source, data_type, language, model)
+    output_parent_folder = get_output_parent_folder(data_type, language, source, model)
     check_folder(output_parent_folder)
     return os.path.join(output_parent_folder, '{0}_{1}_{2}_{3}'.format(data_type, language, model, run_name) + extension)
 

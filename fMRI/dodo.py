@@ -83,10 +83,8 @@ def task_raw_features():
             else:
                 input_data_type = 'text'
                 extension_input = '.txt'
-            input_parent_folder = join(paths.path2data, '{0}/{1}/{2}'.format(input_data_type, language, params.get_category(model)))
-            dependencies = [join(input_parent_folder, '{0}_{1}_{2}_{3}'.format(input_data_type, language, params.get_category(model), run_name) + extension_input) for run_name in run_names]
-            output_parent_folder = get_output_parent_folder(source, output_data_type, language, model)
-            targets = [get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension) for run_name in run_names]
+            dependecies = [get_path2output(source='', data_type=input_data_type, language=language, model=params.get_category(model), run_name=run_name, extension=extension_input) for run_name in run_names]
+            targets = [get_path2output(source=source, data_type=output_data_type, language=language, model=model, run_name=run_name, extension=extension) for run_name in run_names]
             yield {
                 'name': model,
                 'file_dep': ['raw_features.py'] + dependencies,
@@ -106,10 +104,8 @@ def task_features():
 
     for language in languages:
         for model in models:
-            output_parent_folder = get_output_parent_folder(source, output_data_type, language, model)
-            input_parent_folder = get_output_parent_folder(source, input_data_type, language, model)
-            dependencies = [get_path2output(input_parent_folder, input_data_type, language, model, run_name, extension) for run_name in run_names]
-            targets = [get_path2output(output_parent_folder, output_data_type, language, model, run_name, extension) for run_name in run_names]
+            dependencies = [get_path2output(source=source, data_type=input_data_type, language=language, model=model, run_name=run_name, extension=extension) for run_name in run_names]
+            targets = [get_path2output(source=source, data_type=output_data_type, language=language, model=model, run_name=run_name, extension=extension) for run_name in run_names]
             yield {
                 'name': model,
                 'file_dep': ['features.py'] + dependencies,
@@ -127,12 +123,8 @@ def task_design_matrices():
 
     for language in languages:
         for models in aggregated_models:
-            output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
-            dependencies = []
-            for model in models.split('+'):
-                input_parent_folder = get_output_parent_folder(source, input_data_type, language, model)
-                dependencies += [get_path2output(input_parent_folder, input_data_type, language, model, run_name, extension) for run_name in run_names]
-            targets = [get_path2output(output_parent_folder, output_data_type, language, models, run_name, extension) for run_name in run_names]
+            dependencies = [get_path2output(source=source, data_type=input_data_type, language=language, model=model, run_name=run_name, extension=extension) for run_name in run_names for model in models.split('+')]
+            targets = [get_path2output(source=source, data_type=output_data_type, language=language, model=models, run_name=run_name, extension=extension) for run_name in run_names]
             yield {
                 'name': models,
                 'file_dep': ['design-matrices.py'] + dependencies,
@@ -156,11 +148,12 @@ def task_glm_indiv():
             pca_list = params.n_components_list if params.pca else ['']
             for pca in pca_list:
                 pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
-                output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
-                input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-                dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
-                targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
-                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
+                dependencies = [get_path2output(source=source, data_type=input_data_type, language=language, model=models, run_name=run_name, extension=extension) for run_name in run_names]
+                output_parent_folder = get_output_parent_folder(output_data_type, language, source, models)
+                targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'pearson', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
+                        + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'pearson', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)]
                 pca_argument = ' --pca {} '.format(pca) if params.pca else ''
                 yield {
                     'name': models + '_pca_' + str(pca) if params.pca else models + '_no_pca',
@@ -186,9 +179,8 @@ def task_ridge_indiv():
             pca_list = params.n_components_list if params.pca else ['']
             for pca in pca_list:
                 pca_name = 'pca_' + str(pca) if params.pca else 'no_pca'
-                output_parent_folder = get_output_parent_folder(source, output_data_type, language, models)
-                input_parent_folder = get_output_parent_folder(source, input_data_type, language, models)
-                dependencies = [get_path2output(input_parent_folder, input_data_type, language, models, run_name, extension) for run_name in run_names]
+                dependencies = [get_path2output(source=source, data_type=input_data_type, language=language, model=models, run_name=run_name, extension=extension) for run_name in run_names]
+                output_parent_folder = get_output_parent_folder(output_data_type, language, source, models)
                 targets = [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \
                         + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'r2_test', pca_name, subject)+'.png') for subject in subjects.get_all(language, test)] \
                         + [join(output_parent_folder, "{0}_{1}_{2}_{3}_{4}_{5}".format(output_data_type, language, models, 'alphas', pca_name, subject)+'.nii.gz') for subject in subjects.get_all(language, test)] \

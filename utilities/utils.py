@@ -277,8 +277,6 @@ def pca(X, data_name, n_components=50):
     # diag_matrix = np.diag(eig_values_Vc)
     #############################
     eig_pairs = [(np.abs(eig_values_Vc[i]), A[:,i]) for i in range(len(eig_values_Vc))]
-    eig_pairs.sort()
-    eig_pairs.reverse()
     tot = sum(np.abs(eig_values_Vc))
     var_exp = [(val / tot)*100 for val in sorted(np.abs(eig_values_Vc), reverse=True)]
     cum_var_exp = np.cumsum(var_exp)

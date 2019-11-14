@@ -145,7 +145,7 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = ['bert_bucket_pca_300', 'gpt2_pca_300']
+		self.models = ['bert_bucket_pca_300_all-layers', 'gpt2_pca_300_all-layers']
 		
 		# ['lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer',
 		# 				'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',

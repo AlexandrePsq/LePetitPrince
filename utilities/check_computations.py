@@ -100,8 +100,8 @@ model_names = ['wordrate_word_position',
                 'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
                 'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
                 'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer',
-                'bert_bucket_pca_300',
-                'gpt2_pca_300']
+                'bert_bucket_pca_300_all-layers',
+                'gpt2_pca_300_all-layers']
 
 subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
 nb_runs = 9

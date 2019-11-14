@@ -195,9 +195,6 @@ def get_significativity_value(distribution, distribution_array, alpha):
     return significative, mask, z_values, p_values
 
 
-
-
-
 def transform_design_matrices(path):
     """Read a design matrix and perform 
     a desired transformation.
@@ -303,10 +300,10 @@ def pca(X, data_name, n_components=50):
     for matrix in X:
         projected_matrices.append(np.dot(matrix, projector))
     # normalizing each matrix
-    for index in range(len(projected_matrices)):
-        scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
-        scaler.fit(projected_matrices[index])
-        projected_matrices[index] = scaler.transform(projected_matrices[index])
+    #for index in range(len(projected_matrices)):
+    #    scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
+    #    scaler.fit(projected_matrices[index])
+    #    projected_matrices[index] = scaler.transform(projected_matrices[index])
     return projected_matrices
 
 

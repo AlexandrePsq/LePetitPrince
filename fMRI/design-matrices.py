@@ -17,7 +17,7 @@ import warnings
 warnings.simplefilter(action='ignore' )
 
 from utilities.settings import Paths, Params
-from utilities.utils import get_data, compute, get_path2output
+from utilities.utils import get_data, compute, get_path2output, standardization
 import pandas as pd
 
 paths = Paths()
@@ -52,20 +52,31 @@ if __name__ == '__main__':
 
     runs = list(zip(*features_list)) # list of 9 tuples (1 for each run), each tuple containing the features for all the specified models
     # e.g.: [(path2run1_model1, path2run1_model2), (path2run2_model1, path2run2_model2)]
-
+    
+    model_name = '+'.join(models)
+    dataframes = []
+    matrices = []
+    evaluate = True
 
     # Computing design-matrices
     for i in range(len(runs)):
-        model_name = '+'.join(models)
+        name = os.path.basename(os.path.splitext(runs[i][0])[0])
+        run_name = name.split('_')[-1] # extract the name of the run
+        path2output = get_path2output(source, step, args.language, model_name, run_name, extension)
+        evaluate = (evaluate and compute(path2output, overwrite=args.overwrite))
+
+        merge = pd.concat([pd.read_csv(path2features, header=0) for path2features in runs[i]], axis=1) # concatenate horizontaly the read csv files of a run
+        dm = merge.values
+        dataframes.append(pd.DataFrame(dm, columns=merge.columns))
+        matrices.append(dm)
+    
+    matrices = standardization(matrices, model_name, pca_components=300) if evaluate else matrices
+
+    for i in range(len(runs)):
         name = os.path.basename(os.path.splitext(runs[i][0])[0])
         run_name = name.split('_')[-1] # extract the name of the run
         path2output = get_path2output(source, step, args.language, model_name, run_name, extension)
 
         if compute(path2output, overwrite=args.overwrite):
-            merge = pd.concat([pd.read_csv(path2features, header=0) for path2features in runs[i]], axis=1) # concatenate horizontaly the read csv files of a run
-            matrices = merge.values
-            scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
-            scaler.fit(matrices)
-            matrices = scaler.transform(matrices)
-            result = pd.DataFrame(matrices, columns=merge.columns)
+            result = pd.DataFrame(matrices[i], columns=dataframes[i].columns)
             result.to_csv(path2output, index=False)

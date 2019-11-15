@@ -145,10 +145,10 @@ def get_scores(model, y_true, x, r2_min=-0.5, r2_max=0.99, pearson_min=-0.2, pea
     if output in ['pearson', 'both']:
         pearson = [pearsonr(y_true[:,i], prediction[:,i])[0] for i in range(y_true.shape[1])]
         pearson = np.array([0 if (x < pearson_min or x >= pearson_max) else x for x in pearson])
-    return r2, pearsonr
+    return r2, pearson
 
 
-def generate_random_prediction(model, x_test, y_test, n_sample=3000):
+def generate_random_prediction(model, x_test, y_test, n_sample=params.n_sample):
     """Generate predictions over randomly shuffled columns.
     :model: (sklearn.linear_model) Model trained on a set of voxels.
     :x_test: (np.array) Input values for prediction (test).
@@ -169,7 +169,7 @@ def generate_random_prediction(model, x_test, y_test, n_sample=3000):
     # Computing significant values
     distribution_array_r2 = None
     distribution_array_pearson_corr = None
-    for index in range(n_sample):
+    for index in tqdm(range(n_sample)):
         r2_tmp, pearson_corr_tmp = get_scores(model, y_test, x_test[:, shuffling[index]])
         distribution_array_r2 = r2_tmp if distribution_array_r2 is None else np.vstack([distribution_array_r2, r2_tmp])
         distribution_array_pearson_corr = pearson_corr_tmp if distribution_array_pearson_corr is None else np.vstack([distribution_array_pearson_corr, pearson_corr_tmp])

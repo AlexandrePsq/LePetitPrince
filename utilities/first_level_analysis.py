@@ -77,7 +77,7 @@ def compute_global_masker(files):
     return masker
 
 
-def do_single_subject(subject, fmri_filenames, matrices, masker, source, data_type, language, model, voxel_wised=False, alpha_list=np.logspace(-3, -1, 30), pca=params.n_components_default):
+def do_single_subject(subject, fmri_filenames, matrices, masker, source, data_type, language, model, model_name, voxel_wised=False, alpha_list=np.logspace(-3, -1, 30), pca=params.n_components_default):
     """Main function for computing r2 and pearson maps for a subject for a given set of design-matrices (associated with one model)
     and creating the associated maps.
     :subject : (str) Name of the subject (e.g.: sub-xxx).
@@ -94,7 +94,7 @@ def do_single_subject(subject, fmri_filenames, matrices, masker, source, data_ty
     :pca: (int) Number of components to keep if a pca was applied.
     """
     fmri_runs = [masker.transform(f) for f in fmri_filenames] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
-    output_parent_folder = get_output_parent_folder(source, data_type, language, model)
+    output_parent_folder = get_output_parent_folder(data_type, language, source, model='')(source, data_type, language, model)
     
     if voxel_wised:
         alphas, r2, pearson_corr, distribution_array_r2, distribution_array_pearson = per_voxel_analysis(model, fmri_runs, matrices, subject, alpha_list)

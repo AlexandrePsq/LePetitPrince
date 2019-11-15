@@ -75,8 +75,8 @@ if __name__ == '__main__':
 
     # Fitting the GLM model
     if args.parallel:
-            Parallel(n_jobs=-2)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, source, input_data_type, args.language, model, pca=args.pca) for sub in subjects)
+            Parallel(n_jobs=-2)(delayed(do_single_subject)(sub, fmri_runs[sub], matrices, masker, source, input_data_type, args.language, model, model_name, pca=args.pca) for sub in subjects)
     else:
         for sub in subjects:
             print('Processing subject {}...'.format(sub))
-            do_single_subject(sub, fmri_runs[sub], matrices, masker, source, input_data_type, args.language, model, pca=args.pca)
+            do_single_subject(sub, fmri_runs[sub], matrices, masker, source, input_data_type, args.language, model, model_name, pca=args.pca)

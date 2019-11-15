@@ -246,7 +246,6 @@ def shift(column, n_rows, column_name):
 ################## PCA ##################
 #########################################
 
-
 def pca(X, data_name, n_components=50):
     """Compute a Dual-STATIS analysis. It takes account of the 
     similarities between the variance-covariance matrices of the groups.
@@ -296,12 +295,11 @@ def pca(X, data_name, n_components=50):
     for index in range(1, n_components):
         projector = np.hstack((projector, eig_pairs[index][1].reshape(-1, 1)))
     for matrix in X:
-        projected_matrices.append(np.dot(matrix, projector))
+        projected_matrices.append(np.array(list(map(lambda y: y.real, np.dot(matrix, projector)))))
+        
     # normalizing each matrix
-    #for index in range(len(projected_matrices)):
-    #    scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
-    #    scaler.fit(projected_matrices[index])
-    #    projected_matrices[index] = scaler.transform(projected_matrices[index])
+    for index in range(len(projected_matrices)):
+        scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
+        scaler.fit(projected_matrices[index])
+        projected_matrices[index] = scaler.transform(projected_matrices[index])
     return projected_matrices
-
-

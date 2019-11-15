@@ -139,6 +139,8 @@ if __name__=='__main__':
         jobs_state = pd.DataFrame(data=np.full((len(model_names)*len(subjects),3), np.nan)  , columns=['subject', 'model_name', 'state'])
         index_jobs_state = 0
         print('--> Done', flush=True)
+    else:
+        jobs_state = pd.read_csv(jobs_state_path)
 
     print('Iterating over subjects...\nTransforming fMRI data...', flush=True)
     for subject in subjects:
@@ -214,6 +216,10 @@ if __name__=='__main__':
             if not os.path.isfile(jobs_state_path) or args.overwrite:
                 jobs_state.iloc[index_jobs_state] = [subject, model_name, '5']
                 index_jobs_state += 1
+            else:
+                if jobs_state[(jobs_state['subject']==subject) & (jobs_state['model_name']==model_name)].empty:
+                    jobs_state.loc[len(jobs_state)] = [subject, model_name, '5']   
+
         print('\t\tParameters for all models are computed.')
     if not os.path.isfile(jobs_state_path) or args.overwrite:
         jobs_state.to_csv(jobs_state_path, index=False)

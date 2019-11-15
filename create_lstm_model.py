@@ -39,7 +39,7 @@ if __name__ == '__main__':
             model_name = 'lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}_'.format(embedding_size, nhid, nlayers, str(dropout).replace('.', '')) + extension
 
             if not os.path.isfile(model_name+'.py'):
-                with open(os.path.join(paths.path2code, 'models', language, 'model_name.txt'), 'a+') as f:
+                with open(os.path.join(paths.path2code, 'models', 'model_name.txt'), 'a+') as f:
                     f.write(model_name)
                     f.write('\n')
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 import sys
 import os
 
-root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if root not in sys.path:
     sys.path.append(root)
 
@@ -134,5 +134,5 @@ if __name__ == '__main__':
                 """.format(embedding_size, nhid, nlayers, dropout)
 
 
-                with open(os.path.join(paths.path2code, 'models', language, model_name + '.py'), 'w') as f:
+                with open(os.path.join(paths.path2code, 'models', model_name + '.py'), 'w') as f:
                     f.write(result)

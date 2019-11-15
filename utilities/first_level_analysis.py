@@ -94,7 +94,7 @@ def do_single_subject(subject, fmri_filenames, matrices, masker, source, data_ty
     :pca: (int) Number of components to keep if a pca was applied.
     """
     fmri_runs = [masker.transform(f) for f in fmri_filenames] # return a list of 2D matrices with the values of the voxels in the mask: 1 voxel per column
-    output_parent_folder = get_output_parent_folder(data_type, language, source, model='')(source, data_type, language, model)
+    output_parent_folder = get_output_parent_folder(data_type, language, source, model_name)
     
     if voxel_wised:
         alphas, r2, pearson_corr, distribution_array_r2, distribution_array_pearson = per_voxel_analysis(model, fmri_runs, matrices, subject, alpha_list)

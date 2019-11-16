@@ -225,11 +225,8 @@ if __name__=='__main__':
                     jobs_state.loc[len(jobs_state)] = [subject, model_name, '5']   
 
         print('\t\tParameters for all models are computed.')
-    if not os.path.isfile(jobs_state_path) or args.overwrite:
-        jobs_state.to_csv(jobs_state_path, index=False)
-    else:
-        jobs_state = pd.read_csv(jobs_state_path)
-
+    jobs_state.to_csv(jobs_state_path, index=False)
+    
     ################ INFINITE LOOP ################
     print('---------------------- Ridge pipeline scheduler is on... ----------------------')
     print('--------------------------- (Iteration every 15 min)---------------------------')

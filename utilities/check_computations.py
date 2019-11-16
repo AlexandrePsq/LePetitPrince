@@ -192,6 +192,10 @@ if __name__=='__main__':
                             jobs_state_folder, os.path.dirname(parameters_path)]
             for path in all_paths:
                 check_folder(path)
+            
+            for index in range(1,10):
+                if not os.path.isfile(os.path.join(design_matrices_path, 'x_run{}.npy'.format(index))) or args.overwrite:
+                    np.save(os.path.join(design_matrices_path, f'x_run{index}.npy'), pd.read_csv(os.path.join(design_matrices_path, f'design-matrices_{language}_{model_name}_run{index}.csv')).values)
 
             if not os.path.isfile(parameters_path) or args.overwrite:
                 y = np.load(os.path.join(fmri_path, 'y_run1.npy'))

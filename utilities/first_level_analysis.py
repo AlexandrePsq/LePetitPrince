@@ -237,8 +237,8 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
             for alpha_tmp in tqdm(alpha_list): # compute the r2 for a given alpha for all the voxel
                 model.set_params(alpha=alpha_tmp)
                 model_fitted = model.fit(dm,fmri)
-                r2 = get_scores(model_fitted, fmri_data_train_[valid[0]], predictors_train_[valid[0]], output='r2')
-                scores_cv1[:, cv2, cv1] = r2
+                r2_tmp, _ = get_scores(model_fitted, fmri_data_train_[valid[0]], predictors_train_[valid[0]], output='r2')
+                scores_cv1[:, cv2, cv1] = r2_tmp
                 cv1 += 1
             cv2 += 1
         best_alphas_indexes = np.argmax(np.mean(scores_cv1, axis=1), axis=1)
@@ -262,8 +262,8 @@ def per_voxel_analysis(model, fmri_runs, design_matrices, subject, alpha_list):
                                                                                                             fmri_runs[test[0]][:,voxel].reshape((fmri_runs[test[0]].shape[0],1)))
             r2[cv3, voxel] = r2_split[0]
             pearson_corr[cv3, voxel] = pearson_corr_split[0]
-            distribution_array_r2[cv3, :, voxel] = distribution_array_r2_split
-            distribution_array_pearson[cv3, :, voxel] = distribution_array_pearson_split
+            distribution_array_r2[cv3, :, voxel] = distribution_array_r2_split.ravel()
+            distribution_array_pearson[cv3, :, voxel] = distribution_array_pearson_split.ravel()
 
         cv3 += 1
         

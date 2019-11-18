@@ -43,6 +43,40 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     masker.fit()
     return masker
 
+def retrieve_df(jobs_state, inputs_path):
+    print('Retrieving state CSV...', end=' ', flush=True)
+    for index, row in tqdm(jobs_state.iterrows()):
+        model = row.model_name
+        sub = row.subject
+        state = row.state
+        derivatives_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(sub, model))
+        if os.path.isfile(os.path.join(derivatives_path, 'shuffling.npy')):
+            result = [os.path.isfile(os.path.join(derivatives_path, file_)) for file_ in ['yaml_files/voxel2alpha1.npy', 'yaml_files/voxel2alpha2.npy', 'yaml_files/voxel2alpha3.npy', 'yaml_files/voxel2alpha4.npy', 'yaml_files/voxel2alpha5.npy', 'yaml_files/voxel2alpha6.npy', 'yaml_files/voxel2alpha7.npy', 'yaml_files/voxel2alpha8.npy', 'yaml_files/voxel2alpha9.npy']]
+            if (len(result)==sum(result)):
+                yaml_files = sorted(glob.glob(os.path.join(derivatives_path, 'yaml_files/*.yml')))
+                r2_files = sorted(glob.glob(os.path.join(derivatives_path, 'r2/*.npy')))
+                pearson_files = sorted(glob.glob(os.path.join(derivatives_path, 'pearson_corr/*.npy')))
+                if ((len(yaml_files)==len(r2_files)) and (len(yaml_files)==len(pearson_files))):
+                    distribution_r2_files = sorted(glob.glob(os.path.join(derivatives_path, 'distribution_r2/*.npy')))
+                    distribution_pearson_corr_files = sorted(glob.glob(os.path.join(derivatives_path, 'distribution_pearson_corr/*.npy')))
+                    if ((len(yaml_files)==len(distribution_r2_files)) and (len(yaml_files)==len(distribution_pearson_corr_files))):
+                        if (len(glob.glob(os.path.join(derivatives_path, 'outputs/maps/*')))==27):
+                            state = '0'
+                        else:
+                            state = '1'
+                    else:
+                        state = '2'
+                else:
+                    state = '3'
+            else:
+                state = '4'
+        else:
+            state = '5'
+        sel = (jobs_state.subject == sub) & (jobs_state.model_name == model)
+        jobs_state.loc[sel, 'state'] = str(state)
+    print('\t--> Done')
+    return jobs_state
+
 
 
 model_names = ['wordrate_word_position',
@@ -225,6 +259,8 @@ if __name__=='__main__':
                     jobs_state.loc[len(jobs_state)] = [subject, model_name, '5']   
 
         print('\t\tParameters for all models are computed.')
+    if args.overwrite:
+        jobs_state = retrieve_df(jobs_state, inputs_path)
     jobs_state.to_csv(jobs_state_path, index=False)
     
     ################ INFINITE LOOP ################

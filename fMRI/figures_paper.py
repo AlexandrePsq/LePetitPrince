@@ -377,7 +377,7 @@ if __name__ == '__main__':
                 check_folder(save_folder)
                 plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + ' - R2 - ' + subject  + '_top-25%-voxels.png'))
                 plt.close()
-            Y_full = np.mean(np.vstack(Y_full), axis=1)
+            Y_full = np.vstack(Y_full)
             Y_filtered = np.vstack(Y_filtered)
             X = X[0]
 

@@ -249,8 +249,8 @@ if __name__ == '__main__':
                 'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_all-layers',
                 'bert_bucket_pca_300_all-layers',
                 'gpt2_pca_300_all-layers']]
-
-    create_df_for_R(plots, labels, subjects, maps, language, source, 'First plot (Comparison 300 features models)', surnames)
+    plots_names = ["Comparison 300 features models"]
+    create_df_for_R(plots, plots_names, labels, subjects, maps, language, source, 'First plot (Comparison 300 features models)', surnames)
 
     ###########################################################################
     #################### Second plot (Individual features) ####################
@@ -335,21 +335,22 @@ if __name__ == '__main__':
             X = []
             Y = []
             for subject in subjects:
-                y = [np.mean(masker.transform(fetch_ridge_maps(model_name, subject, 'maps_r2'))) for model_name in models]
+                y = [masker.transform(fetch_ridge_maps(model_name, subject, 'maps_r2')) for model_name in models]
                 x = [model_name for model_name in models]
                 X.append(x)
                 Y.append(y)
+                y = [np.mean(value) for value in y]
                 plot = plt.plot(x, y)
                 plt.title('R2 per ROI')
                 plt.xlabel('Models')
                 plt.ylabel('R2 values')
                 plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
-                # plt.legend(plot, [surnames[model_name] for model_name in models], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key))
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key), subject)
                 check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, key + ' - R2 - ' + subject  + '.png'))
+                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + ' - R2 - ' + subject  + '.png'))
                 plt.close()
+            Y = [np.mean(np.hstack(list(m)), axis=1) for m in list(zip(*Y))]
             Y = np.vstack(Y)
             X = X[0]
             error = np.std(Y, axis=0)
@@ -376,29 +377,29 @@ if __name__ == '__main__':
                     'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_all-layers',
                     'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers',
-                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers'],
-                    ['lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_first-layer',
-                    'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_second-layer'],
-                    ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer',
-                    'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
-                    'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer'],
-                    ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
-                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
-                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
-                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer'],
-                    ['glove_embeddings',
+                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers',
                     'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_cell_first-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_all-layers',
                     'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_all-layers',
                     'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_all-layers'],
-                    ['lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_first-layer',
+                    ['lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_first-layer',
+                    'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_second-layer',
+                    'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_first-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_second-layer'],
-                    ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_first-layer',
+                    ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer',
+                    'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
+                    'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer',
+                    'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_first-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_second-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_third-layer'],
-                    ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_first-layer',
+                    ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
+                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
+                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
+                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer',
+                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_first-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_second-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_third-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_fourth-layer']]
-    create_df_for_R(plots, labels, subjects, maps, language, source, 'Fourth plot (Layer analysis LSTM)', surnames)
+    plots_names = ["LSTM comparison with 300 units", "LSTM #L2 - layer comparison", "LSTM #L3 - layer comparison", "LSTM #L4 - layer comparison"]
+    create_df_for_R(plots, plots_names, labels, subjects, maps, language, source, 'Fourth plot (Layer analysis LSTM)', surnames)
 

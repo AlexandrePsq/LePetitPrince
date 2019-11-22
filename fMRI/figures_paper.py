@@ -352,10 +352,10 @@ if __name__ == '__main__':
                 y = list(zip(*[list(filter_distribution(masker.transform(fetch_ridge_maps(model_name, subject, 'maps_r2')), 75)) for model_name in models]))
                 x = [model_name for model_name in models]
                 X.append(x)
-                Y_full.append(y[0])
-                Y_filtered.append(y[1])
-                y_full = [np.mean(value) for value in y[0]]
-                y_filtered = [np.mean(value) for value in y[1]]
+                Y_full.append([i[0] for i in y[0]])
+                Y_filtered.append([i[0] for i in y[1]])
+                y_full = [np.mean(value[0]) for value in y[0]]
+                y_filtered = [np.mean(value[0]) for value in y[1]]
 
                 plot = plt.plot(x, y_full)
                 plt.title('R2 per ROI (all voxels)')

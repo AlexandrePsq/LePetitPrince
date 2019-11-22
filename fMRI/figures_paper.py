@@ -290,7 +290,7 @@ if __name__ == '__main__':
                 display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, plot_abs=False)
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Second plots (Layer analysis)", f"{model_name}")
                 check_folder(save_folder)
-                display.savefig(os.path.join(save_folder, model_name + ' - R2 - ' + subject  + '.png'))
+                display.savefig(os.path.join(save_folder, model_name + f' - {object_of_interest[5:]} - ' + subject  + '.png'))
                 display.close()
             data = [masker.transform(path) for path in all_paths]
             data = np.vstack(data)

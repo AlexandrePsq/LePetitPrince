@@ -209,15 +209,15 @@ surnames = {'wordrate_word_position': 'Word position',
 
 if __name__ == '__main__':
 
-    paths = []
+    paths2check = []
     source = 'fMRI'
     language = 'english'
     subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
     inputs_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
-    paths.append(inputs_path)
+    paths2check.append(inputs_path)
 
     # Sanity check
-    for path in paths:
+    for path in paths2check:
         check_folder(path)
 
     # retrieve default atlas  (= set of ROI)
@@ -248,7 +248,7 @@ if __name__ == '__main__':
                 'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_all-layers',
                 'bert_bucket_pca_300_all-layers',
                 'gpt2_pca_300_all-layers']]
-                
+
     create_df_for_R(plots, labels, subjects, maps, language, source, 'First plot (Comparison 300 features models)', surnames)
 
     ###########################################################################

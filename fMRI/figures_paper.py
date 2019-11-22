@@ -75,6 +75,7 @@ def create_df_for_R(plots, labels, subjects, maps, language, source, folder_name
         df_significant_pearson_final = []
         df_significant_r2_final = []
         save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', folder_name)
+        check_folder(save_folder)
 
         for subject in subjects:
             df_pearson = pd.DataFrame(data=[], columns=x_labels+['model_names'])
@@ -289,6 +290,7 @@ if __name__ == '__main__':
         display.savefig(os.path.join(save_folder, model_name + ' - R2 - ' + 'averaged accross subjects'  + '.png'))
         display.close()
 
+    # add best glass brain (bert/gpt2)
 
     ###########################################################################
     ################## Third plot (Layer analysis BERT/GPT2) ##################

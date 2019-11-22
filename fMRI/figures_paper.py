@@ -74,7 +74,7 @@ def create_df_for_R(plots, labels, subjects, maps, language, source, folder_name
         df_r2_final = []
         df_significant_pearson_final = []
         df_significant_r2_final = []
-        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', folder_name)
+        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', folder_name)
         check_folder(save_folder)
 
         for subject in subjects:
@@ -276,7 +276,7 @@ if __name__ == '__main__':
             all_paths.append(path)
             img = load_img(path) 
             display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, plot_abs=False)
-            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', "Second plots (Layer analysis)", f"{model_name}")
+            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Second plots (Layer analysis)", f"{model_name}")
             check_folder(save_folder)
             display.savefig(os.path.join(save_folder, model_name + ' - R2 - ' + subject  + '.png'))
             display.close()
@@ -285,7 +285,7 @@ if __name__ == '__main__':
         data = np.mean(data, axis=0)
         img = masker.inverse_transform(data)
         display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, plot_abs=False)
-        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', "Second plots (Layer analysis)", f"{model_name}")
+        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Second plots (Layer analysis)", f"{model_name}")
         check_folder(save_folder)
         display.savefig(os.path.join(save_folder, model_name + ' - R2 - ' + 'averaged accross subjects'  + '.png'))
         display.close()
@@ -346,24 +346,25 @@ if __name__ == '__main__':
                 plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
                 # plt.legend(plot, [surnames[model_name] for model_name in models], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', "Third plot (Layer analysis {})".format(key))
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key))
                 check_folder(save_folder)
                 plt.savefig(os.path.join(save_folder, key + ' - R2 - ' + subject  + '.png'))
                 plt.close()
             Y = np.vstack(Y)
+            X = X[0]
             error = np.std(Y, axis=0)
             Y = np.mean(Y, axis=0)
             plot = plt.plot(X, Y)
-            plt.title('R2 per ROI')
+            plt.title(f'R2 per ROI - {labels[index_mask+1]}')
             plt.xlabel('Models')
             plt.ylabel('R2 values')
             plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
             plt.errorbar(X, Y, error, linestyle='None', marker='^')
             # plt.legend(plot, [surnames[model_name] for model_name in models], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
             plt.tight_layout()
-            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'model_comparison', 'Third plot (Layer analysis {})'.format(key))
+            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key))
             check_folder(save_folder)
-            plt.savefig(os.path.join(save_folder, key + ' - R2 - ' + 'averaged accross subjects'  + '.png'))
+            plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + ' - R2 - ' + 'averaged accross subjects'  + '.png'))
             plt.close()
 
         
@@ -371,7 +372,6 @@ if __name__ == '__main__':
     ###########################################################################
     #################### Fourth plot (Layer analysis LSTM) ####################
     ###########################################################################
-    derivatives_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/")
     plots = [['glove_embeddings',
                     'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_all-layers',
@@ -399,8 +399,6 @@ if __name__ == '__main__':
                     ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_first-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_second-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_third-layer',
-                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_fourth-layer'],
-                    'bert_bucket_pca_300_all-layers',
-                    'gpt2_pca_300_all-layers']
+                    'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_fourth-layer']]
     create_df_for_R(plots, labels, subjects, maps, language, source, 'Fourth plot (Layer analysis LSTM)', surnames)
 

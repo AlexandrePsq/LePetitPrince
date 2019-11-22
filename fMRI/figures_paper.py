@@ -38,8 +38,19 @@ warnings.simplefilter(action='ignore')
 params = Params()
 paths = Paths()
 
+def filter_distribution(distribution, percent):
+    """ Keep the higgest percent% of the distribution,
+    and padd the rest with nan values.
+    """
+    result = np.full(distribution.shape, np.nan)
+    result[distribution>np.percentile(distribution, 75)] = distribution[distribution>np.percentile(distribution, 75)]
+    return distribution, result
+
 
 def fetch_ridge_maps(model, subject, value):
+    """Retrieve the R2/pearson values (significant or not)
+    for a given subject and model.
+    """
     path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english', subject, model, 'outputs', 'maps', '*{}*.nii.gz'.format(value))
     files = sorted(glob.glob(path))
     return files[0]
@@ -60,21 +71,23 @@ def batchify(x, y, size=10):
     return zip(x_batch, y_batch)
 
 def compute_global_masker(files): # [[path, path2], [path3, path4]]
-    # return a MultiNiftiMasker object
+    """Return a MultiNiftiMasker object.
+    """
     masks = [compute_epi_mask(f) for f in files]
     global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
     masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=5) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
     masker.fit()
     return masker
 
-def create_df_for_R(plots, labels, subjects, maps, language, source, folder_name, surnames):
-    for models in plots:
+def create_df_for_R(plots, plots_names, labels, subjects, maps, language, source, folder_name, surnames):
+    for index, models in enumerate(plots):
+        name = plots_names[index]
         x_labels = labels[1:]
         df_pearson_final = []
         df_r2_final = []
         df_significant_pearson_final = []
         df_significant_r2_final = []
-        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', folder_name)
+        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', folder_name, name)
         check_folder(save_folder)
 
         for subject in subjects:
@@ -333,39 +346,68 @@ if __name__ == '__main__':
         for key in plots.keys():
             models = plots[key]
             X = []
-            Y = []
+            Y_full = []
+            Y_filtered = []
             for subject in subjects:
-                y = [masker.transform(fetch_ridge_maps(model_name, subject, 'maps_r2')) for model_name in models]
+                y = list(zip(*[list(filter_distribution(masker.transform(fetch_ridge_maps(model_name, subject, 'maps_r2')), 75)) for model_name in models]))
                 x = [model_name for model_name in models]
                 X.append(x)
-                Y.append(y)
-                y = [np.mean(value) for value in y]
-                plot = plt.plot(x, y)
-                plt.title('R2 per ROI')
+                Y_full.append(y[0])
+                Y_filtered.append(y[1])
+                y_full = [np.mean(value) for value in y[0]]
+                y_filtered = [np.mean(value) for value in y[1]]
+
+                plot = plt.plot(x, y_full)
+                plt.title('R2 per ROI (all voxels)')
                 plt.xlabel('Models')
                 plt.ylabel('R2 values')
                 plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
                 plt.tight_layout()
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key), subject)
                 check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + ' - R2 - ' + subject  + '.png'))
+                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + ' - R2 - ' + subject  + '_all-voxels.png'))
                 plt.close()
-            Y = [np.mean(np.hstack(list(m)), axis=1) for m in list(zip(*Y))]
-            Y = np.vstack(Y)
+
+                plot = plt.plot(x, y_filtered)
+                plt.title('R2 per ROI (top 25% voxels)')
+                plt.xlabel('Models')
+                plt.ylabel('R2 values')
+                plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
+                plt.tight_layout()
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key), subject)
+                check_folder(save_folder)
+                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + ' - R2 - ' + subject  + '_top-25%-voxels.png'))
+                plt.close()
+            Y_full = np.vstack(Y_full)
+            Y_filtered = np.vstack(Y_filtered)
             X = X[0]
-            error = np.std(Y, axis=0)
-            Y = np.mean(Y, axis=0)
-            plot = plt.plot(X, Y)
-            plt.title(f'R2 per ROI - {labels[index_mask+1]}')
+
+            error = np.std(Y_full, axis=0)/np.sqrt(len(subjects))
+            Y_full = np.mean(Y_full, axis=0)
+            plot = plt.plot(X, Y_full)
+            plt.title(f'R2 per ROI - {labels[index_mask+1]} - all voxels')
             plt.xlabel('Models')
             plt.ylabel('R2 values')
             plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
-            plt.errorbar(X, Y, error, linestyle='None', marker='^')
-            # plt.legend(plot, [surnames[model_name] for model_name in models], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
+            plt.errorbar(X, Y_full, error, linestyle='None', marker='^')
             plt.tight_layout()
             save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key))
             check_folder(save_folder)
-            plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + ' - R2 - ' + 'averaged accross subjects'  + '.png'))
+            plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + ' - R2 - ' + 'averaged accross subjects'  + '_all-voxels.png'))
+            plt.close()
+
+            error = np.std(Y_filtered, axis=0)/np.sqrt(len(subjects))
+            Y_filtered = np.mean(Y_filtered, axis=0)
+            plot = plt.plot(X, Y_filtered)
+            plt.title(f'R2 per ROI - {labels[index_mask+1]} - top 25% voxels')
+            plt.xlabel('Models')
+            plt.ylabel('R2 values')
+            plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
+            plt.errorbar(X, Y_filtered, error, linestyle='None', marker='^')
+            plt.tight_layout()
+            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key))
+            check_folder(save_folder)
+            plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + ' - R2 - ' + 'averaged accross subjects'  + '_top-25%-voxels.png'))
             plt.close()
 
         

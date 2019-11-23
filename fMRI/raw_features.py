@@ -107,7 +107,7 @@ if __name__ == '__main__':
     if params.pca:
         data = [pd.read_csv(run) for run in get_data(args.language, step, model=model_name, source='fMRI')]
         matrices = [df.values for df in data]
-        matrices = standardization(matrices, model_name, pca_components=300, scale=False)
+        matrices = standardization(matrices, model_name, pca_components=300, scaling=False)
         for i in range(len(matrices)):
             run_name = 'run{}'.format(i)
             path2output = get_path2output(source, step, args.language, model_name, run_name, extension)

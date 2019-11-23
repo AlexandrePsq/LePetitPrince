@@ -215,7 +215,7 @@ def scale(matrices):
     return matrices
 
 
-def standardization(matrices, model_name, pca_components=300, scale=True):
+def standardization(matrices, model_name, pca_components=300, scaling=True):
     """Standardize a list of matrices and do a PCA transformation 
     if requested.
     :matrices: (list of np.array)
@@ -227,7 +227,7 @@ def standardization(matrices, model_name, pca_components=300, scale=True):
         print('PCA analysis ({}) running...'.format(params.pca_type))
         matrices = pca(matrices, model_name, n_components=pca_components) if params.pca_type=='dual-statis' else simple_pca(matrices, model_name, n_components=pca_components)
         print('PCA done.')
-    if scale:
+    if scaling:
         matrices = scale(matrices)
     return matrices
 

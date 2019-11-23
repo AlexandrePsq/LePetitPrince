@@ -145,9 +145,9 @@ def create_df_for_R(plots, plots_names, labels, subjects, maps, language, source
         df_significant_r2_final.drop_duplicates(inplace=True)
         df_significant_r2_final.to_csv(os.path.join(save_folder, 'significant_r2_data.csv'), index=False)
 
-limit_values = {'maps_r2':0.1
-                'maps_pearson_corr':0.4
-                'maps_significant_pearson_corr_with_pvalues':0.4
+limit_values = {'maps_r2':0.1,
+                'maps_pearson_corr':0.4,
+                'maps_significant_pearson_corr_with_pvalues':0.4,
                 'maps_significant_r2_with_pvalues':0.1}
 
 surnames = {'wordrate_word_position': 'Word position',

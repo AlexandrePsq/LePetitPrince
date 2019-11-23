@@ -145,7 +145,10 @@ def create_df_for_R(plots, plots_names, labels, subjects, maps, language, source
         df_significant_r2_final.drop_duplicates(inplace=True)
         df_significant_r2_final.to_csv(os.path.join(save_folder, 'significant_r2_data.csv'), index=False)
 
-
+limit_values = {'maps_r2':0.1
+                'maps_pearson_corr':0.4
+                'maps_significant_pearson_corr_with_pvalues':0.4
+                'maps_significant_r2_with_pvalues':0.1}
 
 surnames = {'wordrate_word_position': 'Word position',
                 'wordrate_model': 'Wordrate',
@@ -217,7 +220,11 @@ surnames = {'wordrate_word_position': 'Word position',
                 'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_third-layer': 'LSTM-E600-H75-#L4-L3',
                 'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_fourth-layer': 'LSTM-E600-H75-#L4-L4',
                 'bert_bucket_pca_300_all-layers': 'BERT-all-pca-300',
-                'gpt2_pca_300_all-layers':'GPT2-all-pca-300'}
+                'gpt2_pca_300_all-layers':'GPT2-all-pca-300',
+                'maps_r2':'R2', 
+                'maps_pearson_corr':'Pearson coefficient',
+                'maps_significant_pearson_corr_with_pvalues':'Significant Pearson', 
+                'maps_significant_r2_with_pvalues':'Significant R2'}
 
 
 if __name__ == '__main__':
@@ -288,18 +295,18 @@ if __name__ == '__main__':
                 all_paths.append(path)
                 img = load_img(path) 
                 display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, plot_abs=False)
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Second plots (Layer analysis)", f"{model_name}")
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Second plots (Layer analysis)", model_name, surnames[object_of_interest], subject)
                 check_folder(save_folder)
-                display.savefig(os.path.join(save_folder, model_name + f' - {object_of_interest[5:]} - ' + subject  + '.png'))
+                display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + subject  + '.png'))
                 display.close()
             data = [masker.transform(path) for path in all_paths]
             data = np.vstack(data)
             data = np.mean(data, axis=0)
             img = masker.inverse_transform(data)
             display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, plot_abs=False)
-            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Second plots (Layer analysis)", f"{model_name}")
+            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Second plots (Layer analysis)", model_name, surnames[object_of_interest])
             check_folder(save_folder)
-            display.savefig(os.path.join(save_folder, model_name + f' - {object_of_interest[5:]} - ' + 'averaged accross subjects'  + '.png'))
+            display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + 'averaged accross subjects'  + '.png'))
             display.close()
 
     # add best glass brain (bert/gpt2)
@@ -339,6 +346,7 @@ if __name__ == '__main__':
                     'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer',
                     'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_cell_first-layer']}
     for object_of_interest in ['maps_r2', 'maps_pearson_corr','maps_significant_pearson_corr_with_pvalues', 'maps_significant_r2_with_pvalues']:
+        limit = limit_values[object_of_interest]
         for index_mask in range(len(labels)-1):
             mask = math_img('img > 50', img=index_img(maps, index_mask))  
             masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=5)
@@ -350,7 +358,7 @@ if __name__ == '__main__':
                 Y_filtered = []
                 for subject in subjects:
                     y = list(zip(*[list(filter_distribution(masker.transform(fetch_ridge_maps(model_name, subject, object_of_interest)), 75)) for model_name in models]))
-                    x = [model_name for model_name in models]
+                    x = [surnames[model_name] for model_name in models]
                     X.append(x)
                     Y_full.append([np.mean(i[0]) for i in y[0]])
                     Y_filtered.append([np.mean(i) for i in y[1]])
@@ -358,27 +366,27 @@ if __name__ == '__main__':
                     y_filtered = [np.mean(value) for value in y[1]]
 
                     plot = plt.plot(x, y_full)
-                    plt.title(f'{object_of_interest[5:]} ' + f'per ROI - {labels[index_mask+1]} - all voxels')
+                    plt.title('\n'.join(wrap(surnames[object_of_interest]} + f' per ROI - {labels[index_mask+1]} - all voxels')))
                     plt.xlabel('Models')
-                    plt.ylabel(f'{object_of_interest[5:]}')
-                    plt.ylim(0,0.1)
+                    plt.ylabel(surnames[object_of_interest])
+                    plt.ylim(0,limit)
                     plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
                     plt.tight_layout()
-                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key), subject)
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key), subject, surnames[object_of_interest])
                     check_folder(save_folder)
-                    plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {object_of_interest[5:]} - ' + subject  + '_all-voxels.png'))
+                    plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + subject  + '_all-voxels.png'))
                     plt.close()
 
                     plot = plt.plot(x, y_filtered)
-                    plt.title(f'{object_of_interest[5:]} ' + f'per ROI - {labels[index_mask+1]} - top 25% voxels')
+                    plt.title('\n'.join(wrap(surnames[object_of_interest] + f' per ROI - {labels[index_mask+1]} - top 25% voxels')))
                     plt.xlabel('Models')
-                    plt.ylabel(f'{object_of_interest[5:]}')
-                    plt.ylim(0,0.1)
+                    plt.ylabel(surnames[object_of_interest])
+                    plt.ylim(0,limit)
                     plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
                     plt.tight_layout()
-                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key), subject)
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key), subject, surnames[object_of_interest])
                     check_folder(save_folder)
-                    plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {object_of_interest[5:]} - ' + subject  + '_top-25%-voxels.png'))
+                    plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + subject  + '_top-25%-voxels.png'))
                     plt.close()
                 Y_full = np.vstack(Y_full)
                 Y_filtered = np.vstack(Y_filtered)
@@ -387,29 +395,31 @@ if __name__ == '__main__':
                 error = np.std(Y_full, axis=0)/np.sqrt(len(subjects))
                 Y_full = np.mean(Y_full, axis=0)
                 plot = plt.plot(X, Y_full)
-                plt.title(f'{object_of_interest[5:]} ' + f'per ROI - {labels[index_mask+1]} - all voxels')
+                plt.title('\n'.join(wrap(surnames[object_of_interest]} + f' per ROI - {labels[index_mask+1]} - all voxels')))
                 plt.xlabel('Models')
-                plt.ylabel(f'{object_of_interest[5:]}')
+                plt.ylabel(surnames[object_of_interest])
+                plt.ylim(0,limit)
                 plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
                 plt.errorbar(X, Y_full, error, linestyle='None', marker='^')
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key))
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key), surnames[object_of_interest])
                 check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {object_of_interest[5:]} - ' + 'averaged accross subjects'  + '_all-voxels.png'))
+                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + 'averaged accross subjects'  + '_all-voxels.png'))
                 plt.close()
 
                 error = np.std(Y_filtered, axis=0)/np.sqrt(len(subjects))
                 Y_filtered = np.mean(Y_filtered, axis=0)
                 plot = plt.plot(X, Y_filtered)
-                plt.title(f'{object_of_interest[5:]} ' + f'per ROI - {labels[index_mask+1]} - top 25% voxels')
+                plt.title('\n'.join(wrap(surnames[object_of_interest] + f' per ROI - {labels[index_mask+1]} - top 25% voxels')))
                 plt.xlabel('Models')
-                plt.ylabel(f'{object_of_interest[5:]}')
+                plt.ylabel(surnames[object_of_interest])
+                plt.ylim(0,limit)
                 plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
                 plt.errorbar(X, Y_filtered, error, linestyle='None', marker='^')
                 plt.tight_layout()
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key))
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key), surnames[object_of_interest])
                 check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {object_of_interest[5:]} - ' + 'averaged accross subjects'  + '_top-25%-voxels.png'))
+                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + 'averaged accross subjects'  + '_top-25%-voxels.png'))
                 plt.close()
 
         

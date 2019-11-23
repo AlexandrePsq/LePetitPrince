@@ -42,7 +42,7 @@ def filter_distribution(distribution, percent):
     """ Keep the higgest percent% of the distribution,
     and padd the rest with nan values.
     """
-    result = distribution[distribution>np.percentile(distribution, 75)]
+    result = distribution[distribution>np.percentile(distribution, 75)].copy()
     return distribution, result
 
 
@@ -352,10 +352,10 @@ if __name__ == '__main__':
                     y = list(zip(*[list(filter_distribution(masker.transform(fetch_ridge_maps(model_name, subject, object_of_interest)), 75)) for model_name in models]))
                     x = [model_name for model_name in models]
                     X.append(x)
-                    Y_full.append([np.mean(i[0]) for i in y[0]])
-                    Y_filtered.append([np.mean(i[0]) for i in y[1]])
-                    y_full = [np.mean(value[0]) for value in y[0]]
-                    y_filtered = [np.mean(value[0]) for value in y[1]]
+                    Y_full.append([np.mean(i) for i in y[0]])
+                    Y_filtered.append([np.mean(i) for i in y[1]])
+                    y_full = [np.mean(value) for value in y[0]]
+                    y_filtered = [np.mean(value) for value in y[1]]
 
                     plot = plt.plot(x, y_full)
                     plt.title(f'{object_of_interest[5:]} ' + f'per ROI - {labels[index_mask+1]} - all voxels')

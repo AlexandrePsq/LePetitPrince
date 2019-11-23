@@ -366,7 +366,7 @@ if __name__ == '__main__':
                     y_filtered = [np.mean(value) for value in y[1]]
 
                     plot = plt.plot(x, y_full)
-                    plt.title('\n'.join(wrap(surnames[object_of_interest]} + f' per ROI - {labels[index_mask+1]} - all voxels')))
+                    plt.title('\n'.join(wrap(surnames[object_of_interest] + f' per ROI - {labels[index_mask+1]} - all voxels')))
                     plt.xlabel('Models')
                     plt.ylabel(surnames[object_of_interest])
                     plt.ylim(0,limit)
@@ -395,7 +395,7 @@ if __name__ == '__main__':
                 error = np.std(Y_full, axis=0)/np.sqrt(len(subjects))
                 Y_full = np.mean(Y_full, axis=0)
                 plot = plt.plot(X, Y_full)
-                plt.title('\n'.join(wrap(surnames[object_of_interest]} + f' per ROI - {labels[index_mask+1]} - all voxels')))
+                plt.title('\n'.join(wrap(surnames[object_of_interest] + f' per ROI - {labels[index_mask+1]} - all voxels')))
                 plt.xlabel('Models')
                 plt.ylabel(surnames[object_of_interest])
                 plt.ylim(0,limit)

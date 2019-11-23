@@ -306,7 +306,7 @@ if __name__ == '__main__':
             display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, plot_abs=False)
             save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Second plots (Layer analysis)", model_name, surnames[object_of_interest])
             check_folder(save_folder)
-            display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + 'averaged accross subjects'  + '.png'))
+            display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + 'averaged across subjects'  + '.png'))
             display.close()
 
     # add best glass brain (bert/gpt2)
@@ -404,7 +404,7 @@ if __name__ == '__main__':
                 plt.tight_layout()
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key), surnames[object_of_interest])
                 check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + 'averaged accross subjects'  + '_all-voxels.png'))
+                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + 'averaged across subjects'  + '_all-voxels.png'))
                 plt.close()
 
                 error = np.std(Y_filtered, axis=0)/np.sqrt(len(subjects))
@@ -419,7 +419,7 @@ if __name__ == '__main__':
                 plt.tight_layout()
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key), surnames[object_of_interest])
                 check_folder(save_folder)
-                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + 'averaged accross subjects'  + '_top-25%-voxels.png'))
+                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + 'averaged across subjects'  + '_top-25%-voxels.png'))
                 plt.close()
 
         

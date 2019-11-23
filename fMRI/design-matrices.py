@@ -17,7 +17,7 @@ import warnings
 warnings.simplefilter(action='ignore' )
 
 from utilities.settings import Paths, Params
-from utilities.utils import get_data, compute, get_path2output, standardization
+from utilities.utils import get_data, compute, get_path2output, standardization, scale
 import pandas as pd
 
 paths = Paths()
@@ -70,7 +70,8 @@ if __name__ == '__main__':
         dataframes.append(pd.DataFrame(dm, columns=merge.columns))
         matrices.append(dm)
     
-    matrices = standardization(matrices, model_name, pca_components=300) if evaluate else matrices
+    # matrices = standardization(matrices, model_name, pca_components=300) if evaluate else matrices
+    matrices = scale(matrices)
 
     for i in range(len(runs)):
         name = os.path.basename(os.path.splitext(runs[i][0])[0])

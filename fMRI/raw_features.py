@@ -14,7 +14,7 @@ import warnings
 warnings.simplefilter(action='ignore')
 
 from utilities.settings import Paths, Params
-from utilities.utils import get_data, compute, get_path2output
+from utilities.utils import get_data, compute, get_path2output, standardization
 import pandas as pd
 from joblib import Parallel, delayed
 
@@ -103,5 +103,14 @@ if __name__ == '__main__':
     else:
         Parallel(n_jobs=-2)(delayed(compute_raw_features) \
                     (run, source, input_data_type, step, args.language, model_name, model_category, extension, args.overwrite) for run in raw_data)
+    
+    if params.pca:
+        data = [pd.read_csv(run) for run in get_data(args.language, step, model=model_name, source='fMRI')]
+        matrices = [df.values for df in data]
+        matrices = standardization(matrices, model_name, pca_components=300, scale=False)
+        for i in range(len(matrices)):
+            run_name = 'run{}'.format(i)
+            path2output = get_path2output(source, step, args.language, model_name, run_name, extension)
 
-
+            result = pd.DataFrame(matrices[i], columns=['{}_component-{}'.format(model_name, index) for index in range(params.n_components_default)])
+            result.to_csv(path2output, index=False)

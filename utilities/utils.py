@@ -15,6 +15,7 @@ import csv
 from sklearn.metrics import r2_score
 from scipy.stats import pearsonr
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 from textwrap import wrap
@@ -206,22 +207,28 @@ def transform_design_matrices(path):
     #dm = np.hstack((dm, const))
     return dm 
 
+def scale(matrices):
+    for index in range(len(matrices)):
+        scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
+        scaler.fit(matrices[index])
+        matrices[index] = scaler.transform(matrices[index])
+    return matrices
 
-def standardization(matrices, model_name, pca_components=300):
+
+def standardization(matrices, model_name, pca_components=300, scale=True):
     """Standardize a list of matrices and do a PCA transformation 
     if requested.
     :matrices: (list of np.array)
     :model_name: (str) Name of the model studied.
     :pca_components: (int - optional) Number of components to keep.
     """
-    for index in range(len(matrices)):
-        scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
-        scaler.fit(matrices[index])
-        matrices[index] = scaler.transform(matrices[index])
     if (matrices[0].shape[1] > pca_components) & (params.pca):
-        print('PCA analysis running...')
-        matrices = pca(matrices, model_name, n_components=pca_components)
+        matrices = scale(matrices)
+        print('PCA analysis ({}) running...'.format(params.pca_type))
+        matrices = pca(matrices, model_name, n_components=pca_components) if params.pca_type=='dual-statis' else simple_pca(matrices, model_name, n_components=pca_components)
         print('PCA done.')
+    if scale:
+        matrices = scale(matrices)
     return matrices
 
 
@@ -246,7 +253,27 @@ def shift(column, n_rows, column_name):
 ################## PCA ##################
 #########################################
 
-def pca(X, data_name, n_components=50):
+def simple_pca(X, data_name, n_components=300):
+    """Calssical PCA. Done on the concatenated set 
+    of matrices given as a list.
+    :X: (list of np.array) List of matrices on which to perform the PCA.
+    :data_name: (str) Name of the model studied.
+    :n_components: (int - optional) Number of components to keep.
+    """
+    lengths = [m.shape[0] for m in X]
+    X_all = np.vstack(X)
+    pca = PCA(n_components=n_components)
+    pca.fit(X_all)
+    X_all = pca.transform(X_all)
+    index = 0
+    result = []
+    for i in lengths:
+        result.append(X_all[index:index+i,:])
+        index += i
+    return result
+
+
+def pca(X, data_name, n_components=300):
     """Compute a Dual-STATIS analysis. It takes account of the 
     similarities between the variance-covariance matrices of the groups.
     See paper:
@@ -275,6 +302,12 @@ def pca(X, data_name, n_components=50):
     # u,s,v = np.linalg.svd(X_std.T)
     # diag_matrix = np.diag(eig_values_Vc)
     #############################
+    # checking the directions of variance
+    result = pd.DataFrame(data=[], columns=['index-{}'.format(j) for j in range(len(eig_values_Vc))]+['run']) 
+    for index, matrix in enumerate(cov_matrices):
+        result.loc[len(result)] = [np.dot(np.dot(A[:,i], matrix), A[:,i]) for i in range(len(eig_values_Vc))] + [index]
+    result.to_csv("/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/variance_per_run_{}.csv".format(data_name))
+    #############################
     eig_pairs = [(np.abs(eig_values_Vc[i]), A[:,i]) for i in range(len(eig_values_Vc))]
     tot = sum(np.abs(eig_values_Vc))
     var_exp = [(val / tot)*100 for val in sorted(np.abs(eig_values_Vc), reverse=True)]
@@ -298,8 +331,5 @@ def pca(X, data_name, n_components=50):
         projected_matrices.append(np.array(list(map(lambda y: y.real, np.dot(matrix, projector)))))
         
     # normalizing each matrix
-    for index in range(len(projected_matrices)):
-        scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
-        scaler.fit(projected_matrices[index])
-        projected_matrices[index] = scaler.transform(projected_matrices[index])
+    projected_matrices = scale(projected_matrices)
     return projected_matrices

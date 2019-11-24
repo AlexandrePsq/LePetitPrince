@@ -105,12 +105,20 @@ if __name__ == '__main__':
                     (run, source, input_data_type, step, args.language, model_name, model_category, extension, args.overwrite) for run in raw_data)
     
     if params.pca:
-        data = [pd.read_csv(run) for run in get_data(args.language, step, model=model_name, source='fMRI')]
+        data = []
+        offsets = []
+        for run in get_data(args.language, step, model=model_name, source='fMRI'):
+            df = pd.read_csv(run)
+            offsets.append(df[['offsets', 'duration']])
+            del df['offsets']
+            del df['duration']
+            data.append(df)
         matrices = [df.values for df in data]
         matrices = standardization(matrices, model_name, pca_components=300, scaling=False)
         for i in range(len(matrices)):
-            run_name = 'run{}'.format(i)
+            run_name = 'run{}'.format(i+1)
             path2output = get_path2output(source, step, args.language, model_name, run_name, extension)
 
             result = pd.DataFrame(matrices[i], columns=['{}_component-{}'.format(model_name, index) for index in range(params.n_components_default)])
+            result[['offsets', 'duration']] = offsets[i]
             result.to_csv(path2output, index=False)

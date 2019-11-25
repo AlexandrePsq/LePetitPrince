@@ -23,7 +23,7 @@ scatter_plots:
     input_data_folder1: ridge-indiv
     input_data_folder2: ridge-indiv
     title: Significant R2 comparison
-    name: BERT(pca)  VS  Glove embeddings
+    name: BERT_pca_VS_Glove_embeddings
   - model2: gpt2_pca_300_all-layers_outputs_maps_significant_r2_with_pvalues_pca_None_voxel_wise
     model2_folder: gpt2_pca_300_all-layers/outputs/maps
     model1: glove_embeddings_outputs_maps_significant_r2_with_pvalues_pca_None_voxel_wise
@@ -33,7 +33,7 @@ scatter_plots:
     input_data_folder1: ridge-indiv
     input_data_folder2: ridge-indiv
     title: Significant R2 comparison
-    name: GPT2 (pca)  VS  Glove embeddings
+    name: GPT2_pca_VS_Glove_embeddings
 
 specific_analysis:
   - parameters:

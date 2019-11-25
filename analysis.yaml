@@ -1,5 +1,13 @@
 subjects:
   - 57
+  - 63
+  - 67
+  - 73
+  - 77
+  - 82
+  - 101
+  - 109
+  - 110
   - 113
   - 114
 source: fMRI
@@ -344,68 +352,20 @@ model_complexity:
     title: 'R2 test = f(pca components)'
     name: model_complexity - LSTM E600H1800L1D02 - pca
 model_comparison:
-  - title: BERT
+  - title: 'Comparison 300 units'
     name: Model comparison - Average per ROI
     models:
-      - path: bert_bucket_all-layers
-        surname: BERT - ALL
-      - path: bert_bucket_embeddings
-        surname: BERT - embeddings
-      - path: bert_bucket_layer-1
-        surname: BERT - Layer 1
-      - path: bert_bucket_layer-2
-        surname: BERT - Layer 2
-      - path: bert_bucket_layer-3
-        surname: BERT - Layer 3
-      - path: bert_bucket_layer-4
-        surname: BERT - Layer 4
-      - path: bert_bucket_layer-5
-        surname: BERT - Layer 5
-      - path: bert_bucket_layer-6
-        surname: BERT - Layer 6
-      - path: bert_bucket_layer-7
-        surname: BERT - Layer 7
-      - path: bert_bucket_layer-8
-        surname: BERT - Layer 8
-      - path: bert_bucket_layer-9
-        surname: BERT - Layer 9
-      - path: bert_bucket_layer-10
-        surname: BERT - Layer 10
-      - path: bert_bucket_layer-11
-        surname: BERT - Layer 11
-      - path: bert_bucket_layer-12
-        surname: BERT - Layer 12
-  - title: GPT2
-    name: Model comparison - Average per ROI
-    models:
-      - path: gpt2_all-layers
-        surname: GPT2 - ALL
-      - path: gpt2_embeddings
-        surname: GPT2 - embeddings
-      - path: gpt2_layer-1
-        surname: GPT2 - Layer 1
-      - path: gpt2_layer-2
-        surname: GPT2 - Layer 2
-      - path: gpt2_layer-3
-        surname: GPT2 - Layer 3
-      - path: gpt2_layer-4
-        surname: GPT2 - Layer 4
-      - path: gpt2_layer-5
-        surname: GPT2 - Layer 5
-      - path: gpt2_layer-6
-        surname: GPT2 - Layer 6
-      - path: gpt2_layer-7
-        surname: GPT2 - Layer 7
-      - path: gpt2_layer-8
-        surname: GPT2 - Layer 8
-      - path: gpt2_layer-9
-        surname: GPT2 - Layer 9
-      - path: gpt2_layer-10
-        surname: GPT2 - Layer 10
-      - path: gpt2_layer-11
-        surname: GPT2 - Layer 11
-      - path: gpt2_layer-12
-        surname: GPT2 - Layer 12
+      - path: bert_bucket_pca_300_all-layers
+        surname: BERT
+      - path: gpt2_pca_300_all-layers
+        surname: GPT2
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer
+        surname: LSTM-L1-H300
+      - path: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_cell_first-layer
+        surname: LSTM-L1-C300
+      - path: glove_embeddings
+        surname: GloVe
+
   #- title: LSTM E600-H*-L1 - all layers
   #  name: Model comparison - Average per ROI
   #  models:
@@ -546,3 +506,66 @@ model_comparison:
   #      surname: log_word_freq
   #    - path: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/position_in_sentence
   #      surname: word_position
+  #- title: BERT
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: bert_bucket_all-layers
+  #      surname: BERT - ALL
+  #    - path: bert_bucket_embeddings
+  #      surname: BERT - embeddings
+  #    - path: bert_bucket_layer-1
+  #      surname: BERT - Layer 1
+  #    - path: bert_bucket_layer-2
+  #      surname: BERT - Layer 2
+  #    - path: bert_bucket_layer-3
+  #      surname: BERT - Layer 3
+  #    - path: bert_bucket_layer-4
+  #      surname: BERT - Layer 4
+  #    - path: bert_bucket_layer-5
+  #      surname: BERT - Layer 5
+  #    - path: bert_bucket_layer-6
+  #      surname: BERT - Layer 6
+  #    - path: bert_bucket_layer-7
+  #      surname: BERT - Layer 7
+  #    - path: bert_bucket_layer-8
+  #      surname: BERT - Layer 8
+  #    - path: bert_bucket_layer-9
+  #      surname: BERT - Layer 9
+  #    - path: bert_bucket_layer-10
+  #      surname: BERT - Layer 10
+  #    - path: bert_bucket_layer-11
+  #      surname: BERT - Layer 11
+  #    - path: bert_bucket_layer-12
+  #      surname: BERT - Layer 12
+  #- title: GPT2
+  #  name: Model comparison - Average per ROI
+  #  models:
+  #    - path: gpt2_all-layers
+  #      surname: GPT2 - ALL
+  #    - path: gpt2_embeddings
+  #      surname: GPT2 - embeddings
+  #    - path: gpt2_layer-1
+  #      surname: GPT2 - Layer 1
+  #    - path: gpt2_layer-2
+  #      surname: GPT2 - Layer 2
+  #    - path: gpt2_layer-3
+  #      surname: GPT2 - Layer 3
+  #    - path: gpt2_layer-4
+  #      surname: GPT2 - Layer 4
+  #    - path: gpt2_layer-5
+  #      surname: GPT2 - Layer 5
+  #    - path: gpt2_layer-6
+  #      surname: GPT2 - Layer 6
+  #    - path: gpt2_layer-7
+  #      surname: GPT2 - Layer 7
+  #    - path: gpt2_layer-8
+  #      surname: GPT2 - Layer 8
+  #    - path: gpt2_layer-9
+  #      surname: GPT2 - Layer 9
+  #    - path: gpt2_layer-10
+  #      surname: GPT2 - Layer 10
+  #    - path: gpt2_layer-11
+  #      surname: GPT2 - Layer 11
+  #    - path: gpt2_layer-12
+  #      surname: GPT2 - Layer 12
+  #

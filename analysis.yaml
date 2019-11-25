@@ -14,129 +14,26 @@ source: fMRI
 language: english
 scatter_plots:
   # comparison pearson coefficient
-  - model2: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/outputs/maps
-    model1: glove_embeddings_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model1_folder: sub-057/glove_embeddings/outputs/maps
-    y_label: LSTM E600-H300-L1-hidden-all_layers
+  - model2: bert_bucket_pca_300_all-layers_outputs_maps_significant_r2_with_pvalues_pca_None_voxel_wise
+    model2_folder: bert_bucket_pca_300_all-layers/outputs/maps
+    model1: glove_embeddings_outputs_maps_significant_r2_with_pvalues_pca_None_voxel_wise
+    model1_folder: glove_embeddings/outputs/maps
+    y_label: BERT
     x_label: Glove embeddings
     input_data_folder1: ridge-indiv
     input_data_folder2: ridge-indiv
-    title: Pearson correlation comparison
-    name: LSTM E600-H300-L1-hidden-all_layers  VS  Glove embeddings
-  - model2: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/outputs/maps
-    model1: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model1_folder: sub-057/mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/outputs/maps
-    y_label: LSTM E600-H300-L1-hidden-all_layers
-    x_label: Basic Features
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: Pearson correlation comparison
-    name: LSTM E600-H300-L1-hidden-all_layers  VS  Basic Features
-  - model2: glove_embeddings_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model2_folder: sub-057/glove_embeddings/outputs/maps
-    model1: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model1_folder: sub-057/mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/outputs/maps
-    y_label: Glove embeddings
-    x_label: Basic Features
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: Pearson correlation comparison
-    name: Glove embeddings  VS  Basic Features
-  # comparison r2
-  - model2: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_outputs_maps_r2_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/outputs/maps
-    model1: glove_embeddings_outputs_maps_r2_pca_None_voxel_wise
-    model1_folder: sub-057/glove_embeddings/outputs/maps
-    y_label: LSTM E600-H300-L1-hidden-all_layers
+    title: Significant R2 comparison
+    name: BERT(pca)  VS  Glove embeddings
+  - model2: gpt2_pca_300_all-layers_outputs_maps_significant_r2_with_pvalues_pca_None_voxel_wise
+    model2_folder: gpt2_pca_300_all-layers/outputs/maps
+    model1: glove_embeddings_outputs_maps_significant_r2_with_pvalues_pca_None_voxel_wise
+    model1_folder: glove_embeddings/outputs/maps
+    y_label: GTP2
     x_label: Glove embeddings
     input_data_folder1: ridge-indiv
     input_data_folder2: ridge-indiv
-    title: R2 coefficients comparison
-    name: LSTM E600-H300-L1-hidden-all_layers  VS  Glove embeddings
-  - model2: lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer_outputs_maps_r2_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer/outputs/maps
-    model1: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model_outputs_maps_r2_pca_None_voxel_wise
-    model1_folder: sub-057/mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/outputs/maps
-    y_label: LSTM E600-H300-L1-hidden-all_layers
-    x_label: Basic Features
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: R2 coefficients comparison
-    name: LSTM E600-H300-L1-hidden-all_layers  VS  Basic Features
-  - model2: glove_embeddings_outputs_maps_r2_pca_None_voxel_wise
-    model2_folder: sub-057/glove_embeddings/outputs/maps
-    model1: mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model_outputs_maps_r2_pca_None_voxel_wise
-    model1_folder: sub-057/mfcc_model+rms_model+other_sentence_onset+bottomup_model+topdown_model+wordrate_all_model/outputs/maps
-    y_label: Glove embeddings
-    x_label: Basic Features
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: R2 coefficients comparison
-    name: Glove embeddings  VS  Basic Features
-  # comparison accross layers for LSTM E600 H100 L3
-  - model2: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer/outputs/maps
-    model1: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model1_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer/outputs/maps
-    y_label: Layer 2
-    x_label: Layer 1
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: Pearson correlation comparison
-    name: Layers comparison/LSTM E600-H100-L3-hidden-all_layers/pearson_correlation/Layer 2 VS Layer 1
-  - model2: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer/outputs/maps
-    model1: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model1_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer/outputs/maps
-    y_label: Layer 3
-    x_label: Layer 1
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: Pearson correlation comparison
-    name: Layers comparison/LSTM E600-H100-L3-hidden-all_layers/pearson_correlation/Layer 3 VS Layer 1
-  - model2: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer/outputs/maps
-    model1: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer_outputs_maps_pearson_corr_pca_None_voxel_wise
-    model1_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer/outputs/maps
-    y_label: Layer 3
-    x_label: Layer 2
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: Pearson correlation comparison
-    name: Layers comparison/LSTM E600-H100-L3-hidden-all_layers/pearson_correlation/Layer 2 VS Layer 1
-
-  - model2: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer_outputs_maps_r2_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer/outputs/maps
-    model1: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer_outputs_maps_r2_pca_None_voxel_wise
-    model1_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer/outputs/maps
-    y_label: Layer 2
-    x_label: Layer 1
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: R2 coefficients comparison
-    name: Layers comparison/LSTM E600-H100-L3-hidden-all_layers/r2/Layer 2 VS Layer 1
-  - model2: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer_outputs_maps_r2_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer/outputs/maps
-    model1: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer_outputs_maps_r2_pca_None_voxel_wise
-    model1_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer/outputs/maps
-    y_label: Layer 3
-    x_label: Layer 1
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: R2 coefficients comparison
-    name: Layers comparison/LSTM E600-H100-L3-hidden-all_layers/r2/Layer 3 VS Layer 1
-  - model2: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer_outputs_maps_r2_pca_None_voxel_wise
-    model2_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer/outputs/maps
-    model1: lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer_outputs_maps_r2_pca_None_voxel_wise
-    model1_folder: sub-057/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers/lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer/outputs/maps
-    y_label: Layer 3
-    x_label: Layer 2
-    input_data_folder1: ridge-indiv
-    input_data_folder2: ridge-indiv
-    title: R2 coefficients comparison
-    name: Layers comparison/LSTM E600-H100-L3-hidden-all_layers/r2/Layer 2 VS Layer 1
+    title: Significant R2 comparison
+    name: GPT2 (pca)  VS  Glove embeddings
 
 
   # distribution des alphas

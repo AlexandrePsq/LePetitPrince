@@ -264,6 +264,11 @@ def simple_pca(X, data_name, n_components=300):
     X_all = np.vstack(X)
     pca = PCA(n_components=n_components)
     pca.fit(X_all)
+    # plot explained variance
+    plt.plot(pca.explained_variance_ratio_)
+    plt.savefig(os.path.join(paths.path2derivatives, 'fMRI', 'raw-features', 'explained_variance_{}_{}.png'.format(data_name, n_components)))
+    plt.close()
+    # extract components
     X_all = pca.transform(X_all)
     index = 0
     result = []

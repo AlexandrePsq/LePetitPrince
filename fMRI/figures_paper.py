@@ -322,7 +322,7 @@ if __name__ == '__main__':
                 path = sorted(glob.glob(path_template))[0]
                 all_paths.append(path)
                 img = load_img(path) 
-                display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, plot_abs=False)
+                display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
                 save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Second plots (Layer analysis)", model_name, surnames[object_of_interest], subject)
                 check_folder(save_folder)
                 display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + subject  + '.png'))

@@ -145,10 +145,10 @@ def create_df_for_R(plots, plots_names, labels, subjects, maps, language, source
         df_significant_r2_final.drop_duplicates(inplace=True)
         df_significant_r2_final.to_csv(os.path.join(save_folder, 'significant_r2_data.csv'), index=False)
 
-limit_values = {'maps_r2':0.1,
+limit_values = {'maps_r2':0.08,
                 'maps_pearson_corr':0.4,
                 'maps_significant_pearson_corr_with_pvalues':0.4,
-                'maps_significant_r2_with_pvalues':0.1}
+                'maps_significant_r2_with_pvalues':0.08}
 
 surnames = {'wordrate_word_position': 'Word position',
                 'wordrate_model': 'Wordrate',
@@ -427,33 +427,108 @@ if __name__ == '__main__':
     ###########################################################################
     #################### Fourth plot (Layer analysis LSTM) ####################
     ###########################################################################
-    plots = [['glove_embeddings',
-                'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_all-layers',
-                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers',
-                'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_cell_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_all-layers',
-                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_all-layers',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_all-layers'],
-                ['lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_second-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_second-layer'],
-                ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_second-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_third-layer'],
-                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_second-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_third-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_fourth-layer']]
+    plots = {'LSTM_300':['glove_embeddings',
+                            'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_all-layers',
+                            'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_all-layers',
+                            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_all-layers',
+                            'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_cell_first-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_all-layers',
+                            'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_all-layers',
+                            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_all-layers'],
+                'LSTM_#L2':['lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_first-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_hidden_second-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_first-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_150_nlayers_2_dropout_02_cell_second-layer'],
+                'LSTM_#L3':['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_first-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_second-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_cell_third-layer'],
+                'LSTM_#L4':['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_first-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_second-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_third-layer',
+                            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_fourth-layer']}
     plots_names = ["LSTM comparison with 300 units", "LSTM #L2 - layer comparison", "LSTM #L3 - layer comparison", "LSTM #L4 - layer comparison"]
-    create_df_for_R(plots, plots_names, labels, subjects, maps, language, source, 'Fourth plot (Layer analysis LSTM)', surnames)
+    # create_df_for_R(plots, plots_names, labels, subjects, maps, language, source, 'Fourth plot (Layer analysis LSTM)', surnames)
+    for object_of_interest in ['maps_significant_r2_with_pvalues']:
+        limit = limit_values[object_of_interest]
+        for index_mask in range(len(labels)-1):
+            mask = math_img('img > 50', img=index_img(maps, index_mask))  
+            masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=5)
+            masker.fit()
+            for key in plots.keys():
+                models = plots[key]
+                X = []
+                Y_full = []
+                Y_filtered = []
+                for subject in subjects:
+                    y = list(zip(*[list(filter_distribution(masker.transform(fetch_ridge_maps(model_name, subject, object_of_interest)), 75)) for model_name in models]))
+                    x = [surnames[model_name] for model_name in models]
+                    X.append(x)
+                    Y_full.append([np.mean(i[0]) for i in y[0]])
+                    Y_filtered.append([np.mean(i) for i in y[1]])
+                    y_full = [np.mean(value[0]) for value in y[0]]
+                    y_filtered = [np.mean(value) for value in y[1]]
 
+                    plot = plt.plot(x, y_full)
+                    plt.title('\n'.join(wrap(surnames[object_of_interest] + f' per ROI - {labels[index_mask+1]} - all voxels')))
+                    plt.xlabel('Models')
+                    plt.ylabel(surnames[object_of_interest])
+                    plt.ylim(0,limit)
+                    plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
+                    plt.tight_layout()
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key), subject, surnames[object_of_interest])
+                    check_folder(save_folder)
+                    plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + subject  + '_all-voxels.png'))
+                    plt.close()
+
+                    plot = plt.plot(x, y_filtered)
+                    plt.title('\n'.join(wrap(surnames[object_of_interest] + f' per ROI - {labels[index_mask+1]} - top 25% voxels')))
+                    plt.xlabel('Models')
+                    plt.ylabel(surnames[object_of_interest])
+                    plt.ylim(0,limit)
+                    plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
+                    plt.tight_layout()
+                    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Third plot (Layer analysis {})".format(key), subject, surnames[object_of_interest])
+                    check_folder(save_folder)
+                    plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + subject  + '_top-25%-voxels.png'))
+                    plt.close()
+                Y_full = np.vstack(Y_full)
+                Y_filtered = np.vstack(Y_filtered)
+                X = X[0]
+
+                error = np.std(Y_full, axis=0)/np.sqrt(len(subjects))
+                Y_full = np.mean(Y_full, axis=0)
+                plot = plt.plot(X, Y_full)
+                plt.title('\n'.join(wrap(surnames[object_of_interest] + f' per ROI - {labels[index_mask+1]} - all voxels')))
+                plt.xlabel('Models')
+                plt.ylabel(surnames[object_of_interest])
+                plt.ylim(0,limit)
+                plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
+                plt.errorbar(X, Y_full, error, linestyle='None', marker='^')
+                plt.tight_layout()
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key), surnames[object_of_interest])
+                check_folder(save_folder)
+                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + 'averaged across subjects'  + '_all-voxels.png'))
+                plt.close()
+
+                error = np.std(Y_filtered, axis=0)/np.sqrt(len(subjects))
+                Y_filtered = np.mean(Y_filtered, axis=0)
+                plot = plt.plot(X, Y_filtered)
+                plt.title('\n'.join(wrap(surnames[object_of_interest] + f' per ROI - {labels[index_mask+1]} - top 25% voxels')))
+                plt.xlabel('Models')
+                plt.ylabel(surnames[object_of_interest])
+                plt.ylim(0,limit)
+                plt.xticks(rotation=30, fontsize=6, horizontalalignment='right')
+                plt.errorbar(X, Y_filtered, error, linestyle='None', marker='^')
+                plt.tight_layout()
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', 'Third plot (Layer analysis {})'.format(key), surnames[object_of_interest])
+                check_folder(save_folder)
+                plt.savefig(os.path.join(save_folder, key + labels[index_mask+1] + f' - {surnames[object_of_interest]} - ' + 'averaged across subjects'  + '_top-25%-voxels.png'))
+                plt.close()

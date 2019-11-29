@@ -62,12 +62,12 @@ def batchify(x, y, size=10):
     y_batch.append(y[last:])
     return zip(x_batch, y_batch)
 
-def compute_global_masker(files): # [[path, path2], [path3, path4]]
+def compute_global_masker(files, smoothing_fwhm=None): # [[path, path2], [path3, path4]]
     """Return a MultiNiftiMasker object.
     """
     masks = [compute_epi_mask(f) for f in files]
     global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
-    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=5) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
+    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=smoothing_fwhm) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
     masker.fit()
     return masker
 
@@ -76,7 +76,7 @@ def save_hist(distribution, path):
     plt.savefig(path)
     plt.close()
 
-def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest, surnames, models, syntactic_roi, language_roi, figsize=(10,12)):
+def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest, surnames, models, syntactic_roi, language_roi, figsize=(10,12), count=False, title='R2 per ROI', ylabel='Regions of interest (ROI)', xlabel='R2 value'):
     """Plots vertically the 6 first models.
     """
     limit = (-0.02, 0.06) if object_of_interest=='maps_r2' else None
@@ -94,9 +94,11 @@ def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest,
                     data[:,3], x, '.m',
                     data[:,4], x, '.k',
                     data[:,5], x, '.g')
-    plt.title('R2 per ROI')
-    plt.ylabel('Regions of interest (ROI)')
-    plt.xlabel('R2 value')
+    plt.title(title)
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
+    if count:
+        plt.axvline(x=100, color='k', linestyle='-', alpha=0.2)
     plt.hlines(x, dash_inf, data[:,0], linestyle="dashed", alpha=0.1)
     plt.hlines(x, dash_inf, data[:,1], linestyle="dashed", alpha=0.1)
     plt.hlines(x, dash_inf, data[:,2], linestyle="dashed", alpha=0.1)
@@ -104,6 +106,9 @@ def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest,
     plt.hlines(x, dash_inf, data[:,4], linestyle="dashed", alpha=0.1)
     plt.hlines(x, dash_inf, data[:,5], linestyle="dashed", alpha=0.1)
     plt.xlim(limit)
+    plt.minorticks_on()
+    plt.grid(which='major', linestyle='-', linewidth='0.5', color='black')
+    plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.2)
     plt.legend(plot, [surnames[model] for model in models], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
     for index, label in enumerate(x):
         if label in language_roi:
@@ -170,45 +175,48 @@ limit_values = {'maps_r2':0.08,
                 'maps_significant_pearson_corr_with_pvalues':0.4,
                 'maps_significant_r2_with_pvalues':0.08}
 
-syntactic_roi = ['Frontal Pole',
-'Superior Frontal Gyrus',
-'Inferior Frontal Gyrus, pars triangularis',
-'Inferior Frontal Gyrus, pars opercularis',
-'Superior Temporal Gyrus, anterior division',
-'Superior Temporal Gyrus, posterior division',
-'Middle Temporal Gyrus, anterior division',
-'Middle Temporal Gyrus, posterior division',
-'Middle Temporal Gyrus, temporooccipital part',
-'Inferior Temporal Gyrus, anterior division',
-'Inferior Temporal Gyrus, posterior division',
-'Inferior Temporal Gyrus, temporooccipital part',
-'Supramarginal Gyrus, anterior division',
-'Supramarginal Gyrus, posterior division',
-'Angular Gyrus',
-'Frontal Medial Cortex']
+syntactic_roi = ['Inferior Frontal Gyrus, pars triangularis',
+                    'Inferior Frontal Gyrus, pars opercularis',
+                    'Precentral Gyrus',
+                    'Temporal Pole',
+                    'Superior Temporal Gyrus, anterior division',
+                    'Superior Temporal Gyrus, posterior division',
+                    'Middle Temporal Gyrus, anterior division',
+                    'Middle Temporal Gyrus, posterior division',
+                    'Middle Temporal Gyrus, temporooccipital part',
+                    'Juxtapositional Lobule Cortex (formerly Supplementary Motor Cortex)',
+                    'Planum Temporale']
 
 language_roi = ['Frontal Pole',
-'Insular Cortex',
-'Superior Frontal Gyrus',
-'Middle Frontal Gyrus',
-'Inferior Frontal Gyrus, pars triangularis',
-'Inferior Frontal Gyrus, pars opercularis',
-'Temporal Pole',
-'Superior Temporal Gyrus, anterior division',
-'Superior Temporal Gyrus, posterior division',
-'Middle Temporal Gyrus, anterior division',
-'Middle Temporal Gyrus, posterior division',
-'Middle Temporal Gyrus, temporooccipital part',
-'Inferior Temporal Gyrus, anterior division',
-'Inferior Temporal Gyrus, posterior division',
-'Inferior Temporal Gyrus, temporooccipital part',
-'Supramarginal Gyrus, anterior division',
-'Supramarginal Gyrus, posterior division',
-'Angular Gyrus',
-'Frontal Medial Cortex',
-'Paracingulate Gyrus',
-'Cingulate Gyrus, anterior division',
-'Cingulate Gyrus, posterior division']
+                    'Insular Cortex',
+                    'Superior Frontal Gyrus',
+                    'Middle Frontal Gyrus',
+                    'Inferior Frontal Gyrus, pars triangularis',
+                    'Inferior Frontal Gyrus, pars opercularis',
+                    'Precentral Gyrus',
+                    'Temporal Pole',
+                    'Superior Temporal Gyrus, anterior division',
+                    'Superior Temporal Gyrus, posterior division',
+                    'Middle Temporal Gyrus, anterior division',
+                    'Middle Temporal Gyrus, posterior division',
+                    'Middle Temporal Gyrus, temporooccipital part',
+                    'Inferior Temporal Gyrus, anterior division',
+                    'Inferior Temporal Gyrus, posterior division',
+                    'Inferior Temporal Gyrus, temporooccipital part',
+                    'Superior Parietal Lobule',
+                    'Supramarginal Gyrus, posterior division',
+                    'Angular Gyrus',
+                    'Lateral Occipital Cortex, superior division',
+                    'Juxtapositional Lobule Cortex (formerly Supplementary Motor Cortex)',
+                    'Precuneous Cortex',
+                    'Frontal Orbital Cortex',
+                    'Temporal Fusiform Cortex, posterior division',
+                    'Temporal Occipital Fusiform Cortex',
+                    'Occipital Fusiform Gyrus',
+                    'Frontal Operculum Cortex',
+                    'Planum Polare',
+                    "Heschl's Gyrus (includes H1 and H2)",
+                    'Planum Temporale']
 
 surnames = {'wordrate_word_position': 'Word position',
                 'wordrate_model': 'Wordrate',
@@ -534,13 +542,13 @@ if __name__ == '__main__':
                         value, surnames, models, syntactic_roi, language_roi)
         vertical_plot(mean_filtered, x_labels, 'Mean-filtered-comparison_300_features', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi)
+                        value, surnames, models, syntactic_roi, language_roi, title='Filtered R2 per ROI')
         vertical_plot(median_filtered, x_labels, 'Median-filtered-comparison_300_features', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi)
+                        value, surnames, models, syntactic_roi, language_roi, title='Filtered R2 per ROI')
         vertical_plot(percentile_filtered, x_labels, 'Third-quartile-filtered-comparison_300_features', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi)
+                        value, surnames, models, syntactic_roi, language_roi, title='Filtered R2 per ROI')
         print("\t\t-->Done")
 
     ###########################################################################
@@ -558,12 +566,14 @@ if __name__ == '__main__':
             data = [masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
             counter[index_mask, index_model] = np.mean([np.count_nonzero(~np.isnan(array)) for array in data])
             mean[index_mask, index_model] = np.mean([np.mean(array) for array in data])
+    print(counter)
     vertical_plot(counter, x_labels, 'Count of non-Nan values per ROI', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2bis'), 
-                        value, surnames, models, syntactic_roi, language_roi)
+                        value, surnames, models, syntactic_roi, language_roi, count=True, title='Count of non-Nan values per ROI', 
+                        ylabel='Regions of interest (ROI)', xlabel='Count')
     vertical_plot(mean, x_labels, 'Mean significant R2', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2bis'), 
-                        value, surnames, models, syntactic_roi, language_roi)
+                        value, surnames, models, syntactic_roi, language_roi, title='Significant R2 per ROI')
     print("\t-->Done")
 
 

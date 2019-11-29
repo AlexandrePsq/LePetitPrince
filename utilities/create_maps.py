@@ -30,21 +30,22 @@ def check_folder(path):
         pass
 
 
-def compute_global_masker(files): # [[path, path2], [path3, path4]]
+def compute_global_masker(files, smoothing_fwhm=None): # [[path, path2], [path3, path4]]
     # return a MultiNiftiMasker object
     masks = [compute_epi_mask(f) for f in files]
     global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
-    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=5) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
+    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=smoothing_fwhm) # return a object that transforms a 4D barin into a 2D matrix of voxel-time and can do the reverse action
     masker.fit()
     return masker
 
 
-def create_maps(masker, distribution, distribution_name, subject, output_parent_folder, vmax=None, pca='', voxel_wise=False, not_glass_brain=False):
+def create_maps(masker, masker_smoothed, distribution, distribution_name, subject, output_parent_folder, vmax=None, pca='', voxel_wise=False, not_glass_brain=False):
     model = os.path.basename(output_parent_folder)
     language = os.path.basename(os.path.dirname(output_parent_folder))
     data_type = os.path.basename(os.path.dirname(os.path.dirname(output_parent_folder)))
 
     img = masker.inverse_transform(distribution)
+    img_smoothed = masker_smoothed.inverse_transform(distribution)
 
     pca = 'pca_' + str(pca) if (pca!='') else 'no_pca'
     voxel_wise = 'voxel_wise' if voxel_wise else 'not_voxel_wise'
@@ -60,11 +61,11 @@ def create_maps(masker, distribution, distribution_name, subject, output_parent_
     plt.close()
 
     if not_glass_brain:
-        display = plot_img(img, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))
+        display = plot_img(img_smoothed, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))
         display.savefig(path2output_png)
         display.close()
     else:
-        display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
+        display = plot_glass_brain(img_smoothed, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
         display.savefig(path2output_png)
         display.close()
 
@@ -101,6 +102,7 @@ if __name__ =='__main__':
         check_folder(fmri_path)
         fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language=language, subject=subject), 'fMRI_*run*')))
     masker = compute_global_masker(list(fmri_runs.values()))
+    masker_smoothed = compute_global_masker(list(fmri_runs.values()), smoothing_fwhm=5)
 
     for model in parameters['models']:
         model_name = model['name'] # model['name']=='' if we study the model as a whole
@@ -127,16 +129,16 @@ if __name__ =='__main__':
         check_folder(output_parent_folder)
         
         # creating maps
-        create_maps(masker, alphas, 'alphas', args.subject, output_parent_folder, pca=pca, vmax=10000) # alphas # argument deleted: , vmax=5e3
+        create_maps(masker, masker_smoothed, alphas, 'alphas', args.subject, output_parent_folder, pca=pca, vmax=10000) # alphas # argument deleted: , vmax=5e3
 
-        create_maps(masker, r2, 'r2', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # r2 
-        create_maps(masker, r2_significant_with_pvalues, 'significant_r2_with_pvalues', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significant
+        create_maps(masker, masker_smoothed, r2, 'r2', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # r2 
+        create_maps(masker, masker_smoothed, r2_significant_with_pvalues, 'significant_r2_with_pvalues', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significant
         
-        create_maps(masker, pearson_corr, 'pearson_corr', args.subject, output_parent_folder, pca=pca,  voxel_wise=True) # pearson_corr 
-        create_maps(masker, pearson_corr_significant_with_pvalues, 'significant_pearson_corr_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # pearson_corr_significant
+        create_maps(masker, masker_smoothed, pearson_corr, 'pearson_corr', args.subject, output_parent_folder, pca=pca,  voxel_wise=True) # pearson_corr 
+        create_maps(masker, masker_smoothed, pearson_corr_significant_with_pvalues, 'significant_pearson_corr_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # pearson_corr_significant
 
-        create_maps(masker, p_values_r2, 'p_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
-        create_maps(masker, p_values_pearson_corr, 'p_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+        create_maps(masker, masker_smoothed, p_values_r2, 'p_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+        create_maps(masker, masker_smoothed, p_values_pearson_corr, 'p_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
 
-        create_maps(masker, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
-        create_maps(masker, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+        create_maps(masker, masker_smoothed, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+        create_maps(masker, masker_smoothed, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)

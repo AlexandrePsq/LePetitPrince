@@ -210,15 +210,15 @@ language_roi = ['Inferior Frontal Gyrus, pars triangularis',
                     'Middle Temporal Gyrus, temporooccipital part',
                     'Angular Gyrus']
 
-surnames = {'wordrate_word_position': 'Word position',
+surnames = {'wordrate_word_position': 'Word-position',
                 'wordrate_model': 'Wordrate',
-                'wordrate_log_word_freq': 'Log word frequency',
-                'wordrate_function-word': 'Function words',
-                'wordrate_content-word': 'Content words',
-                'wordrate_all_model': 'All word-related models',
-                'topdown_model': 'Topdown parser',
+                'wordrate_log_word_freq': 'Log-word-frequency',
+                'wordrate_function-word': 'Function-words',
+               'wordrate_content-word': 'Content-words',
+                'wordrate_all_model': 'All-word-related-models',
+                'topdown_model': 'Topdown-parser',
                 'rms_model': 'RMS',
-                'other_sentence_onset': 'Sentence onset',
+                'other_sentence_onset': 'Sentence-onset',
                 'mfcc_model': 'MFCC',
                 'gpt2_layer-9': 'GPT2-L9',
                 'gpt2_layer-8': 'GPT2-L8',
@@ -234,7 +234,7 @@ surnames = {'wordrate_word_position': 'Word position',
                 'gpt2_layer-1': 'GPT2-L1',
                 'gpt2_embeddings': 'GPT2-L0',
                 'gpt2_all-layers': 'GPT2-all',
-                'bottomup_model': 'Bottomup parser',
+                'bottomup_model': 'Bottomup-parser',
                 'bert_bucket_median_all-layers': 'BERT-median-all',
                 'bert_bucket_layer-9': 'BERT-L9',
                 'bert_bucket_layer-8': 'BERT-L8',
@@ -282,9 +282,9 @@ surnames = {'wordrate_word_position': 'Word position',
                 'bert_bucket_pca_300_all-layers': 'BERT-all-pca-300',
                 'gpt2_pca_300_all-layers':'GPT2-all-pca-300',
                 'maps_r2_':'R2', 
-                'maps_pearson_corr':'Pearson coefficient',
-                'maps_significant_pearson_corr_with_pvalues':'Significant Pearson', 
-                'maps_significant_r2_with_pvalues':'Significant R2',
+                'maps_pearson_corr':'Pearson',
+                'maps_significant_pearson_corr_with_pvalues':'Significant-Pearson', 
+                'maps_significant_r2_with_pvalues':'Significant-R2',
                 'Background': 'Background', 
                 'Frontal Pole': 'FP', 
                 'Insular Cortex': 'InsC', 
@@ -426,7 +426,7 @@ if __name__ == '__main__':
     #            display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
     #            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest], subject)
     #            check_folder(save_folder)
-    #            display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + subject  + '.png'))
+    #            display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + subject  + '.png'))
     #            display.close()
     #        data = [global_masker.transform(path) for path in all_paths]
     #        data = np.vstack(data)
@@ -435,14 +435,14 @@ if __name__ == '__main__':
     #        display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
     #        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest])
     #        check_folder(save_folder)
-    #        display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + 'averaged across subjects'  + '.png'))
+    #        display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + '-averaged-'  + '.png'))
     #        display.close()
     #        # with smoothing
     #        #img = global_masker_smoothed.inverse_transform(data)
     #        #display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
     #        #save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest])
     #        #check_folder(save_folder)
-    #        #display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + 'averaged across subjects'  + '_smoothed.png'))
+    #        #display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + '-averaged-'  + '-smoothed.png'))
     #        #display.close()
 #
     #print("\t\t-->Done")
@@ -649,27 +649,27 @@ if __name__ == '__main__':
     #        layer_plot(X, np.mean(Y_full, axis=0), np.std(Y_full, axis=0)/np.sqrt(len(subjects)), 
     #                    surnames, object_of_interest, roi, limit, 
     #                    save_folder, 
-    #                    key + '_' + roi + '_mean_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_all-voxels.png')
+    #                    key + '-' + roi + '-mean-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-all-voxels.png')
     #        
     #        error = np.std(Y_filtered_25, axis=0)/np.sqrt(len(subjects))
     #        layer_plot(X, np.mean(Y_filtered_25, axis=0), error, 
     #                    surnames, object_of_interest, roi, limit, 
     #                    save_folder, 
-    #                    key + '_' + roi + '_mean_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_top-25%-voxels.png')
+    #                    key + '-' + roi + '-mean-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-top-25percent-voxels.png')
     #        layer_plot(X, np.median(Y_filtered_25, axis=0), error, 
     #                    surnames, object_of_interest, roi, limit, 
     #                    save_folder, 
-    #                    key + '_' + roi + '_median_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_top-25%-voxels.png')
+    #                    key + '-' + roi + '-median-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-top-25percent-voxels.png')
     #        layer_plot(X, np.percentile(Y_filtered_25, 75, axis=0), error, 
     #                    surnames, object_of_interest, roi, limit, 
     #                    save_folder, 
-    #                    key + '_' + roi + '_third-quartile_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_top-25%-voxels.png')
+    #                    key + '-' + roi + '-third-quartile-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-top-25percent-voxels.png')
 #
     #        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '3', key, surnames['maps_significant_r2_with_pvalues'])
     #        layer_plot(X, np.array(Y_full_significant), error_significant, 
     #                    surnames, 'maps_significant_r2_with_pvalues', roi, limit_values['maps_significant_r2_with_pvalues'], 
     #                    save_folder, 
-    #                    key + '_' + roi + '_mean_'+ f" - {surnames['maps_significant_r2_with_pvalues']} - " + 'averaged_across_subjects'  + '_all-voxels.png')
+    #                    key + '-' + roi + '-mean-'+ f"-{surnames['maps_significant_r2_with_pvalues']}-" + 'averaged'  + '-all-voxels.png')
     #        
     #print("\t-->Done")
 #
@@ -699,21 +699,25 @@ if __name__ == '__main__':
 
     models = [['bert_bucket_all-layers',
                 'gpt2_all-layers'], 
-                ['bert_bucket_embeddings',
-                'bert_bucket_layer-8'], 
                 ['bert_bucket_layer-8',
-                'bert_bucket_layer-9'],
-                ['gpt2_embeddings',
-                'gpt2_layer-7'], 
+                'bert_bucket_embeddings'], 
+                ['bert_bucket_layer-9',
+                'bert_bucket_layer-8'],
                 ['gpt2_layer-7',
-                'gpt2_layer-8']]
+                'gpt2_embeddings'], 
+                ['gpt2_layer-8',
+                'gpt2_layer-7']]
     for plots in models:
+        print(plots)
         name = surnames[plots[0]] + '-' + surnames[plots[1]]
         path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'r2.npy')
         data = [np.load(path.format(subject=subject, model=plots[0])) - np.load(path.format(subject=subject, model=plots[1])) for subject in subjects]
         data = np.mean(np.vstack(data), axis=0)
         path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'distribution_r2.npy')
+        print("\tloading distributions...")
         distribution = [np.load(path.format(subject=subject, model=plots[0])) - np.load(path.format(subject=subject, model=plots[1])) for subject in subjects]
+        print("\t\t-->Done")
+        print("\tComputing...")
         distribution = [np.mean(array, axis=0) for array in distribution]
         distribution = np.mean(distribution, axis=0)
 
@@ -730,3 +734,4 @@ if __name__ == '__main__':
         check_folder(save_folder)
         display.savefig(os.path.join(save_folder, name + '.png'))
         display.close()
+        print("\t-->Done")

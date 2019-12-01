@@ -450,133 +450,133 @@ if __name__ == '__main__':
     ############################################################################
     ################ 2 (Comparison 300 features models) ###############
     ############################################################################
-    print("Computing: 2 (Comparison 300 features models)...")
-    models = ['glove_embeddings',
-                'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
-                'bert_bucket_pca_300_all-layers',
-                'gpt2_pca_300_all-layers',
-                'bert_bucket_all-layers',
-                'gpt2_all-layers']
-    plot_name = ["Comparison 300 features models"]
-    data = {model:[] for model in all_models}
-    nb_voxels = 26117
-    table = np.zeros((len(all_models), nb_voxels))
-    for value in ['maps_r2_']:
-        tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "2")
-        check_folder(os.path.join(tmp_path, 'averages'))
-
-        print("\tTransforming data...")
-        for model_index, model in enumerate(all_models):
-            data[model] = [global_masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
-            distribution = np.mean(np.vstack(data[model]), axis=0)
-            table[model_index, distribution>np.percentile(distribution, 75)] = 1
-            save_hist(distribution, os.path.join(tmp_path, 'averages', f'hist_averaged_{value}_{model}.png'))
-            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
-            check_folder(path2output_raw)
-            nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, value + '.nii.gz'))
-        print("\t\t-->Done")
-
-        table = np.sum(table, axis=0)
-        mask = (table>np.percentile(table, 75))
-        print("\tSaving filtered distributions per model and subject...")
-        for model in all_models:
-            for index, subject in enumerate(subjects):
-                distribution = data[model][index][0]
-                distribution[~mask] = np.nan
-                path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, subject, model, 'outputs/maps')
-                check_folder(path2output_raw)
-                nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, model + '_outputs_maps_' + 'filtered_25%_r2_' + 'pca_None_voxel_wise_'+ subject + '.nii.gz'))
-            distribution = np.mean(np.vstack(data[model]), axis=0)
-            distribution[~mask] = np.nan
-            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
-            check_folder(path2output_raw)
-            nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, 'filtered_25%_r2_' + '.nii.gz'))
-        print("\t\t-->Done")
-
-        x_labels = labels[1:]
-        mean = np.zeros((len(labels)-1, len(models)))
-        median = np.zeros((len(labels)-1, len(models)))
-        percentile = np.zeros((len(labels)-1, len(models)))
-        mean_filtered = np.zeros((len(labels)-1, len(models)))
-        median_filtered = np.zeros((len(labels)-1, len(models)))
-        percentile_filtered = np.zeros((len(labels)-1, len(models)))
-        # extract data
-        print("\tLooping through labeled masks...")
-        for index_mask in range(len(labels)-1):
-            mask = math_img('img > 50', img=index_img(maps, index_mask))  
-            masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
-            masker.fit()
-
-            for index_model, model in enumerate(models):
-                path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
-                array = masker.transform(os.path.join(path2output_raw, value + '.nii.gz'))
-                mean[index_mask, index_model] = np.mean(array)
-                median[index_mask, index_model] = np.percentile(array, 50)
-                percentile[index_mask, index_model] = np.percentile(array, 75)
-
-                path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
-                array = masker.transform(os.path.join(path2output_raw, 'filtered_25%_' + value + '.nii.gz'))
-                array = array[~np.isnan(array)]
-                mean_filtered[index_mask, index_model] = np.mean(array)
-                median_filtered[index_mask, index_model] = np.percentile(array, 50)
-                percentile_filtered[index_mask, index_model] = np.percentile(array, 75)
-        print("\t\t-->Done")
-
-        print("\tPlotting...")
-        # save plots
-        vertical_plot(mean, x_labels, 'Mean-comparison-300-features', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi)
-        vertical_plot(median, x_labels, 'Median-comparison-300-features', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi)
-        vertical_plot(percentile, x_labels, 'Third-quartile-comparison-300-features', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi)
-        vertical_plot(mean_filtered, x_labels, 'Mean-filtered-comparison-300-features', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi)
-        vertical_plot(median_filtered, x_labels, 'Median-filtered-comparison-300-features', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi)
-        vertical_plot(percentile_filtered, x_labels, 'Third-quartile-filtered-comparison-300-features', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi)
-        print("\t\t-->Done")
+    #print("Computing: 2 (Comparison 300 features models)...")
+    #models = ['glove_embeddings',
+    #            'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
+    #            'bert_bucket_pca_300_all-layers',
+    #            'gpt2_pca_300_all-layers',
+    #            'bert_bucket_all-layers',
+    #            'gpt2_all-layers']
+    #plot_name = ["Comparison 300 features models"]
+    #data = {model:[] for model in all_models}
+    #nb_voxels = 26117
+    #table = np.zeros((len(all_models), nb_voxels))
+    #for value in ['maps_r2_']:
+    #    tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "2")
+    #    check_folder(os.path.join(tmp_path, 'averages'))
+#
+    #    print("\tTransforming data...")
+    #    for model_index, model in enumerate(all_models):
+    #        data[model] = [global_masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
+    #        distribution = np.mean(np.vstack(data[model]), axis=0)
+    #        table[model_index, distribution>np.percentile(distribution, 75)] = 1
+    #        save_hist(distribution, os.path.join(tmp_path, 'averages', f'hist_averaged_{value}_{model}.png'))
+    #        path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
+    #        check_folder(path2output_raw)
+    #        nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, value + '.nii.gz'))
+    #    print("\t\t-->Done")
+#
+    #    table = np.sum(table, axis=0)
+    #    mask = (table>np.percentile(table, 75))
+    #    print("\tSaving filtered distributions per model and subject...")
+    #    for model in all_models:
+    #        for index, subject in enumerate(subjects):
+    #            distribution = data[model][index][0]
+    #            distribution[~mask] = np.nan
+    #            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, subject, model, 'outputs/maps')
+    #            check_folder(path2output_raw)
+    #            nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, model + '_outputs_maps_' + 'filtered_25%_r2_' + 'pca_None_voxel_wise_'+ subject + '.nii.gz'))
+    #        distribution = np.mean(np.vstack(data[model]), axis=0)
+    #        distribution[~mask] = np.nan
+    #        path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
+    #        check_folder(path2output_raw)
+    #        nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, 'filtered_25%_r2_' + '.nii.gz'))
+    #    print("\t\t-->Done")
+#
+    #    x_labels = labels[1:]
+    #    mean = np.zeros((len(labels)-1, len(models)))
+    #    median = np.zeros((len(labels)-1, len(models)))
+    #    percentile = np.zeros((len(labels)-1, len(models)))
+    #    mean_filtered = np.zeros((len(labels)-1, len(models)))
+    #    median_filtered = np.zeros((len(labels)-1, len(models)))
+    #    percentile_filtered = np.zeros((len(labels)-1, len(models)))
+    #    # extract data
+    #    print("\tLooping through labeled masks...")
+    #    for index_mask in range(len(labels)-1):
+    #        mask = math_img('img > 50', img=index_img(maps, index_mask))  
+    #        masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
+    #        masker.fit()
+#
+    #        for index_model, model in enumerate(models):
+    #            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
+    #            array = masker.transform(os.path.join(path2output_raw, value + '.nii.gz'))
+    #            mean[index_mask, index_model] = np.mean(array)
+    #            median[index_mask, index_model] = np.percentile(array, 50)
+    #            percentile[index_mask, index_model] = np.percentile(array, 75)
+#
+    #            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
+    #            array = masker.transform(os.path.join(path2output_raw, 'filtered_25%_' + value + '.nii.gz'))
+    #            array = array[~np.isnan(array)]
+    #            mean_filtered[index_mask, index_model] = np.mean(array)
+    #            median_filtered[index_mask, index_model] = np.percentile(array, 50)
+    #            percentile_filtered[index_mask, index_model] = np.percentile(array, 75)
+    #    print("\t\t-->Done")
+#
+    #    print("\tPlotting...")
+    #    # save plots
+    #    vertical_plot(mean, x_labels, 'Mean-comparison-300-features', 
+    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
+    #                    value, surnames, models, syntactic_roi, language_roi)
+    #    vertical_plot(median, x_labels, 'Median-comparison-300-features', 
+    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
+    #                    value, surnames, models, syntactic_roi, language_roi)
+    #    vertical_plot(percentile, x_labels, 'Third-quartile-comparison-300-features', 
+    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
+    #                    value, surnames, models, syntactic_roi, language_roi)
+    #    vertical_plot(mean_filtered, x_labels, 'Mean-filtered-comparison-300-features', 
+    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
+    #                    value, surnames, models, syntactic_roi, language_roi)
+    #    vertical_plot(median_filtered, x_labels, 'Median-filtered-comparison-300-features', 
+    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
+    #                    value, surnames, models, syntactic_roi, language_roi)
+    #    vertical_plot(percentile_filtered, x_labels, 'Third-quartile-filtered-comparison-300-features', 
+    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
+    #                    value, surnames, models, syntactic_roi, language_roi)
+    #    print("\t\t-->Done")
 #
     ###########################################################################
     ############### 2 bis (avec significant R2 values) ###############
     ###########################################################################
-    print("Dealing with significant R2...")
-    value = 'maps_significant_r2_with_pvalues'
-    counter = np.zeros((len(labels)-1, len(models)))
-    mean = np.zeros((len(labels)-1, len(models)))
-    maximum = np.zeros((len(labels)-1, len(models)))
-    x_labels = labels[1:]
-    for index_mask in range(len(labels)-1):
-        mask = math_img('img > 50', img=index_img(maps, index_mask))  
-        masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
-        masker.fit()
-        for index_model, model in enumerate(models):
-            data0 = [masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
-            data = []
-            for array in data0:
-                if np.count_nonzero(array)>0:
-                    data.append(array)
-            counter[index_mask, index_model] = np.mean([np.count_nonzero(array) for array in data])
-            mean[index_mask, index_model] = np.mean([np.mean(array[array!=0]) for array in data])
-            maximum[index_mask, index_model] = np.mean([np.max(array[array!=0]) for array in data])
-    vertical_plot(counter, x_labels, 'Count-non-Nan-values', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2-significative'), 
-                        value, surnames, models, syntactic_roi, language_roi, count=True, 
-                        ylabel='Regions of interest (ROI)', xlabel='Count')
-    vertical_plot(mean, x_labels, 'Mean-significant-R2', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2-significative'), 
-                        value, surnames, models, syntactic_roi, language_roi)
-    vertical_plot(maximum, x_labels, 'Maximum-significant-R2', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2-significative'), 
-                        value, surnames, models, syntactic_roi, language_roi)
-    print("\t-->Done")
+    #print("Dealing with significant R2...")
+    #value = 'maps_significant_r2_with_pvalues'
+    #counter = np.zeros((len(labels)-1, len(models)))
+    #mean = np.zeros((len(labels)-1, len(models)))
+    #maximum = np.zeros((len(labels)-1, len(models)))
+    #x_labels = labels[1:]
+    #for index_mask in range(len(labels)-1):
+    #    mask = math_img('img > 50', img=index_img(maps, index_mask))  
+    #    masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
+    #    masker.fit()
+    #    for index_model, model in enumerate(models):
+    #        data0 = [masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
+    #        data = []
+    #        for array in data0:
+    #            if np.count_nonzero(array)>0:
+    #                data.append(array)
+    #        counter[index_mask, index_model] = np.mean([np.count_nonzero(array) for array in data])
+    #        mean[index_mask, index_model] = np.mean([np.mean(array[array!=0]) for array in data])
+    #        maximum[index_mask, index_model] = np.mean([np.max(array[array!=0]) for array in data])
+    #vertical_plot(counter, x_labels, 'Count-non-Nan-values', 
+    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2-significative'), 
+    #                    value, surnames, models, syntactic_roi, language_roi, count=True, 
+    #                    ylabel='Regions of interest (ROI)', xlabel='Count')
+    #vertical_plot(mean, x_labels, 'Mean-significant-R2', 
+    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2-significative'), 
+    #                    value, surnames, models, syntactic_roi, language_roi)
+    #vertical_plot(maximum, x_labels, 'Maximum-significant-R2', 
+    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2-significative'), 
+    #                    value, surnames, models, syntactic_roi, language_roi)
+    #print("\t-->Done")
 
 
     ###########################################################################

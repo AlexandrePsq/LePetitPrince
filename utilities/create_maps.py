@@ -131,8 +131,8 @@ if __name__ =='__main__':
         # creating maps
         create_maps(masker, masker_smoothed, alphas, 'alphas', args.subject, output_parent_folder, pca=pca, vmax=10000) # alphas # argument deleted: , vmax=5e3
 
-        create_maps(masker, masker_smoothed, r2, 'r2', args.subject, output_parent_folder, vmax=0.2, pca=pca,  voxel_wise=True) # r2 
-        create_maps(masker, masker_smoothed, r2_significant_with_pvalues, 'significant_r2_with_pvalues', args.subject, output_parent_folder, vmax=0.2, pca=pca, voxel_wise=True) # r2_significant
+        create_maps(masker, masker_smoothed, r2, 'r2', args.subject, output_parent_folder, pca=pca,  voxel_wise=True) # r2 
+        create_maps(masker, masker_smoothed, r2_significant_with_pvalues, 'significant_r2_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # r2_significant
         
         create_maps(masker, masker_smoothed, pearson_corr, 'pearson_corr', args.subject, output_parent_folder, pca=pca,  voxel_wise=True) # pearson_corr 
         create_maps(masker, masker_smoothed, pearson_corr_significant_with_pvalues, 'significant_pearson_corr_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # pearson_corr_significant

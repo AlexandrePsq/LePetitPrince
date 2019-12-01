@@ -76,10 +76,10 @@ def save_hist(distribution, path):
     plt.savefig(path)
     plt.close()
 
-def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest, surnames, models, syntactic_roi, language_roi, figsize=(10,12), count=False, title='R2 per ROI', ylabel='Regions of interest (ROI)', xlabel='R2 value'):
+def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest, surnames, models, syntactic_roi, language_roi, figsize=(7.6,12), count=False, title=None, ylabel='Regions of interest (ROI)', xlabel='R2 value'):
     """Plots vertically the 6 first models.
     """
-    limit = (-0.02, 0.06) if object_of_interest=='maps_r2' else None
+    limit = (-0.02, 0.05) if object_of_interest=='maps_r2_' else None
     dash_inf = limit[0] if limit else 0
     x = x_names.copy()
     plt.figure(figsize=figsize)
@@ -88,15 +88,21 @@ def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest,
     data = data[order, :]
     x = [x[i] for i in order]
     ax = plt.axes()
-    plot = plt.plot(data[:,0], x, '.b',
-                    data[:,1], x, '.y',
-                    data[:,2], x, '.r',
-                    data[:,3], x, '.m',
-                    data[:,4], x, '.k',
-                    data[:,5], x, '.g')
-    plt.title(title)
-    plt.ylabel(ylabel)
-    plt.xlabel(xlabel)
+    plt.plot(data[:,0], x, '.k', alpha=0.7, markersize=12)
+    plt.plot(data[:,1], x, '.g', alpha=0.7, markersize=12)
+    plt.plot(data[:,2], x, '.r', alpha=0.7, markersize=12)
+    plt.plot(data[:,3], x, '.b', alpha=0.5, markersize=12)
+    plt.plot(data[:,4], x, '^r', alpha=0.3, markersize=8)
+    plt.plot(data[:,5], x, '^b', alpha=0.3, markersize=8)
+    #plot = plt.plot(data[:,0], x, '.k',
+    #                data[:,1], x, '.g',
+    #                data[:,2], x, '.r',
+    #                data[:,3], x, '.b',
+    #                data[:,4], x, '^r',
+    #                data[:,5], x, '^b', alpha=0.3)
+    #plt.title(title)
+    plt.ylabel(ylabel, fontsize=16)
+    plt.xlabel(xlabel, fontsize=16)
     if count:
         plt.axvline(x=100, color='k', linestyle='-', alpha=0.2)
     plt.hlines(x, dash_inf, data[:,0], linestyle="dashed", alpha=0.1)
@@ -107,17 +113,19 @@ def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest,
     plt.hlines(x, dash_inf, data[:,5], linestyle="dashed", alpha=0.1)
     plt.xlim(limit)
     plt.minorticks_on()
-    plt.grid(which='major', linestyle='-', linewidth='0.5', color='black')
-    plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.2)
-    plt.legend(plot, [surnames[model] for model in models], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
+    ax.tick_params(axis='x', labelsize=12)
+    ax.tick_params(axis='y', labelsize=12)
+    plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='x')
+    plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.1, axis='x')
+    #plt.legend(plot, [surnames[model] for model in models], ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=5)
     for index, label in enumerate(x):
         if label in language_roi:
             if label in syntactic_roi:
-                ax.get_yticklabels()[index].set_bbox(dict(facecolor="red", alpha=0.6))
-            ax.axhspan(index-0.5, index+0.5, alpha=0.1, color='red')
+                ax.get_yticklabels()[index].set_bbox(dict(facecolor="green", alpha=0.4)) # set box around label
+            #ax.axhspan(index-0.5, index+0.5, alpha=0.1, color='red') #set shade over the line of interest
     plt.tight_layout()
     check_folder(save_folder)
-    plt.savefig(os.path.join(save_folder, f'{analysis_name}-{object_of_interest}.png'))
+    plt.savefig(os.path.join(save_folder, f'{analysis_name}.png'))
     plt.close()
 
 def layer_plot(X,Y, error, surnames, object_of_interest, roi, limit, save_folder, name):
@@ -137,6 +145,13 @@ def layer_plot(X,Y, error, surnames, object_of_interest, roi, limit, save_folder
 
 all_models = ['glove_embeddings',
                 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
+                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
+                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
+                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
+                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer',
+                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer',
+                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
+                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer',
                 'bert_bucket_pca_300_all-layers',
                 'gpt2_pca_300_all-layers',
                 'bert_bucket_all-layers',
@@ -170,53 +185,30 @@ all_models = ['glove_embeddings',
                 'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer',
                 'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_cell_first-layer']
 
-limit_values = {'maps_r2':0.08,
-                'maps_pearson_corr':0.4,
+limit_values = {'maps_r2_':0.07,
+                'maps_pearson_corr':0.6,
                 'maps_significant_pearson_corr_with_pvalues':0.4,
-                'maps_significant_r2_with_pvalues':0.08}
+                'maps_significant_r2_with_pvalues':0.07}
 
 syntactic_roi = ['Inferior Frontal Gyrus, pars triangularis',
                     'Inferior Frontal Gyrus, pars opercularis',
-                    'Precentral Gyrus',
                     'Temporal Pole',
                     'Superior Temporal Gyrus, anterior division',
                     'Superior Temporal Gyrus, posterior division',
                     'Middle Temporal Gyrus, anterior division',
                     'Middle Temporal Gyrus, posterior division',
                     'Middle Temporal Gyrus, temporooccipital part',
-                    'Juxtapositional Lobule Cortex (formerly Supplementary Motor Cortex)',
-                    'Planum Temporale']
+                    'Angular Gyrus']
 
-language_roi = ['Frontal Pole',
-                    'Insular Cortex',
-                    'Superior Frontal Gyrus',
-                    'Middle Frontal Gyrus',
-                    'Inferior Frontal Gyrus, pars triangularis',
+language_roi = ['Inferior Frontal Gyrus, pars triangularis',
                     'Inferior Frontal Gyrus, pars opercularis',
-                    'Precentral Gyrus',
                     'Temporal Pole',
                     'Superior Temporal Gyrus, anterior division',
                     'Superior Temporal Gyrus, posterior division',
                     'Middle Temporal Gyrus, anterior division',
                     'Middle Temporal Gyrus, posterior division',
                     'Middle Temporal Gyrus, temporooccipital part',
-                    'Inferior Temporal Gyrus, anterior division',
-                    'Inferior Temporal Gyrus, posterior division',
-                    'Inferior Temporal Gyrus, temporooccipital part',
-                    'Superior Parietal Lobule',
-                    'Supramarginal Gyrus, posterior division',
-                    'Angular Gyrus',
-                    'Lateral Occipital Cortex, superior division',
-                    'Juxtapositional Lobule Cortex (formerly Supplementary Motor Cortex)',
-                    'Precuneous Cortex',
-                    'Frontal Orbital Cortex',
-                    'Temporal Fusiform Cortex, posterior division',
-                    'Temporal Occipital Fusiform Cortex',
-                    'Occipital Fusiform Gyrus',
-                    'Frontal Operculum Cortex',
-                    'Planum Polare',
-                    "Heschl's Gyrus (includes H1 and H2)",
-                    'Planum Temporale']
+                    'Angular Gyrus']
 
 surnames = {'wordrate_word_position': 'Word position',
                 'wordrate_model': 'Wordrate',
@@ -289,7 +281,7 @@ surnames = {'wordrate_word_position': 'Word position',
                 'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_cell_fourth-layer': 'LSTM-E600-C75-#L4-L4',
                 'bert_bucket_pca_300_all-layers': 'BERT-all-pca-300',
                 'gpt2_pca_300_all-layers':'GPT2-all-pca-300',
-                'maps_r2':'R2', 
+                'maps_r2_':'R2', 
                 'maps_pearson_corr':'Pearson coefficient',
                 'maps_significant_pearson_corr_with_pvalues':'Significant Pearson', 
                 'maps_significant_r2_with_pvalues':'Significant R2',
@@ -319,7 +311,7 @@ surnames = {'wordrate_word_position': 'Word position',
                 'Lateral Occipital Cortex, inferior division': 'LOC-i', 
                 'Intracalcarine Cortex': 'IccC', 
                 'Frontal Medial Cortex': 'FMC', 
-                'Juxtapositional Lobule Cortex (formerly Supplementary Motor Cortex)': 'SMC', 
+                'Juxtapositional Lobule Cortex (formerly Supplementary Motor Cortex)': 'SMA', 
                 'Subcallosal Cortex': 'SC', 
                 'Paracingulate Gyrus': 'PCgG', 
                 'Cingulate Gyrus, anterior division': 'CgG-a', 
@@ -367,12 +359,13 @@ if __name__ == '__main__':
 
     # Compute global masker
     fmri_runs = {}
-    print("Commuting global masker...")
+    print("Computing global masker...")
     for subject in subjects:
         fmri_path = os.path.join(inputs_path, "data/fMRI/{language}/{subject}/func/")
         check_folder(fmri_path)
         fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language=language, subject=subject), 'fMRI_*run*')))
     global_masker = compute_global_masker(list(fmri_runs.values()))
+    #global_masker_smoothed = compute_global_masker(list(fmri_runs.values()), smoothing_fwhm=5)
     print("\t-->Done")
 
 
@@ -380,17 +373,9 @@ if __name__ == '__main__':
     #################### 1 (Individual features) ####################
     ###########################################################################
     #print("Computing: 1 (Individual features)")
-    #plots = [['wordrate_word_position'],
-    #               ['wordrate_model'],
+    #plots = [['wordrate_model'],
     #               ['wordrate_log_word_freq'],
-    #               ['wordrate_function-word'],
-    #               ['wordrate_content-word'],
-    #               ['wordrate_all_model'],
-    #               ['topdown_model'],
-    #               ['rms_model'],
-    #               ['other_sentence_onset'],
     #               ['mfcc_model'],
-    #               ['bottomup_model'],
     #               ['bert_bucket_all-layers'],
     #               ['bert_bucket_embeddings'],
     #               ['bert_bucket_layer-1'],
@@ -429,7 +414,7 @@ if __name__ == '__main__':
     #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer'],
     #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer'],
     #                ['glove_embeddings']]
-    #for object_of_interest in ['maps_r2', 'maps_significant_r2_with_pvalues']:
+    #for object_of_interest in ['maps_r2_', 'maps_significant_r2_with_pvalues']:
     #    for models in plots:
     #        all_paths = []
     #        for subject in subjects:
@@ -452,11 +437,19 @@ if __name__ == '__main__':
     #        check_folder(save_folder)
     #        display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + 'averaged across subjects'  + '.png'))
     #        display.close()
+    #        # with smoothing
+    #        #img = global_masker_smoothed.inverse_transform(data)
+    #        #display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
+    #        #save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest])
+    #        #check_folder(save_folder)
+    #        #display.savefig(os.path.join(save_folder, model_name + f' - {surnames[object_of_interest]} - ' + 'averaged across subjects'  + '_smoothed.png'))
+    #        #display.close()
+#
     #print("\t\t-->Done")
-
-    ###########################################################################
-    ############### 2 (Comparison 300 features models) ###############
-    ###########################################################################
+#
+    ############################################################################
+    ################ 2 (Comparison 300 features models) ###############
+    ############################################################################
     print("Computing: 2 (Comparison 300 features models)...")
     models = ['glove_embeddings',
                 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
@@ -468,7 +461,7 @@ if __name__ == '__main__':
     data = {model:[] for model in all_models}
     nb_voxels = 26117
     table = np.zeros((len(all_models), nb_voxels))
-    for value in ['maps_r2']:
+    for value in ['maps_r2_']:
         tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "2")
         check_folder(os.path.join(tmp_path, 'averages'))
 
@@ -492,12 +485,12 @@ if __name__ == '__main__':
                 distribution[~mask] = np.nan
                 path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, subject, model, 'outputs/maps')
                 check_folder(path2output_raw)
-                nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, model + '_outputs_maps_' + 'filtered_25%_' + value + 'pca_None_voxel_wise_'+ subject + '.nii.gz'))
+                nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, model + '_outputs_maps_' + 'filtered_25%_r2_' + 'pca_None_voxel_wise_'+ subject + '.nii.gz'))
             distribution = np.mean(np.vstack(data[model]), axis=0)
             distribution[~mask] = np.nan
             path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
             check_folder(path2output_raw)
-            nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, 'filtered_25%_' + value + '.nii.gz'))
+            nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, 'filtered_25%_r2_' + '.nii.gz'))
         print("\t\t-->Done")
 
         x_labels = labels[1:]
@@ -531,26 +524,26 @@ if __name__ == '__main__':
 
         print("\tPlotting...")
         # save plots
-        vertical_plot(mean, x_labels, 'Mean-comparison_300_features', 
+        vertical_plot(mean, x_labels, 'Mean-comparison-300-features', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
                         value, surnames, models, syntactic_roi, language_roi)
-        vertical_plot(median, x_labels, 'Median-comparison_300_features', 
+        vertical_plot(median, x_labels, 'Median-comparison-300-features', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
                         value, surnames, models, syntactic_roi, language_roi)
-        vertical_plot(percentile, x_labels, 'Third-quartile-comparison_300_features', 
+        vertical_plot(percentile, x_labels, 'Third-quartile-comparison-300-features', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
                         value, surnames, models, syntactic_roi, language_roi)
-        vertical_plot(mean_filtered, x_labels, 'Mean-filtered-comparison_300_features', 
+        vertical_plot(mean_filtered, x_labels, 'Mean-filtered-comparison-300-features', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi, title='Filtered R2 per ROI')
-        vertical_plot(median_filtered, x_labels, 'Median-filtered-comparison_300_features', 
+                        value, surnames, models, syntactic_roi, language_roi)
+        vertical_plot(median_filtered, x_labels, 'Median-filtered-comparison-300-features', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi, title='Filtered R2 per ROI')
-        vertical_plot(percentile_filtered, x_labels, 'Third-quartile-filtered-comparison_300_features', 
+                        value, surnames, models, syntactic_roi, language_roi)
+        vertical_plot(percentile_filtered, x_labels, 'Third-quartile-filtered-comparison-300-features', 
                         os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-                        value, surnames, models, syntactic_roi, language_roi, title='Filtered R2 per ROI')
+                        value, surnames, models, syntactic_roi, language_roi)
         print("\t\t-->Done")
-
+#
     ###########################################################################
     ############### 2 bis (avec significant R2 values) ###############
     ###########################################################################
@@ -558,22 +551,31 @@ if __name__ == '__main__':
     value = 'maps_significant_r2_with_pvalues'
     counter = np.zeros((len(labels)-1, len(models)))
     mean = np.zeros((len(labels)-1, len(models)))
+    maximum = np.zeros((len(labels)-1, len(models)))
+    x_labels = labels[1:]
     for index_mask in range(len(labels)-1):
         mask = math_img('img > 50', img=index_img(maps, index_mask))  
         masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
         masker.fit()
         for index_model, model in enumerate(models):
-            data = [masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
-            counter[index_mask, index_model] = np.mean([np.count_nonzero(~np.isnan(array)) for array in data])
-            mean[index_mask, index_model] = np.mean([np.mean(array) for array in data])
-    print(counter)
-    vertical_plot(counter, x_labels, 'Count of non-Nan values per ROI', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2bis'), 
-                        value, surnames, models, syntactic_roi, language_roi, count=True, title='Count of non-Nan values per ROI', 
+            data0 = [masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
+            data = []
+            for array in data0:
+                if np.count_nonzero(array)>0:
+                    data.append(array)
+            counter[index_mask, index_model] = np.mean([np.count_nonzero(array) for array in data])
+            mean[index_mask, index_model] = np.mean([np.mean(array[array!=0]) for array in data])
+            maximum[index_mask, index_model] = np.mean([np.max(array[array!=0]) for array in data])
+    vertical_plot(counter, x_labels, 'Count-non-Nan-values', 
+                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2-significative'), 
+                        value, surnames, models, syntactic_roi, language_roi, count=True, 
                         ylabel='Regions of interest (ROI)', xlabel='Count')
-    vertical_plot(mean, x_labels, 'Mean significant R2', 
-                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2bis'), 
-                        value, surnames, models, syntactic_roi, language_roi, title='Significant R2 per ROI')
+    vertical_plot(mean, x_labels, 'Mean-significant-R2', 
+                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2-significative'), 
+                        value, surnames, models, syntactic_roi, language_roi)
+    vertical_plot(maximum, x_labels, 'Maximum-significant-R2', 
+                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2-significative'), 
+                        value, surnames, models, syntactic_roi, language_roi)
     print("\t-->Done")
 
 
@@ -581,7 +583,6 @@ if __name__ == '__main__':
     ############### 3 (Layer-wise analysis) ###############
     ###########################################################################
     #print("Computing: 3 (Layer-wise analysis)...")
-    #object_of_interest = 'maps_r2'
     #plots = {"GPT2":['gpt2_embeddings',
     #                'gpt2_layer-1',
     #                'gpt2_layer-2',
@@ -611,71 +612,121 @@ if __name__ == '__main__':
     #                'bert_bucket_layer-12',
     #                'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer']}
 #
-    #for object_of_interest in ['maps_r2', 'maps_significant_r2_with_pvalues']:
-    #    limit = limit_values[object_of_interest]
-    #    for index_mask in range(len(labels)-1):
-    #        mask = math_img('img > 50', img=index_img(maps, index_mask))  
-    #        masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
-    #        masker.fit()
-    #        for key in plots.keys():
-    #            models = plots[key]
-    #            Y_full = []
-    #            Y_filtered_25 = [] if object_of_interest=='maps_r2' else None
-    #            X = [surnames[model_name] for model_name in models]
-    #            for subject in subjects:
-    #                y = list(zip(*[list((masker.transform(fetch_ridge_maps(model_name, subject, object_of_interest)), masker.transform(fetch_ridge_maps(model_name, subject, 'filtered_25%_' + object_of_interest )))) for model_name in models]))
-    #                Y_full.append([np.mean(i[0]) for i in y[0]])
-    #                if object_of_interest=='maps_r2':
-    #                    Y_filtered_25.append([np.mean(i[0]) for i in y[1]])
-#
-    #            Y_full = np.vstack(Y_full)
-    #            Y_filtered_25 = np.vstack(Y_filtered_25) if object_of_interest=='maps_r2' else None
-    #            
-    #            # Plotting
-    #            roi = labels[index_mask+1]
-    #            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '3', key, surnames[object_of_interest])
-    #            layer_plot(X, np.mean(Y_full, axis=0), np.std(Y_full, axis=0)/np.sqrt(len(subjects)), 
-    #                        surnames, object_of_interest, roi, limit, 
-    #                        save_folder, 
-    #                        key + '_' + roi + '_mean_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_all-voxels.png')
-    #            
-    #            if object_of_interest=='maps_r2':
-    #                error = np.std(Y_filtered_25, axis=0)/np.sqrt(len(subjects))
-    #                layer_plot(X, np.mean(Y_filtered_25, axis=0), error, 
-    #                            surnames, object_of_interest, roi, limit, 
-    #                            save_folder, 
-    #                            key + '_' + roi + '_mean_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_top-25%-voxels.png')
-    #                layer_plot(X, np.median(Y_filtered_25, axis=0), error, 
-    #                            surnames, object_of_interest, roi, limit, 
-    #                            save_folder, 
-    #                            key + '_' + roi + '_median_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_top-25%-voxels.png')
-    #                layer_plot(X, np.percentile(Y_filtered_25, 75, axis=0), error, 
-    #                            surnames, object_of_interest, roi, limit, 
-    #                            save_folder, 
-    #                            key + '_' + roi + '_third-quartile_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_top-25%-voxels.png')
-#
-    #print("\t-->Done")
-#
-#
-    ############################################################################
-    ##################### Appendix  ####################
-    ############################################################################
-    #value_of_interest = 'maps_r2'
-    #print("Computing: Appendix...")
-    #print("\tLooping through labeled masks...")
+    #object_of_interest = 'maps_r2_'
+    #limit = limit_values[object_of_interest]
     #for index_mask in range(len(labels)-1):
     #    mask = math_img('img > 50', img=index_img(maps, index_mask))  
     #    masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
     #    masker.fit()
-    #    to_compare = [['bert_bucket_all-layers', 'gpt2_all-layers'],
-    #                    ['bert_bucket_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
-    #                    ['gpt2_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
-    #                    ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer', 'glove_embeddings']]
-    #    for (model1, model2) in to_compare:
-    #        tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Appendix")
-    #        check_folder(os.path.join(tmp_path, 'averages'))
-    #        distribution1 = masker.transform(os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model1, value_of_interest + '.nii.gz'))
-    #        distribution2 = masker.transform(os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model2, value_of_interest + '.nii.gz'))
-    #        save_hist(distribution1-distribution2, os.path.join(tmp_path, 'averages', f'hist_diff_averaged_{model1}_{model2}.png'))
-    #print("\t\t-->Done")
+    #    for key in plots.keys():
+    #        models = plots[key]
+    #        Y_full = []
+    #        Y_filtered_25 = [] if object_of_interest=='maps_r2_' else None
+    #        X = [surnames[model_name] for model_name in models]
+    #        Y_full_significant = {model:[] for model in models}
+    #        for sub_id, subject in enumerate(subjects):
+    #            y = list(zip(*[list((masker.transform(fetch_ridge_maps(model_name, subject, object_of_interest)), masker.transform(fetch_ridge_maps(model_name, subject, 'filtered_25%_maps_r2' )))) for model_name in models]))
+    #            Y_full.append([np.mean(i[0]) for i in y[0]])
+    #            Y_filtered_25.append([np.mean(i[0]) for i in y[1]])
+    #            for mod_id, model in enumerate(models):
+    #                Y_full_significant[model].append(masker.transform(fetch_ridge_maps(model, subject, 'maps_significant_r2_with_pvalues'))[0])
+#
+    #        Y_full = np.vstack(Y_full)
+    #        Y_filtered_25 = np.vstack(Y_filtered_25) if object_of_interest=='maps_r2_' else None
+    #        for model in models:
+    #            Y_full_significant[model] = [array[array!=0] for array in Y_full_significant[model]]
+    #            result = []
+    #            for array in Y_full_significant[model]:
+    #                if array != []:
+    #                    result.append(np.mean(array))
+    #            Y_full_significant[model] = result
+    #        error_significant = [np.std(np.array(Y_full_significant[model]))/np.sqrt(len(Y_full_significant[model])) for model in Y_full_significant.keys()]
+    #        Y_full_significant = [np.mean(Y_full_significant[model]) for model in Y_full_significant.keys()]
+#
+    #        # Plotting
+    #        roi = labels[index_mask+1]
+    #        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '3', key, surnames[object_of_interest])
+    #        layer_plot(X, np.mean(Y_full, axis=0), np.std(Y_full, axis=0)/np.sqrt(len(subjects)), 
+    #                    surnames, object_of_interest, roi, limit, 
+    #                    save_folder, 
+    #                    key + '_' + roi + '_mean_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_all-voxels.png')
+    #        
+    #        error = np.std(Y_filtered_25, axis=0)/np.sqrt(len(subjects))
+    #        layer_plot(X, np.mean(Y_filtered_25, axis=0), error, 
+    #                    surnames, object_of_interest, roi, limit, 
+    #                    save_folder, 
+    #                    key + '_' + roi + '_mean_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_top-25%-voxels.png')
+    #        layer_plot(X, np.median(Y_filtered_25, axis=0), error, 
+    #                    surnames, object_of_interest, roi, limit, 
+    #                    save_folder, 
+    #                    key + '_' + roi + '_median_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_top-25%-voxels.png')
+    #        layer_plot(X, np.percentile(Y_filtered_25, 75, axis=0), error, 
+    #                    surnames, object_of_interest, roi, limit, 
+    #                    save_folder, 
+    #                    key + '_' + roi + '_third-quartile_'+ f' - {surnames[object_of_interest]} - ' + 'averaged_across_subjects'  + '_top-25%-voxels.png')
+#
+    #        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '3', key, surnames['maps_significant_r2_with_pvalues'])
+    #        layer_plot(X, np.array(Y_full_significant), error_significant, 
+    #                    surnames, 'maps_significant_r2_with_pvalues', roi, limit_values['maps_significant_r2_with_pvalues'], 
+    #                    save_folder, 
+    #                    key + '_' + roi + '_mean_'+ f" - {surnames['maps_significant_r2_with_pvalues']} - " + 'averaged_across_subjects'  + '_all-voxels.png')
+    #        
     #print("\t-->Done")
+#
+#
+    #############################################################################
+    ###################### Appendix  ####################
+    #############################################################################
+    value_of_interest = 'maps_r2_'
+    print("Computing: Appendix...")
+    print("\tLooping through labeled masks...")
+    for index_mask in range(len(labels)-1):
+        mask = math_img('img > 50', img=index_img(maps, index_mask))  
+        masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
+        masker.fit()
+        to_compare = [['bert_bucket_all-layers', 'gpt2_all-layers'],
+                        ['bert_bucket_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
+                        ['gpt2_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
+                        ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer', 'glove_embeddings']]
+        for (model1, model2) in to_compare:
+            tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Appendix")
+            check_folder(os.path.join(tmp_path, 'averages'))
+            distribution1 = masker.transform(os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model1, value_of_interest + '.nii.gz'))
+            distribution2 = masker.transform(os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model2, value_of_interest + '.nii.gz'))
+            save_hist(distribution1-distribution2, os.path.join(tmp_path, 'averages', f'hist_diff_averaged_{model1}_{model2}.png'))
+    print("\t\t-->Done")
+    print("\t-->Done")
+
+    models = [['bert_bucket_all-layers',
+                'gpt2_all-layers'], 
+                ['bert_bucket_embeddings',
+                'bert_bucket_layer-8'], 
+                ['bert_bucket_layer-8',
+                'bert_bucket_layer-9'],
+                ['gpt2_embeddings',
+                'gpt2_layer-7'], 
+                ['gpt2_layer-7',
+                'gpt2_layer-8']]
+    for plots in models:
+        name = surnames[plots[0]] + '-' + surnames[plots[1]]
+        path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'r2.npy')
+        data = [np.load(path.format(subject=subject, model=plots[0])) - np.load(path.format(subject=subject, model=plots[1])) for subject in subjects]
+        data = np.mean(np.vstack(data), axis=0)
+        path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'distribution_r2.npy')
+        distribution = [np.load(path.format(subject=subject, model=plots[0])) - np.load(path.format(subject=subject, model=plots[1])) for subject in subjects]
+        distribution = [np.mean(array, axis=0) for array in distribution]
+        distribution = np.mean(distribution, axis=0)
+
+        p_values_r2 = (1.0 * np.sum(distribution>data, axis=0))/distribution.shape[0] 
+
+        mask_pvalues_r2 = (p_values_r2 < (1-99/100))
+
+        significant = np.zeros(data.shape)
+        significant[mask_pvalues_r2] = data[mask_pvalues_r2]
+        significant[~mask_pvalues_r2] = np.nan
+        img = global_masker.inverse_transform(data)
+        display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
+        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Appendix")
+        check_folder(save_folder)
+        display.savefig(os.path.join(save_folder, name + '.png'))
+        display.close()

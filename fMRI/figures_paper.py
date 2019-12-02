@@ -421,7 +421,7 @@ if __name__ == '__main__':
     source = 'fMRI'
     language = 'english'
     subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
-    inputs_path = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/' #'/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
+    inputs_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     paths2check.append(inputs_path)
 
     # Sanity check

@@ -80,7 +80,7 @@ def process_matrix(subjects, model1, model2):
     print(f"Processing subject for model 1: {model1} and model 2: {model2}...")
     name = surnames[model1] + '-' + surnames[model2]
     print("\tLoading r2 values...")
-    path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'r2.npy')
+    path = os.path.join(paths.path2root, 'Backup', 'restricted_analysis','{subject}/{model}', 'outputs', 'r2.npy')
     data1 = [np.load(path.format(subject=subject, model=model1)) for subject in subjects]
     data2 = [np.load(path.format(subject=subject, model=model2)) for subject in subjects]
     print("\t\t-->Done")
@@ -91,7 +91,7 @@ def process_matrix(subjects, model1, model2):
     data_smoothed = np.mean(np.vstack([smooth3D(data1[index], global_masker) - smooth3D(array, global_masker) for index, array in enumerate(data2)]), axis=0)
     print("\t\t-->Done")
     print("\tLoading distributions...")
-    path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'distribution_r2.npy')
+    path = os.path.join(paths.path2root, 'Backup', 'restricted_analysis','{subject}/{model}', 'outputs', 'distribution_r2.npy')
     distribution1 = [np.mean(np.load(path.format(subject=subject, model=model1)), axis=0) for subject in subjects]
     distribution2 = [np.mean(np.load(path.format(subject=subject, model=model2)), axis=0) for subject in subjects]
     print("\t\t-->Done")

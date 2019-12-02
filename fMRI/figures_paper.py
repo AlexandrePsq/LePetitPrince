@@ -16,7 +16,7 @@ plt.switch_backend('agg')
 
 import numpy as np
 import nilearn
-from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img
+from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img
 from nilearn import datasets
 from nilearn.input_data import NiftiMapsMasker, NiftiMasker, NiftiLabelsMasker, MultiNiftiMasker
 from nilearn.masking import compute_epi_mask
@@ -76,13 +76,15 @@ def save_hist(distribution, path):
     plt.savefig(path)
     plt.close()
 
-def process_matrix(path, subjects, model1, model2):
-    print(f"Processing subject {subject} for model 1: {model1} and model 2: {model2}...")
-    name = surnames[plots[0]] + '-' + surnames[plots[1]]
+def process_matrix(path, subjects, model):
+    model1 = model[0]
+    model2 = model[1]
+    print(f"Processing subject for model 1: {model1} and model 2: {model2}...")
+    name = surnames[model1] + '-' + surnames[model2]
     print("\tLoading r2 values...")
     path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'r2.npy')
-    data1 = [np.load(path.format(subject=subject, model=plots[0])) for subject in subjects]
-    data2 = [np.load(path.format(subject=subject, model=plots[1])) for subject in subjects]
+    data1 = [np.load(path.format(subject=subject, model=model1)) for subject in subjects]
+    data2 = [np.load(path.format(subject=subject, model=model2)) for subject in subjects]
     print("\t\t-->Done")
     print("\tDifferenciating...")
     data = np.mean(np.vstack([data1[index] - array for index, array in enumerate(data2)]), axis=0)
@@ -92,17 +94,18 @@ def process_matrix(path, subjects, model1, model2):
     print("\t\t-->Done")
     print("\tLoading distributions...")
     path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'distribution_r2.npy')
-    distribution1 = [np.mean(np.load(path.format(subject=subject, model=plots[0])), axis=0) for subject in subjects]
-    distribution2 = [np.mean(np.load(path.format(subject=subject, model=plots[1])), axis=0) for subject in subjects]
+    distribution1 = [np.mean(np.load(path.format(subject=subject, model=model1)), axis=0) for subject in subjects]
+    distribution2 = [np.mean(np.load(path.format(subject=subject, model=model2)), axis=0) for subject in subjects]
     print("\t\t-->Done")
     print("\tDifferenciating distributions...")
     distribution = [array - distribution2[index] for index, array in enumerate(distribution1)]
     distribution = np.mean(distribution, axis=0)
     print("\t\t-->Done")
     print("\tSmoothing distributions...")
-    distribution1 = [np.apply_along_axis(lambda x: smooth3D(array, global_masker), 1, array) for array in distribution1]
-    distribution2 = [np.apply_along_axis(lambda x: smooth3D(array, global_masker), 1, array) for array in distribution2]
-    distribution_smoothed = np.mean(distribution1-distribution2, axis=0)
+    distribution1 = [np.apply_along_axis(lambda x: smooth3D(x, global_masker), 1, array).reshape(array.shape) for array in distribution1]
+    distribution2 = [np.apply_along_axis(lambda x: smooth3D(x, global_masker), 1, array).reshape(array.shape) for array in distribution2]
+    diff = [distribution1[index] - distribution2[index] for index, _ in enumerate(distribution1)]
+    distribution_smoothed = np.mean(diff, axis=0)
     print("\t\t-->Done")
     print("\tComputing...")
     distribution = [np.mean(array, axis=0) for array in distribution]
@@ -772,7 +775,6 @@ if __name__ == '__main__':
                 'gpt2_layer-1'], 
                 ['gpt2_layer-8',
                 'gpt2_layer-7']]
-    for plots in models:
-        Parallel(n_jobs=-2)(delayed(process_matrix) \
-                    (path, subjects, model1, model2) for (model1, model2) in plots)
+    Parallel(n_jobs=-2)(delayed(process_matrix) \
+                (path, subjects, model) for model in models)
 

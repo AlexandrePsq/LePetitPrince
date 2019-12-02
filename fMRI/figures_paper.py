@@ -76,6 +76,74 @@ def save_hist(distribution, path):
     plt.savefig(path)
     plt.close()
 
+def process_matrix(path, subjects, model1, model2):
+    print(f"Processing subject {subject} for model 1: {model1} and model 2: {model2}...")
+    name = surnames[plots[0]] + '-' + surnames[plots[1]]
+    print("\tLoading r2 values...")
+    path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'r2.npy')
+    data1 = [np.load(path.format(subject=subject, model=plots[0])) for subject in subjects]
+    data2 = [np.load(path.format(subject=subject, model=plots[1])) for subject in subjects]
+    print("\t\t-->Done")
+    print("\tDifferenciating...")
+    data = np.mean(np.vstack([data1[index] - array for index, array in enumerate(data2)]), axis=0)
+    print("\t\t-->Done")
+    print("\tSmoothing...")
+    data_smoothed = np.mean(np.vstack([smooth3D(data1[index], global_masker) - smooth3D(array, global_masker) for index, array in enumerate(data2)]), axis=0)
+    print("\t\t-->Done")
+    print("\tLoading distributions...")
+    path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'distribution_r2.npy')
+    distribution1 = [np.mean(np.load(path.format(subject=subject, model=plots[0])), axis=0) for subject in subjects]
+    distribution2 = [np.mean(np.load(path.format(subject=subject, model=plots[1])), axis=0) for subject in subjects]
+    print("\t\t-->Done")
+    print("\tDifferenciating distributions...")
+    distribution = [array - distribution2[index] for index, array in enumerate(distribution1)]
+    distribution = np.mean(distribution, axis=0)
+    print("\t\t-->Done")
+    print("\tSmoothing distributions...")
+    distribution1 = [np.apply_along_axis(lambda x: smooth3D(array, global_masker), 1, array) for array in distribution1]
+    distribution2 = [np.apply_along_axis(lambda x: smooth3D(array, global_masker), 1, array) for array in distribution2]
+    distribution_smoothed = np.mean(distribution1-distribution2, axis=0)
+    print("\t\t-->Done")
+    print("\tComputing...")
+    distribution = [np.mean(array, axis=0) for array in distribution]
+    distribution = np.mean(distribution, axis=0)
+    print("\t\t-->Done")
+    print("\tComputing p values...")
+    p_values = (1.0 * np.sum(distribution>data, axis=0))/distribution.shape[0] 
+    p_values_smoothed = (1.0 * np.sum(distribution_smoothed>data_smoothed, axis=0))/distribution_smoothed.shape[0]
+    print("\t\t-->Done")
+    print("\tComputing mask...")
+    mask = (p_values < (1-99/100))
+    mask_smoothed = (p_values_smoothed < (1-99/100))
+    print("\t\t-->Done")
+    print("\tComputing significant values...")
+    significant = np.zeros(data.shape)
+    significant[mask] = data[mask]
+    significant[~mask] = np.nan
+    significant_smoothed = np.zeros(data_smoothed.shape)
+    significant_smoothed[mask_smoothed] = data_smoothed[mask_smoothed]
+    significant_smoothed[~mask_smoothed] = np.nan
+    print("\t\t-->Done")
+    print("\tPlotting and saving...")
+    img = global_masker.inverse_transform(significant)
+    display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
+    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Appendix")
+    check_folder(save_folder)
+    display.savefig(os.path.join(save_folder, name + '.png'))
+    display.close()
+    img = global_masker.inverse_transform(significant_smoothed)
+    display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
+    save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Appendix")
+    check_folder(save_folder)
+    display.savefig(os.path.join(save_folder, name + '-smoothed.png'))
+    display.close()
+    print("\t\t-->Done")
+    print("\t-->Done")
+
+def smooth3D(vector, masker):
+    img = smooth_img(masker.inverse_transform(vector), fwhm=6)
+    return masker.transform(img)
+
 def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest, surnames, models, syntactic_roi, language_roi, figsize=(7.6,12), count=False, title=None, ylabel='Regions of interest (ROI)', xlabel='R2 value'):
     """Plots vertically the 6 first models.
     """
@@ -372,81 +440,74 @@ if __name__ == '__main__':
     ###########################################################################
     #################### 1 (Individual features) ####################
     ###########################################################################
-    #print("Computing: 1 (Individual features)")
-    #plots = [['wordrate_model'],
-    #               ['wordrate_log_word_freq'],
-    #               ['mfcc_model'],
-    #               ['bert_bucket_all-layers'],
-    #               ['bert_bucket_embeddings'],
-    #               ['bert_bucket_layer-1'],
-    #               ['bert_bucket_layer-2'],
-    #               ['bert_bucket_layer-3'],
-    #               ['bert_bucket_layer-4'],
-    #               ['bert_bucket_layer-5'],
-    #               ['bert_bucket_layer-6'],
-    #               ['bert_bucket_layer-7'],
-    #               ['bert_bucket_layer-8'],
-    #               ['bert_bucket_layer-9'],
-    #               ['bert_bucket_layer-10'],
-    #               ['bert_bucket_layer-11'],
-    #               ['bert_bucket_layer-12'],
-    #               ['gpt2_all-layers'],
-    #               ['gpt2_embeddings'],
-    #               ['gpt2_layer-1'],
-    #               ['gpt2_layer-2'],
-    #               ['gpt2_layer-3'],
-    #               ['gpt2_layer-4'],
-    #               ['gpt2_layer-5'],
-    #               ['gpt2_layer-6'],
-    #               ['gpt2_layer-7'],
-    #               ['gpt2_layer-8'],
-    #               ['gpt2_layer-9'],
-    #               ['gpt2_layer-10'],
-    #               ['gpt2_layer-11'],
-    #               ['gpt2_layer-12'],
-    #               ['lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer'],
-    #               ['lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_cell_first-layer'],
-    #               ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer'],
-    #                ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer'],
-    #                ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer'],
-    #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer'],
-    #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer'],
-    #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer'],
-    #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer'],
-    #                ['glove_embeddings']]
-    #for object_of_interest in ['maps_r2_', 'maps_significant_r2_with_pvalues']:
-    #    for models in plots:
-    #        all_paths = []
-    #        for subject in subjects:
-    #            model_name = models[0]
-    #            path_template = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/outputs/maps/*{object_of_interest}*.nii.gz")
-    #            path = sorted(glob.glob(path_template))[0]
-    #            all_paths.append(path)
-    #            img = load_img(path) 
-    #            display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
-    #            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest], subject)
-    #            check_folder(save_folder)
-    #            display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + subject  + '.png'))
-    #            display.close()
-    #        data = [global_masker.transform(path) for path in all_paths]
-    #        data = np.vstack(data)
-    #        data = np.mean(data, axis=0)
-    #        img = global_masker.inverse_transform(data)
-    #        display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
-    #        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest])
-    #        check_folder(save_folder)
-    #        display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + '-averaged-'  + '.png'))
-    #        display.close()
-    #        # with smoothing
-    #        #img = global_masker_smoothed.inverse_transform(data)
-    #        #display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
-    #        #save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest])
-    #        #check_folder(save_folder)
-    #        #display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + '-averaged-'  + '-smoothed.png'))
-    #        #display.close()
-#
-    #print("\t\t-->Done")
-#
+    print("Computing: 1 (Individual features)")
+    plots = [['wordrate_model'],
+                   ['wordrate_log_word_freq'],
+                   ['mfcc_model'],
+                   ['bert_bucket_all-layers'],
+                   ['bert_bucket_embeddings'],
+                   ['bert_bucket_layer-1'],
+                   ['bert_bucket_layer-2'],
+                   ['bert_bucket_layer-3'],
+                   ['bert_bucket_layer-4'],
+                   ['bert_bucket_layer-5'],
+                   ['bert_bucket_layer-6'],
+                   ['bert_bucket_layer-7'],
+                   ['bert_bucket_layer-8'],
+                   ['bert_bucket_layer-9'],
+                   ['bert_bucket_layer-10'],
+                   ['bert_bucket_layer-11'],
+                   ['bert_bucket_layer-12'],
+                   ['gpt2_all-layers'],
+                   ['gpt2_embeddings'],
+                   ['gpt2_layer-1'],
+                   ['gpt2_layer-2'],
+                   ['gpt2_layer-3'],
+                   ['gpt2_layer-4'],
+                   ['gpt2_layer-5'],
+                   ['gpt2_layer-6'],
+                   ['gpt2_layer-7'],
+                   ['gpt2_layer-8'],
+                   ['gpt2_layer-9'],
+                   ['gpt2_layer-10'],
+                   ['gpt2_layer-11'],
+                   ['gpt2_layer-12'],
+                   ['lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer'],
+                   ['lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_cell_first-layer'],
+                   ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer'],
+                    ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer'],
+                    ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer'],
+                    ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer'],
+                    ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer'],
+                    ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer'],
+                    ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer'],
+                    ['glove_embeddings']]
+    for object_of_interest in ['maps_r2_', 'maps_significant_r2_with_pvalues']:
+        for models in plots:
+            all_paths = []
+            for subject in subjects:
+                model_name = models[0]
+                path_template = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/outputs/maps/*{object_of_interest}*.nii.gz")
+                path = sorted(glob.glob(path_template))[0]
+                all_paths.append(path)
+                img = load_img(path) 
+                display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
+                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest], subject)
+                check_folder(save_folder)
+                display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + subject  + '.png'))
+                display.close()
+            data = [global_masker.transform(path) for path in all_paths]
+            data = np.vstack(data)
+            data = np.mean(data, axis=0)
+            img = global_masker.inverse_transform(data)
+            display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
+            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest])
+            check_folder(save_folder)
+            display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + '-averaged-'  + '.png'))
+            display.close()
+
+    print("\t\t-->Done")
+
     ############################################################################
     ################ 2 (Comparison 300 features models) ###############
     ############################################################################
@@ -697,41 +758,21 @@ if __name__ == '__main__':
     print("\t\t-->Done")
     print("\t-->Done")
 
-    models = [['bert_bucket_all-layers',
+    models = [['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer', 'glove_embeddings'],
+                ['bert_bucket_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
+                ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
+                'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_cell_first-layer'],
+                ['bert_bucket_all-layers',
                 'gpt2_all-layers'], 
                 ['bert_bucket_layer-8',
-                'bert_bucket_embeddings'], 
+                'bert_bucket_layer-1'], 
                 ['bert_bucket_layer-9',
                 'bert_bucket_layer-8'],
                 ['gpt2_layer-7',
-                'gpt2_embeddings'], 
+                'gpt2_layer-1'], 
                 ['gpt2_layer-8',
                 'gpt2_layer-7']]
     for plots in models:
-        print(plots)
-        name = surnames[plots[0]] + '-' + surnames[plots[1]]
-        path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'r2.npy')
-        data = [np.load(path.format(subject=subject, model=plots[0])) - np.load(path.format(subject=subject, model=plots[1])) for subject in subjects]
-        data = np.mean(np.vstack(data), axis=0)
-        path = os.path.join(paths.path2derivatives, 'fMRI', 'ridge-indiv', 'english','{subject}/{model}', 'outputs', 'distribution_r2.npy')
-        print("\tloading distributions...")
-        distribution = [np.load(path.format(subject=subject, model=plots[0])) - np.load(path.format(subject=subject, model=plots[1])) for subject in subjects]
-        print("\t\t-->Done")
-        print("\tComputing...")
-        distribution = [np.mean(array, axis=0) for array in distribution]
-        distribution = np.mean(distribution, axis=0)
+        Parallel(n_jobs=-2)(delayed(process_matrix) \
+                    (path, subjects, model1, model2) for (model1, model2) in plots)
 
-        p_values_r2 = (1.0 * np.sum(distribution>data, axis=0))/distribution.shape[0] 
-
-        mask_pvalues_r2 = (p_values_r2 < (1-99/100))
-
-        significant = np.zeros(data.shape)
-        significant[mask_pvalues_r2] = data[mask_pvalues_r2]
-        significant[~mask_pvalues_r2] = np.nan
-        img = global_masker.inverse_transform(data)
-        display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
-        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Appendix")
-        check_folder(save_folder)
-        display.savefig(os.path.join(save_folder, name + '.png'))
-        display.close()
-        print("\t-->Done")

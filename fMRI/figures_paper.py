@@ -105,10 +105,6 @@ def process_matrix(subjects, model1, model2):
     diff = [distribution1[index] - distribution2[index] for index, _ in enumerate(distribution1)]
     distribution_smoothed = np.mean(diff, axis=0)
     print("\t\t-->Done")
-    print("\tComputing...")
-    distribution = [np.mean(array, axis=0) for array in distribution]
-    distribution = np.mean(distribution, axis=0)
-    print("\t\t-->Done")
     print("\tComputing p values...")
     p_values = (1.0 * np.sum(distribution>data, axis=0))/distribution.shape[0] 
     p_values_smoothed = (1.0 * np.sum(distribution_smoothed>data_smoothed, axis=0))/distribution_smoothed.shape[0]
@@ -421,7 +417,7 @@ if __name__ == '__main__':
     source = 'fMRI'
     language = 'english'
     subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
-    inputs_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
+    inputs_path = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/' #'/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     paths2check.append(inputs_path)
 
     # Sanity check
@@ -481,6 +477,7 @@ if __name__ == '__main__':
     #               ['gpt2_layer-10'],
     #               ['gpt2_layer-11'],
     #               ['gpt2_layer-12'],
+    #               ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
     #               ['lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer'],
     #               ['lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_cell_first-layer'],
     #               ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer'],
@@ -530,7 +527,6 @@ if __name__ == '__main__':
     #plot_name = ["Comparison 300 features models"]
     #data = {model:[] for model in all_models}
     #nb_voxels = 26117
-    #table = np.zeros((len(all_models), nb_voxels))
     #for value in ['maps_r2_']:
     #    tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "2")
     #    check_folder(os.path.join(tmp_path, 'averages'))
@@ -539,37 +535,15 @@ if __name__ == '__main__':
     #    for model_index, model in enumerate(all_models):
     #        data[model] = [global_masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
     #        distribution = np.mean(np.vstack(data[model]), axis=0)
-    #        table[model_index, distribution>np.percentile(distribution, 75)] = 1
     #        save_hist(distribution, os.path.join(tmp_path, 'averages', f'hist_averaged_{value}_{model}.png'))
     #        path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
     #        check_folder(path2output_raw)
     #        nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, value + '.nii.gz'))
     #    print("\t\t-->Done")
 #
-    #    table = np.sum(table, axis=0)
-    #    mask = (table>np.percentile(table, 75))
-    #    print("\tSaving filtered distributions per model and subject...")
-    #    for model in all_models:
-    #        for index, subject in enumerate(subjects):
-    #            distribution = data[model][index][0]
-    #            distribution[~mask] = np.nan
-    #            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, subject, model, 'outputs/maps')
-    #            check_folder(path2output_raw)
-    #            nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, model + '_outputs_maps_' + 'filtered_25%_r2_' + 'pca_None_voxel_wise_'+ subject + '.nii.gz'))
-    #        distribution = np.mean(np.vstack(data[model]), axis=0)
-    #        distribution[~mask] = np.nan
-    #        path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
-    #        check_folder(path2output_raw)
-    #        nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, 'filtered_25%_r2_' + '.nii.gz'))
-    #    print("\t\t-->Done")
-#
     #    x_labels = labels[1:]
     #    mean = np.zeros((len(labels)-1, len(models)))
-    #    median = np.zeros((len(labels)-1, len(models)))
-    #    percentile = np.zeros((len(labels)-1, len(models)))
     #    mean_filtered = np.zeros((len(labels)-1, len(models)))
-    #    median_filtered = np.zeros((len(labels)-1, len(models)))
-    #    percentile_filtered = np.zeros((len(labels)-1, len(models)))
     #    # extract data
     #    print("\tLooping through labeled masks...")
     #    for index_mask in range(len(labels)-1):
@@ -580,38 +554,19 @@ if __name__ == '__main__':
     #        for index_model, model in enumerate(models):
     #            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
     #            array = masker.transform(os.path.join(path2output_raw, value + '.nii.gz'))
+    #            filtered_data = [masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
+    #            mean_filtered[index_mask, index_model] = np.mean(np.array([np.mean(array[array>np.percentile(array, 75)]) for array in filtered_data]))
     #            mean[index_mask, index_model] = np.mean(array)
-    #            median[index_mask, index_model] = np.percentile(array, 50)
-    #            percentile[index_mask, index_model] = np.percentile(array, 75)
-#
-    #            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
-    #            array = masker.transform(os.path.join(path2output_raw, 'filtered_25%_' + value + '.nii.gz'))
-    #            array = array[~np.isnan(array)]
-    #            mean_filtered[index_mask, index_model] = np.mean(array)
-    #            median_filtered[index_mask, index_model] = np.percentile(array, 50)
-    #            percentile_filtered[index_mask, index_model] = np.percentile(array, 75)
     #    print("\t\t-->Done")
 #
     #    print("\tPlotting...")
     #    # save plots
     #    vertical_plot(mean, x_labels, 'Mean-comparison-300-features', 
     #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-    #                    value, surnames, models, syntactic_roi, language_roi)
-    #    vertical_plot(median, x_labels, 'Median-comparison-300-features', 
-    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-    #                    value, surnames, models, syntactic_roi, language_roi)
-    #    vertical_plot(percentile, x_labels, 'Third-quartile-comparison-300-features', 
-    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-    #                    value, surnames, models, syntactic_roi, language_roi)
+    #                    value, surnames, models, syntactic_roi, language_roi, xlabel='R2 values')
     #    vertical_plot(mean_filtered, x_labels, 'Mean-filtered-comparison-300-features', 
     #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-    #                    value, surnames, models, syntactic_roi, language_roi)
-    #    vertical_plot(median_filtered, x_labels, 'Median-filtered-comparison-300-features', 
-    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-    #                    value, surnames, models, syntactic_roi, language_roi)
-    #    vertical_plot(percentile_filtered, x_labels, 'Third-quartile-filtered-comparison-300-features', 
-    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-    #                    value, surnames, models, syntactic_roi, language_roi)
+    #                    'filtered', surnames, models, syntactic_roi, language_roi, xlabel='Filtered R2 values')
     #    print("\t\t-->Done")
 
     ###########################################################################
@@ -747,26 +702,26 @@ if __name__ == '__main__':
     #############################################################################
     ###################### Appendix  ####################
     #############################################################################
-    value_of_interest = 'maps_r2_'
-    print("Computing: Appendix...")
-    print("\tLooping through labeled masks...")
-    for index_mask in range(len(labels)-1):
-        mask = math_img('img > 50', img=index_img(maps, index_mask))  
-        masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
-        masker.fit()
-        to_compare = [['bert_bucket_all-layers', 'gpt2_all-layers'],
-                        ['bert_bucket_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
-                        ['gpt2_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
-                        ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer', 'glove_embeddings']]
-        for (model1, model2) in to_compare:
-            tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Appendix")
-            check_folder(os.path.join(tmp_path, 'averages'))
-            distribution1 = masker.transform(os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model1, value_of_interest + '.nii.gz'))
-            distribution2 = masker.transform(os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model2, value_of_interest + '.nii.gz'))
-            save_hist(distribution1-distribution2, os.path.join(tmp_path, 'averages', f'hist_diff_averaged_{model1}_{model2}.png'))
-    print("\t\t-->Done")
-    print("\t-->Done")
-
+    #value_of_interest = 'maps_r2_'
+    #print("Computing: Appendix...")
+    #print("\tLooping through labeled masks...")
+    #for index_mask in range(len(labels)-1):
+    #    mask = math_img('img > 50', img=index_img(maps, index_mask))  
+    #    masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
+    #    masker.fit()
+    #    to_compare = [['bert_bucket_all-layers', 'gpt2_all-layers'],
+    #                    ['bert_bucket_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
+    #                    ['gpt2_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
+    #                    ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer', 'glove_embeddings']]
+    #    for (model1, model2) in to_compare:
+    #        tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "Appendix")
+    #        check_folder(os.path.join(tmp_path, 'averages'))
+    #        distribution1 = masker.transform(os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model1, value_of_interest + '.nii.gz'))
+    #        distribution2 = masker.transform(os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model2, value_of_interest + '.nii.gz'))
+    #        save_hist(distribution1-distribution2, os.path.join(tmp_path, 'averages', f'hist_diff_averaged_{model1}_{model2}.png'))
+    #print("\t\t-->Done")
+    #print("\t-->Done")
+#
     models = [['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer', 'glove_embeddings'],
                 ['bert_bucket_pca_300_all-layers', 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
                 ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',

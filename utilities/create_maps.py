@@ -17,7 +17,13 @@ import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
 
-subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
+subjects = ['sub-057', 'sub-058', 'sub-059', 'sub-061', 'sub-062', 'sub-063', 'sub-064', 'sub-065', 
+            'sub-066', 'sub-067', 'sub-068', 'sub-069', 'sub-070', 'sub-072', 'sub-073', 'sub-074', 
+            'sub-075', 'sub-076', 'sub-077', 'sub-078', 'sub-079', 'sub-080', 'sub-081', 'sub-082', 
+            'sub-083', 'sub-084', 'sub-086', 'sub-087', 'sub-088', 'sub-089', 'sub-091', 'sub-092', 
+            'sub-093', 'sub-094', 'sub-095', 'sub-096', 'sub-097', 'sub-098', 'sub-099', 'sub-100', 
+            'sub-101', 'sub-103', 'sub-104', 'sub-105', 'sub-106', 'sub-108', 'sub-109', 'sub-110', 
+            'sub-113', 'sub-114', 'sub-115']
 
 
 def check_folder(path):
@@ -84,6 +90,7 @@ if __name__ =='__main__':
     parser.add_argument("--parameters", type=str, default='', help="Path to the yaml file containing the models names and column indexes.")
     parser.add_argument("--pca", type=str, default=None, help="Number of components to keep for the PCA.")
     parser.add_argument("--fmri_data", type=str, default='', help="Path to fMRI data directory.")
+    parser.add_argument("--compute_distribution", type=bool, action="store_true", default=False, help="allow the computation of predictions over the randomly shuffled columns of the test set")
 
     args = parser.parse_args()
 
@@ -97,6 +104,7 @@ if __name__ =='__main__':
     fmri_runs = {}
     language = 'english'
     inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
+    compute = args.compute_distribution
     for subject in subjects:
         fmri_path = os.path.join(inputs_path, "data/fMRI/{language}/{subject}/func/")
         check_folder(fmri_path)
@@ -113,16 +121,17 @@ if __name__ =='__main__':
         alphas = np.mean(np.load(os.path.join(output, 'voxel2alpha.npy')), axis=0)
 
         r2 = np.load(os.path.join(output, 'r2.npy'))
-        r2_significant_with_pvalues = np.load(os.path.join(output, 'r2_significant_with_pvalues.npy'))
-
         pearson_corr = np.load(os.path.join(output, 'pearson_corr.npy'))
-        pearson_corr_significant_with_pvalues = np.load(os.path.join(output, 'pearson_corr_significant_with_pvalues.npy'))
+        
+        if compute:
+            r2_significant_with_pvalues = np.load(os.path.join(output, 'r2_significant_with_pvalues.npy'))
+            pearson_corr_significant_with_pvalues = np.load(os.path.join(output, 'pearson_corr_significant_with_pvalues.npy'))
 
-        z_values_r2 = np.load(os.path.join(output, 'z_values_r2.npy'))
-        z_values_pearson_corr = np.load(os.path.join(output, 'z_values_pearson_corr.npy'))
+            z_values_r2 = np.load(os.path.join(output, 'z_values_r2.npy'))
+            z_values_pearson_corr = np.load(os.path.join(output, 'z_values_pearson_corr.npy'))
 
-        p_values_r2 = np.load(os.path.join(output, 'p_values_r2.npy'))
-        p_values_pearson_corr = np.load(os.path.join(output, 'p_values_pearson_corr.npy'))
+            p_values_r2 = np.load(os.path.join(output, 'p_values_r2.npy'))
+            p_values_pearson_corr = np.load(os.path.join(output, 'p_values_pearson_corr.npy'))
 
         pca = int(args.pca) if type(args.pca)==str else None
 
@@ -132,13 +141,14 @@ if __name__ =='__main__':
         create_maps(masker, masker_smoothed, alphas, 'alphas', args.subject, output_parent_folder, pca=pca, vmax=10000) # alphas # argument deleted: , vmax=5e3
 
         create_maps(masker, masker_smoothed, r2, 'r2', args.subject, output_parent_folder, pca=pca,  voxel_wise=True) # r2 
-        create_maps(masker, masker_smoothed, r2_significant_with_pvalues, 'significant_r2_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # r2_significant
-        
         create_maps(masker, masker_smoothed, pearson_corr, 'pearson_corr', args.subject, output_parent_folder, pca=pca,  voxel_wise=True) # pearson_corr 
-        create_maps(masker, masker_smoothed, pearson_corr_significant_with_pvalues, 'significant_pearson_corr_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # pearson_corr_significant
+        
+        if compute:
+            create_maps(masker, masker_smoothed, r2_significant_with_pvalues, 'significant_r2_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # r2_significant
+            create_maps(masker, masker_smoothed, pearson_corr_significant_with_pvalues, 'significant_pearson_corr_with_pvalues', args.subject, output_parent_folder, pca=pca, voxel_wise=True) # pearson_corr_significant
 
-        create_maps(masker, masker_smoothed, p_values_r2, 'p_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
-        create_maps(masker, masker_smoothed, p_values_pearson_corr, 'p_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+            create_maps(masker, masker_smoothed, p_values_r2, 'p_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+            create_maps(masker, masker_smoothed, p_values_pearson_corr, 'p_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
 
-        create_maps(masker, masker_smoothed, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
-        create_maps(masker, masker_smoothed, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+            create_maps(masker, masker_smoothed, z_values_r2, 'z_values_r2', args.subject, output_parent_folder, pca=pca, voxel_wise=True)
+            create_maps(masker, masker_smoothed, z_values_pearson_corr, 'z_values_pearson_corr', args.subject, output_parent_folder, pca=pca, voxel_wise=True)

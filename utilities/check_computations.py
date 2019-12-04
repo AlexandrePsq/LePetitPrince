@@ -79,27 +79,47 @@ def retrieve_df(jobs_state, inputs_path):
 
 
 
-model_names = ['wordrate_log_word_freq',
-                'mfcc_model',
-                'gpt2_all-layers',
-                'bert_bucket_all-layers',
-                'glove_embeddings',
-                'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
-                'bert_bucket_pca_300_all-layers',
-                'gpt2_pca_300_all-layers',
-                'bert_bucket_embeddings',
-                'bert_bucket_layer-1',
-                'bert_bucket_layer-8',
-                'bert_bucket_layer-9',
-                'bert_bucket_layer-12']
+model_names = ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
+						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
+						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
+						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
+						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer',
+						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer',
+						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
+						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer',
+						'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer',
+						'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_cell_first-layer',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_cell_unit_775',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_cell_unit_775_987',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_cell_unit_987',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_forget_unit_775',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_forget_unit_987',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_hidden_short-range-units',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_hidden_unit_1149',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_input_unit_775',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_input_unit_987']
+#model_names = ['wordrate_log_word_freq',
+#                'mfcc_model',
+#                'gpt2_all-layers',
+#                'bert_bucket_all-layers',
+#                'glove_embeddings',
+#                'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
+#                'bert_bucket_pca_300_all-layers',
+#                'gpt2_pca_300_all-layers',
+#                'bert_bucket_embeddings',
+#                'bert_bucket_layer-1',
+#                'bert_bucket_layer-8',
+#                'bert_bucket_layer-9',
+#                'bert_bucket_layer-12']
 
-subjects = ['sub-057', 'sub-058', 'sub-059', 'sub-061', 'sub-062', 'sub-063', 'sub-064', 'sub-065', 
-            'sub-066', 'sub-067', 'sub-068', 'sub-069', 'sub-070', 'sub-072', 'sub-073', 'sub-074', 
-            'sub-075', 'sub-076', 'sub-077', 'sub-078', 'sub-079', 'sub-080', 'sub-081', 'sub-082', 
-            'sub-083', 'sub-084', 'sub-086', 'sub-087', 'sub-088', 'sub-089', 'sub-091', 'sub-092', 
-            'sub-093', 'sub-094', 'sub-095', 'sub-096', 'sub-097', 'sub-098', 'sub-099', 'sub-100', 
-            'sub-101', 'sub-103', 'sub-104', 'sub-105', 'sub-106', 'sub-108', 'sub-109', 'sub-110', 
-            'sub-113', 'sub-114', 'sub-115']
+subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
+#subjects = ['sub-057', 'sub-058', 'sub-059', 'sub-061', 'sub-062', 'sub-063', 'sub-064', 'sub-065', 
+#            'sub-066', 'sub-067', 'sub-068', 'sub-069', 'sub-070', 'sub-072', 'sub-073', 'sub-074', 
+#            'sub-075', 'sub-076', 'sub-077', 'sub-078', 'sub-079', 'sub-080', 'sub-081', 'sub-082', 
+#            'sub-083', 'sub-084', 'sub-086', 'sub-087', 'sub-088', 'sub-089', 'sub-091', 'sub-092', 
+#            'sub-093', 'sub-094', 'sub-095', 'sub-096', 'sub-097', 'sub-098', 'sub-099', 'sub-100', 
+#            'sub-101', 'sub-103', 'sub-104', 'sub-105', 'sub-106', 'sub-108', 'sub-109', 'sub-110', 
+#            'sub-113', 'sub-114', 'sub-115']
 nb_runs = 9
 language = 'english'
 nb_permutations = 3000
@@ -268,7 +288,8 @@ if __name__=='__main__':
                 state = state[1:] if result else str(int(state[1:])+1)
                 sel = (jobs_state.subject == subject) & (jobs_state.model_name == model_name)
                 jobs_state.loc[sel, 'state'] = str(state)
-                os.system(f"rm {state_file}")
+                if not (jobs_state[(jobs_state['subject']==subject) & (jobs_state['model_name']==model_name)].empty):
+                    os.system(f"rm {state_file}")
             jobs_state.to_csv(jobs_state_path, index=False)
             print('\t--> Done')
             

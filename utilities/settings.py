@@ -163,7 +163,7 @@ class Params:
 						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_hidden_short-range-units',
 						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_hidden_unit_1149',
 						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_input_unit_775',
-						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_input_unit_987',] # ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_input_unit_987'] # ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
 		
 		self.aggregated_models = self.models # ['+'.join(self.models)] # 
 		# self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'

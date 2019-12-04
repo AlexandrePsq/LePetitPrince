@@ -202,7 +202,7 @@ class Params:
 		self.parallel = False
 		self.cuda = True
 		self.voxel_wise = True
-		self.force_glm = True
+		self.force_glm = False
 		if torch.cuda.is_available():
 			if not self.cuda:
 				print("WARNING: You have a CUDA device, so you should probably run with --cuda")
@@ -214,14 +214,14 @@ class Params:
 		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))
 
 		# PCA
-		self.pca = True
+		self.pca = False
 		self.pca_type = 'classic'
 		self.n_components_default = 300
 		self.n_components_list = [5, 10, 50, 100, 300, 600] #[1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 1800]
 
 		# Deconfounding
 		self.n_sample = 3000
-		self.alpha_percentile = 95
+		self.alpha_percentile = 99
 		self.cluster_bsz = 100
 
 		# Scaling

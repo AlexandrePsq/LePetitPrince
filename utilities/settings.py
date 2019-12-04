@@ -146,7 +146,6 @@ class Params:
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
 		self.models = ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
 						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
 						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
 						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',

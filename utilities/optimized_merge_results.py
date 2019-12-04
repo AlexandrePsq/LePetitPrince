@@ -129,6 +129,7 @@ if __name__ =='__main__':
         pearson_corr_significant_with_pvalues[~mask_pvalues_pearson_corr] = np.nan
     else:
         r2_final = np.mean(scores, axis=0)
+        r2_final = np.array([x if np.abs(x) < 1 else np.sign(x)*0.2 for x in r2_final])
         corr_final = np.mean(corr, axis=0)
 
     # defining paths
@@ -156,12 +157,12 @@ if __name__ =='__main__':
 
     # saving
     np.save(r2_output_path, r2_final)
-    np.save(r2_significant_with_pvalues_output_path, r2_significant_with_pvalues)
-
     np.save(pearson_corr_output_path, corr_final)
-    np.save(pearson_corr_significant_with_pvalues_output_path, pearson_corr_significant_with_pvalues)
 
     if compute:
+        np.save(r2_significant_with_pvalues_output_path, r2_significant_with_pvalues)
+        np.save(pearson_corr_significant_with_pvalues_output_path, pearson_corr_significant_with_pvalues)
+
         np.save(mask_r2_with_pvalues_output_path, mask_pvalues_r2)
         np.save(mask_pearson_corr_with_pvalues_output_path, mask_pvalues_pearson_corr)
 

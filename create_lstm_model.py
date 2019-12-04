@@ -106,7 +106,7 @@ def generate(model, run, language, textgrid, overwrite=False):
     for layer in analyzed_layers:
         weight2retrieve.append(np.arange(model.param['nhid']*layer, model.param['nhid']*(layer+1)))
     parameters = list(set(parameters) - set(['surprisal', 'entropy']))
-    columns2retrieve = ['raw-{}-{}'.format(name, i) for i in np.hstack(weight2retrieve) for name in parameters]
+    columns2retrieve = ['raw-{}-{}'.format(name, i) for name in parameters for i in np.hstack(weight2retrieve)]
     
     if retrieve_surprisal:
         # if shift_surprisal:

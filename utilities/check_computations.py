@@ -86,7 +86,12 @@ model_names = ['wordrate_log_word_freq',
                 'glove_embeddings',
                 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
                 'bert_bucket_pca_300_all-layers',
-                'gpt2_pca_300_all-layers']
+                'gpt2_pca_300_all-layers',
+                'bert_bucket_embeddings',
+                'bert_bucket_layer-1',
+                'bert_bucket_layer-8',
+                'bert_bucket_layer-9',
+                'bert_bucket_layer-12']
 
 subjects = ['sub-057', 'sub-058', 'sub-059', 'sub-061', 'sub-062', 'sub-063', 'sub-064', 'sub-065', 
             'sub-066', 'sub-067', 'sub-068', 'sub-069', 'sub-070', 'sub-072', 'sub-073', 'sub-074', 

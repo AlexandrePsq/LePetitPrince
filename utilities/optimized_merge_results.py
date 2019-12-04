@@ -28,7 +28,7 @@ def write(path, text):
 
 def get_significativity_value(r2_test_array, pearson_corr_array, distribution_r2_array, distribution_pearson_corr_array, alpha_percentile, test=False):
     r2_final = np.mean(r2_test_array, axis=0)
-    r2_final = np.array([x if np.abs(x) < 1 else 0. for x in r2_final])
+    r2_final = np.array([0 if (x < -1 or x >= 1) else x for x in r2_final])
     corr_final = np.mean(pearson_corr_array, axis=0)
 
     distribution_r2_array_tmp = np.mean(distribution_r2_array, axis=0)
@@ -63,7 +63,7 @@ if __name__ =='__main__':
     parser.add_argument("--n_permutations", type=str, default=None, help="Number of permutations.")
     parser.add_argument("--model_name", type=str, default='', help="Name of the model.")
     parser.add_argument("--alpha_percentile", type=str, default=None, help="Path of shuffling array.")
-    parser.add_argument("--compute_distribution", type=bool, action="store_true", default=False, help="allow the computation of predictions over the randomly shuffled columns of the test set")
+    parser.add_argument("--compute_distribution", action="store_true", default=False, help="allow the computation of predictions over the randomly shuffled columns of the test set")
 
     args = parser.parse_args()
 
@@ -129,7 +129,7 @@ if __name__ =='__main__':
         pearson_corr_significant_with_pvalues[~mask_pvalues_pearson_corr] = np.nan
     else:
         r2_final = np.mean(scores, axis=0)
-        r2_final = np.array([x if np.abs(x) < 1 else 0. for x in r2_final])
+        r2_final = np.array([0 if (x < -1 or x >= 1) else x for x in r2_final])
         corr_final = np.mean(corr, axis=0)
 
     # defining paths

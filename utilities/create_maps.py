@@ -90,7 +90,7 @@ if __name__ =='__main__':
     parser.add_argument("--parameters", type=str, default='', help="Path to the yaml file containing the models names and column indexes.")
     parser.add_argument("--pca", type=str, default=None, help="Number of components to keep for the PCA.")
     parser.add_argument("--fmri_data", type=str, default='', help="Path to fMRI data directory.")
-    parser.add_argument("--compute_distribution", type=bool, action="store_true", default=False, help="allow the computation of predictions over the randomly shuffled columns of the test set")
+    parser.add_argument("--compute_distribution", action="store_true", default=False, help="allow the computation of predictions over the randomly shuffled columns of the test set")
 
     args = parser.parse_args()
 

@@ -155,7 +155,16 @@ class Params:
 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
 						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer',
 						'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_cell_first-layer'] # ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
+						'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_cell_first-layer',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_cell_unit_775',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_cell_unit_775_987',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_cell_unit_987',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_forget_unit_775',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_forget_unit_987',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_hidden_short-range-units',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_hidden_unit_1149',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_input_unit_775',
+						'lstm_wikikristina_embedding-size_200_nhid_650_nlayers_2_dropout_02_input_unit_987',] # ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
 		
 		self.aggregated_models = self.models # ['+'.join(self.models)] # 
 		# self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'

@@ -17,13 +17,15 @@ import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
 
-subjects = ['sub-057', 'sub-058', 'sub-059', 'sub-061', 'sub-062', 'sub-063', 'sub-064', 'sub-065', 
-            'sub-066', 'sub-067', 'sub-068', 'sub-069', 'sub-070', 'sub-072', 'sub-073', 'sub-074', 
-            'sub-075', 'sub-076', 'sub-077', 'sub-078', 'sub-079', 'sub-080', 'sub-081', 'sub-082', 
-            'sub-083', 'sub-084', 'sub-086', 'sub-087', 'sub-088', 'sub-089', 'sub-091', 'sub-092', 
-            'sub-093', 'sub-094', 'sub-095', 'sub-096', 'sub-097', 'sub-098', 'sub-099', 'sub-100', 
-            'sub-101', 'sub-103', 'sub-104', 'sub-105', 'sub-106', 'sub-108', 'sub-109', 'sub-110', 
-            'sub-113', 'sub-114', 'sub-115']
+#subjects = ['sub-057', 'sub-058', 'sub-059', 'sub-061', 'sub-062', 'sub-063', 'sub-064', 'sub-065', 
+#            'sub-066', 'sub-067', 'sub-068', 'sub-069', 'sub-070', 'sub-072', 'sub-073', 'sub-074', 
+#            'sub-075', 'sub-076', 'sub-077', 'sub-078', 'sub-079', 'sub-080', 'sub-081', 'sub-082', 
+#            'sub-083', 'sub-084', 'sub-086', 'sub-087', 'sub-088', 'sub-089', 'sub-091', 'sub-092', 
+#            'sub-093', 'sub-094', 'sub-095', 'sub-096', 'sub-097', 'sub-098', 'sub-099', 'sub-100', 
+#            'sub-101', 'sub-103', 'sub-104', 'sub-105', 'sub-106', 'sub-108', 'sub-109', 'sub-110', 
+#            'sub-113', 'sub-114', 'sub-115']
+subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
+
 
 
 def check_folder(path):

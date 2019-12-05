@@ -27,7 +27,7 @@ def load():
     return utils.load(mod, data_name, language)
                 
 def generate(model, run, language, textgrid, overwrite=False):
-    from LSTM import model
+    from .LSTM import model
     from data import Corpus
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run

@@ -46,7 +46,7 @@ def generate(model, run, language, textgrid, overwrite=False):
     retrieve_entropy = False
                 
     #### generating raw-features ####
-    if (os.path.exists(path)) & (not Params().overwrite):
+    if (os.path.exists(path)):
         raw_features = pd.read_csv(path)
     else:
         raw_features = model.generate(run, language)

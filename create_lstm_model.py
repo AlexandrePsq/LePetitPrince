@@ -18,11 +18,11 @@ layers_name = {'[0]':'first-layer',
                 }
 
 language = 'english'
-embedding_size_list = [650]
-nhid_list = [650] # [200]
-nlayers_list = [2] # [2,3]
+embedding_size_list = [600]
+nhid_list = [300] # [200]
+nlayers_list = [1] # [2,3]
 dropout_list = [0.2]
-parameters_list = [['hidden']] #[['hidden'], ['cell'], ['c_tilde'], ['in'], ['forget'], ['out'], ['surprisal'], ['entropy']]
+parameters_list = [['hidden'], ['cell'], ['in'], ['forget'], ['out']] #[['hidden'], ['cell'], ['c_tilde'], ['in'], ['forget'], ['out'], ['surprisal'], ['entropy']]
 shift_surprisal = None
 shift_entropy = None
 
@@ -76,7 +76,7 @@ def load():
                 result +=\
                 """
 def generate(model, run, language, textgrid, overwrite=False):
-    from LSTM import model
+    #from LSTM import model
     from data import Corpus
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
@@ -101,7 +101,7 @@ def generate(model, run, language, textgrid, overwrite=False):
                 result +=\
                 """
     #### generating raw-features ####
-    if (os.path.exists(path)):
+    if (os.path.exists(path)) & (not Params().overwrite):
         raw_features = pd.read_csv(path)
     else:
         raw_features = model.generate(run, language)

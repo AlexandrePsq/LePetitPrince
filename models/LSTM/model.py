@@ -101,7 +101,11 @@ class RNNModel(nn.Module):
         iterator = tokenize(path, language, self.vocab)
         last_item = params.eos_separator
         out = None
-        hidden = None
+        hidden = self.init_hidden(1)
+        inp = torch.autograd.Variable(torch.LongTensor([[self.vocab.word2idx[params.eos_separator]]]))
+        if params.cuda:
+            inp = inp.cuda()
+        out, hidden = self(inp, hidden)
         for item in tqdm(iterator):
             activation, surprisal, entropy, (out, hidden) = self.extract_activations(item, last_item=last_item, out=out, hidden=hidden, parameters=parameters)
             last_item = item
@@ -117,12 +121,6 @@ class RNNModel(nn.Module):
     
     def extract_activations(self, item, last_item, out=None, hidden=None, parameters=['hidden']):
         activation = []
-        if last_item == params.eos_separator:
-            hidden = self.init_hidden(1)
-            inp = torch.autograd.Variable(torch.LongTensor([[self.vocab.word2idx[params.eos_separator]]]))
-            if params.cuda:
-                inp = inp.cuda()
-            out, hidden = self(inp, hidden)
         out = torch.nn.functional.log_softmax(out[0]).unsqueeze(0)
         surprisal = -out[0, 0, self.vocab.word2idx[item]].item()
         inp = torch.autograd.Variable(torch.LongTensor([[self.vocab.word2idx[item]]]))

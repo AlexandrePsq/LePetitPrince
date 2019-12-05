@@ -18,11 +18,11 @@ layers_name = {'[0]':'first-layer',
                 }
 
 language = 'english'
-embedding_size_list = [600]
-nhid_list = [50, 100, 150] # [200]
-nlayers_list = [1] # [2,3]
+embedding_size_list = [650]
+nhid_list = [650] # [200]
+nlayers_list = [2] # [2,3]
 dropout_list = [0.2]
-parameters_list = [['hidden'], ['cell'], ['c_tilde'], ['in'], ['forget'], ['out'], ['surprisal'], ['entropy']]
+parameters_list = [['hidden']] #[['hidden'], ['cell'], ['c_tilde'], ['in'], ['forget'], ['out'], ['surprisal'], ['entropy']]
 shift_surprisal = None
 shift_entropy = None
 
@@ -76,9 +76,14 @@ def load():
                 result +=\
                 """
 def generate(model, run, language, textgrid, overwrite=False):
+    from LSTM import model
+    from data import Corpus
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
+    model.param = {'rnn_type':'LSTM', """+"""'ntoken':50001, 'ninp':{0}, 'nhid':{1}, 'nlayers':{2}, 'dropout':{3}, 'tie_weights':False""".format(embedding_size, nhid, nlayers, dropout)+"""}
+    corpus = Corpus(os.path.join(Paths().path2data, 'text', 'english', 'lstm_training'), language)
+    model.vocab = corpus.dictionary
     model_name = 'lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}'.format(model.param['ninp'], model.param['nhid'], model.param['nlayers'], str(model.param['dropout']).replace('.', ''))
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))
     path = os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name, 'raw-features_{}_{}_{}.csv'.format(language, model_name, run_name))
@@ -96,7 +101,7 @@ def generate(model, run, language, textgrid, overwrite=False):
                 result +=\
                 """
     #### generating raw-features ####
-    if (os.path.exists(path)) & (not overwrite):
+    if (os.path.exists(path)):
         raw_features = pd.read_csv(path)
     else:
         raw_features = model.generate(run, language)

@@ -145,10 +145,14 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0_650',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775_987',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1282_1283'] # ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
+		self.models = ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
+						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_first-layer',
+						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_second-layer',
+						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_all-layers',
+						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_all-layers',
+						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_all-layers',
+						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_in_all-layers',
+						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_out_all-layers'] # ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
 		
 		self.aggregated_models = self.models # ['+'.join(self.models)] # 
 		# self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'

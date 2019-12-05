@@ -356,6 +356,8 @@ surnames = {'wordrate_word_position': 'Word-position',
                 'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1149': 'LSTM-E650-H650-Hu1149',
                 'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_775': 'LSTM-E650-H650-Iu775',
                 'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_987': 'LSTM-E650-H650-Iu987',
+                'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775_987': 'LSTM-E650-H650-Fu775-987',
+                'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1282_1283': 'LSTM-E650-H650-Hu1282-1283',
                 'bert_bucket_pca_300_all-layers': 'BERT-all-pca-300',
                 'gpt2_pca_300_all-layers':'GPT2-all-pca-300',
                 'maps_r2_':'R2', 
@@ -428,7 +430,7 @@ if __name__ == '__main__':
     source = 'fMRI'
     language = 'english'
     subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
-    inputs_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
+    inputs_path = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince' #'/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     paths2check.append(inputs_path)
 
     # Sanity check

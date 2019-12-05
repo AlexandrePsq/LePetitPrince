@@ -428,7 +428,7 @@ if __name__ == '__main__':
     source = 'fMRI'
     language = 'english'
     subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
-    inputs_path = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince/' #'/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
+    inputs_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     paths2check.append(inputs_path)
 
     # Sanity check
@@ -472,7 +472,11 @@ if __name__ == '__main__':
 	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_short-range-units'],
 	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1149'],
 	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_775'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_987']]
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_987'],
+    #                    ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0'],
+    #                    ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0_650'],
+    #                    ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775_987'],
+    #                    ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1282_1283']]
     #plots = [['wordrate_model'],
     #               ['wordrate_log_word_freq'],
     #               ['mfcc_model'],
@@ -637,16 +641,16 @@ if __name__ == '__main__':
     ###########################################################################
     ############### 3 (Layer-wise analysis) ###############
     ###########################################################################
-    print("Computing: 3 (Layer-wise analysis)...")
-    plots = {
-        "LSTM-#L3":['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer'],
-        "LSTM-#L4":['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
-                'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer']
-    }
+    #print("Computing: 3 (Layer-wise analysis)...")
+    #plots = {
+    #    "LSTM-#L3":['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer',
+    #            'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
+    #            'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer'],
+    #    "LSTM-#L4":['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
+    #            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
+    #            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
+    #            'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer']
+    #}
     #plots = {"GPT2":['gpt2_embeddings',
     #                'gpt2_layer-1',
     #                'gpt2_layer-2',
@@ -676,72 +680,72 @@ if __name__ == '__main__':
     #                'bert_bucket_layer-12',
     #                'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer']}
 
-    object_of_interest = 'maps_r2_'
-    limit = limit_values[object_of_interest]
-    for index_mask in range(len(labels)-1):
-        mask = math_img('img > 50', img=index_img(maps, index_mask))  
-        masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
-        masker.fit()
-        for key in plots.keys():
-            models = plots[key]
-            Y_full = []
-            Y_filtered_25 = [] if object_of_interest=='maps_r2_' else None
-            X = [surnames[model_name] for model_name in models]
-            Y_full_significant = {model:[] for model in models}
-            for sub_id, subject in enumerate(subjects):
-                y = list(zip(*[list((masker.transform(fetch_ridge_maps(model_name, subject, object_of_interest)), masker.transform(fetch_ridge_maps(model_name, subject, 'filtered_25%_maps_r2' )))) for model_name in models]))
-                Y_full.append([np.mean(i[0]) for i in y[0]])
-                Y_filtered_25.append([np.mean(i[0]) for i in y[1]])
-                for mod_id, model in enumerate(models):
-                    Y_full_significant[model].append(masker.transform(fetch_ridge_maps(model, subject, 'maps_significant_r2_with_pvalues'))[0])
-
-            Y_full = np.vstack(Y_full)
-            Y_filtered_25 = np.vstack(Y_filtered_25) if object_of_interest=='maps_r2_' else None
-            for model in models:
-                Y_full_significant[model] = [array[array!=0] for array in Y_full_significant[model]]
-                result = []
-                for array in Y_full_significant[model]:
-                    if array != []:
-                        result.append(np.mean(array))
-                Y_full_significant[model] = result
-            error_significant = [np.std(np.array(Y_full_significant[model]))/np.sqrt(len(Y_full_significant[model])) for model in Y_full_significant.keys()]
-            Y_full_significant = [np.mean(Y_full_significant[model]) for model in Y_full_significant.keys()]
-
-            # Plotting
-            roi = labels[index_mask+1]
-            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '3', key, surnames[object_of_interest])
-            layer_plot(X, np.mean(Y_full, axis=0), np.std(Y_full, axis=0)/np.sqrt(len(subjects)), 
-                        surnames, object_of_interest, roi, limit, 
-                        save_folder, 
-                        key + '-' + roi + '-mean-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-all-voxels.png')
-            
-            error = np.std(Y_filtered_25, axis=0)/np.sqrt(len(subjects))
-            layer_plot(X, np.mean(Y_filtered_25, axis=0), error, 
-                        surnames, object_of_interest, roi, limit, 
-                        save_folder, 
-                        key + '-' + roi + '-mean-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-top-25percent-voxels.png')
-            layer_plot(X, np.median(Y_filtered_25, axis=0), error, 
-                        surnames, object_of_interest, roi, limit, 
-                        save_folder, 
-                        key + '-' + roi + '-median-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-top-25percent-voxels.png')
-            layer_plot(X, np.percentile(Y_filtered_25, 75, axis=0), error, 
-                        surnames, object_of_interest, roi, limit, 
-                        save_folder, 
-                        key + '-' + roi + '-third-quartile-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-top-25percent-voxels.png')
-
-            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '3', key, surnames['maps_significant_r2_with_pvalues'])
-            layer_plot(X, np.array(Y_full_significant), error_significant, 
-                        surnames, 'maps_significant_r2_with_pvalues', roi, limit_values['maps_significant_r2_with_pvalues'], 
-                        save_folder, 
-                        key + '-' + roi + '-mean-'+ f"-{surnames['maps_significant_r2_with_pvalues']}-" + 'averaged'  + '-all-voxels.png')
-            
-    print("\t-->Done")
+    #object_of_interest = 'maps_r2_'
+    #limit = limit_values[object_of_interest]
+    #for index_mask in range(len(labels)-1):
+    #    mask = math_img('img > 50', img=index_img(maps, index_mask))  
+    #    masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
+    #    masker.fit()
+    #    for key in plots.keys():
+    #        models = plots[key]
+    #        Y_full = []
+    #        Y_filtered_25 = [] if object_of_interest=='maps_r2_' else None
+    #        X = [surnames[model_name] for model_name in models]
+    #        Y_full_significant = {model:[] for model in models}
+    #        for sub_id, subject in enumerate(subjects):
+    #            y = list(zip(*[list((masker.transform(fetch_ridge_maps(model_name, subject, object_of_interest)), masker.transform(fetch_ridge_maps(model_name, subject, 'filtered_25%_maps_r2' )))) for model_name in models]))
+    #            Y_full.append([np.mean(i[0]) for i in y[0]])
+    #            Y_filtered_25.append([np.mean(i[0]) for i in y[1]])
+    #            for mod_id, model in enumerate(models):
+    #                Y_full_significant[model].append(masker.transform(fetch_ridge_maps(model, subject, 'maps_significant_r2_with_pvalues'))[0])
+#
+    #        Y_full = np.vstack(Y_full)
+    #        Y_filtered_25 = np.vstack(Y_filtered_25) if object_of_interest=='maps_r2_' else None
+    #        for model in models:
+    #            Y_full_significant[model] = [array[array!=0] for array in Y_full_significant[model]]
+    #            result = []
+    #            for array in Y_full_significant[model]:
+    #                if array != []:
+    #                    result.append(np.mean(array))
+    #            Y_full_significant[model] = result
+    #        error_significant = [np.std(np.array(Y_full_significant[model]))/np.sqrt(len(Y_full_significant[model])) for model in Y_full_significant.keys()]
+    #        Y_full_significant = [np.mean(Y_full_significant[model]) for model in Y_full_significant.keys()]
+#
+    #        # Plotting
+    #        roi = labels[index_mask+1]
+    #        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '3', key, surnames[object_of_interest])
+    #        layer_plot(X, np.mean(Y_full, axis=0), np.std(Y_full, axis=0)/np.sqrt(len(subjects)), 
+    #                    surnames, object_of_interest, roi, limit, 
+    #                    save_folder, 
+    #                    key + '-' + roi + '-mean-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-all-voxels.png')
+    #        
+    #        error = np.std(Y_filtered_25, axis=0)/np.sqrt(len(subjects))
+    #        layer_plot(X, np.mean(Y_filtered_25, axis=0), error, 
+    #                    surnames, object_of_interest, roi, limit, 
+    #                    save_folder, 
+    #                    key + '-' + roi + '-mean-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-top-25percent-voxels.png')
+    #        layer_plot(X, np.median(Y_filtered_25, axis=0), error, 
+    #                    surnames, object_of_interest, roi, limit, 
+    #                    save_folder, 
+    #                    key + '-' + roi + '-median-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-top-25percent-voxels.png')
+    #        layer_plot(X, np.percentile(Y_filtered_25, 75, axis=0), error, 
+    #                    surnames, object_of_interest, roi, limit, 
+    #                    save_folder, 
+    #                    key + '-' + roi + '-third-quartile-'+ f'-{surnames[object_of_interest]}-' + 'averaged'  + '-top-25percent-voxels.png')
+#
+    #        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '3', key, surnames['maps_significant_r2_with_pvalues'])
+    #        layer_plot(X, np.array(Y_full_significant), error_significant, 
+    #                    surnames, 'maps_significant_r2_with_pvalues', roi, limit_values['maps_significant_r2_with_pvalues'], 
+    #                    save_folder, 
+    #                    key + '-' + roi + '-mean-'+ f"-{surnames['maps_significant_r2_with_pvalues']}-" + 'averaged'  + '-all-voxels.png')
+    #        
+    #print("\t-->Done")
 
 
     #############################################################################
     ###################### Appendix  ####################
     #############################################################################
-    #value_of_interest = 'maps_r2_'
+    value_of_interest = 'maps_r2_'
     print("Computing: Appendix...")
     #print("\tLooping through labeled masks...")
     #for index_mask in range(len(labels)-1):
@@ -775,7 +779,7 @@ if __name__ == '__main__':
     #            'gpt2_layer-1'], 
     #            ['gpt2_layer-8',
     #            'gpt2_layer-7']]
-    #
-    #model1 = args.model1
-    #model2 = args.model2
-    #process_matrix(subjects, model1, model2, args.path2data, compute_significant=True)
+    
+    model1 = args.model1
+    model2 = args.model2
+    process_matrix(subjects, model1, model2, args.path2data, compute_significant=True)

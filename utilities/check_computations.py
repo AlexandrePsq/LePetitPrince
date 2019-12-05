@@ -79,25 +79,10 @@ def retrieve_df(jobs_state, inputs_path):
 
 
 
-model_names = ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_600_nhid_768_nlayers_1_dropout_02_cell_first-layer',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775_987',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_987',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_987',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_short-range-units',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1149',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_775',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_987']
+model_names = ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0.py',
+                'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0_650.py',
+                'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775_987.py',
+                'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1282_1283.py']
 #model_names = ['wordrate_log_word_freq',
 #                'mfcc_model',
 #                'gpt2_all-layers',

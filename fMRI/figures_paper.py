@@ -447,23 +447,23 @@ if __name__ == '__main__':
     ###########################################################################
     #################### 1 (Individual features) ####################
     ###########################################################################
-    print("Computing: 1 (Individual features)")
-    plots = [['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer'],
-						['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer'],
-						['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer'],
-						['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer'],
-						['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer'],
-						['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer'],
-						['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer'],
-						['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775'],
-						['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775_987'],
-						['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_987'],
-						['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775'],
-						['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_987'],
-						['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_short-range-units'],
-						['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1149'],
-						['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_775'],
-						['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_987']]
+    #print("Computing: 1 (Individual features)")
+    #plots = [['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer'],
+	#					['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer'],
+	#					['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer'],
+	#					['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer'],
+	#					['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer'],
+	#					['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer'],
+	#					['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer'],
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775'],
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775_987'],
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_987'],
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775'],
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_987'],
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_short-range-units'],
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1149'],
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_775'],
+	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_987']]
     #plots = [['wordrate_model'],
     #               ['wordrate_log_word_freq'],
     #               ['mfcc_model'],
@@ -506,34 +506,34 @@ if __name__ == '__main__':
     #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer'],
     #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer'],
     #                ['glove_embeddings']]
-    for object_of_interest in ['maps_r2_']:
-        for models in plots:
-            all_paths = []
-            for subject in subjects:
-                model_name = models[0]
-                path_template = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/outputs/maps/*{object_of_interest}*.nii.gz")
-                path = sorted(glob.glob(path_template))[0]
-                all_paths.append(path)
-                img = load_img(path) 
-                display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
-                save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest], subject)
-                check_folder(save_folder)
-                display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + subject  + '.png'))
-                display.close()
-            data = [global_masker.transform(path) for path in all_paths]
-            for index, array in enumerate(data):
-                array[array<0] = 0
-            data = np.vstack(data)
-            data = np.mean(data, axis=0)
-            img = global_masker.inverse_transform(data)
-            #img = mean_img([threshold_img(fetch_ridge_maps(model_name, subject, object_of_interest), threshold=0) for subject in subjects])
-            display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
-            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest])
-            check_folder(save_folder)
-            display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + '-averaged-'  + '.png'))
-            display.close()
-
-    print("\t\t-->Done")
+    #for object_of_interest in ['maps_r2_']:
+    #    for models in plots:
+    #        all_paths = []
+    #        for subject in subjects:
+    #            model_name = models[0]
+    #            path_template = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/outputs/maps/*{object_of_interest}*.nii.gz")
+    #            path = sorted(glob.glob(path_template))[0]
+    #            all_paths.append(path)
+    #            img = load_img(path) 
+    #            display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
+    #            save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest], subject)
+    #            check_folder(save_folder)
+    #            display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + subject  + '.png'))
+    #            display.close()
+    #        data = [global_masker.transform(path) for path in all_paths]
+    #        for index, array in enumerate(data):
+    #            array[array<0] = 0
+    #        data = np.vstack(data)
+    #        data = np.mean(data, axis=0)
+    #        img = global_masker.inverse_transform(data)
+    #        #img = mean_img([threshold_img(fetch_ridge_maps(model_name, subject, object_of_interest), threshold=0) for subject in subjects])
+    #        display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=False, plot_abs=False)
+    #        save_folder = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "1", model_name, surnames[object_of_interest])
+    #        check_folder(save_folder)
+    #        display.savefig(os.path.join(save_folder, model_name + f'-{surnames[object_of_interest]}-' + '-averaged-'  + '.png'))
+    #        display.close()
+#
+    #print("\t\t-->Done")
 
     ############################################################################
     ################ 2 (Comparison 300 features models) ###############

@@ -19,7 +19,7 @@ from utilities.utils import check_folder, shift
 
 
 def load():
-    from LSTM import model, utils
+    from .LSTM import model, utils
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
     mod = model.RNNModel('LSTM', 5, 650, 650, 2, dropout=0.2) # ntoken is chosen randomly, it will or has been determined during training
     data_name = 'wiki_kristina'
@@ -27,7 +27,7 @@ def load():
     return utils.load(mod, data_name, language)
                 
 def generate(model, run, language, textgrid, overwrite=False):
-    from .LSTM import model
+    from LSTM import model
     from data import Corpus
     name = os.path.basename(os.path.splitext(run)[0])
     run_name = name.split('_')[-1] # extract the name of the run

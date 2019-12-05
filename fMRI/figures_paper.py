@@ -785,4 +785,4 @@ if __name__ == '__main__':
     
     model1 = args.model1
     model2 = args.model2
-    process_matrix(subjects, model1, model2, args.path2data, compute_significant=True)
+    process_matrix(subjects, model1, model2, args.path2data, compute_significant=False)

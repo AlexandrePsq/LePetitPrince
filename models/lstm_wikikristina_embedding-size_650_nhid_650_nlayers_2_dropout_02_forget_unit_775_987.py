@@ -33,7 +33,7 @@ def generate(model, run, language, textgrid, overwrite=False):
     run_name = name.split('_')[-1] # extract the name of the run
     save_all = None
     model.param = {'rnn_type':'LSTM', 'ntoken':50001, 'ninp':650, 'nhid':650, 'nlayers':2, 'dropout':0.2, 'tie_weights':False}
-    corpus = Corpus('wiki_kristina', language)
+    corpus = Corpus(os.path.join(paths.path2data, 'text', 'english', 'lstm_training'), language)
     model.vocab = corpus.dictionary
     model_name = 'lstm_wikikristina_embedding-size_{}_nhid_{}_nlayers_{}_dropout_{}'.format(model.param['ninp'], model.param['nhid'], model.param['nlayers'], str(model.param['dropout']).replace('.', ''))
     check_folder(os.path.join(Paths().path2derivatives, 'fMRI/raw-features', language, model_name))

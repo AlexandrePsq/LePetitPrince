@@ -77,6 +77,7 @@ if __name__=='__main__':
     check_after =  f"echo '~3' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
     write(paths_commands[0], check_before)
     for run in range(1, 1+int(nb_runs)):
+        write(paths_commands[run-1], "#!/bin/sh")
         indexes = np.arange(1, 1+int(nb_runs))
         indexes_tmp = np.delete(indexes, run-1, 0)
         command = f"python {os.path.join(inputs_path, 'code/utilities/cv_alphas.py')} --indexes {','.join([str(i) for i in indexes_tmp])} " + \

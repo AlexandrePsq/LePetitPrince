@@ -430,7 +430,7 @@ if __name__ == '__main__':
     source = 'fMRI'
     language = 'english'
     subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
-    inputs_path = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince' #'/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
+    inputs_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     paths2check.append(inputs_path)
 
     # Sanity check
@@ -459,29 +459,36 @@ if __name__ == '__main__':
     #################### 1 (Individual features) ####################
     ###########################################################################
     #print("Computing: 1 (Individual features)")
-    #plots = [['bert_bucket_pca_300_all-layers'],
-    #                    ['gpt2_pca_300_all-layers'],
-    #                    ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer']]
-    #                    ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer'],
-	#					['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer'],
-	#					['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer'],
-	#					['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer'],
-	#					['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer'],
-	#					['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer'],
-	#					['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775_987'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_987'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_987'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_short-range-units'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1149'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_775'],
-	#					['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_987'],
-    #                    ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0'],
-    #                    ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0_650'],
-    #                    ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775_987'],
-    #                    ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1282_1283']]
+    #plots = [['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_first-layer'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_second-layer'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_all-layers'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_all-layers'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_all-layers'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_in_all-layers'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_out_all-layers'],
+    #                ['bert_bucket_pca_300_all-layers'],
+    #                ['gpt2_pca_300_all-layers'],
+    #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_first-layer'],
+    #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_second-layer'],
+    #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_third-layer'],
+    #                ['lstm_wikikristina_embedding-size_600_nhid_75_nlayers_4_dropout_02_hidden_fourth-layer'],
+    #                ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_first-layer'],
+    #                ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_second-layer'],
+    #                ['lstm_wikikristina_embedding-size_600_nhid_100_nlayers_3_dropout_02_hidden_third-layer'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_775_987'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_unit_987'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_987'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_short-range-units'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1149'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_775'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_input_unit_987'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_0_650'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_unit_775_987'],
+    #                ['lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_unit_1282_1283']]
     #plots = [['wordrate_model'],
     #               ['wordrate_log_word_freq'],
     #               ['mfcc_model'],
@@ -556,57 +563,57 @@ if __name__ == '__main__':
     ############################################################################
     ################ 2 (Comparison 300 features models) ###############
     ############################################################################
-    #print("Computing: 2 (Comparison 300 features models)...")
-    #models = ['glove_embeddings',
-    #            'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
-    #            'bert_bucket_pca_300_all-layers',
-    #            'gpt2_pca_300_all-layers',
-    #            'bert_bucket_all-layers',
-    #            'gpt2_all-layers']
-    #plot_name = ["Comparison 300 features models"]
-    #data = {model:[] for model in all_models}
-    #nb_voxels = 26117
-    #for value in ['maps_r2_']:
-    #    tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "2")
-    #    check_folder(os.path.join(tmp_path, 'averages'))
-#
-    #    print("\tTransforming data...")
-    #    for model_index, model in enumerate(all_models):
-    #        data[model] = [global_masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
-    #        distribution = np.mean(np.vstack(data[model]), axis=0)
-    #        save_hist(distribution, os.path.join(tmp_path, 'averages', f'hist_averaged_{value}_{model}.png'))
-    #        path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
-    #        check_folder(path2output_raw)
-    #        nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, value + '.nii.gz'))
-    #    print("\t\t-->Done")
-#
-    #    x_labels = labels[1:]
-    #    mean = np.zeros((len(labels)-1, len(models)))
-    #    mean_filtered = np.zeros((len(labels)-1, len(models)))
-    #    # extract data
-    #    print("\tLooping through labeled masks...")
-    #    for index_mask in range(len(labels)-1):
-    #        mask = math_img('img > 50', img=index_img(maps, index_mask))  
-    #        masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
-    #        masker.fit()
-#
-    #        for index_model, model in enumerate(models):
-    #            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
-    #            array = masker.transform(os.path.join(path2output_raw, value + '.nii.gz'))
-    #            filtered_data = [masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
-    #            mean_filtered[index_mask, index_model] = np.mean(np.array([np.mean(array[array>np.percentile(array, 75)]) for array in filtered_data]))
-    #            mean[index_mask, index_model] = np.mean(array)
-    #    print("\t\t-->Done")
-#
-    #    print("\tPlotting...")
-    #    # save plots
-    #    vertical_plot(mean, x_labels, 'Mean-comparison-300-features', 
-    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-    #                    value, surnames, models, syntactic_roi, language_roi, xlabel='R2 values')
-    #    vertical_plot(mean_filtered, x_labels, 'Mean-filtered-comparison-300-features', 
-    #                    os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
-    #                    'filtered', surnames, models, syntactic_roi, language_roi, xlabel='Filtered R2 values')
-    #    print("\t\t-->Done")
+    print("Computing: 2 (Comparison 300 features models)...")
+    models = ['glove_embeddings',
+                'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
+                'bert_bucket_pca_300_all-layers',
+                'gpt2_pca_300_all-layers',
+                'bert_bucket_all-layers',
+                'gpt2_all-layers']
+    plot_name = ["Comparison 300 features models"]
+    data = {model:[] for model in all_models}
+    nb_voxels = 26117
+    for value in ['maps_r2_']:
+        tmp_path = os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', "2")
+        check_folder(os.path.join(tmp_path, 'averages'))
+
+        print("\tTransforming data...")
+        for model_index, model in enumerate(all_models):
+            data[model] = [global_masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
+            distribution = np.mean(np.vstack(data[model]), axis=0)
+            save_hist(distribution, os.path.join(tmp_path, 'averages', f'hist_averaged_{value}_{model}.png'))
+            path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
+            check_folder(path2output_raw)
+            nib.save(global_masker.inverse_transform(distribution), os.path.join(path2output_raw, value + '.nii.gz'))
+        print("\t\t-->Done")
+
+        x_labels = labels[1:]
+        mean = np.zeros((len(labels)-1, len(models)))
+        mean_filtered = np.zeros((len(labels)-1, len(models)))
+        # extract data
+        print("\tLooping through labeled masks...")
+        for index_mask in range(len(labels)-1):
+            mask = math_img('img > 50', img=index_img(maps, index_mask))  
+            masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
+            masker.fit()
+
+            for index_model, model in enumerate(models):
+                path2output_raw = os.path.join(paths.path2derivatives, 'fMRI/ridge-indiv', language, 'averaged', model)
+                array = masker.transform(os.path.join(path2output_raw, value + '.nii.gz'))
+                filtered_data = [masker.transform(fetch_ridge_maps(model, subject, value)) for subject in subjects]
+                mean_filtered[index_mask, index_model] = np.mean(np.array([np.mean(array[array>np.percentile(array, 75)]) for array in filtered_data]))
+                mean[index_mask, index_model] = np.mean(array)
+        print("\t\t-->Done")
+
+        print("\tPlotting...")
+        # save plots
+        vertical_plot(mean, x_labels, 'Mean-comparison-300-features', 
+                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
+                        value, surnames, models, syntactic_roi, language_roi, xlabel='R2 values')
+        vertical_plot(mean_filtered, x_labels, 'Mean-filtered-comparison-300-features', 
+                        os.path.join(paths.path2derivatives, source, 'analysis', language, 'paper_plots', '2'), 
+                        'filtered', surnames, models, syntactic_roi, language_roi, xlabel='Filtered R2 values')
+        print("\t\t-->Done")
 
     ###########################################################################
     ############### 2 bis (avec significant R2 values) ###############
@@ -785,6 +792,6 @@ if __name__ == '__main__':
     #            ['gpt2_layer-8',
     #            'gpt2_layer-7']]
     
-    model1 = args.model1
-    model2 = args.model2
-    process_matrix(subjects, model1, model2, args.path2data, compute_significant=False)
+    #model1 = args.model1
+    #model2 = args.model2
+    #process_matrix(subjects, model1, model2, args.path2data, compute_significant=False)

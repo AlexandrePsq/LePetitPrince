@@ -157,11 +157,13 @@ def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest,
     x = [x[i] for i in order]
     ax = plt.axes()
     plt.plot(data[:,0], x, '.k', alpha=0.7, markersize=12)
-    plt.plot(data[:,1], x, '.g', alpha=0.7, markersize=12)
-    plt.plot(data[:,2], x, '.r', alpha=0.7, markersize=12)
-    plt.plot(data[:,3], x, '.b', alpha=0.5, markersize=12)
-    plt.plot(data[:,4], x, '^r', alpha=0.3, markersize=8)
-    plt.plot(data[:,5], x, '^b', alpha=0.3, markersize=8)
+    plt.plot(data[:,1], x, '.y', alpha=0.7, markersize=12)
+    plt.plot(data[:,2], x, '^y', alpha=0.7, markersize=12)
+    plt.plot(data[:,3], x, '.g', alpha=0.7, markersize=12)
+    plt.plot(data[:,4], x, '.r', alpha=0.7, markersize=12)
+    plt.plot(data[:,5], x, '.b', alpha=0.5, markersize=12)
+    plt.plot(data[:,6], x, '^r', alpha=0.3, markersize=8)
+    plt.plot(data[:,7], x, '^b', alpha=0.3, markersize=8)
     #plot = plt.plot(data[:,0], x, '.k',
     #                data[:,1], x, '.g',
     #                data[:,2], x, '.r',
@@ -565,6 +567,8 @@ if __name__ == '__main__':
     ############################################################################
     print("Computing: 2 (Comparison 300 features models)...")
     models = ['glove_embeddings',
+                'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_all-layers',
+                'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_pca_300_all-layers',
                 'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
                 'bert_bucket_pca_300_all-layers',
                 'gpt2_pca_300_all-layers',

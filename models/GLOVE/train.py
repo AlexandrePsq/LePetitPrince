@@ -33,7 +33,7 @@ def train(model, path2data, data_name, language):
     try:
         print('Entering training...')
         sentences = tokenize(path2data, language, train=True)
-        model = Word2Vec(sentences, min_count=1, size=model.param['embedding-size'])
+        model = Word2Vec(sentences, min_count=1, size=model.param['embedding-size'], workers=8)
     except KeyboardInterrupt:
         print('-' * 89)
         print('Exiting from training early')

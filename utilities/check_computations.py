@@ -290,6 +290,7 @@ if __name__=='__main__':
                 if state in ['5', '4']:
                     os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_1.py')} --model_name {model_name} --subject {subject} --language {language}")
                     job2launch1.append(os.path.join(inputs_path, f"command_lines/1_{subject}_{model_name}_{language}.sh"))
+                    job2launch1 += [os.path.join(inputs_path, f"command_lines/1_{subject}_{model_name}_{language}_run{run}.sh") for run in range(1,10)]
                 elif state=='3':
                     os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_2.py')} --model_name {model_name} --subject {subject} --language {language}")
                     job2launch2.append(os.path.join(inputs_path, f"command_lines/2_{subject}_{model_name}_{language}.sh"))

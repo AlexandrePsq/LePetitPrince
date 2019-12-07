@@ -79,13 +79,14 @@ def save_hist(distribution, path):
     plt.savefig(path)
     plt.close()
 
-def process_matrix(subjects, model1, model2, path2data, compute_significant=False):
+def process_matrix(subjects, model1, model2, path2data1, path2data2, compute_significant=False):
     print("Processing subject for model 1: {} and model 2: {}...".format(model1, model2))
     name = surnames[model1] + '-' + surnames[model2]
     print("\tLoading r2 values...")
-    path = os.path.join(path2data,'{subject}/{model}', 'outputs', 'r2.npy')
-    data1 = [np.load(path.format(subject=subject, model=model1)) for subject in subjects]
-    data2 = [np.load(path.format(subject=subject, model=model2)) for subject in subjects]
+    path1 = os.path.join(path2data1,'{subject}/{model}', 'outputs', 'r2.npy')
+    path2 = os.path.join(path2data2,'{subject}/{model}', 'outputs', 'r2.npy')
+    data1 = [np.load(path1.format(subject=subject, model=model1)) for subject in subjects]
+    data2 = [np.load(path2.format(subject=subject, model=model2)) for subject in subjects]
     print("\t\t-->Done")
     print("\tDifferenciating...")
     data = np.mean(np.vstack([data1[index] - array for index, array in enumerate(data2)]), axis=0)
@@ -95,9 +96,10 @@ def process_matrix(subjects, model1, model2, path2data, compute_significant=Fals
     print("\t\t-->Done")
     if compute_significant:
         print("\tLoading distributions...")
-        path = os.path.join(path2data,'{subject}/{model}', 'outputs', 'distribution_r2.npy')
-        distribution1 = [np.mean(np.load(path.format(subject=subject, model=model1)), axis=0) for subject in subjects]
-        distribution2 = [np.mean(np.load(path.format(subject=subject, model=model2)), axis=0) for subject in subjects]
+        path1 = os.path.join(path2data1,'{subject}/{model}', 'outputs', 'distribution_r2.npy')
+        path2 = os.path.join(path2data2,'{subject}/{model}', 'outputs', 'distribution_r2.npy')
+        distribution1 = [np.mean(np.load(path1.format(subject=subject, model=model1)), axis=0) for subject in subjects]
+        distribution2 = [np.mean(np.load(path2.format(subject=subject, model=model2)), axis=0) for subject in subjects]
         print("\t\t-->Done")
         print("\tDifferenciating distributions...")
         distribution = [array - distribution2[index] for index, array in enumerate(distribution1)]
@@ -430,7 +432,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="...")
     parser.add_argument("--model1", type=str)
     parser.add_argument("--model2", type=str)
-    parser.add_argument("--path2data", type=str)
+    parser.add_argument("--path2data1", type=str)
+    parser.add_argument("--path2data2", type=str)
 
     args = parser.parse_args()
 
@@ -802,4 +805,4 @@ if __name__ == '__main__':
     
     model1 = args.model1
     model2 = args.model2
-    process_matrix(subjects, model1, model2, args.path2data, compute_significant=False)
+    process_matrix(subjects, model1, model2, args.path2data1, args.path2data2, compute_significant=True)

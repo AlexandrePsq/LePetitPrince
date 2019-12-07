@@ -15,7 +15,7 @@ import pandas as pd
 from utilities.settings import Paths
 from utilities.utils import check_folder
 
-
+paths = Paths()
 
 def load():
     # mod is only used for name retrieving ! the actual trained model is retrieved in the last line
@@ -57,4 +57,4 @@ if __name__=='__main__':
     path2data = os.path.join(paths.path2data, 'text', 'english', 'lstm_training', 'train.txt')
     data_name = 'wiki_kristina'
     language = 'english'
-    train(model, path2data, data_name, language)
+    train.train(model, path2data, data_name, language)

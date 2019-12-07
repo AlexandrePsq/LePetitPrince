@@ -444,7 +444,7 @@ if __name__ == '__main__':
         check_folder(path)
 
     # retrieve default atlas  (= set of ROI)
-    atlas = datasets.fetch_atlas_harvard_oxford(params.atlas)
+    atlas = datasets.fetch_atlas_harvard_oxford('cort-prob-2mm')
     labels = atlas['labels']
     labels = [surnames[value] for value in labels]
     maps = nilearn.image.load_img(atlas['maps'])

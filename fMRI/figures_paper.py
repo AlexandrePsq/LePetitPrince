@@ -14,7 +14,6 @@ from nilearn.masking import compute_epi_mask
 from nilearn.plotting import plot_glass_brain, plot_img
 import nibabel as nib
 from nilearn.regions import RegionExtractor
-from utilities.utils import get_data, get_output_parent_folder, check_folder, transform_design_matrices, pca
 
 from joblib import Parallel, delayed
 import yaml
@@ -30,6 +29,17 @@ warnings.simplefilter(action='ignore')
 paths = {'path2root': '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/',
                 'path2derivatives': '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives',
                 'path2data': '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data'}
+
+def check_folder(path):
+    """Create the adequate folders for
+    the path to exist.
+    """
+    try:
+        if not os.path.isdir(path):
+            check_folder(os.path.dirname(path))
+            os.mkdir(path)
+    except:
+        pass
 
 def fetch_ridge_maps(model, subject, value):
     """Retrieve the R2/pearson values (significant or not)

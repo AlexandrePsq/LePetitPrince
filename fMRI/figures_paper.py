@@ -80,7 +80,7 @@ def save_hist(distribution, path):
     plt.close()
 
 def process_matrix(subjects, model1, model2, path2data, compute_significant=False):
-    print("Processing subject for model 1: {model1} and model 2: {model2}...".format(model1, model2))
+    print("Processing subject for model 1: {} and model 2: {}...".format(model1, model2))
     name = surnames[model1] + '-' + surnames[model2]
     print("\tLoading r2 values...")
     path = os.path.join(path2data,'{subject}/{model}', 'outputs', 'r2.npy')

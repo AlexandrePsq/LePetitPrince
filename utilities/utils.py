@@ -43,10 +43,12 @@ def check_folder(path):
     """Create the adequate folders for
     the path to exist.
     """
-    if not os.path.isdir(path):
-        check_folder(os.path.dirname(path))
-        os.mkdir(path)
-
+    try:
+        if not os.path.isdir(path):
+            check_folder(os.path.dirname(path))
+            os.mkdir(path)
+    except:
+        pass
 
 def log(subject, voxel, alpha, r2):
     """ log stats per fold to a csv file """

@@ -17,8 +17,8 @@ import torch
 class Paths:
     def __init__(self):
         # Paths
-        #self.path2root = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince'
-        self.path2root = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince'
+        self.path2root = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince'
+        #self.path2root = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince'
         self.path2data = join(self.path2root, 'data')
         self.path2derivatives = join(self.path2root, 'derivatives')
         self.path2code = join(self.path2root, 'code')
@@ -145,16 +145,15 @@ class Params:
 		# Data
 		self.tr = 2 # FMRI sampling period
 		self.nb_runs = 9 # number of runs
-		self.models = ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_second-layer',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_all-layers',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_all-layers',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_all-layers',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_in_all-layers',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_out_all-layers'] # ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
+		self.models = [] # ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
 		
-		self.aggregated_models = self.models # ['+'.join(self.models)] # 
+		self.aggregated_models = ['bert_bucket_pca_300_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
+									'gpt2_pca_300_all-layers+rms_model+wordrate_model+wordrate_log_word_freq',
+									'glove_embeddings+rms_model+wordrate_model+wordrate_log_word_freq',
+									'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer+rms_model+wordrate_model+wordrate_log_word_freq',
+									'rms_model+wordrate_model+wordrate_log_word_freq'
+									'bert_bucket_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
+									'gpt2_all-layers+rms_model+wordrate_model+wordrate_log_word_freq',] # ['+'.join(self.models)] # 
 		# self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'
 		# self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
 		# 								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden',

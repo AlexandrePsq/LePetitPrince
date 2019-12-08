@@ -151,9 +151,9 @@ class Params:
 									'gpt2_pca_300_all-layers+rms_model+wordrate_model+wordrate_log_word_freq',
 									'glove_embeddings+rms_model+wordrate_model+wordrate_log_word_freq',
 									'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer+rms_model+wordrate_model+wordrate_log_word_freq',
-									'rms_model+wordrate_model+wordrate_log_word_freq'
+									'rms_model+wordrate_model+wordrate_log_word_freq',
 									'bert_bucket_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
-									'gpt2_all-layers+rms_model+wordrate_model+wordrate_log_word_freq',] # ['+'.join(self.models)] # 
+									'gpt2_all-layers+rms_model+wordrate_model+wordrate_log_word_freq'] # ['+'.join(self.models)] # 
 		# self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'
 		# self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
 		# 								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden',

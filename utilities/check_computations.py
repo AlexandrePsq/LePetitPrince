@@ -79,40 +79,27 @@ def retrieve_df(jobs_state, inputs_path):
 
 
 
-model_names = ['lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_first-layer',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_second-layer',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_hidden_all-layers',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_cell_all-layers',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_forget_all-layers',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_in_all-layers',
-						'lstm_wikikristina_embedding-size_650_nhid_650_nlayers_2_dropout_02_out_all-layers']
-#model_names = ['wordrate_log_word_freq',
-#                'mfcc_model',
-#                'gpt2_all-layers',
-#                'bert_bucket_all-layers',
-#                'glove_embeddings',
-#                'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer',
-#                'bert_bucket_pca_300_all-layers',
-#                'gpt2_pca_300_all-layers',
-#                'bert_bucket_embeddings',
-#                'bert_bucket_layer-1',
-#                'bert_bucket_layer-8',
-#                'bert_bucket_layer-9',
-#                'bert_bucket_layer-12']
+model_names = ['bert_bucket_pca_300_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
+									'gpt2_pca_300_all-layers+rms_model+wordrate_model+wordrate_log_word_freq',
+									'glove_embeddings+rms_model+wordrate_model+wordrate_log_word_freq',
+									'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer+rms_model+wordrate_model+wordrate_log_word_freq',
+									'rms_model+wordrate_model+wordrate_log_word_freq',
+									'bert_bucket_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
+									'gpt2_all-layers+rms_model+wordrate_model+wordrate_log_word_freq']
 
-subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
-#subjects = ['sub-057', 'sub-058', 'sub-059', 'sub-061', 'sub-062', 'sub-063', 'sub-064', 'sub-065', 
-#            'sub-066', 'sub-067', 'sub-068', 'sub-069', 'sub-070', 'sub-072', 'sub-073', 'sub-074', 
-#            'sub-075', 'sub-076', 'sub-077', 'sub-078', 'sub-079', 'sub-080', 'sub-081', 'sub-082', 
-#            'sub-083', 'sub-084', 'sub-086', 'sub-087', 'sub-088', 'sub-089', 'sub-091', 'sub-092', 
-#            'sub-093', 'sub-094', 'sub-095', 'sub-096', 'sub-097', 'sub-098', 'sub-099', 'sub-100', 
-#            'sub-101', 'sub-103', 'sub-104', 'sub-105', 'sub-106', 'sub-108', 'sub-109', 'sub-110', 
-#            'sub-113', 'sub-114', 'sub-115']
+
+#subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
+subjects = ['sub-057', 'sub-058', 'sub-059', 'sub-061', 'sub-062', 'sub-063', 'sub-064', 'sub-065', 
+            'sub-066', 'sub-067', 'sub-068', 'sub-069', 'sub-070', 'sub-072', 'sub-073', 'sub-074', 
+            'sub-075', 'sub-076', 'sub-077', 'sub-078', 'sub-079', 'sub-080', 'sub-081', 'sub-082', 
+            'sub-083', 'sub-084', 'sub-086', 'sub-087', 'sub-088', 'sub-089', 'sub-091', 'sub-092', 
+            'sub-093', 'sub-094', 'sub-095', 'sub-096', 'sub-097', 'sub-098', 'sub-099', 'sub-100', 
+            'sub-101', 'sub-103', 'sub-104', 'sub-105', 'sub-106', 'sub-108', 'sub-109', 'sub-110', 
+            'sub-113', 'sub-114', 'sub-115']
 nb_runs = 9
 language = 'english'
 nb_permutations = 3000
-alpha_percentile = str(99)
+alpha_percentile = str(99.9)
 
 job2launchpath1 = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/job2launch1.txt"
 job2launchpath2 = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/job2launch2.txt"

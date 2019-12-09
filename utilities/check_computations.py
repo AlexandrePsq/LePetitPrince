@@ -85,7 +85,8 @@ model_names = ['bert_bucket_pca_300_all-layers+rms_model+wordrate_model+wordrate
 									'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer+rms_model+wordrate_model+wordrate_log_word_freq',
 									'rms_model+wordrate_model+wordrate_log_word_freq',
 									'bert_bucket_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
-									'gpt2_all-layers+rms_model+wordrate_model+wordrate_log_word_freq']
+									'gpt2_all-layers+rms_model+wordrate_model+wordrate_log_word_freq',
+                                    'rms_model']
 
 
 #subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
@@ -237,7 +238,7 @@ if __name__=='__main__':
             delete_file(job2launchpath4)
             print('Updating state CSV...', end=' ', flush=True)
             for state_file in state_files:
-                model_name = os.path.basename(state_file).split('+')[0]
+                model_name = '+'.join(os.path.basename(state_file).split('+')[:-1])
                 subject = os.path.basename(state_file).split('+')[1].split('_')[0]
                 state = str(open(state_file, 'r').read()).replace('\n', '')
                 derivatives_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(subject, model_name))

@@ -27,12 +27,14 @@ if __name__=='__main__':
     parser.add_argument("--model_name", type=str, default='', help="Name of the model.")
     parser.add_argument("--subject", type=str, default=None, help="Subject name.")
     parser.add_argument("--language", type=str, default=None, help="Subject name.")
+    parser.add_argument("--compute_distribution", action="store_true", default=False, help="allow the computation of predictions over the randomly shuffled columns of the test set")
 
     args = parser.parse_args()
 
     subject = args.subject
     model_name = args.model_name
     language = args.language
+    finish_state = '2' if args.compute_distribution else '1'
 
     # Define paths and variables
     inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
@@ -57,8 +59,8 @@ if __name__=='__main__':
     model = parameters['models'][0]
     name = model['name']
     nb_runs = parameters['nb_runs']
-    check_before =  f"echo '3-->2' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')}"
-    check_after =  f"echo '~2' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
+    check_before =  f"echo '3-->{finish_state}' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')}"
+    check_after =  f"echo '~{finish_state}' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
     write(path4model_subject, "#!/bin/sh")
     write(path4model_subject, check_before)
 

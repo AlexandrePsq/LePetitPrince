@@ -75,7 +75,8 @@ if __name__=='__main__':
 
     check_before =   f"echo '4-->3' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')}"
     check_after =  f"echo '~3' >  {os.path.join(jobs_state_folder, '+'.join([model_name, subject])+'_tmp.txt')} "
-    write(paths_commands[0], check_before)
+    #write(paths_commands[0], check_before)
+    write(path4model_subject, check_before)
     for run in range(1, 1+int(nb_runs)):
         write(paths_commands[run-1], "#!/bin/sh")
         indexes = np.arange(1, 1+int(nb_runs))
@@ -86,5 +87,7 @@ if __name__=='__main__':
                                         f"--y {fmri_path} " + \
                                         f"--run {run} " + \
                                         f"--alphas {alphas}"
-        write(paths_commands[run-1], command)
-    write(paths_commands[-1], check_after)
+        #write(paths_commands[run-1], command)
+        write(path4model_subject, command)
+    write(path4model_subject, check_after)
+    #write(paths_commands[-1], check_after)

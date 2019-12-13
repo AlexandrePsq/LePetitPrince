@@ -43,7 +43,7 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     masker.fit()
     return masker
 
-def retrieve_df(jobs_state, inputs_path):
+def retrieve_df(jobs_state, inputs_path, compute_distribution=False):
     print('Retrieving state CSV...', end=' ', flush=True)
     for index, row in tqdm(jobs_state.iterrows()):
         model = row.model_name
@@ -65,7 +65,7 @@ def retrieve_df(jobs_state, inputs_path):
                         if ((len(yaml_files)==len(distribution_r2_files)) and (len(yaml_files)==len(distribution_pearson_corr_files))):
                             state = '1'
                         else:
-                            state = '2'
+                            state = '2' if compute_distribution else '1'
                     else:
                         state = '3'
                 else:
@@ -129,6 +129,7 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser(description="""Objective:\nScheduler that checks the state of all the jobs and planned the jobs that need to be run.""")
     parser.add_argument("--jobs_state_folder", type=str, default="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/jobs_state/", help="Folder where jobs state are saved.")
     parser.add_argument("--overwrite", action='store_true', default=False, help="Overwrite existing data.")
+    parser.add_argument("--compute_distribution", action="store_true", default=False, help="allow the computation of predictions over the randomly shuffled columns of the test set")
 
     args = parser.parse_args()
 
@@ -235,7 +236,7 @@ if __name__=='__main__':
 
         print('\t\tParameters for all models are computed.')
     if args.overwrite:
-        jobs_state = retrieve_df(jobs_state, inputs_path)
+        jobs_state = retrieve_df(jobs_state, inputs_path, args.compute_distribution)
     jobs_state.to_csv(jobs_state_path, index=False)
     
     ################ INFINITE LOOP ################
@@ -296,7 +297,7 @@ if __name__=='__main__':
                     job2launch1.append(os.path.join(inputs_path, f"command_lines/1_{subject}_{model_name}_{language}.sh"))
                     job2launch1 += [os.path.join(inputs_path, f"command_lines/1_{subject}_{model_name}_{language}_run{run}.sh") for run in range(1,10)]
                 elif state=='3':
-                    os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_2.py')} --model_name {model_name} --subject {subject} --language {language}")
+                    os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_2.py')} --model_name {model_name} --subject {subject} --language {language} --compute_distribution {args.compute_distribution}")
                     job2launch2.append(os.path.join(inputs_path, f"command_lines/2_{subject}_{model_name}_{language}.sh"))
                 elif state=='2':
                     os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_3.py')} --model_name {model_name} --subject {subject} --language {language}")

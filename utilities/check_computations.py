@@ -50,7 +50,7 @@ def retrieve_df(jobs_state, inputs_path):
         sub = row.subject
         state = row.state
         derivatives_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(sub, model))
-        if (len(glob.glob(os.path.join(derivatives_path, 'outputs/maps/*')))==27):
+        if (len(glob.glob(os.path.join(derivatives_path, 'outputs/maps/*')))==9):
             state = '0'
         else:
             if os.path.isfile(os.path.join(derivatives_path, 'shuffling.npy')):
@@ -79,14 +79,30 @@ def retrieve_df(jobs_state, inputs_path):
 
 
 
-model_names = ['bert_bucket_pca_300_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
-									'gpt2_pca_300_all-layers+rms_model+wordrate_model+wordrate_log_word_freq',
-									'glove_embeddings+rms_model+wordrate_model+wordrate_log_word_freq',
-									'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer+rms_model+wordrate_model+wordrate_log_word_freq',
-									'rms_model+wordrate_model+wordrate_log_word_freq',
-									'bert_bucket_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
-									'gpt2_all-layers+rms_model+wordrate_model+wordrate_log_word_freq',
-                                    'rms_model']
+model_names = ['bert_bucket_layer-2',
+                'bert_bucket_layer-3',
+                'bert_bucket_layer-4',
+                'bert_bucket_layer-5',
+                'bert_bucket_layer-6',
+                'bert_bucket_layer-7',
+                'bert_bucket_layer-10',
+                'bert_bucket_layer-11',
+                'gpt2_layer-1',
+                'gpt2_layer-2',
+                'gpt2_layer-3',
+                'gpt2_layer-4',
+                'gpt2_layer-5',
+                'gpt2_layer-6',
+                'gpt2_layer-7',
+                'gpt2_layer-8',
+                'gpt2_layer-9',
+                'gpt2_layer-10',
+                'gpt2_layer-11',
+                'gpt2_layer-12',
+                'gpt2_embeddings',
+                'bert_bucket_all-layers',
+                'gpt2_all-layers'
+]
 
 
 #subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
@@ -258,7 +274,7 @@ if __name__=='__main__':
                     distribution_pearson_corr_files = sorted(glob.glob(os.path.join(derivatives_path, 'distribution_pearson_corr/*.npy')))
                     result = ((len(yaml_files)==len(distribution_r2_files)) and (len(yaml_files)==len(distribution_pearson_corr_files)))
                 elif state=='~0':
-                    result = (len(glob.glob(os.path.join(derivatives_path, 'outputs/maps/*')))==27)
+                    result = (len(glob.glob(os.path.join(derivatives_path, 'outputs/maps/*')))==9)
                 else:
                     state = '~' + state
                     result = True

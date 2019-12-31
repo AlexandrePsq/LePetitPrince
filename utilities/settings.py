@@ -1,14 +1,3 @@
-###################### PARAMETERS ######################
-# 
-# 
-# Here, all the parameters can be changed.
-# 
-# 
-# 
-# 
-# 
-########################################################
-
 from os.path import join
 from itertools import product
 import numpy as np
@@ -18,7 +7,6 @@ class Paths:
     def __init__(self):
         # Paths
         self.path2root = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince'
-        #self.path2root = '/Users/alexpsq/Code/NeuroSpin/LePetitPrince'
         self.path2data = join(self.path2root, 'data')
         self.path2derivatives = join(self.path2root, 'derivatives')
         self.path2code = join(self.path2root, 'code')
@@ -35,7 +23,8 @@ class Extensions:
                            'raw-features':'.csv',
                            'features':'.csv',
                            'fMRI':'.nii.nii',
-                           'design-matrices':'.csv'
+                           'design-matrices':'.csv',
+						   'predictions': '.csv'
         }
 
     def get_extension(self, data_type):
@@ -88,12 +77,9 @@ class Subjects:
         else:
             return 'sub-{}'.format(subject_number)
 
-    def get_all(self, language, test=False):
+    def get_all(self, language):
         result = []
-        if test:
-            sub_list = self.subject_test[language]
-        else:
-            sub_list = self.subject_lists[language]
+        sub_list = self.subject_lists[language]
         for subj in sub_list:
             result.append(self.get_subject(subj))
         return result
@@ -102,11 +88,7 @@ class Subjects:
 class Preferences:
 	def __init__(self):
 
-		# Number of voxel
-		self.subset = None
-
         # LSTM
-		self.seed = 1111
 		self.eval_batch_size = 20
 		self.bsz = 20
 		self.bptt = 35 # sequence length
@@ -123,13 +105,10 @@ class Preferences:
 		
 		# Crossvalidation preferences
 		self.ridge_nested_crossval = True
-		self.n_alphas = 30
+		self.n_alphas = 25
 
 		# Alpha for nested
 		self.alphas = np.logspace(-3, 3, 30) # Alphas list for voxel-wised analysis
-		self.alpha_order_min = -4
-		self.alpha_order_max = 6
-		self.alphas_nested_ridgecv = np.logspace(self.alpha_order_min, self.alpha_order_max, self.n_alphas)
 		self.fit_intercept = True
 
         # GLM / Ridge
@@ -141,27 +120,6 @@ class Preferences:
 class Params:
 	def __init__(self):
 		self.pref = Preferences()
-
-		# Data
-		self.tr = 2 # FMRI sampling period
-		self.nb_runs = 9 # number of runs
-		self.models = [] # ['mfcc_model', 'other_sentence_onset', 'bottomup_model', 'topdown_model', 'wordrate_all_model']
-		
-		self.aggregated_models = ['bert_bucket_pca_300_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
-									'gpt2_pca_300_all-layers+rms_model+wordrate_model+wordrate_log_word_freq',
-									'glove_embeddings+rms_model+wordrate_model+wordrate_log_word_freq',
-									'lstm_wikikristina_embedding-size_600_nhid_300_nlayers_1_dropout_02_hidden_first-layer+rms_model+wordrate_model+wordrate_log_word_freq',
-									'rms_model+wordrate_model+wordrate_log_word_freq',
-									'bert_bucket_all-layers+rms_model+wordrate_model+wordrate_log_word_freq', 
-									'gpt2_all-layers+rms_model+wordrate_model+wordrate_log_word_freq'] # ['+'.join(self.models)] # 
-		# self.basic_features = sorted(['wordrate_model', 'rms_model']) #, 'word_freq',  'fundamental_freq'
-		# self.modelsOfInterest = sorted(['lstm_wikikristina_embedding-size_600_nhid_600_nlayers_1_dropout_02_hidden',
-		# 								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_2_dropout_02_hidden',
-		# 								'lstm_wikikristina_embedding-size_600_nhid_600_nlayers_3_dropout_02_hidden',
-		# 								'lstm_wikikristina_embedding-size_600_nhid_200_nlayers_3_dropout_02_hidden'])
-		# self.aggregated_models = ['+'.join(model) for model in list(product(['+'.join(self.basic_features)], self.modelsOfInterest))]
-		# self.aggregated_models = ['+'.join(item) for i in range(1, len(self.models)+1) for item in combinations(self.models, i)] ## Aggregated models (for design matrices contruction)
-		self.languages = ['english'] # ['english', 'french', 'chineese']
 
 		# ROI
 		self.atlas = 'cort-prob-2mm' #extracted from harvard-oxford
@@ -184,37 +142,4 @@ class Params:
 
 
 		# general parameters
-		self.test = True
-		self.overwrite = True
-		self.parallel = False
-		self.cuda = True
-		self.voxel_wise = True
-		self.force_glm = False
-		if torch.cuda.is_available():
-			if not self.cuda:
-				print("WARNING: You have a CUDA device, so you should probably run with --cuda")
-
 		self.eos_separator = '<eos>'
-		self.seed = 1111
-
-		self.nb_features_lstm = 1300
-		self.features_of_interest = list(range(1301)) + [1601, 1602, 1603, 1604, 1605] # + list(range(100, 120))))
-
-		# PCA
-		self.pca = False
-		self.pca_type = 'classic'
-		self.n_components_default = 300
-		self.n_components_list = [5, 10, 50, 100, 300, 600] #[1, 2, 5, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300, 350, 400, 500, 600, 800, 1000, 1500, 1800]
-
-		# Deconfounding
-		self.n_sample = 3000
-		self.alpha_percentile = 99
-		self.cluster_bsz = 100
-
-		# Scaling
-		self.scaling_mean = True
-		self.scaling_var = True
-		
-	def get_category(self, model_name):
-		category = model_name.split('_')[0]
-		return category.upper()

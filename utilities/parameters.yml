@@ -1,0 +1,14 @@
+tr: 2
+nb_runs: 9
+scaling_mean: True
+scaling_var: True
+parallel: True
+cuda: True
+voxel_wise: True
+atlas: cort-prob-2mm
+seed: 1111
+alpha_percentile: 99.9
+nb_permutations: 3000
+alpha_min_log_scale: 2
+alpha_max_log_scale: 5
+nb_alphas: 25

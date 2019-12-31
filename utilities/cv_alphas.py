@@ -13,6 +13,7 @@ import numpy as np
 from sklearn.metrics import r2_score
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import LeaveOneOut
+from utils import read_yaml, check_folder, get_design_matrix
 
 
 def get_r2_score(model, y_true, x, r2_min=0., r2_max=0.99):
@@ -23,32 +24,29 @@ def get_r2_score(model, y_true, x, r2_min=0., r2_max=0.99):
     return r2
 
 
-def check_folder(path):
-    # Create adequate folders if necessary
-    if not os.path.isdir(path):
-        check_folder(os.path.dirname(path))
-        os.mkdir(path)
-
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--indexes", type=str, default=None, help="List of run to use for CV (delimiter=',').")
-    parser.add_argument("--x", type=str, default='', help="Path to x folder.")
     parser.add_argument("--y", type=str, default='', help="Path to y folder.")
     parser.add_argument("--run", type=str, default=None, help="Run split.")
     parser.add_argument("--alphas", type=str, default=None, help="Alphas values to test during CV (delimiter=',').")
     parser.add_argument("--output", type=str, default=None, help="Output folder.")
+    parser.add_argument("--model_name", type=str, default=None, help="Name of the model.")
+    parser.add_argument("--path2models", type=str, default=None, help="Path were the aggregated models are specified.")
 
     args = parser.parse_args()
+
+    data = read_yaml(args.path2models)
+    language = data['aggregated_models']
+    dataframes = get_design_matrix(data['aggregated_models']['all_models'][args.model_name], language)
 
     alphas = [float(alpha) for alpha in args.alphas.split(',')]
     model = Ridge()
 
     indexes = [int(i) for i in args.indexes.split(',')]
     
-    x_paths = sorted([glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]) #[[a], [b], [c]]
-    x = [np.load(item[0]) for item in x_paths]
+    x = [dataframes[i - 1].values for i in indexes]
 
     y_paths = sorted([glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes])
     y = [np.load(item[0]) for item in y_paths]

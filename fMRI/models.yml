@@ -1,0 +1,27 @@
+models: 
+  - model_name: bert_all-layers
+    surname: BERT-small
+    language: english
+    overwrite: False
+    pca: False
+    pca_type: None
+    pca_components: None
+    onsets_paths: 'word' # word / word+punctuation / ...
+aggregated_models:
+  language: english
+  overwrite: False
+  all_models:
+    BERT-L9+RMS+Wordrate: 
+      - model_name: bert_all-layers
+        columns2retrieve: "['layer-9-{}'.format(index) for index in range(768)]"
+      - model_name: rms_model
+        columns2retrieve: "[:]" # all columns
+      - model_name: wordrate_model
+        columns2retrieve: "[:]"
+    BERT-L8+RMS+Wordrate: 
+      - model_name: bert_all-layers
+        columns2retrieve: "['layer-8-{}'.format(index) for index in range(768)]"
+      - model_name: rms_model
+        columns2retrieve: "[:]"
+      - model_name: wordrate_model
+        columns2retrieve: "[:]"

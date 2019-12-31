@@ -39,7 +39,6 @@ if __name__=='__main__':
     derivatives_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/")
     shuffling_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/shuffling.npy")
     yaml_files_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/yaml_files/")
-    design_matrices_path = os.path.join(inputs_path, f"derivatives/fMRI/design-matrices/{language}/{model_name}/")
     fmri_path = os.path.join(inputs_path, f"data/fMRI/{language}/{subject}/func/")
     jobs_state_folder = os.path.join(inputs_path, "command_lines/jobs_state/")
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')

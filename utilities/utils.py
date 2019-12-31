@@ -119,6 +119,42 @@ def get_path2output(source, data_type, language, model, run_name, extension):
     check_folder(output_parent_folder)
     return os.path.join(output_parent_folder, '{0}_{1}_{2}_{3}'.format(data_type, language, model, run_name) + extension)
 
+def read_yaml(yaml_path):
+    """Read a yaml file.
+    :yaml_path: (str) Path to the yaml file.
+    """
+    with open(yaml_path, 'r') as stream:
+        try:
+            data = yaml.safe_load(stream)
+        except :
+            print('Error when loading {}...'.format(yaml_path))
+            quit()
+    return data
+
+def get_design_matrix(models, language):
+    """Create the design matrix associated with a set of models.
+    :models: (list) List of model names.
+    :language: (str) Language that is being used.
+    """
+    dataframes = []
+    features_list = []
+    source = 'fMRI'
+
+    for model in models:
+        features_list.append(get_data(language, 'features', model=model['model_name'], source=source)) # retrieve the data to transform and append the list of runs (features data) to features_list) 
+    runs = list(zip(*features_list)) # list of 9 tuples (1 for each run), each tuple containing the features for all the specified models
+    # e.g.: [(path2run1_model1, path2run1_model2), (path2run2_model1, path2run2_model2)]
+
+    # Computing design-matrices
+    for i in range(len(runs)):
+        merge = pd.concat([pd.read_csv(path2features, header=0)[eval(models[index]['columns2retrieve'])] for index, path2features in enumerate(runs[i])], axis=1) # concatenate horizontaly the read csv files of a run
+        dataframes.append(merge)
+    return dataframes
+
+def get_category(model_name):
+    category = model_name.split('_')[0]
+    return category.upper()
+
 
 
 #########################################
@@ -209,15 +245,20 @@ def transform_design_matrices(path):
     #dm = np.hstack((dm, const))
     return dm 
 
-def scale(matrices):
+def scale(matrices, scaling_mean=True, scaling_var=True):
+    """Standardize a list of matrices.
+    :matrices: (list of np.array)
+    :scaling_mean: (bool) Center the data.
+    :scaling_var: (bool) Standardize the variance.
+    """
     for index in range(len(matrices)):
-        scaler = StandardScaler(with_mean=params.scaling_mean, with_std=params.scaling_var)
+        scaler = StandardScaler(with_mean=scaling_mean, with_std=scaling_var)
         scaler.fit(matrices[index])
         matrices[index] = scaler.transform(matrices[index])
     return matrices
 
 
-def standardization(matrices, model_name, pca_components=300, scaling=True):
+def standardization(matrices, model_name, pca_components=300, scaling=True, pca_type='simple'):
     """Standardize a list of matrices and do a PCA transformation 
     if requested.
     :matrices: (list of np.array)
@@ -226,8 +267,8 @@ def standardization(matrices, model_name, pca_components=300, scaling=True):
     """
     if (matrices[0].shape[1] > pca_components) & (params.pca):
         matrices = scale(matrices)
-        print('PCA analysis ({}) running...'.format(params.pca_type))
-        matrices = pca(matrices, model_name, n_components=pca_components) if params.pca_type=='dual-statis' else simple_pca(matrices, model_name, n_components=pca_components)
+        print('PCA analysis ({}) running...'.format(pca_type))
+        matrices = pca(matrices, model_name, n_components=pca_components) if pca_type=='dual-statis' else simple_pca(matrices, model_name, n_components=pca_components)
         print('PCA done.')
     if scaling:
         matrices = scale(matrices)

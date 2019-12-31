@@ -1,4 +1,10 @@
 import os
+import sys
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if root not in sys.path:
+    sys.path.append(root)
+
+    
 import pandas as pd
 import argparse
 import warnings
@@ -6,6 +12,8 @@ warnings.simplefilter(action='ignore')
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker
+from utilities.utils import get_design_matrix, read_yaml
+from utilities.settings import Paths
 import glob
 from tqdm import tqdm
 import yaml
@@ -24,7 +32,6 @@ def write(path, text):
     with open(path, 'a+') as f:
         f.write(text)
         f.write('\n')
-
 
 def check_folder(path):
     """Create adequate folders if necessary."""
@@ -78,75 +85,49 @@ def retrieve_df(jobs_state, inputs_path, compute_distribution=False):
     return jobs_state
 
 
-
-model_names = ['bert_bucket_layer-2',
-                'bert_bucket_layer-3',
-                'bert_bucket_layer-4',
-                'bert_bucket_layer-5',
-                'bert_bucket_layer-6',
-                'bert_bucket_layer-7',
-                'bert_bucket_layer-10',
-                'bert_bucket_layer-11',
-                'gpt2_layer-1',
-                'gpt2_layer-2',
-                'gpt2_layer-3',
-                'gpt2_layer-4',
-                'gpt2_layer-5',
-                'gpt2_layer-6',
-                'gpt2_layer-7',
-                'gpt2_layer-8',
-                'gpt2_layer-9',
-                'gpt2_layer-10',
-                'gpt2_layer-11',
-                'gpt2_layer-12',
-                'gpt2_embeddings',
-                'bert_bucket_all-layers',
-                'gpt2_all-layers'
-]
-
-
-#subjects = ['sub-057', 'sub-063', 'sub-067', 'sub-073', 'sub-077', 'sub-082', 'sub-101', 'sub-109', 'sub-110', 'sub-113', 'sub-114']
-subjects = ['sub-057', 'sub-058', 'sub-059', 'sub-061', 'sub-062', 'sub-063', 'sub-064', 'sub-065', 
-            'sub-066', 'sub-067', 'sub-068', 'sub-069', 'sub-070', 'sub-072', 'sub-073', 'sub-074', 
-            'sub-075', 'sub-076', 'sub-077', 'sub-078', 'sub-079', 'sub-080', 'sub-081', 'sub-082', 
-            'sub-083', 'sub-084', 'sub-086', 'sub-087', 'sub-088', 'sub-089', 'sub-091', 'sub-092', 
-            'sub-093', 'sub-094', 'sub-095', 'sub-096', 'sub-097', 'sub-098', 'sub-099', 'sub-100', 
-            'sub-101', 'sub-103', 'sub-104', 'sub-105', 'sub-106', 'sub-108', 'sub-109', 'sub-110', 
-            'sub-113', 'sub-114', 'sub-115']
-nb_runs = 9
-language = 'english'
-nb_permutations = 3000
-alpha_percentile = str(99.9)
-
 job2launchpath1 = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/job2launch1.txt"
 job2launchpath2 = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/job2launch2.txt"
 job2launchpath3 = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/job2launch3.txt"
 job2launchpath4 = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/job2launch4.txt"
 
+paths = Paths()
 
 if __name__=='__main__':
 
     parser = argparse.ArgumentParser(description="""Objective:\nScheduler that checks the state of all the jobs and planned the jobs that need to be run.""")
     parser.add_argument("--jobs_state_folder", type=str, default="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/command_lines/jobs_state/", help="Folder where jobs state are saved.")
     parser.add_argument("--overwrite", action='store_true', default=False, help="Overwrite existing data.")
+    parser.add_argument("--subjects", nargs='+', action='append', help="Id of the subjects.")
+    parser.add_argument("--path2models", type=str, default=None, help="Path were the aggregated models are specified.")
+    parser.add_argument("--path2parameters", type=str, default=None, help="Path were the parameters.")
     parser.add_argument("--compute_distribution", action="store_true", default=False, help="allow the computation of predictions over the randomly shuffled columns of the test set")
 
     args = parser.parse_args()
+    subjects = args.subjects[0]
+    data = read_yaml(args.path2models)
+    shared_parameters = read_yaml(args.path2parameters)
+    language = data['aggregated_models']['language']
+    nb_runs = shared_parameters['nb_runs']
+    alpha_percentile = shared_parameters['alpha_percentile']
+    all_models = data['aggregated_models']['all_models']
+    model_names = all_models.keys()
+    nb_permutations = shared_parameters['nb_permutations']
+    alpha_list = [round(tmp, 5) for tmp in np.logspace(shared_parameters['alpha_min_log_scale'], shared_parameters['alpha_max_log_scale'], shared_parameters['nb_alphas'])]
+    alphas = ','.join([str(alpha) for alpha in alpha_list]) 
 
-    inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
-    jobs_state_path = os.path.join(inputs_path, "command_lines/jobs_state.csv")
-    jobs_state_folder = os.path.join(inputs_path, "command_lines/jobs_state/")
+    jobs_state_path = os.path.join(paths.path2root, "command_lines/jobs_state.csv")
+    jobs_state_folder = args.jobs_state_folder
 
     if args.overwrite:
         print('Computing global masker...', end=' ', flush=True)
         fmri_runs = {}
         for subject in subjects:
-            fmri_path = os.path.join(inputs_path, "data/fMRI/{language}/{subject}/func/")
+            fmri_path = os.path.join(paths.path2data, "/fMRI/{language}/{subject}/func/")
             check_folder(fmri_path)
             fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language=language, subject=subject), 'fMRI_*run*')))
         masker = compute_global_masker(list(fmri_runs.values()))
 
-        jobs_state = pd.DataFrame(data=np.full((len(model_names)*len(subjects),3), np.nan)  , columns=['subject', 'model_name', 'state'])
+        jobs_state = pd.DataFrame(data=np.full((len(all_models)*len(subjects),3), np.nan)  , columns=['subject', 'model_name', 'state'])
         index_jobs_state = 0
         print('--> Done', flush=True)
     else:
@@ -155,7 +136,7 @@ if __name__=='__main__':
     print('Iterating over subjects...\nTransforming fMRI data...', flush=True)
     for subject in subjects:
         print('\tSubject: {} ...'.format(subject), end=' ', flush=True)
-        fmri_path = os.path.join(inputs_path, f"data/fMRI/{language}/{subject}/func/")
+        fmri_path = os.path.join(paths.path2root, f"data/fMRI/{language}/{subject}/func/")
         check_folder(fmri_path)
         runs = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
 
@@ -176,44 +157,38 @@ if __name__=='__main__':
                 np.save(os.path.join(fmri_path, 'y_run{}.npy'.format(index+1)), y[index])
             print('(dim: {})'.format(y[0].shape), end=' ', flush=True)
         print('--> Done', flush=True)
-        for model_name in model_names:
-
+        for key in all_models.keys():
+            model_name = key
             ######################
             ### Data retrieval ###
             ######################
-            derivatives_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/")
-            shuffling_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/shuffling.npy")
-            r2_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/r2/")
-            pearson_corr_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/pearson_corr/")
-            distribution_r2_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/distribution_r2/")
-            distribution_pearson_corr_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/distribution_pearson_corr/")
-            yaml_files_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/yaml_files/")
-            output_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/outputs/")
-            design_matrices_path = os.path.join(inputs_path, f"derivatives/fMRI/design-matrices/{language}/{model_name}/")
+            derivatives_path = os.path.join(paths.path2root, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/")
+            shuffling_path = os.path.join(paths.path2root, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/shuffling.npy")
+            r2_path = os.path.join(paths.path2root, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/r2/")
+            pearson_corr_path = os.path.join(paths.path2root, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/pearson_corr/")
+            distribution_r2_path = os.path.join(paths.path2root, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/distribution_r2/")
+            distribution_pearson_corr_path = os.path.join(paths.path2root, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/distribution_pearson_corr/")
+            yaml_files_path = os.path.join(paths.path2root, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/yaml_files/")
+            output_path = os.path.join(paths.path2root, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/outputs/")
+            design_matrices_path = os.path.join(paths.path2root, f"derivatives/fMRI/design-matrices/{language}/{model_name}/")
             parameters_path = f"/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/parameters.yml"
             
             ####################
             ### Sanity check ###
             ####################
 
-            all_paths = [inputs_path, design_matrices_path, derivatives_path, 
+            all_paths = [paths.path2root, design_matrices_path, derivatives_path, 
                             r2_path, pearson_corr_path, distribution_r2_path, 
                             distribution_pearson_corr_path, yaml_files_path, output_path,
                             jobs_state_folder, os.path.dirname(parameters_path)]
             for path in all_paths:
                 check_folder(path)
             
-            for index in range(1,10):
-                if not os.path.isfile(os.path.join(design_matrices_path, 'x_run{}.npy'.format(index))) or args.overwrite:
-                    np.save(os.path.join(design_matrices_path, f'x_run{index}.npy'), pd.read_csv(os.path.join(design_matrices_path, f'design-matrices_{language}_{model_name}_run{index}.csv')).values)
-
             if not os.path.isfile(parameters_path) or args.overwrite:
                 y = np.load(os.path.join(fmri_path, 'y_run1.npy'))
-                x = np.load(os.path.join(design_matrices_path, 'x_run1.npy'))
+                x = get_design_matrix(all_models[key], language)[0]
                 nb_voxels = str(y.shape[1])
                 nb_features = str(x.shape[1])
-                alpha_list = [round(tmp, 5) for tmp in np.logspace(2, 5, 25)]
-                alphas = ','.join([str(alpha) for alpha in alpha_list]) 
                 # Defining 'parameters.yml' file
                 parameters = {'models': [], 
                                 'nb_runs':nb_runs, 
@@ -221,7 +196,20 @@ if __name__=='__main__':
                                 'nb_features':nb_features, 
                                 'nb_permutations':nb_permutations, 
                                 'alphas':alphas,
-                                'alpha_percentile': alpha_percentile}
+                                'alpha_percentile': alpha_percentile,
+                                'tr': shared_parameters['tr'],
+                                'scaling_mean': shared_parameters['scaling_mean'],
+                                'scaling_var': shared_parameters['scaling_var'],
+                                'parallel': shared_parameters['parallel'],
+                                'cuda': shared_parameters['cuda'],
+                                'voxel_wise': shared_parameters['voxel_wise'],
+                                'atlas': shared_parameters['atlas'],
+                                'seed': shared_parameters['seed'],
+                                'alpha_min_log_scale': shared_parameters['alpha_min_log_scale'],
+                                'alpha_max_log_scale': shared_parameters['alpha_max_log_scale'],
+                                'nb_alphas': shared_parameters['nb_alphas']
+                                }
+
                 parameters['models'].append({'name':'', 'indexes':[0, int(nb_features)]})
                 # Saving
                 with open(parameters_path, 'w') as outfile:
@@ -236,7 +224,7 @@ if __name__=='__main__':
 
         print('\t\tParameters for all models are computed.')
     if args.overwrite:
-        jobs_state = retrieve_df(jobs_state, inputs_path, args.compute_distribution)
+        jobs_state = retrieve_df(jobs_state, paths.path2root, args.compute_distribution)
     jobs_state.to_csv(jobs_state_path, index=False)
     
     ################ INFINITE LOOP ################
@@ -258,7 +246,7 @@ if __name__=='__main__':
                 model_name = '+'.join(os.path.basename(state_file).split('+')[:-1])
                 subject = os.path.basename(state_file).split('+')[-1].split('_')[0]
                 state = str(open(state_file, 'r').read()).replace('\n', '')
-                derivatives_path = os.path.join(inputs_path, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(subject, model_name))
+                derivatives_path = os.path.join(paths.path2root, "derivatives/fMRI/ridge-indiv/english/{}/{}/".format(subject, model_name))
                 if state=='~4':
                     result = os.path.isfile(os.path.join(derivatives_path, 'shuffling.npy'))
                 elif state=='~3':
@@ -290,21 +278,22 @@ if __name__=='__main__':
             print('Listing new jobs to run...', flush=True)
             for index, row in tqdm(jobs_state.iterrows()):
                 model_name = row['model_name']
+                data['aggregated_models']['all_models']
                 subject = row['subject']
                 state = str(row['state'])
                 if state in ['5', '4']:
-                    os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_1.py')} --model_name {model_name} --subject {subject} --language {language}")
-                    job2launch1.append(os.path.join(inputs_path, f"command_lines/1_{subject}_{model_name}_{language}.sh"))
-                    job2launch1 += [os.path.join(inputs_path, f"command_lines/1_{subject}_{model_name}_{language}_run{run}.sh") for run in range(1,10)]
+                    os.system(f"python {os.path.join(paths.path2root, 'code/create_command_lines_1.py')} --path2models {args.path2models} --model_name {model_name} --subject {subject} --language {language}")
+                    job2launch1.append(os.path.join(paths.path2root, f"command_lines/1_{subject}_{model_name}_{language}.sh"))
+                    #job2launch1 += [os.path.join(paths.path2root, f"command_lines/1_{subject}_{model_name}_{language}_run{run}.sh") for run in range(1,10)]
                 elif state=='3':
-                    os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_2.py')} --model_name {model_name} --subject {subject} --language {language} --compute_distribution {args.compute_distribution}")
-                    job2launch2.append(os.path.join(inputs_path, f"command_lines/2_{subject}_{model_name}_{language}.sh"))
+                    os.system(f"python {os.path.join(paths.path2root, 'code/create_command_lines_2.py')} --path2models {args.path2models} --model_name {model_name} --subject {subject} --language {language}")
+                    job2launch2.append(os.path.join(paths.path2root, f"command_lines/2_{subject}_{model_name}_{language}.sh"))
                 elif state=='2':
-                    os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_3.py')} --model_name {model_name} --subject {subject} --language {language}")
-                    job2launch3.append(os.path.join(inputs_path, f"command_lines/3_{subject}_{model_name}_{language}.sh"))
+                    os.system(f"python {os.path.join(paths.path2root, 'code/create_command_lines_3.py')} --path2models {args.path2models} --model_name {model_name} --subject {subject} --language {language}")
+                    job2launch3.append(os.path.join(paths.path2root, f"command_lines/3_{subject}_{model_name}_{language}.sh"))
                 elif state=='1':
-                    os.system(f"python {os.path.join(inputs_path, 'code/create_command_lines_4.py')} --model_name {model_name} --subject {subject} --language {language}")
-                    job2launch4.append(os.path.join(inputs_path, f"command_lines/4_{subject}_{model_name}_{language}.sh"))
+                    os.system(f"python {os.path.join(paths.path2root, 'code/create_command_lines_4.py')} --path2models {args.path2models} --model_name {model_name} --subject {subject} --language {language}")
+                    job2launch4.append(os.path.join(paths.path2root, f"command_lines/4_{subject}_{model_name}_{language}.sh"))
             print('\t--> Done')
 
             print("Grouping 'qsub' commands...", end=' ', flush=True)

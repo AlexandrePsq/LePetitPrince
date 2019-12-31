@@ -12,6 +12,7 @@ import numpy as np
 from sklearn.metrics import r2_score
 from scipy.stats import pearsonr
 import pandas as pd
+from utils import read_yaml, get_design_matrix, check_folder
 from sklearn.linear_model import Ridge
 # import h5py
 import json
@@ -27,12 +28,6 @@ def get_score(model, y_true, x, r2_min=0., r2_max=0.99):
     # remove values with are too low and values too good to be true (e.g. voxels without variation)
     # return np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
     return r2, pearson_corr
-
-def check_folder(path):
-    # Create adequate folders if necessary
-    if not os.path.isdir(path):
-        check_folder(os.path.dirname(path))
-        os.mkdir(path)
 
 def update(model, parameters):
     model.alpha = parameters['alpha']
@@ -80,22 +75,21 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="""Objective:\nGenerate r2 maps from design matrices and fMRI data in a given language for a given model.\n\nInput:\nLanguage and models.""")
     parser.add_argument("--yaml_file", type=str, default=None, help="Path to the yaml file containing alpha, run values and the voxels associateds with.")
     parser.add_argument("--output", type=str, default='', help="Path to the folder containing outputs.")
-    parser.add_argument("--x", type=str, default='', help="Path to x folder.")
     parser.add_argument("--y", type=str, default='', help="Path to y folder.")
     parser.add_argument("--shuffling", type=str, default='', help="Path to shuffling array.")
     parser.add_argument("--n_sample", type=str, default=None, help="Number of permutations.")
     parser.add_argument("--model_name", type=str, default=None, help="Name of the model.")
+    parser.add_argument("--path2models", type=str, default=None, help="Path were the aggregated models are specified.")
     parser.add_argument("--features_indexes", type=str, default=None, help="Indexes of the features to take into account.")
 
     args = parser.parse_args()
 
-    with open(args.yaml_file, 'r') as stream:
-        try:
-            data = yaml.safe_load(stream)
-        except :
-            print(-1)
-            quit()
-    
+    data_models = read_yaml(args.path2models)
+    language = data_models['aggregated_models']
+    dataframes = get_design_matrix(data_models['aggregated_models']['all_models'][args.model_name], language)
+
+    data = read_yaml(args.yaml_file)
+
     if data['voxels']==[]:
         quit()
 
@@ -110,7 +104,7 @@ if __name__ == '__main__':
 
     model_fitted = load_model(model_loading_path, model)
     
-    x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(run)))[0])
+    x_test = dataframes[run - 1].values
     y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(run)))[0])[:, voxels]
     
     tmp = model_fitted.coef_.copy()

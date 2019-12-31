@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import yaml
 import argparse
+from utilities.utils import read_yaml
 
 
 # Functions definition
@@ -26,19 +27,20 @@ if __name__=='__main__':
     parser.add_argument("--model_name", type=str, default='', help="Name of the model.")
     parser.add_argument("--subject", type=str, default='sub-057', help="Subject name.")
     parser.add_argument("--language", type=str, default=None, help="Subject name.")
+    parser.add_argument("--path2models", type=str, default=None, help="Path were the aggregated models are specified.")
 
     args = parser.parse_args()
 
     subject = args.subject
     model_name = args.model_name
     language = args.language
+    data = read_yaml(args.path2models)
 
     # Define paths and variables
     inputs_path = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
     derivatives_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/")
     shuffling_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/shuffling.npy")
     yaml_files_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/yaml_files/")
-    design_matrices_path = os.path.join(inputs_path, f"derivatives/fMRI/design-matrices/{language}/{model_name}/")
     fmri_path = os.path.join(inputs_path, f"data/fMRI/{language}/{subject}/func/")
     jobs_state_folder = os.path.join(inputs_path, "command_lines/jobs_state/")
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')
@@ -78,15 +80,16 @@ if __name__=='__main__':
     #write(paths_commands[0], check_before)
     write(path4model_subject, check_before)
     for run in range(1, 1+int(nb_runs)):
-        write(paths_commands[run-1], "#!/bin/sh")
+        #write(paths_commands[run-1], "#!/bin/sh")
         indexes = np.arange(1, 1+int(nb_runs))
         indexes_tmp = np.delete(indexes, run-1, 0)
         command = f"python {os.path.join(inputs_path, 'code/utilities/cv_alphas.py')} --indexes {','.join([str(i) for i in indexes_tmp])} " + \
                                         f"--output {yaml_files_path} " + \
-                                        f"--x {design_matrices_path} " + \
                                         f"--y {fmri_path} " + \
                                         f"--run {run} " + \
-                                        f"--alphas {alphas}"
+                                        f"--alphas {alphas} " + \
+                                        f"--paths2model {args.path2models}" + \
+                                        f"--modle_name {model_name}"
         #write(paths_commands[run-1], command)
         write(path4model_subject, command)
     write(path4model_subject, check_after)

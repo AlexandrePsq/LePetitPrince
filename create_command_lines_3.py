@@ -39,7 +39,6 @@ if __name__=='__main__':
     derivatives_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/")
     shuffling_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/shuffling.npy")
     yaml_files_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/yaml_files/")
-    design_matrices_path = os.path.join(inputs_path, f"derivatives/fMRI/design-matrices/{language}/{model_name}/")
     fmri_path = os.path.join(inputs_path, f"data/fMRI/{language}/{subject}/func/")
     jobs_state_folder = os.path.join(inputs_path, "command_lines/jobs_state/")
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')
@@ -72,11 +71,11 @@ if __name__=='__main__':
         command = f"python {os.path.join(inputs_path, 'code/utilities/optimized_generate_distribution.py')} --features_indexes {features_indexes} " + \
                                         f"--output {derivatives_path} " + \
                                         f"--yaml_file {file_} " + \
-                                        f"--x {design_matrices_path} " + \
                                         f"--y {fmri_path} " + \
                                         f"--n_sample {nb_permutations} " + \
                                         f"--shuffling {shuffling_path} " + \
-                                        f"--model_name '{name}' "
+                                        f"--model_name '{name}' " + \
+                                        f"--paths2model {args.path2models} "
         write(path4model_subject, command)
     write(path4model_subject, check_after)
     

@@ -7,6 +7,7 @@ plt.switch_backend('agg')
 
 import numpy as np
 import nilearn
+from tqdm import tqdm
 from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img
 from nilearn import datasets
 from nilearn.input_data import NiftiMapsMasker, NiftiMasker, NiftiLabelsMasker, MultiNiftiMasker
@@ -166,8 +167,8 @@ def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest,
     plt.plot(data[:,1], x, '.g', alpha=0.7, markersize=12)
     plt.plot(data[:,2], x, '.r', alpha=0.7, markersize=12)
     plt.plot(data[:,3], x, '.b', alpha=0.5, markersize=12)
-    plt.plot(data[:,4], x, '^r', alpha=0.3, markersize=8)
-    plt.plot(data[:,5], x, '^b', alpha=0.3, markersize=8)
+    #plt.plot(data[:,4], x, '^r', alpha=0.3, markersize=8)
+    #plt.plot(data[:,5], x, '^b', alpha=0.3, markersize=8)
     #plt.title(title)
     plt.ylabel(ylabel, fontsize=16)
     plt.xlabel(xlabel, fontsize=16)
@@ -177,8 +178,8 @@ def vertical_plot(data, x_names, analysis_name, save_folder, object_of_interest,
     plt.hlines(x, dash_inf, data[:,1], linestyle="dashed", alpha=0.1)
     plt.hlines(x, dash_inf, data[:,2], linestyle="dashed", alpha=0.1)
     plt.hlines(x, dash_inf, data[:,3], linestyle="dashed", alpha=0.1)
-    plt.hlines(x, dash_inf, data[:,4], linestyle="dashed", alpha=0.1)
-    plt.hlines(x, dash_inf, data[:,5], linestyle="dashed", alpha=0.1)
+    #plt.hlines(x, dash_inf, data[:,4], linestyle="dashed", alpha=0.1)
+    #plt.hlines(x, dash_inf, data[:,5], linestyle="dashed", alpha=0.1)
     plt.xlim(limit)
     plt.minorticks_on()
     ax.tick_params(axis='x', labelsize=12)
@@ -603,7 +604,7 @@ if __name__ == '__main__':
         mean_filtered = np.zeros((len(labels)-1, len(models)))
         # extract data
         print("\tLooping through labeled masks...")
-        for index_mask in range(len(labels)-1):
+        for index_mask in tqdm(range(len(labels)-1)):
             mask = math_img('img > 50', img=index_img(maps, index_mask))  
             masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
             masker.fit()

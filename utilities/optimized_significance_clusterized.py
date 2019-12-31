@@ -10,6 +10,7 @@ warnings.simplefilter(action='ignore')
 
 import numpy as np
 from sklearn.metrics import r2_score
+from utils import read_yaml, get_design_matrix, check_folder
 
 from scipy.stats import pearsonr
 import pandas as pd
@@ -27,15 +28,6 @@ def get_score(model, y_true, x, r2_min=0., r2_max=0.99):
     # remove values with are too low and values too good to be true (e.g. voxels without variation)
     # return np.array([0 if (x < r2_min or x >= r2_max) else x for x in r2])
     return r2, pearson_corr
-
-def check_folder(path):
-    # Create adequate folders if necessary
-    try:
-        if not os.path.isdir(path):
-            check_folder(os.path.dirname(path))
-            os.mkdir(path)
-    except:
-        pass
 
 def update(model, parameters):
     model.alpha = parameters['alpha']
@@ -85,22 +77,21 @@ if __name__ == '__main__':
     parser.add_argument("--run", type=str, default='', help="Number of the run.")
     parser.add_argument("--yaml_files_path", type=str, default='', help="Path to the folder containing yaml files.")
     parser.add_argument("--output", type=str, default='', help="Path to the folder containing outputs.")
-    parser.add_argument("--x", type=str, default='', help="Path to x folder.")
     parser.add_argument("--y", type=str, default='', help="Path to y folder.")
     parser.add_argument("--model_name", type=str, default=None, help="Name of the model.")
+    parser.add_argument("--path2models", type=str, default=None, help="Path were the aggregated models are specified.")
     parser.add_argument("--features_indexes", type=str, default=None, help="Indexes of the features to take into account.")
 
     args = parser.parse_args()
 
+    data = read_yaml(args.path2models)
+    language = data['aggregated_models']
+    dataframes = get_design_matrix(data['aggregated_models']['all_models'][args.model_name], language)
+
     files = sorted(glob.glob(os.path.join(args.yaml_files_path, "run_{}_alpha_*.yml".format(args.run))))
     for file_ in files:
         alpha = os.path.basename(file_).split('_')[-1][:-4]
-        with open(file_, 'r') as stream:
-            try:
-                yaml_file = yaml.safe_load(stream)
-            except :
-                print(-1)
-                quit()
+        yaml_file = read_yaml(file_)
 
         source = 'fMRI'
         model = Ridge()
@@ -113,8 +104,7 @@ if __name__ == '__main__':
         try :
             model_fitted = load_model(model_loading_path, model)
         except:
-            x_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.x, '*_run{}.npy'.format(i))) for i in indexes]])
-            x = [np.load(item) for item in x_paths]
+            x = [dataframes[i - 1].values for i in indexes]
 
             y_paths = sorted([path[0] for path in [glob.glob(os.path.join(args.y, '*_run{}.npy'.format(i))) for i in indexes]])
             y = [np.load(item) for item in y_paths]
@@ -126,7 +116,7 @@ if __name__ == '__main__':
             model_fitted = model.fit(x_train, y_train)
             save_model(model_saving_path, model_fitted)
         
-        x_test = np.load(glob.glob(os.path.join(args.x, '*_run{}.npy'.format(args.run)))[0])
+        x_test = dataframes[args.run - 1].values
         y_test = np.load(glob.glob(os.path.join(args.y, '*_run{}.npy'.format(args.run)))[0])[:, voxels]
         
         tmp = model_fitted.coef_.copy()

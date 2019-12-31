@@ -27,6 +27,7 @@ if __name__=='__main__':
     parser.add_argument("--model_name", type=str, default='', help="Name of the model.")
     parser.add_argument("--subject", type=str, default=None, help="Subject name.")
     parser.add_argument("--language", type=str, default=None, help="Subject name.")
+    parser.add_argument("--path2models", type=str, default=None, help="Path were the aggregated models are specified.")
     parser.add_argument("--compute_distribution", action="store_true", default=False, help="allow the computation of predictions over the randomly shuffled columns of the test set")
 
     args = parser.parse_args()
@@ -41,7 +42,6 @@ if __name__=='__main__':
     derivatives_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/")
     shuffling_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/shuffling.npy")
     yaml_files_path = os.path.join(inputs_path, f"derivatives/fMRI/ridge-indiv/{language}/{subject}/{model_name}/yaml_files/")
-    design_matrices_path = os.path.join(inputs_path, f"derivatives/fMRI/design-matrices/{language}/{model_name}/")
     fmri_path = os.path.join(inputs_path, f"data/fMRI/{language}/{subject}/func/")
     jobs_state_folder = os.path.join(inputs_path, "command_lines/jobs_state/")
     parameters_path = os.path.join(derivatives_path, 'parameters.yml')
@@ -71,8 +71,8 @@ if __name__=='__main__':
                                         f"--output {derivatives_path} " + \
                                         f"--yaml_files_path {yaml_files_path} " + \
                                         f"--run {run} " + \
-                                        f"--x {design_matrices_path} " + \
                                         f"--y {fmri_path} " + \
-                                        f"--model_name '{name}' "   
+                                        f"--model_name '{name}' "  + \
+                                        f"--paths2model {args.path2models} "
         write(path4model_subject, command)
     write(path4model_subject, check_after)

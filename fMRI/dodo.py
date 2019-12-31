@@ -85,7 +85,7 @@ def task_features():
     for model in data['models']:
         model_name = model['model_name']
         language = model['language']
-        onsets_paths = ' '.join(sorted(glob.glob(os.path.join(paths.path2data, 'wave', language, 'onset-offsets', model['onset_type'] + '_run*.csv'))))
+        onsets_paths = ' '.join(sorted(glob.glob(os.path.join(paths.path2data, 'wave', language, 'onsets-offsets', model['onset_type'] + '_run*.csv'))))
         dependencies = [get_path2output(source=source, data_type=input_data_type, language=language, model=model_name, run_name=run_name, extension=extension) for run_name in run_names]
         targets = [get_path2output(source=source, data_type=output_data_type, language=language, model=model_name, run_name=run_name, extension=extension) for run_name in run_names]
         optional = ''

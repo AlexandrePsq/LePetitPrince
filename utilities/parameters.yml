@@ -2,7 +2,7 @@ tr: 2
 nb_runs: 9
 scaling_mean: True
 scaling_var: True
-parallel: True
+parallel: False
 cuda: True
 voxel_wise: True
 atlas: cort-prob-2mm

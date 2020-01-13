@@ -11,6 +11,7 @@ from time import time
 import numpy as np
 import pandas as pd
 from scipy import stats
+import yaml
 import csv
 from sklearn.metrics import r2_score
 from scipy.stats import pearsonr

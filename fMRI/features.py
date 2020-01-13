@@ -70,7 +70,7 @@ def process_predictions(array, tr, nscans):
     return pd.concat(result, axis=1)
 
 def compute_features(run, index, source, step, language, model_name, extension, tr, overwrite):
-    """Compute features (regressors) from raw-features.
+    """Compute features (regressors) from predictions.
     :run: (dataframe) preprocessed predictions of the model with onset.
     :index: (int) index of the run.
     :tr: (float) sampling period for scan.

@@ -2,9 +2,9 @@ models:
   - model_name: bert_all-layers
     surname: BERT-small
     language: english
-    overwrite: False
+    overwrite: True
     pca: False
-    pca_type: None
+    pca_type: None # 'dual-statis' or 'simple'
     pca_components: None
     onset_type: 'word' # word / word+punctuation / ...
     shift_surprisal: False
@@ -19,7 +19,7 @@ models:
     shift_surprisal: False
 aggregated_models:
   language: english
-  overwrite: False
+  overwrite: True
   all_models:
     BERT-L9+RMS+Wordrate: 
       - model_name: bert_all-layers

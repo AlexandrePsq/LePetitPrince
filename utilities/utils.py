@@ -187,7 +187,7 @@ def get_scores(model, y_true, x, r2_min=-0.5, r2_max=0.99, pearson_min=-0.2, pea
     return r2, pearson
 
 
-def generate_random_prediction(model, x_test, y_test, n_sample=params.n_sample):
+def generate_random_prediction(model, x_test, y_test, n_sample=3000):
     """Generate predictions over randomly shuffled columns.
     :model: (sklearn.linear_model) Model trained on a set of voxels.
     :x_test: (np.array) Input values for prediction (test).

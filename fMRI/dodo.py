@@ -33,7 +33,7 @@ subjects = Subjects()
 
 ## Set parameters
 path2models = os.path.join(paths.path2code, 'fMRI', 'models.yml')
-path2parameters = os.path.join(paths.path2code, 'fMRI', 'parameters.yml')
+path2parameters = os.path.join(paths.path2code, 'utilities', 'parameters.yml')
 alphas = np.logspace(-3, 3, 30)
 with open(path2models, 'r') as stream:
     try:
@@ -63,17 +63,6 @@ optional_parallel = '--parallel ' if parameters['parallel'] else ''
 
 paths = Paths()
 
-def task_check_architecture():
-    """Create the folders necessary to the architecture of the project.
-    You might want to run this task first, then put your input data where 
-    it should be and finally run the whole pipeline."""
-    yield {
-            'name': 'architecture',
-            'file_dep': ['../create_data_architecture.py'],
-            'actions': ['python ../create_data_architecture.py']
-            }
-
-
 def task_features():
     """Generate features (=fMRI regressors) from predictions 
     (csv file with 3 columns onset-amplitude-duration) by convolution 
@@ -95,7 +84,7 @@ def task_features():
             'name': model['surname'],
             'file_dep': ['features.py'] + dependencies,
             'targets': targets,
-            'actions': ['python features.py --tr {} --language {} --model {} --onsets_paths {} '.format(parameters.tr, language, model_name, onsets_paths) + optional + optional_parallel],
+            'actions': ['python features.py --tr {} --language {} --model {} --onsets_paths {} '.format(parameters['tr'], language, model_name, onsets_paths) + optional + optional_parallel],
         }
 
 

@@ -6,7 +6,8 @@ models:
     pca: False
     pca_type: None
     pca_components: None
-    onsets_paths: 'word' # word / word+punctuation / ...
+    onset_type: 'word' # word / word+punctuation / ...
+    shift_surprisal: False
 aggregated_models:
   language: english
   overwrite: False

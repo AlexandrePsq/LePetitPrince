@@ -103,7 +103,7 @@ if __name__ =='__main__':
 
     args = parser.parse_args()
 
-    last_step = 'raw-features'
+    last_step = 'predictions'
     step = 'features'
     extension = '.csv'
     source = 'fMRI'

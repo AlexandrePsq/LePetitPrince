@@ -131,5 +131,5 @@ if __name__ =='__main__':
     data = [pd.DataFrame(data=matrix, columns=data[index].columns) for index, matrix in enumerate(matrices)]
 
     # Saving
-    for index, df in data:
+    for index, df in enumerate(data):
         df.to_csv(paths[index], index=False)

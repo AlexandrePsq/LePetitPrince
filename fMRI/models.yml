@@ -8,6 +8,15 @@ models:
     pca_components: None
     onset_type: 'word' # word / word+punctuation / ...
     shift_surprisal: False
+  - model_name: wordrate
+    surname: Word_rate
+    language: english
+    overwrite: False
+    pca: False
+    pca_type: None
+    pca_components: None
+    onset_type: 'word' # word / word+punctuation / ...
+    shift_surprisal: False
 aggregated_models:
   language: english
   overwrite: False

@@ -122,7 +122,7 @@ if __name__=='__main__':
         print('Computing global masker...', end=' ', flush=True)
         fmri_runs = {}
         for subject in subjects:
-            fmri_path = os.path.join(paths.path2data, "/fMRI/{language}/{subject}/func/")
+            fmri_path = os.path.join(paths.path2data, "fMRI", "{language}", "{subject}", "func")
             check_folder(fmri_path)
             fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path.format(language=language, subject=subject), 'fMRI_*run*')))
         masker = compute_global_masker(list(fmri_runs.values()))

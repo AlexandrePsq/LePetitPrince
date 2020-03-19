@@ -8,15 +8,15 @@ This repository includes the code of "Le Petit Prince" project.
 
 ## Project description
 
-This project is a cross-linguistics study involving NLP and Neurolinguistics experts (NeuroSpin, FAIR, INRIA, CORNELL, ...).
+This project is a cross-linguistics study involving NLP and Neurolinguistics experts (NeuroSpin, INRIA, CORNELL, ...).
 It aims at better understanding the cortical bases of language comprehension through computational linguistics.
+To do so, we acquired the fMRI and MEG activations of subjects listening to the audiobook of "Le Petit Prince".
 
 
 
 ## Data acquisition
 
-
-The story is segmented into 9 runs:
+The story is segmented into 9 runs of approximately 10 min each:
 - Chapters 1 to 3 --> run 1
 - Chapters 4 to 6 --> run 2
 - Chapters 7 to 9 --> run 3
@@ -33,28 +33,31 @@ This study includes:
 - 40 fMRI in French
 - 20 MEG in French
 each of 90 min long.
+Native English speaker were scanned at Cornell University on a Discovery MR750, GE Healthcare, 3T MRI scanner (for details, see Bhattasali et al., 2019). The functional images (repetition time=2s; resolution=3.5x3.5x3.5mm) were spatially normalised to the MNI–152 template using the AFNI packages, and processed using multi-echo independent components analysis (Kundu et al., 2012) .
+Naive French speaker were scanned at NeuroSpin on ????.
 
-These data were acquired by passive listening of the audiobook of "Le Petit Prince", divided in 9 runs of approximately 10 min each.
 
 This huge dataset will be shared through neurovault.
 
 
-
 ## Methodology
 
-In order to do so we followed the following methodology:
+We abode by the following methodology:
 
 **For fMRI**:
 
-Selection and implementation of different Language Models.
+Selection and implementation of different Language Models (GloVe, LSTM, BERT/CamemBERT, GPT-2).
 
 Analysis pipeline:
 
-Generation of raw-features from the text (or audio) of "Le Petit Prince" thanks to the selected models.
-Concatenation of the raw-feature dataframe with an onset file (the result is called raw-features).
-Convolution of the newly constructed dataframe with an 'hrf' kernel (the result is called features).
-Construction of a design-matrix by concatenation of the features associated with the different models of interest (the result is called design-matrix).
-Ridge (cross validated) regression between our design-matrix and the fMRI data (transformed thanks to Nilearn)(the result is called ridge-indiv).
+Generation of deep-representations from the text (or audio) of "Le Petit Prince" thanks to the selected models.
+Construction of a design-matrix by concatenation of the representations associated with the different models of interest.
+Nested cross-validated Ridge-regression between our design-matrix and the fMRI data (transformed thanks to Nilearn).
+The nested cross-validation (NCV) is composed of a main cross-validation (CV) over the R2 values, and for each split of the main 
+cross-validation, another cross-validation is done to determined the regularization (hyperparameter) of the ridge-regression.
+If needed (and before the regression), a compression of the representations is done during the CV.
+We then concatenate the dataframe of compressed representations with an onset file and convolve the newly constructed dataframe 
+with an 'hrf' kernel to get the regressors that will be aligned to the fMRI data thanks to the regression.
 
 **For MEG**:
 
@@ -65,7 +68,6 @@ Ridge (cross validated) regression between our design-matrix and the fMRI data (
 ## Data architecture
 
 Due to the high amount of data and analysis, this project data-code-derivatives recquire to be organized in a intuitively way.
-To do so, we first created the script create_architecture.py that will do so automatically (we will see how to execute the script later).
 
 Here you have a glance at the overall architecture:
 
@@ -74,17 +76,9 @@ Here you have a glance at the overall architecture:
 ├── <b>oldstuff</b> <i>(oldscripts, personnal data/code, ...)</i>
 ├── <b>code</b> <i>(all the code of all the analysis)</i>
 │   ├── <b>MEG</b> <i>(code of the MEG analysis pipeline)</i>
-│   ├── <b>fMRI</b> <i>(code of the fMRI analysis pipeline)</i>
-│   ├── <b>models</b> <i>(code related to models initialization/training/generation)</i>
-│   │   ├── <b>english</b>
-│   │   │   ├── <b>LSTM</b> <i>(LSTM framework)</i>
-│   │   │   ├── <b>RMS</b> <i>(Framework for wave properties analysis)</i>
-│   │   │   ├── <b>WORDRATE</b> <i>(Framework for simple linguistics properties analysis)</i>
-│   │   │   ├── lstm_wikikristina_embedding-size_200_nhid_300_nlayers_1_dropout_01.py <i>(instantiation of a LSTM model)</i>
-│   │   │   ├── lstm_wikikristina_embedding-size_200_nhid_100_nlayers_3_dropout_01.py <i>(instantiation of a LSTM model)</i>
-│   │   │   └── ...
-│   │   └── <b>french</b>
-│   └── <b>utilities</b> <i>(utilities functions: parameters settings, splitter for CV, ...)</i>
+│   └── <b>fMRI</b> <i>(code of the fMRI analysis pipeline)</i>
+│
+│         └── <b>utilities</b> <i>(utilities functions: parameters settings, splitter for CV, ...)</i>
 ├── <b>data</b> <i>(all the raw data acquired from sources)</i>
 │   ├── <b>fMRI</b> <i>(fMRI data, 9 runs per subject)</i>
 │   │   └── <b>english</b>
@@ -94,25 +88,23 @@ Here you have a glance at the overall architecture:
 │   │   ├── <b>english</b>
 │   │   └── <b>french</b>
 │   └── <b>text</b> <i>(text data, raw text, division in 9 runs, onsets/offsets for each runs, data for models training)</i>
-│       ├── <b>english</b>
-│       │   ├── <b>lstm_training</b>
-│       │   └── <b>onsets-offsets</b>
-│       └── <b>french</b>
+│          ├── <b>english</b>
+│          │   ├── <b>lstm_training</b>
+│          │   └── <b>onsets-offsets</b>
+│          └── <b>french</b>
 └── <b>derivatives</b> <i>(results of the code above)</i>
-    ├── <b>MEG</b>
-    └── <b>fMRI</b> <i>(results from the fMRI pipeline in code/fMRI/)</i>
-        ├── <b>design-matrices</b> <i>(concatenation of features associated with different models of interest)</i>
-        │   └── <b>english</b>
-        ├── <b>features</b> <i>(Raw-features convolved with an 'hrf' kernel)</i>
-        │   └── <b>english</b>
-        ├── <b>glm-indiv</b> <i>(GLM model fitted on fMRI data with a design-matrix)</i>
-        │   └── <b>english</b>
-        ├── <b>models</b> <i>(trained models)</i>
-        │   └── <b>english</b>
-        ├── <b>raw_features</b> <i>(Result of a model generation from the text/wave file of LPP, concatenated with the adequate onsets file)</i>
-        │   └── <b>english</b>
-        └── <b>ridge-indiv</b> <i>(Ridge model fitted on fMRI data with a design-matrix)</i>
-            └── <b>english</b>
+      ├── <b>MEG</b>
+      └── <b>fMRI</b> <i>(results from the fMRI pipeline in code/fMRI/)</i>
+              ├── <b>deep-representations</b> <i>(deep representation dataframes extracted from the models activity)</i>
+              │  ├── <b>english</b>
+              │  │  └──  <b> model_of_interest </b>
+              │  │         ├── <b> deep_representation_run_1.csv </b>
+              │  │         ├──  ...
+              │  │         └── <b> deep_representation_run_<i>n</i>.csv </b>
+              │  └── <b>french</b>
+              └── <b>maps</b> <i>Maps deriving from our pipeline</i>
+                    ├── <b>english</b>
+                    └── <b>french</b>
 </pre>
 
 To give more insights on the three main parts of the project:
@@ -120,6 +112,7 @@ To give more insights on the three main parts of the project:
 - **code**
     - MEG data analysis pipeline
     - fMRI data analysis pipeline
+    #### TO BE MODIFIED
         - raw-features.py *(generate raw-features and concatenate them with onsets for a given model)*
         - features.py *(convolve the raw-features with a 'hrf' kernel for a given model)*
         - design-matrices.py *(concatenate features of different models of interest)*
@@ -131,78 +124,33 @@ To give more insights on the three main parts of the project:
         - settings.py *(where we change the parameters)*
         - first_level_analysis.py *(functions for first level analysis of fMRI)*
         - splitter.py *(splitter for multi-groups Ridge CV)*
-    - models
-        - \*XXXX\* : framework associated with a kind of model (e.g. LSTM)*
-            - model.py *(class definition)*
-            - train.py *(train the model)*
-            - tokenizer.py *(adequate tokenizer for the model training and generation)*
-            - utils.py *(utilities functions)*
-        - \*xxxx\* : instantiation of a given class model
 
 - **data**
     - we have the fMRI data organized following the BIDS standard except for the name of the final file
     - the MEG should be added in a few months
-    - there is the text of LPP, the text divided into 9 runs, the original onset-offsets of LPP and training data for models
+    - there is the text of LPP, the text is divided into 9 runs, the original onset-offsets of LPP and training data for models
     - wave files, meaning the content of the audio book with the textgrid files and training data for models
 
 - **derivatives**
     - MEG
-    - fMRI (every script of `code/fMRI/` fills a folder of the same name here, the same goes for `code/models/`)
+    - fMRI (to prevent useless use of memory, we only save deep-model representations as well as the final maps output)
 
 
 
 ## Executing scripts
 
-If you want to train a given model called *model_name.py* in a given *language* and use it in the pipeline, you need to create a module *model_name.py* in <pre>$LPP/code/models/<i>language</i>/</pre>, and define in it the functions:
-- `load`: that returns the trained model 
-- `generate`: that take as arguments a model, a path to the input run, a language and a textgrid dataframe and generate raw-features
-
-And add at the end of the script:
-<pre>
-if __name__=='__main__':
-    train(model)
-</pre>
-
-
-### Model training
-
-To train a given model called *model_name.py* in a given *language*, just write:
-($LPP is the path to the LPP project home directory)
-
-<pre>
-cd $LPP
-cd code
-python models/<i>language</i>/<i>model_name.py</i>
-</pre>
+First, you will need to upload your deep-representation matrix as a .csv file or numpy array in <pre>derivatives/<i>source</i>/deep-representations/<i>language</i>/<i>model_name</i>/</pre>.
 
 
 ### fMRI pipeline
 
-To start the fMRI pipeline analysis, first:
-    - start by modifying the `code/utilities/settings.py` file with the parameters, paths, subjects and models that you want to study.
-
-<pre>
-cd $LPP
-cd code/fMRI
-doit
-</pre>
-
-Normally, the dodo.py will not run a file that has already been run except if it has been modified.
-If you still want to do so, run:
-
-<pre>
-cd $LPP
-cd code/fMRI
-doit clean
-doit forget
-</pre>
-
-Running `doit` will first create the adequate architecture and then start the fMRI pipeline.
-
+To run the fMRI pipeline, first fill a yaml template specifying the parameters of your analysis and call `main.py`.
 
 
 ### Analysis
 
+
+#### TO BE MODIFIED
 Available analysis so far:
 - scatter plot comparison of r2 distributions per ROI in the brain for 2 given models
 

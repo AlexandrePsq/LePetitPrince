@@ -4,19 +4,10 @@
 This repository includes the code of "Le Petit Prince" project.
 (LPP = Le Petit Prince)
 
+English, French and Chinese participants were scanned using fMRI while listening to the whole audiobook of the Little Prince (~90min), in their native language.
 
+The audio stream was segmented into nine parts presented in 9 successive runs:
 
-## Project description
-
-This project is a cross-linguistics study involving NLP and Neurolinguistics experts (NeuroSpin, INRIA, CORNELL, ...).
-It aims at better understanding the cortical bases of language comprehension through computational linguistics.
-To do so, we acquired the fMRI and MEG activations of subjects listening to the audiobook of "Le Petit Prince".
-
-
-
-## Data acquisition
-
-The story is segmented into 9 runs of approximately 10 min each:
 - Chapters 1 to 3 --> run 1
 - Chapters 4 to 6 --> run 2
 - Chapters 7 to 9 --> run 3
@@ -27,51 +18,49 @@ The story is segmented into 9 runs of approximately 10 min each:
 - Chapters 23 to 25 --> run 8
 - Chapters 26 to 27 --> run 9
 
+## Data acquisition ##
 
-This study includes:
-- 40 fMRI in English
-- 40 fMRI in French
-- 20 MEG in French
-each of 90 min long.
-Native English speaker were scanned at Cornell University on a Discovery MR750, GE Healthcare, 3T MRI scanner (for details, see Bhattasali et al., 2019). The functional images (repetition time=2s; resolution=3.5x3.5x3.5mm) were spatially normalised to the MNI–152 template using the AFNI packages, and processed using multi-echo independent components analysis (Kundu et al., 2012) .
-Naive French speaker were scanned at NeuroSpin on ????.
+- English Multiecho 
+- French Multiecho Siemens 3T
+- Chinese
+
 
 
 This huge dataset will be shared through neurovault.
 
 
-## Methodology
+## Methodology 
 
 We abode by the following methodology:
 
-**For fMRI**:
+### For fMRI ###:
 
 Selection and implementation of different Language Models (GloVe, LSTM, BERT/CamemBERT, GPT-2).
 
 Analysis pipeline:
 
-Generation of deep-representations from the text (or audio) of "Le Petit Prince" thanks to the selected models.
-Construction of a design-matrix by concatenation of the representations associated with the different models of interest.
-Nested cross-validated Ridge-regression between our design-matrix and the fMRI data (transformed thanks to Nilearn).
+0.  Generation of deep-representations from the text (or audio) of "Le Petit Prince" thanks to the selected models.
+1.  Construction of a design-matrix by concatenation of the representations associated with the different models of interest.
+2.  Nested cross-validated Ridge-regression between our design-matrix and the fMRI data (transformed thanks to Nilearn).
+
 The nested cross-validation (NCV) is composed of a main cross-validation (CV) over the R2 values, and for each split of the main 
 cross-validation, another cross-validation is done to determined the regularization (hyperparameter) of the ridge-regression.
 If needed (and before the regression), a compression of the representations is done during the CV.
 We then concatenate the dataframe of compressed representations with an onset file and convolve the newly constructed dataframe 
 with an 'hrf' kernel to get the regressors that will be aligned to the fMRI data thanks to the regression.
 
-**For MEG**:
+### For MEG ###:
 
-(Not done yet)
+**TODO**
 
 
 
 ## Data architecture
 
-Due to the high amount of data and analysis, this project data-code-derivatives recquire to be organized in a intuitively way.
-
-Here you have a glance at the overall architecture:
+The files are organized in the following overall folder structure:
 
 <pre>
+ ---
 ├── <b>paradigm</b> <i>(experiences information, stimuli)</i>
 ├── <b>oldstuff</b> <i>(oldscripts, personnal data/code, ...)</i>
 ├── <b>code</b> <i>(all the code of all the analysis)</i>

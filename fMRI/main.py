@@ -5,6 +5,11 @@ import argparse
 
 from utilities import check_folder, read_yaml, write, get_subject_name
 from regression_pipeline import Pipeline
+from encoding_models import EncodingModel
+from splitter import Splitter
+from data_transformation import Transformer
+from data_compression import Compressor
+
 
 if __name__=='__main__':
     
@@ -24,9 +29,21 @@ if __name__=='__main__':
     check_folder(os.path.join(output_path, subject))
     
     deep_representations, fMRI_data = fetch_data(parameters, input)
+    encoding_model_test = EncodingModel()
+    encoding_model_valid = EncodingModel()
+    transform_data = Transformer()
+    compressor = Compressor()
+    splitter_cv_int = Splitter()
+    splitter_cv_ext = Splitter()
     
     pipeline = Pipeline()
-    pipeline.fit(parameters)
-    pipeline.compute(deep_representations, fMRI_data, output_path, logs)
+    pipeline.fit([("splitter_cv_ext", splitter_cv_ext),
+                    ("splitter_cv_int", splitter_cv_int),
+                    ("compressor", compressor),
+                    ("transform_data", transform_data),
+                    ("encoding_model_valid", encoding_model_valid),
+                    ("encoding_model_test", encoding_model_test)
+                ])
+    pipeline.compute(deep_representations, fMRI_data, output_path, logs=logs)
     
     print("Model: {} for subject: {} --> Done".format(parameters['model_name'], subject))

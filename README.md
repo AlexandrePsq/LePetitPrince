@@ -29,11 +29,11 @@ The audio stream was segmented into nine parts presented in 9 successive runs:
 This huge dataset will be shared through neurovault.
 
 
-## Methodology 
+## Methodology  ##
 
 We abode by the following methodology:
 
-### For fMRI ###:
+### fMRI ###
 
 Selection and implementation of different Language Models (GloVe, LSTM, BERT/CamemBERT, GPT-2).
 
@@ -49,13 +49,13 @@ If needed (and before the regression), a compression of the representations is d
 We then concatenate the dataframe of compressed representations with an onset file and convolve the newly constructed dataframe 
 with an 'hrf' kernel to get the regressors that will be aligned to the fMRI data thanks to the regression.
 
-### For MEG ###:
+### MEG ###
 
 **TODO**
 
 
 
-## Data architecture
+## Data architecture ##
 
 The files are organized in the following overall folder structure:
 
@@ -126,17 +126,17 @@ To give more insights on the three main parts of the project:
 
 
 
-## Executing scripts
+## Executing scripts ##
 
-First, you will need to upload your deep-representation matrix as a .csv file or numpy array in <pre>derivatives/<i>source</i>/deep-representations/<i>language</i>/<i>model_name</i>/</pre>.
+First, you will need to upload your deep-representation matrix as a .csv file or numpy array in <pre>$LPP/derivatives/<i>source</i>/deep-representations/<i>language</i>/<i>model_name</i>/</pre>
 
 
-### fMRI pipeline
+### fMRI pipeline ###
 
 To run the fMRI pipeline, first fill a yaml template specifying the parameters of your analysis and call `main.py`.
 
 
-### Analysis
+### Analysis ###
 
 
 #### TO BE MODIFIED

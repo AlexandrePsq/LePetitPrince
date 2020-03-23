@@ -14,10 +14,7 @@ class Task(object):
         
     def execute(self, *kwargs):
         if self.functions:
-            execute_ = True
-            for parent in self.parents:
-                execute_ = execute_ and parent.terminated
-            if execute_:
+            if not self.is_waiting():
                 func = self.function.pop()
                 func(*kwargs)
                 self.terminated = True
@@ -26,3 +23,12 @@ class Task(object):
     
     def get_dependencies(self):
         return self.parents
+
+    def is_waiting(self):
+        result = True
+        for parent in self.parents:
+            result = result and parent.terminated
+        return (not result)
+
+    def is_terminated(self):
+        return self.terminated

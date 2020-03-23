@@ -48,13 +48,7 @@ if __name__=='__main__':
     fMRI_data = transformer.process_fmri_data(fMRI_paths)
     
     pipeline = Pipeline()
-    pipeline.fit([("splitter_cv_ext", splitter_cv_ext),
-                    ("splitter_cv_int", splitter_cv_int),
-                    ("compressor", compressor),
-                    ("transform_data", transform_data),
-                    ("encoding_model_valid", encoding_model_valid),
-                    ("encoding_model_test", encoding_model_test)
-                ])
+    pipeline.fit([encoding_model_ext]) # retrieve the flow from dependencies
     pipeline.compute(deep_representations, fMRI_data, output_path, logs=logs)
     
     print("Model: {} for subject: {} --> Done".format(parameters['model_name'], subject))

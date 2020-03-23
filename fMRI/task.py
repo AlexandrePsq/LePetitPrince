@@ -7,10 +7,14 @@ class Task(object):
     
     def __init__(self, functions, parents=[], name):
         self.parents = parents
+        self.children = None
         self.terminated = False
         self.functions = functions
         self.name = name
         pass
+    
+    def set_children(self, children):
+        self.children = children
         
     def execute(self, *kwargs):
         if self.functions:
@@ -23,6 +27,9 @@ class Task(object):
     
     def get_dependencies(self):
         return self.parents
+        
+    def get_children(self):
+        return self.children
 
     def is_waiting(self):
         result = True

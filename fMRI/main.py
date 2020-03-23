@@ -35,20 +35,29 @@ if __name__=='__main__':
     splitter_cv_ext = Task([Splitter().split], name='splitter_cv_ext')
     ## Pipeline int
     splitter_cv_int = Task([Splitter().split], [splitter_cv_ext], name='splitter_cv_int')
-    compressor = Task([Compressor().pca], [splitter_cv_int], name='compressor_int') # define here the compression method wanted
-    transform_data = Task([transformer.standardize, transformer.make_regressor], [compressor], name='transform_data_int') # functions in Task objects are read right to left
-    encoding_model_int = Task([encoding_model.predict, encoding_model.fit], [transform_data], name='encoding_model_int')
+    compressor_int = Task([Compressor().pca], [splitter_cv_int], name='compressor_int') # define here the compression method wanted
+    transform_data_int = Task([transformer.standardize, transformer.make_regressor], [compressor_int], name='transform_data_int') # functions in Task objects are read right to left
+    encoding_model_int = Task([encoding_model.predict, encoding_model.fit], [transform_data_int], name='encoding_model_int')
     ## Pipeline ext
-    compressor = Task([Compressor().pca], [splitter_cv_ext, encoding_model_int], name='compressor_ext')
-    transform_data = Task([transformer.standardize, transformer.make_regressor], [compressor], name='transform_data_ext')
-    encoding_model_ext = Task([encoding_model.predict, encoding_model.fit], [transform_data], name='encoding_model_ext')
+    compressor_ext = Task([Compressor().pca], [splitter_cv_ext, encoding_model_int], name='compressor_ext')
+    transform_data_ext = Task([transformer.standardize, transformer.make_regressor], [compressor_ext], name='transform_data_ext')
+    encoding_model_ext = Task([encoding_model.predict, encoding_model.fit], [transform_data_ext], name='encoding_model_ext')
+    
+    # Creating tree structure
+    splitter_cv_ext = splitter_cv_ext.set_children([splitter_cv_int, compressor_ext])
+    splitter_cv_int = splitter_cv_int.set_children([compressor_int])
+    compressor_int = compressor_int.set_children([transform_data_int])
+    transform_data_int = transform_data_int.set_children([encoding_model_int])
+    encoding_model_int = encoding_model_int.set_children([compressor_ext])
+    compressor_ext = compressor_ext.set_children([transform_data_ext])
+    transform_data_ext = transform_data_ext.set_children([encoding_model_ext])    
     
     deep_representations_paths, fMRI_paths = fetch_data(parameters, input)
     deep_representations = transformer.process_representations(deep_representations_paths, parameters['models'])
     fMRI_data = transformer.process_fmri_data(fMRI_paths)
     
     pipeline = Pipeline()
-    pipeline.fit([encoding_model_ext]) # retrieve the flow from dependencies
+    pipeline.fit([splitter_cv_ext]) # retrieve the flow from children and parents dependencies
     pipeline.compute(deep_representations, fMRI_data, output_path, logs=logs)
     
     print("Model: {} for subject: {} --> Done".format(parameters['model_name'], subject))

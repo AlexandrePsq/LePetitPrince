@@ -36,12 +36,12 @@ if __name__=='__main__':
     ## Pipeline int
     splitter_cv_int = Task([Splitter().split], [splitter_cv_ext], name='splitter_cv_int')
     compressor = Task([Compressor().pca], [splitter_cv_int], name='compressor_int') # define here the compression method wanted
-    transform_data = Task([transformer.make_regressor, transformer.standardize], [compressor], name='transform_data_int')
-    encoding_model_int = Task([encoding_model.fit, encoding_model.predict], [transform_data], name='encoding_model_int')
+    transform_data = Task([transformer.standardize, transformer.make_regressor], [compressor], name='transform_data_int') # functions in Task objects are read right to left
+    encoding_model_int = Task([encoding_model.predict, encoding_model.fit], [transform_data], name='encoding_model_int')
     ## Pipeline ext
-    compressor = Task([Compressor()], [splitter_cv_ext, encoding_model_int], name='compressor_ext')
-    transform_data = Task([transformer.make_regressor, transformer.standardize], [compressor], name='transform_data_ext')
-    encoding_model_ext = Task([encoding_model.fit, encoding_model.predict], [transform_data], name='encoding_model_ext')
+    compressor = Task([Compressor().pca], [splitter_cv_ext, encoding_model_int], name='compressor_ext')
+    transform_data = Task([transformer.standardize, transformer.make_regressor], [compressor], name='transform_data_ext')
+    encoding_model_ext = Task([encoding_model.predict, encoding_model.fit], [transform_data], name='encoding_model_ext')
     
     deep_representations_paths, fMRI_paths = fetch_data(parameters, input)
     deep_representations = transformer.process_representations(deep_representations_paths, parameters['models'])

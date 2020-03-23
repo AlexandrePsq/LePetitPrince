@@ -28,17 +28,16 @@ if __name__=='__main__':
     
     check_folder(os.path.join(output_path, subject))
     
-    deep_representations_paths, fMRI_paths = fetch_data(parameters, input)
-    preprocess_data = Transformer()
-    deep_representations = preprocess_data.process_representations(deep_representations_paths)
-    fMRI_data = preprocess_data.process_fmri_data(fMRI_paths)
-    
     encoding_model_test = EncodingModel()
     encoding_model_valid = EncodingModel()
     transform_data = Transformer()
     compressor = Compressor()
     splitter_cv_int = Splitter()
     splitter_cv_ext = Splitter()
+    
+    deep_representations_paths, fMRI_paths = fetch_data(parameters, input)
+    deep_representations = transform_data.process_representations(deep_representations_paths, parameters['models'])
+    fMRI_data = transform_data.process_fmri_data(fMRI_paths)
     
     pipeline = Pipeline()
     pipeline.fit([("splitter_cv_ext", splitter_cv_ext),

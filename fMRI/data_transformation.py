@@ -1,4 +1,9 @@
 import os
+import numpy as np
+import pandas as pd
+
+from sklearn.preprocessing import StandardScaler
+
 
 
 class Transformer(object):
@@ -10,18 +15,53 @@ class Transformer(object):
     def __init__(self):
         pass
     
-    def standardize(self):
-        pass
+    # TO DELETE
+    #def standardize(self, matrices):
+    #    """Standardize a list of matrices.
+    #    Arguments:
+    #        - matrices: list (of np.array)
+    #    """
+    #    for index in range(len(matrices)):
+    #        scaler = StandardScaler(with_mean=True, with_std=True)
+    #        scaler.fit(matrices[index])
+    #        matrices[index] = scaler.transform(matrices[index])
+    #    return matrices
     
-    def scale(self):
-        pass
+    def standardize(self, matrix):
+        """Standardize a matrix.
+        Arguments:
+            - matrix: np.array
+        """
+        scaler = StandardScaler(with_mean=True, with_std=True)
+        scaler.fit(matrix)
+        matrix = scaler.transform(matrix)
+        return matrix
         
-    def make_regressor(self):
-        pass
+    def make_regressor(self, matrix, tr, nscans, hrf='spm'):
+        """ Compute the convolution with an hrf for each column of the matrix.
+        Arguments:
+            - array: Pandas.Dataframe
+            - tr: float
+            - nscans: int
+        """
+        regressors = []
+        representations = [col for col in matrix.columns if col not in ['offsets', 'duration']]
+        for col in representations:
+            conditions = np.vstack((matrix.offsets, matrix.duration, matrix[col]))
+            tmp = compute_regressor(exp_condition=conditions,
+                                    hrf_model=hrf,
+                                    frame_times=np.arange(0.0, nscans*tr, tr),
+                                    oversampling=10)
+            regressors.append(pd.DataFrame(tmp[0], columns=[col]))
+        result = pd.concat(regressors, axis=1)
+        return result
     
     def process_representations(self, representation_paths, models):
         """ Load representation dataframes and create the design matrix
         for each run.
+        Arguments:
+            - representation_paths: list (of list of paths)
+            - models: list (of dict)
         """
         runs = list(zip(*representation_paths)) # list of 9 tuples (1 for each run), each tuple containing the representations for the specified models
         # e.g.: [(path2run1_model1, path2run1_model2), (path2run2_model1, path2run2_model2)]
@@ -36,6 +76,9 @@ class Transformer(object):
         """ Load fMRI data and mask it with a given masker.
         Preprocess it to avoid NaN value when using Pearson
         Correlation coefficients in the following analysis.
+        Arguments:
+            - fmri_paths: list (of string)
+            - masker: NiftiMasker object
         """
         data = [masker.transform(f) for f in fmri_paths]
         # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element

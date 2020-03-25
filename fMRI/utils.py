@@ -39,10 +39,10 @@ def write(path, text, end='\n'):
         f.write(end)
 
 def save(object_to_save, path):
-    if isinstance(object_to_save, isinstance(a, np.ndarray)):
+    if isinstance(object_to_save, np.ndarray):
         extension = '.npy'
         np.save(path+extension, object_to_save)
-    elif isinstance(object_to_save, isinstance(a, pd.DataFrame)):
+    elif isinstance(object_to_save, pd.DataFrame):
         extension = '.csv'
         object_to_save.to_csv(path+extension, index=False)
     # others to add ?

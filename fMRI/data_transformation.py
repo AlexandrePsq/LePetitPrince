@@ -12,22 +12,25 @@ class Transformer(object):
     """
     
     
-    def __init__(self):
-        pass
+    def __init__(self, tr, nscans, hrf='spm', oversampling=10):
+        self.tr = tr
+        self.nscans = nscans
+        self.hrf = hrf
+        self.oversampling = oversampling
     
-    # TO DELETE
-    #def standardize(self, matrices):
-    #    """Standardize a list of matrices.
-    #    Arguments:
-    #        - matrices: list (of np.array)
-    #    """
-    #    for index in range(len(matrices)):
-    #        scaler = StandardScaler(with_mean=True, with_std=True)
-    #        scaler.fit(matrices[index])
-    #        matrices[index] = scaler.transform(matrices[index])
-    #    return matrices
+    def standardize(self, matrices):
+        """Standardize a list of matrices.
+        Arguments:
+            - matrices: list (of np.array)
+        """
+        matrices = matrices if isinstance(matrices, list) else [matrices]
+        for index in range(len(matrices)):
+            scaler = StandardScaler(with_mean=True, with_std=True)
+            scaler.fit(matrices[index])
+            matrices[index] = scaler.transform(matrices[index])
+        return matrices
     
-    def standardize(self, matrix):
+    def standardize_(self, matrix):
         """Standardize a matrix.
         Arguments:
             - matrix: np.array
@@ -37,7 +40,7 @@ class Transformer(object):
         matrix = scaler.transform(matrix)
         return matrix
         
-    def make_regressor(self, matrix, tr, nscans, hrf='spm'):
+    def make_regressor(self, matrix):
         """ Compute the convolution with an hrf for each column of the matrix.
         Arguments:
             - array: Pandas.Dataframe
@@ -49,9 +52,9 @@ class Transformer(object):
         for col in representations:
             conditions = np.vstack((matrix.offsets, matrix.duration, matrix[col]))
             tmp = compute_regressor(exp_condition=conditions,
-                                    hrf_model=hrf,
-                                    frame_times=np.arange(0.0, nscans*tr, tr),
-                                    oversampling=10)
+                                    hrf_model=self.hrf,
+                                    frame_times=np.arange(0.0, self.nscans * self.tr, self.tr),
+                                    oversampling=self.oversampling)
             regressors.append(pd.DataFrame(tmp[0], columns=[col]))
         result = pd.concat(regressors, axis=1)
         return result

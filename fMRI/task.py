@@ -1,4 +1,4 @@
-from utils import merge_dict, filter_args
+from utils import merge_dict, filter_args, save
 
 
 
@@ -51,6 +51,10 @@ class Task(object):
     def is_terminated(self):
         """ Check if the task is temrinated."""
         return self.terminated
+    
+    def save_output(self, path):
+        for index, result in enumerate(self.output):
+            save(result, path + str(index))
     
     def execute(self):
     """ Execute all task functions on the serie of parents outputs."""

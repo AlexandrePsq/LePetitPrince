@@ -1,6 +1,8 @@
 import os
 import yaml
 import inspect
+import numpy as np
+import pandas as pd
 
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
@@ -36,6 +38,15 @@ def write(path, text, end='\n'):
         f.write(text)
         f.write(end)
 
+def save(object_to_save, path):
+    if isinstance(object_to_save, isinstance(a, np.ndarray)):
+        extension = '.npy'
+        np.save(path+extension, object_to_save)
+    elif isinstance(object_to_save, isinstance(a, pd.DataFrame)):
+        extension = '.csv'
+        object_to_save.to_csv(path+extension, index=False)
+    # others to add ?
+
 
 #########################################
 ########### Specific functions ##########
@@ -68,6 +79,12 @@ def filter_args(func, d):
     args = {key: d[key] for key in keys}
     return args
 
+def output_name(folder_path, subject, model_name):
+    folder = os.path.join(folder_path, subject, model_name)
+    check_folder(folder)
+    template = os.path.join(folder, '{}_{}_'.format(subject, model_name)
+    return template
+    
 
 #########################################
 ########### Nilearn functions ###########

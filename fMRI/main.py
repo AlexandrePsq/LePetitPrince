@@ -3,7 +3,7 @@ import yaml
 import argparse
 
 
-from utilities import check_folder, read_yaml, write, get_subject_name
+from utilities import check_folder, read_yaml, write, get_subject_name, output_name
 from task import Task
 from logger import Logger
 from regression_pipeline import Pipeline
@@ -27,8 +27,8 @@ if __name__=='__main__':
     input_path = args.input
     output_path = args.output
     subject = get_subject_name(parameters['subject'])
+    output_path = output_name(folder_path, subject, parameters['model_name'])
     
-    check_folder(os.path.join(output_path, subject))
     transformer = Transformer()
     encoding_model = EncodingModel()
     

@@ -49,6 +49,10 @@ def get_subject_name(id):
     else:
         return 'sub-{}'.format(id)
 
+def merge_dict(list_of_dict):
+    result = {key: value for d in list_of_dict for key, value in d.items()}
+    return result
+
 
 #########################################
 ########### Nilearn functions ###########

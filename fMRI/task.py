@@ -7,7 +7,7 @@ class Task(object):
     possible to integrate in the pipeline.
     """
     
-    def __init__(self, functions=None, parents=[], name=''):
+    def __init__(self, functions=None, parents=[], name='', flatten=False):
         """ Instanciation of a task.
         Arguments:
             - functions: list (of functions)
@@ -20,6 +20,7 @@ class Task(object):
         self.functions = functions
         self.name = name
         self.output = []
+        self.flatten = flatten
     
     def set_children(self, children):
         """ Set self.children value."""
@@ -53,13 +54,34 @@ class Task(object):
         return self.terminated
     
     def save_output(self, path):
+        """ """
         for index, result in enumerate(self.output):
             save(result, path + str(index))
+    
+    def flatten(self, input_):
+        """ Flatten a given input.
+        Arguments:
+            - input_: list (of list)
+        """
+        if self.flatten:
+            if not self.parents:
+                raise Exception("No parents input to flatten...")
+            flattening_factor = len(input_[0])
+            self.flattening_factor = flattening_factor
+            input_ = [item for sublist in input_ for item in sublist]
+        return input_
+    
+    def unflatten(self):
+        """ Unflatten the output of the task when we have flattened
+        the input.
+        """
+        if self.flatten:
+            self.output = [input_[x : x + self.flattening_factor] for x in range(0, len(self.output), self.flattening_factor)]
     
     def execute(self):
     """ Execute all task functions on the serie of parents outputs."""
     if not (self.is_waiting() or self.is_terminated()):
-        inputs_ =  list(zip(*[parent.output for parent in self.parents]))
+        inputs_ =  list(zip(*[self.flatten(parent.output) for parent in self.parents]))
         inputs = [merge_dict(list(items)) for items in inputs_]
         for input in inputs:
             input_tmp = input.copy()
@@ -68,7 +90,8 @@ class Task(object):
                 input_tmp = func(**input_tmp)
             self.add_output(input_tmp)
         self.terminated = True
+        self.unflatten()
     else:
-        print('Depencies not terminated...')
+        print('Dependencies not fullfilled...')
     
     

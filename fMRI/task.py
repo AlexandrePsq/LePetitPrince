@@ -1,4 +1,4 @@
-from utils import merge_dict
+from utils import merge_dict, filter_args
 
 
 
@@ -60,8 +60,11 @@ class Task(object):
         for input in inputs:
             input_tmp = input.copy()
             for func in self.functions:
+                input_tmp = filter_args(func, input_tmp)
                 input_tmp = func(**input_tmp)
             self.add_output(input_tmp)
         self.terminated = True
     else:
         print('Depencies not terminated...')
+    
+    

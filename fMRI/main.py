@@ -5,6 +5,7 @@ import argparse
 
 from utilities import check_folder, read_yaml, write, get_subject_name
 from task import Task
+from logger import Logger
 from regression_pipeline import Pipeline
 from encoding_models import EncodingModel
 from splitter import Splitter
@@ -22,7 +23,7 @@ if __name__=='__main__':
 
     args = parser.parse_args()
     parameters = read_yaml(args.yaml_file)
-    log_file = args.logs
+    logs = Logger(args.logs)
     input_path = args.input
     output_path = args.output
     subject = get_subject_name(parameters['subject'])

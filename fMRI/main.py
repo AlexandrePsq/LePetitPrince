@@ -13,6 +13,7 @@ from data_transformation import Transformer
 from data_compression import Compressor
 
 
+
 if __name__=='__main__':
     
     parser = argparse.ArgumentParser(description="""Main script that compute the R2 maps for a given subject and model.""")
@@ -28,16 +29,19 @@ if __name__=='__main__':
     output_path = args.output
     subject = get_subject_name(parameters['subject'])
     output_path = output_name(folder_path, subject, parameters['model_name'])
+    masker = fetch_masker(parameters['masker_path'], parameters['language'])
     
-    transformer = Transformer()
+    transformer = Transformer(parameters['tr'], parameters['nscans'], parameters['hrf'])
     encoding_model = EncodingModel()
+    splitter = Splitter(1)
+    compressor = Compressor()
     
     # Pipeline flow
-    splitter_cv_ext = Task([Splitter().split], name='splitter_cv_ext')
+    splitter_cv_ext = Task([splitter.split], name='splitter_cv_ext')
     ## Pipeline int
-    splitter_cv_int = Task([Splitter().split], [splitter_cv_ext],
+    splitter_cv_int = Task([splitter.split], [splitter_cv_ext],
                                 name='splitter_cv_int')
-    compressor_int = Task([Compressor().pca], [splitter_cv_int],
+    compressor_int = Task([compressor.pca], [splitter_cv_int],
                                 name='compressor_int', flatten=True) # define here the compression method wanted
     transform_data_int = Task([transformer.standardize, transformer.make_regressor], [compressor_int],
                                 name='transform_data_int', flatten=True) # functions in Task objects are read right to left

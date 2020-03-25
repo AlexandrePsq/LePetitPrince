@@ -13,11 +13,11 @@ alpha_min_log_scale: 2
 alpha_max_log_scale: 5
 nb_alphas: 25
 masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/global_masker_english.nii.gz"
+language: english
 models:
   - model_name: bert_all-layers
     columns_to_retrieve: "[i for i in range(0,50)]" #example
     surname: BERT-small
-    language: english
     data_compression: None
     compression_kwargs: None
     onset_type: 'word' # word / word+punctuation / ...
@@ -25,7 +25,6 @@ models:
   - model_name: wordrate
     columns_to_retrieve: None
     surname: Word_rate
-    language: english
     data_compression: None
     compression_kwargs: None
     onset_type: 'word' # word / word+punctuation / ...

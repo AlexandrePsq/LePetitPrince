@@ -39,7 +39,7 @@ class Pipeline(object):
                 task.set_terminated(True)
                 queue = task.children + queue
                 count += len(task.children)
-        reset_tasks()
+        self.reset_tasks()
         logger.info("The pipeline was fitted without error.")
             
     def compute(self, X_list, Y_list, output_path, logger):

@@ -30,16 +30,6 @@ class Transformer(object):
             matrices[index] = scaler.transform(matrices[index])
         return matrices
     
-    def standardize_(self, matrix):
-        """Standardize a matrix.
-        Arguments:
-            - matrix: np.array
-        """
-        scaler = StandardScaler(with_mean=True, with_std=True)
-        scaler.fit(matrix)
-        matrix = scaler.transform(matrix)
-        return matrix
-        
     def make_regressor(self, matrix):
         """ Compute the convolution with an hrf for each column of the matrix.
         Arguments:

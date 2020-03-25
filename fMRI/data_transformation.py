@@ -63,14 +63,15 @@ class Transformer(object):
             - representation_paths: list (of list of paths)
             - models: list (of dict)
         """
+        arrays = []
         runs = list(zip(*representation_paths)) # list of 9 tuples (1 for each run), each tuple containing the representations for the specified models
         # e.g.: [(path2run1_model1, path2run1_model2), (path2run2_model1, path2run2_model2)]
 
         # Computing design-matrices
         for i in range(len(runs)):
             merge = pd.concat([pd.read_csv(path2features, header=0)[eval(models[index]['columns2retrieve'])] for index, path2features in enumerate(runs[i])], axis=1) # concatenate horizontaly the read csv files of a run
-            dataframes.append(merge)
-        return dataframes
+            arrays.append(merge.data)
+        return arrays
     
     def process_fmri_data(self, fmri_paths, masker):
         """ Load fMRI data and mask it with a given masker.

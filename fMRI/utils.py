@@ -1,5 +1,6 @@
 import os
 import yaml
+import inspect
 
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
@@ -50,8 +51,22 @@ def get_subject_name(id):
         return 'sub-{}'.format(id)
 
 def merge_dict(list_of_dict):
+    """ Merge a list of dictionaries into a single dictionary.
+    Arguments:
+        - list_of_dict: list (of dicts)
+    """
     result = {key: value for d in list_of_dict for key, value in d.items()}
     return result
+
+def filter_args(func, d):
+    """ Filter dictionary keys to match the function arguments.
+    Arguments:
+        - func: function
+        - d: dict
+    """
+    keys = inspect.getfullargspec(func).args
+    args = {key: d[key] for key in keys}
+    return args
 
 
 #########################################

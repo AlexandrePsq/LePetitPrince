@@ -4,6 +4,7 @@ import inspect
 import numpy as np
 import pandas as pd
 
+import nibabel as nib
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker
@@ -84,6 +85,18 @@ def output_name(folder_path, subject, model_name):
     check_folder(folder)
     template = os.path.join(folder, '{}_{}_'.format(subject, model_name)
     return template
+
+def possible_subjects_id(language):
+    if language=='english':
+        result = [57, 58, 59, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
+                    72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 86, 87, 88, 89, 91, 92, 93,
+                    94, 95, 96, 97, 98, 99, 100, 101, 103, 104, 105, 106, 108, 109, 110, 113, 114, 115]
+    elif language=='french':
+        result = [1] # TO DO
+    elif language=='chineese':
+        result = [1] # TO DO
+    else:
+        raise Exception('Language {} not known.'.format(language))
     
 
 #########################################
@@ -96,4 +109,23 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
     masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True)
     masker.fit()
+    return masker
+
+def fetch_masker(masker_path, language):
+    """ Fetch or compute if needed a global masker from all subjects of a
+    given language.
+    Arguments:
+        - masker_path: str
+        - language: str
+    """
+    if os.path.exists(masker_path):
+        masker = nib.load(masker_path)
+    else:
+        fmri_runs = {}
+        subjects = [get_subject_name(id) for id in possible_subjects_id(language)]
+        for subject in subjects:
+            fmri_path = os.path.join(paths.path2data, "fMRI", language, subject, "func")
+            fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
+        masker = compute_global_masker(list(fmri_runs.values()))
+        nib.save(masker, masker_path)
     return masker

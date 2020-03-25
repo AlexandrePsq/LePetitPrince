@@ -42,15 +42,15 @@ class Pipeline(object):
         reset_tasks()
         logger.info("The pipeline was fitted without error.")
             
-    def compute(self, deep_representations, fmri_data, output_path, logger):
+    def compute(self, X_list, Y_list, output_path, logger):
         """ Execute pipeline.
         Arguments:
-            - deep_representations: list (of np.array)
-            - fmri_data: list (of np.array)
+            - X_list: list (of np.array)
+            - Y_list: list (of np.array)
             - output_path: str
             - logger: Logger object
         """
-        inputs = [(deep_representations, fmri_data)]
+        inputs = [{'X_list':X_list, 'Y_list':Y_list}]
         if not self.tasks:
             logger.warning("Pipeline not fitted... Nothing to compute.")
         else:

@@ -1,8 +1,10 @@
 import numpy as np
+import pandas as pd
 
 from sklearn.decomposition import PCA
 
 from logger import Logger
+from utils import clean_nan_rows
 
 
 
@@ -24,48 +26,60 @@ class Compressor(object):
         pass
         
     def clean_bucket(self):
+        """ Clean instance bucket."""
         self.bucket = []
-
-    def pca(self, X_list, X_test, n_components, logger=None):
-        """ Classical PCA train on the concatenated set
-        of matrices given in X_list.
+    
+    def identity(self, X_train, X_test, n_components=None, logger=None):
+        """ Identity function.
         Arguments:
-            - X_list: list
+            - X_train: list
             - X_test: list
+            - n_components: int
             - logger: Logger
         """
-        X_lengths = [m.shape[0] for m in X_list]
-        X_all = np.vstack(X_list)
+        return {'X_train': X_train, 'X_test': X_test}
+
+    def pca(self, X_train, X_test, n_components, logger=None):
+        """ Classical PCA train on the concatenated set
+        of matrices given in X_train.
+        Arguments:
+            - X_train: list
+            - X_test: list
+            - n_components: int
+            - logger: Logger
+        """
+        X_lengths = [m.shape[0] for m in X_train]
+        X_all = np.vstack(X_train)
         pca = PCA(n_components=n_components)
         pca.fit(X_all)
         if logger:
             logger.figure(np.cumsum(pca.explained_variance_ratio_))
         X_all = pca.transform(X_all)
         index = 0
-        X_list_ = []
+        X_train_ = []
         X_test_ = []
         for i in lengths:
-            X_list_.append(pca.transform(X_all[index:index+i,:]))
+            X_train_.append(pca.transform(X_all[index:index+i,:]))
             index += i
         for matrix in X_test:
             X_test_.append(pca.transform(matrix))
-        return {'X_list': X_list_, 'X_test': X_test_}
+        return {'X_train': X_train_, 'X_test': X_test_}
 
-    def compress(self, X_list, X_test, logger=None):
+    def compress(self, X_train, X_test, logger=None):
         """ Compress the data with different compression methods
         for the different representations coming from different models.
         Arguments:
-            - X_list: list
+            - X_train: list
             - X_test: list
             - logger: Logger
         """
         for index, indexes in enumerate(self.indexes):
             func = getattr(self, self.compression_types[index])
-            X_list_ = X_list[:,indexes]
-            X_test_ = X_test[:,indexes]
-            self.bucket.append(func(X_list_, X_test_, self.ncomponents_list[index], logger)
+            X_train_ = clean_nan_rows(X_train[:,indexes])
+            X_test_ = clean_nan_rows(X_test[:,indexes])
+            self.bucket.append(func(X_train_, X_test_, self.ncomponents_list[index], logger)
         
-        X_list = np.hstack([data['X_list'] for data in self.bucket]
-        X_test = np.hstack([data['X_test'] for data in self.bucket]
+        X_train = pd.concat([pd.DataFrame(data['X_train']) for data in self.bucket], axis=1).values
+        X_test = pd.concat([pd.DataFrame(data['X_test']) for data in self.bucket], axis=1).values
         self.clean_bucket()
-        return {'X_list': X_list, 'X_test': X_test}
+        return {'X_train': X_train, 'X_test': X_test}

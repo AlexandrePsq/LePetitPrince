@@ -63,3 +63,4 @@ class Pipeline(object):
             logger.info("Saving output...")
             task.save_output(output_path)
         logger.info("The pipeline was executed without error.")
+        return task.output

@@ -7,6 +7,11 @@ class Splitter(object):
     """
 
     def __init__(self, out_per_fold):
+        """ Instanciation of Splitter class. We specify the number of runs
+        to leave out for the test set.
+        Arguments:
+            - out_per_fold: int
+        """
         self.out_per_fold = out_per_fold
         pass
     

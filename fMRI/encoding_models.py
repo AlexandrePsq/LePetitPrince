@@ -13,6 +13,11 @@ class EncodingModel(object):
     """
 
     def __init__(self, model=Ridge(), alpha=None):
+        """ Instanciation of EncodingModel class.
+        Arguments:
+            - model: sklearn.linear_model
+            - alpha: int
+        """
         self.alpha = alpha # regularization parameter
         self.model = model
         self.model.set_params(alpha=alpha)

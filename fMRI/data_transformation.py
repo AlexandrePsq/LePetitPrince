@@ -12,7 +12,19 @@ class Transformer(object):
     """
     
     
-    def __init__(self, tr, nscans, indexes, offset_type_list, duration_type_list, hrf='spm', oversampling=10, with_mean=True, with_std=True):
+    def __init__(self, tr, nscans, indexes, offset_type_dict, duration_type_dict, hrf='spm', oversampling=10, with_mean=True, with_std=True):
+        """ Instanciation of Transformer class.
+        Arguments:
+            - tr: int
+            - nscans: int
+            - indexes: list (of np.array)
+            - offset_type_dict: dict (of list)
+            - duration_type_dict: dict (of list)
+            - hrf: str
+            - oversampling: int
+            - with_mean: bool
+            - with_std: bool
+        """
         self.tr = tr
         self.nscans = nscans
         self.hrf = hrf
@@ -20,8 +32,8 @@ class Transformer(object):
         self.with_mean=with_mean
         self.with_std=with_std
         self.indexes = indexes
-        self.offset_type_list = offset_type_list
-        self.duration_type_list = duration_type_list
+        self.offset_type_dict = offset_type_dict
+        self.duration_type_dict = duration_type_dict
     
     def standardize(self, X_train, X_test):
         """Standardize a train and test sets.
@@ -51,7 +63,7 @@ class Transformer(object):
         """
         matrices_ = X_train + X_test
         runs = run_train + run_test
-        matrices = [self.compute_regressor(pd.DataFrame(array[:,index]), self.offset_type_list['run{}'.format(runs[array_index] + 1)][i], self.duration_type_list['run{}'.format(runs[array_index] + 1)][i], 'run{}'.format(runs[array_index] + 1)) for array_index, array in enumerate(matrices_) for i, index in enumerate(self.indexes)]
+        matrices = [self.compute_regressor(pd.DataFrame(array[:,index]), self.offset_type_dict['run{}'.format(runs[array_index] + 1)][i], self.duration_type_dict['run{}'.format(runs[array_index] + 1)][i], 'run{}'.format(runs[array_index] + 1)) for array_index, array in enumerate(matrices_) for i, index in enumerate(self.indexes)]
         step = len(self.indexes)
         matrices = [np.hstack(matrices[x : x + step]) for x in range(0, len(matrices), step)]
         return {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):], 'run_train': run_train, 'run_test': run_test}

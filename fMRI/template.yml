@@ -13,20 +13,23 @@ alpha_min_log_scale: 2
 alpha_max_log_scale: 5
 nb_alphas: 25
 masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/global_masker_english.nii.gz"
+offset_path: ""
 language: english
 models:
   - model_name: bert_all-layers
-    columns_to_retrieve: "[i for i in range(0,500)]" #example
+    columns_to_retrieve: "np.array([i for i in range(0,500)])" #example # MUST BE a np.array !!
     surname: BERT-small
     data_compression: pca
     ncomponents: 300
-    onset_type: 'word' # word / word+punctuation / ...
+    offset_type: 'word' # word / word+punctuation / ...
+    duration_type: None
     shift_surprisal: False
   - model_name: wordrate
     columns_to_retrieve: "[0]"
     surname: Word_rate
     data_compression: None
     ncomponents: None
-    onset_type: 'word' # word / word+punctuation / ...
+    offset_type: 'word' # word / word+punctuation / ...
+    duration_type: None
     shift_surprisal: False
 model_name: BERT-small+Word_rate

@@ -68,6 +68,18 @@ def clean_nan_rows(array):
     new_array = np.vstack([row for row in [row_[filter[index]] for index, row_ in enumerate(array)] if len(row)>0])
     return new_array
 
+def aggregate_cv(data):
+    """ Transform a list of lists of dicts to
+    a list of dicts of concatenated lists and
+    aggregate accross splits
+    Argument:
+        - data: list (of list of dict)
+    Returns:
+        - result: list (of dict of list)
+    """
+    result = [{key: np.stack(np.array([dic[key] for dic in data[index]]), axis=0) for key in data[0][0]} for index in len(data)]
+    return result
+
 
 #########################################
 ########### Specific functions ##########
@@ -219,7 +231,7 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     masker.fit()
     return masker
 
-def fetch_masker(masker_path, language):
+def fetch_masker(masker_path, language, smoothing_fwhm=None):
     """ Fetch or compute if needed a global masker from all subjects of a
     given language.
     Arguments:
@@ -234,6 +246,34 @@ def fetch_masker(masker_path, language):
         for subject in subjects:
             fmri_path = os.path.join(paths.path2data, "fMRI", language, subject, "func")
             fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
-        masker = compute_global_masker(list(fmri_runs.values()))
+        masker = compute_global_masker(list(fmri_runs.values()), smoothing_fwhm=smoothing_fwhm)
         nib.save(masker, masker_path)
     return masker
+
+def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=False, logger=None):
+    """ Create the maps from the distribution.
+    Arguments:
+        - masker: NifitMasker
+        - distribution: np.array (1D)
+        - output_path: str
+        - vmax: float
+        - not_glass_brain: bool
+    """
+    logger.info("Transforming array to .nii image...")
+    img = masker.inverse_transform(distribution)
+    logger.info("Saving image...")
+    nib.save(img, output_path + '.nii.gz')
+
+    plt.hist(distribution[~np.isnan(distribution)], bins=50)
+    plt.savefig(output_path + '_hist.png')
+    plt.close()
+
+    logger.info("Saving glass brain...")
+    if not_glass_brain:
+        display = plot_img(img_smoothed, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))
+        display.savefig(output_path + '.png')
+        display.close()
+    else:
+        display = plot_glass_brain(img_smoothed, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
+        display.savefig(output_path + '.png')
+        display.close()

@@ -7,7 +7,7 @@ class Task(object):
     possible to integrate in the pipeline.
     """
     
-    def __init__(self, functions=None, parents=[], name='', flatten=False):
+    def __init__(self, functions=None, parents=[], name='', flatten=False, special_output_transform=None):
         """ Instanciation of a task.
         Arguments:
             - functions: list (of functions)
@@ -21,6 +21,7 @@ class Task(object):
         self.name = name
         self.output = []
         self.flatten = flatten
+        self.special_output_transform= None
     
     def set_children(self, children):
         """ Set self.children value."""
@@ -54,7 +55,10 @@ class Task(object):
         return self.terminated
     
     def save_output(self, path):
-        """ """
+        """ Save the output of the task.
+        Argume,ts:
+            - path: str
+        """
         for index, result in enumerate(self.output):
             save(result, path + str(index))
     
@@ -91,6 +95,8 @@ class Task(object):
             self.add_output(input_tmp)
         self.terminated = True
         self.unflatten()
+        if self.special_output_transform:
+            self.special_output_transform(self.output)
     else:
         print('Dependencies not fullfilled...')
     

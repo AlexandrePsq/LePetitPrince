@@ -7,47 +7,78 @@ from sklearn.preprocessing import StandardScaler
 
 
 class Transformer(object):
-    """ Perform general transformations over a set of dataframes or numpy arrays,
+    """ Perform general transformations over a set of dataframes or arrays,
     taking into account group structures.
     """
     
     
-    def __init__(self, tr, nscans, hrf='spm', oversampling=10):
+    def __init__(self, tr, nscans, indexes, offset_type_list, duration_type_list, hrf='spm', oversampling=10, with_mean=True, with_std=True):
         self.tr = tr
         self.nscans = nscans
         self.hrf = hrf
         self.oversampling = oversampling
+        self.with_mean=with_mean
+        self.with_std=with_std
+        self.indexes = indexes
+        self.offset_type_list = offset_type_list
+        self.duration_type_list = duration_type_list
     
-    def standardize(self, matrices):
-        """Standardize a list of matrices.
+    def standardize(self, X_train, X_test):
+        """Standardize a train and test sets.
         Arguments:
-            - matrices: list (of np.array)
+            - X_train: list (of np.array)
+            - X_test: list (of np.array)
+        Returns:
+            - result: dict
         """
-        matrices = matrices if isinstance(matrices, list) else [matrices]
+        matrices = X_train + X_test
         for index in range(len(matrices)):
-            scaler = StandardScaler(with_mean=True, with_std=True)
+            scaler = StandardScaler(with_mean=self.with_mean, with_std=self.with_std)
             scaler.fit(matrices[index])
             matrices[index] = scaler.transform(matrices[index])
-        return matrices
+        result = {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):]}
+        return result
     
-    def make_regressor(self, matrix):
-        """ Compute the convolution with an hrf for each column of the matrix.
+    def make_regressor(self, X_train, X_test, run_train, run_test):
+        """ Compute the convolution with an hrf for each column of each matrix.
         Arguments:
-            - array: Pandas.Dataframe
-            - tr: float
-            - nscans: int
+            - X_train: list (of np.array)
+            - X_test: list (of np.array)
+            - run_train: list (of int)
+            - run_test: list (of int)
+        Returns:
+            - dict
+        """
+        matrices_ = X_train + X_test
+        runs = run_train + run_test
+        matrices = [self.compute_regressor(pd.DataFrame(array[:,index]), self.offset_type_list['run{}'.format(runs[array_index] + 1)][i], self.duration_type_list['run{}'.format(runs[array_index] + 1)][i], 'run{}'.format(runs[array_index] + 1)) for array_index, array in enumerate(matrices_) for i, index in enumerate(self.indexes)]
+        step = len(self.indexes)
+        matrices = [np.hstack(matrices[x : x + step]) for x in range(0, len(matrices), step)]
+        return {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):], 'run_train': run_train, 'run_test': run_test}
+    
+    def compute_regressor(self, dataframe, offset_type, duration_type, run_index):
+        """ Compute the convolution with an hrf for each column of the dataframe.
+        Arguments:
+            - dataframes: pd.DataFrame
+            - offset_type: str
+            - duration_type: str
+            - run_index: str
+        Returns:
+            - matrix: np.array
         """
         regressors = []
-        representations = [col for col in matrix.columns if col not in ['offsets', 'duration']]
+        representations = [col for col in dataframe.columns]
+        offsets = fetch_offsets(offset_type, run_index)
+        duration = fetch_duration(duration_type, run_index, default_size=len(dataframe))
         for col in representations:
-            conditions = np.vstack((matrix.offsets, matrix.duration, matrix[col]))
+            conditions = np.vstack((offsets, duration, dataframe[col]))
             tmp = compute_regressor(exp_condition=conditions,
                                     hrf_model=self.hrf,
                                     frame_times=np.arange(0.0, self.nscans * self.tr, self.tr),
                                     oversampling=self.oversampling)
             regressors.append(pd.DataFrame(tmp[0], columns=[col]))
-        result = pd.concat(regressors, axis=1)
-        return result
+        matrix = pd.concat(regressors, axis=1).values
+        return matrix
     
     def process_representations(self, representation_paths, models):
         """ Load representation dataframes and create the design matrix
@@ -55,6 +86,8 @@ class Transformer(object):
         Arguments:
             - representation_paths: list (of list of paths)
             - models: list (of dict)
+        Returns:
+            - arrays: list (of np.array)
         """
         arrays = []
         runs = list(zip(*representation_paths)) # list of 9 tuples (1 for each run), each tuple containing the representations for the specified models
@@ -62,8 +95,9 @@ class Transformer(object):
 
         # Computing design-matrices
         for i in range(len(runs)):
+            # to modify in case the path leads to .npy file
             merge = pd.concat([pd.read_csv(path2features, header=0)[eval(models[index]['columns2retrieve'])] for index, path2features in enumerate(runs[i])], axis=1) # concatenate horizontaly the read csv files of a run
-            arrays.append(merge.data)
+            arrays.append(merge.values)
         return arrays
     
     def process_fmri_data(self, fmri_paths, masker):
@@ -73,6 +107,8 @@ class Transformer(object):
         Arguments:
             - fmri_paths: list (of string)
             - masker: NiftiMasker object
+        Returns:
+            - data: list (of np.array)
         """
         data = [masker.transform(f) for f in fmri_paths]
         # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element

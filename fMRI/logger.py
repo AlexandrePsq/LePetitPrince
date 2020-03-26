@@ -1,3 +1,4 @@
+import os
 from utils import write
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
@@ -25,7 +26,7 @@ class Logger(object):
         Arguments:
             - message: str
         """
-        self.report_logs(self.log_path, message, level='ERROR')
+        self.report_logs(message, level='ERROR')
         raise Exception(message)
     
     def warning(self, message):
@@ -33,14 +34,14 @@ class Logger(object):
         Arguments:
             - message: str
         """
-        self.report_logs(self.log_path, message, level='WARNING')
+        self.report_logs(message, level='WARNING')
 
     def info(self, message):
         """Reports INFO messages.
         Arguments:
             - message: str
         """
-        self.report_logs(self.log_path, message, level='INFO')
+        self.report_logs(message, level='INFO')
 
     def figure(self, array):
         """Reports a figure.
@@ -48,5 +49,5 @@ class Logger(object):
             - array: np.array
         """
         plt.plot(array)
-        plt.savefig(os.pth.join(os.path.dirname(self.log_path),'explained_variance.png'))
+        plt.savefig(os.path.join(os.path.dirname(self.log_path),'explained_variance.png'))
         plt.close()

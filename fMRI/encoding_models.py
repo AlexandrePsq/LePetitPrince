@@ -108,8 +108,8 @@ class EncodingModel(object):
         R2 = np.zeros((Y_test[0].shape[1]))
         Pearson_coeff = np.zeros((Y_test[0].shape[1]))
         x_test = np.vstack(X_test)
-        data = R2 if optimizing_criteria=='R2' else Pearson_coeff
-        voxel2alpha, alpha2voxel = self.optimize_alpha(R2, alpha)
+        data = R2 if self.optimizing_criteria=='R2' else Pearson_coeff
+        voxel2alpha, alpha2voxel = self.optimize_alpha(data, alpha)
         for alpha, voxels in alpha2voxel.items():
             y_test = np.vstack(Y_test)[:, voxels]
             y_train = np.vstack(Y_train)[:, voxels]
@@ -130,7 +130,7 @@ class EncodingModel(object):
             - predictions: np.array
             - Y_test: np.array
         """
-        r2 = r2_score(Y, predictions, multioutput='raw_values')
+        r2 = r2_score(Y_test, predictions, multioutput='raw_values')
         return r2
     
     def get_Pearson_coeff(self, predictions, Y_test):
@@ -140,5 +140,5 @@ class EncodingModel(object):
             - predictions: np.array
             - Y_test: np.array
         """
-        pearson_corr = [pearsonr(Y[:,i], predictions[:,i])[0] for i in range(Y.shape[1])]
+        pearson_corr = [pearsonr(Y_test[:,i], predictions[:,i])[0] for i in range(Y_test.shape[1])]
         return pearson_corr

@@ -1,9 +1,11 @@
 import os
 import yaml
 import argparse
+import numpy as np
 
+from sklearn.linear_model import Ridge
 
-from utilities import check_folder, read_yaml, write, get_subject_name, output_name, structuring_inputs, aggregate_cv
+from utils import check_folder, read_yaml, write, get_subject_name, output_name, structuring_inputs, aggregate_cv, create_maps, fetch_masker, fetch_data
 from task import Task
 from logger import Logger
 from regression_pipeline import Pipeline
@@ -28,15 +30,15 @@ if __name__=='__main__':
     input_path = args.input
     output_path = args.output
     subject = get_subject_name(parameters['subject'])
-    output_path = output_name(folder_path, subject, parameters['model_name'])
-    masker = fetch_masker(parameters['masker_path'], parameters['language'])
-    smoothed_masker = fetch_masker(parameters['smoothed_masker_path'], parameters['language'], smoothing_fwhm=5)
+    output_path = output_name(output_path, subject, parameters['model_name'])
+    masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_root'], input_path)
+    smoothed_masker = fetch_masker(parameters['smoothed_masker_path'], parameters['language'], parameters['path_to_root'], input_path, smoothing_fwhm=5)
     
     # Structuring inputs for later computation
     indexes, new_indexes, offset_type_list, duration_type_list, compression_types, n_components_list = structuring_inputs(parameters['models'])
     
     # Instanciations of the classes
-    transformer = Transformer(parameters['tr'], parameters['nscans'], new_indexes, offset_type_list, duration_type_list, parameters['hrf'])
+    transformer = Transformer(parameters['tr'], parameters['nscans'], new_indexes, offset_type_list, duration_type_list, parameters['offset_path'], parameters['duration_path'], parameters['language'], parameters['hrf'])
     encoding_model = EncodingModel(model=Ridge(), alpha=None, alpha_min_log_scale=2, alpha_max_log_scale=4, nb_alphas=25)
     splitter = Splitter(1)
     compressor = Compressor(n_components_list, indexes, compression_types)
@@ -59,23 +61,23 @@ if __name__=='__main__':
     encoding_model_ext = Task([encoding_model.evaluate], [splitter_cv_ext, transform_data_ext, encoding_model_int], name='encoding_model_ext')
     
     # Creating tree structure
-    splitter_cv_ext = splitter_cv_ext.set_children([splitter_cv_int, compressor_ext])
-    splitter_cv_int = splitter_cv_int.set_children([compressor_int])
-    compressor_int = compressor_int.set_children([transform_data_int])
-    transform_data_int = transform_data_int.set_children([encoding_model_int])
-    encoding_model_int = encoding_model_int.set_children([compressor_ext])
-    compressor_ext = compressor_ext.set_children([transform_data_ext])
-    transform_data_ext = transform_data_ext.set_children([encoding_model_ext])    
+    splitter_cv_ext.set_children([splitter_cv_int, compressor_ext, encoding_model_ext])
+    splitter_cv_int.set_children([compressor_int, transform_data_int, encoding_model_int])
+    compressor_int.set_children([transform_data_int])
+    transform_data_int.set_children([encoding_model_int])
+    encoding_model_int.set_children([compressor_ext, encoding_model_ext])
+    compressor_ext.set_children([transform_data_ext])
+    transform_data_ext.set_children([encoding_model_ext])    
     
     # Formatting input
-    deep_representations_paths, fMRI_paths = fetch_data(parameters, input)
+    deep_representations_paths, fMRI_paths = fetch_data(parameters['path_to_root'], input_path, subject, parameters['language'])
     deep_representations = transformer.process_representations(deep_representations_paths, parameters['models'])
     fMRI_data = transformer.process_fmri_data(fMRI_paths, masker)
     
     # Executing pipeline
     pipeline = Pipeline()
-    pipeline.fit([splitter_cv_ext]) # retrieve the flow from children and parents dependencies
-    maps = pipeline.compute(deep_representations, fMRI_data, output_path, logs=logs)
+    pipeline.fit([splitter_cv_ext], logs) # retrieve the flow from children and parents dependencies
+    maps = pipeline.compute(deep_representations, fMRI_data, output_path, logger=logs)
     
     # Aggregate over cross-validation
     maps = {key: np.mean(np.stack(np.array([dic[key] for dic in maps]), axis=0), axis=0) for key in maps[0]}

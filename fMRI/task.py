@@ -20,7 +20,7 @@ class Task(object):
         self.functions = functions
         self.name = name
         self.output = []
-        self.flatten = flatten
+        self.flatten_ = flatten
         self.special_output_transform= None
     
     def set_children(self, children):
@@ -30,6 +30,10 @@ class Task(object):
     def set_terminated(self, bool_value):
         """ Set self.terminated value."""
         self.terminated = bool_value
+    
+    def set_output(self, value):
+        """ Set self.output value."""
+        self.output = value
     
     def add_output(self, output):
         """ Add value to self.output."""
@@ -67,7 +71,7 @@ class Task(object):
         Arguments:
             - input_: list (of list)
         """
-        if self.flatten:
+        if self.flatten_:
             if not self.parents:
                 raise Exception("No parents input to flatten...")
             flattening_factor = len(input_[0])
@@ -79,25 +83,25 @@ class Task(object):
         """ Unflatten the output of the task when we have flattened
         the input.
         """
-        if self.flatten:
+        if self.flatten_:
             self.output = [self.output[x : x + self.flattening_factor] for x in range(0, len(self.output), self.flattening_factor)]
     
     def execute(self):
-    """ Execute all task functions on the serie of parents outputs."""
-    if not (self.is_waiting() or self.is_terminated()):
-        inputs_ =  list(zip(*[self.flatten(parent.output) for parent in self.parents]))
-        inputs = [merge_dict(list(items)) for items in inputs_]
-        for input in inputs:
-            input_tmp = input.copy()
-            for func in self.functions:
-                input_tmp = filter_args(func, input_tmp)
-                input_tmp = func(**input_tmp)
-            self.add_output(input_tmp)
-        self.terminated = True
-        self.unflatten()
-        if self.special_output_transform:
-            self.special_output_transform(self.output)
-    else:
-        print('Dependencies not fullfilled...')
+        """ Execute all task functions on the serie of parents outputs."""
+        if not (self.is_waiting() or self.is_terminated()):
+            inputs_ =  list(zip(*[self.flatten(parent.output) for parent in self.parents]))
+            inputs = [merge_dict(list(items)) for items in inputs_]
+            for input in inputs:
+                input_tmp = input.copy()
+                for func in self.functions:
+                    input_tmp = filter_args(func, input_tmp)
+                    input_tmp = func(**input_tmp)
+                self.add_output(input_tmp)
+            self.terminated = True
+            self.unflatten()
+            if self.special_output_transform:
+                self.special_output_transform(self.output)
+        else:
+            print('Dependencies not fullfilled...')
     
     

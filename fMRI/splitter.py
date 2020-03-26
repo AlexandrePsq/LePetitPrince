@@ -15,7 +15,7 @@ class Splitter(object):
         self.out_per_fold = out_per_fold
         pass
     
-    def split(X_list, Y_list):
+    def split(self, X_list, Y_list):
         """ Split lists in differents folds for cross validation.
         Arguments:
             - X_list: list

@@ -19,7 +19,7 @@ class Compressor(object):
             - indexes: list (of list)
             - compression_types: list (of str)
         """
-        self.ncomponents_list = ncomponents_list
+        self.ncomponents_list = n_components_list
         self.indexes = indexes
         self.compression_types = compression_types
         self.bucket = []
@@ -58,7 +58,7 @@ class Compressor(object):
         index = 0
         X_train_ = []
         X_test_ = []
-        for i in lengths:
+        for i in X_lengths:
             X_train_.append(pca.transform(X_all[index:index+i,:]))
             index += i
         for matrix in X_test:
@@ -77,7 +77,7 @@ class Compressor(object):
             func = getattr(self, self.compression_types[index])
             X_train_ = clean_nan_rows(X_train[:,indexes])
             X_test_ = clean_nan_rows(X_test[:,indexes])
-            self.bucket.append(func(X_train_, X_test_, self.ncomponents_list[index], logger)
+            self.bucket.append(func(X_train_, X_test_, self.ncomponents_list[index], logger))
         
         X_train = pd.concat([pd.DataFrame(data['X_train']) for data in self.bucket], axis=1).values
         X_test = pd.concat([pd.DataFrame(data['X_test']) for data in self.bucket], axis=1).values

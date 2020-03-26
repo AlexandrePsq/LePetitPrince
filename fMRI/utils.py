@@ -1,13 +1,17 @@
 import os
 import yaml
+import glob
 import inspect
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 
 import nibabel as nib
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker
+from nilearn.plotting import plot_glass_brain, plot_img
 
 
 #########################################
@@ -64,8 +68,8 @@ def clean_nan_rows(array):
     Returns:
         - new_array: np.array
     """
-    filter = ~np.isnan(array)
-    new_array = np.vstack([row for row in [row_[filter[index]] for index, row_ in enumerate(array)] if len(row)>0])
+    filter_ = ~np.isnan(array)
+    new_array = np.vstack([row for row in [row_[filter_[index]] for index, row_ in enumerate(array)] if len(row)>0])
     return new_array
 
 def aggregate_cv(data):
@@ -123,7 +127,7 @@ def output_name(folder_path, subject, model_name):
     """
     folder = os.path.join(folder_path, subject, model_name)
     check_folder(folder)
-    template = os.path.join(folder, '{}_{}_'.format(subject, model_name)
+    template = os.path.join(folder, '{}_{}_'.format(subject, model_name))
     return template
 
 def possible_subjects_id(language):
@@ -144,34 +148,54 @@ def possible_subjects_id(language):
     else:
         raise Exception('Language {} not known.'.format(language))
     
-def fetch_offsets(offset_type, run_index):
+def fetch_data(path_to_root, path_to_input, subject, language):
+    """ Retrieve deep representations and fmri data.
+    Arguments:
+        - path_to_root: str
+        - path_to_input: str
+        - subject: str
+        - language: str
+    """
+    fmri_path = os.path.join(path_to_root, "fMRI", language, subject, "func")
+    fMRI_paths = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
+    deep_representations_paths = sorted(glob.glob(os.path.join(path_to_input, '*run*.csv')))
+    return deep_representations_paths, fMRI_paths
+
+def fetch_offsets(offset_type, run_index, offset_path, language):
     """ Retrieve the offset vector.
     Arguments:
         - offset_type: str
+        - run_index: int
+        - offset_path: str
+        - language: str
     Returns:
         - vector: np.array
     """
-    offset_template_path = os.path.join(parameters['offset_path'], parameters['language'], 'onsets-offsets', '{offset_type}' + '_run{run_index}.csv')
+    offset_template_path = os.path.join(offset_path, language, 'onsets-offsets', '{offset_type}' + '_run{run_index}.csv')
     path = offset_template_path.format(offset_type=offset_type, run_index=run_index)
     if not os.path.exists:
         raise Exception("Please specify an offset file at: {}".format(path))
     else:
-        offset = pd.read_csv(path, index=False).values
+        offset = pd.read_csv(path).values
     return offset
 
-def fetch_duration(duration_type, run_index, default_size=None):
+def fetch_duration(duration_type, run_index, duration_path, language, default_size=None):
     """ Retrieve the duration vector.
     Arguments:
         - duration_type: str
+        - run_index: int
+        - duration_path: str
+        - language: str
+        - default_size = int
     Returns:
         - vector: np.array
     """
-    duration_template_path = os.path.join(parameters['offset_path'], parameters['language'], 'durations', '{duration_type}' + '_run{run_index}.csv')
+    duration_template_path = os.path.join(duration_path, language, 'durations', '{duration_type}' + '_run{run_index}.csv')
     path = duration_template_path.format(duration_type=duration_type, run_index=run_index)
     if not os.path.exists:
         duration = np.ones(default_size)
     else:
-        duration = pd.read_csv(path, index=False).values
+        duration = pd.read_csv(path).values
     return duration
 
 def structuring_inputs(parameters):
@@ -195,13 +219,11 @@ def structuring_inputs(parameters):
     n_components_list = []
     i = 0
     i_ = 0
-    for index, model in enumerate(parameters['models']):
+    for model in parameters['models']:
         compression_types.append(model['data_compression'] if model['data_compression'] else 'identity')
         n_components_list.append(model['ncomponents'])
         indexes.append(eval(model['columns_to_retrieve']) + i)
         i += len(eval(model['columns_to_retrieve']))
-        offset_type_list.append(model['offset_type'])
-        duration_type_list.append(model['duration_type'])
         if model['data_compression']:
             new_indexes.append(np.arange(i_, i_ + model['ncomponents']))
             i_ += model['ncomponents']
@@ -218,7 +240,7 @@ def structuring_inputs(parameters):
 ########### Nilearn functions ###########
 #########################################
 
-def compute_global_masker(files): # [[path, path2], [path3, path4]]
+def compute_global_masker(files, smoothing_fwhm=None): # [[path, path2], [path3, path4]]
     """Returns a MultiNiftiMasker object from list (of list) of files.
     Arguments:
         - files: list (of list of str)
@@ -227,16 +249,19 @@ def compute_global_masker(files): # [[path, path2], [path3, path4]]
     """
     masks = [compute_epi_mask(f) for f in files]
     global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
-    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True)
+    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=smoothing_fwhm)
     masker.fit()
     return masker
 
-def fetch_masker(masker_path, language, smoothing_fwhm=None):
+def fetch_masker(masker_path, language, path_to_root, path_to_input, smoothing_fwhm=None):
     """ Fetch or compute if needed a global masker from all subjects of a
     given language.
     Arguments:
         - masker_path: str
         - language: str
+        - path_to_input: str
+        - path_to_root: str
+        - smoothing_fwhm: int
     """
     if os.path.exists(masker_path):
         masker = nib.load(masker_path)
@@ -244,8 +269,8 @@ def fetch_masker(masker_path, language, smoothing_fwhm=None):
         fmri_runs = {}
         subjects = [get_subject_name(id) for id in possible_subjects_id(language)]
         for subject in subjects:
-            fmri_path = os.path.join(paths.path2data, "fMRI", language, subject, "func")
-            fmri_runs[subject] = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
+            _, fmri_paths = fetch_data(path_to_root, path_to_input, subject, language)
+            fmri_runs[subject] = fmri_paths
         masker = compute_global_masker(list(fmri_runs.values()), smoothing_fwhm=smoothing_fwhm)
         nib.save(masker, masker_path)
     return masker
@@ -270,10 +295,10 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
 
     logger.info("Saving glass brain...")
     if not_glass_brain:
-        display = plot_img(img_smoothed, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))
+        display = plot_img(img, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))
         display.savefig(output_path + '.png')
         display.close()
     else:
-        display = plot_glass_brain(img_smoothed, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
+        display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
         display.savefig(output_path + '.png')
         display.close()

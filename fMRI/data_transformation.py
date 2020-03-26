@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 
 from sklearn.preprocessing import StandardScaler
+from nistats.hemodynamic_models import compute_regressor
+
+from utils import fetch_offsets, fetch_duration
 
 
 
@@ -12,7 +15,7 @@ class Transformer(object):
     """
     
     
-    def __init__(self, tr, nscans, indexes, offset_type_dict, duration_type_dict, hrf='spm', oversampling=10, with_mean=True, with_std=True):
+    def __init__(self, tr, nscans, indexes, offset_type_dict, duration_type_dict, offset_path, duration_path, language, hrf='spm', oversampling=10, with_mean=True, with_std=True):
         """ Instanciation of Transformer class.
         Arguments:
             - tr: int
@@ -20,6 +23,9 @@ class Transformer(object):
             - indexes: list (of np.array)
             - offset_type_dict: dict (of list)
             - duration_type_dict: dict (of list)
+            - offset_path: str
+            - duration_path: str
+            - language: str
             - hrf: str
             - oversampling: int
             - with_mean: bool
@@ -34,6 +40,9 @@ class Transformer(object):
         self.indexes = indexes
         self.offset_type_dict = offset_type_dict
         self.duration_type_dict = duration_type_dict
+        self.offset_path = offset_path
+        self.duration_path = duration_path
+        self.language = language
     
     def standardize(self, X_train, X_test):
         """Standardize a train and test sets.
@@ -80,8 +89,8 @@ class Transformer(object):
         """
         regressors = []
         representations = [col for col in dataframe.columns]
-        offsets = fetch_offsets(offset_type, run_index)
-        duration = fetch_duration(duration_type, run_index, default_size=len(dataframe))
+        offsets = fetch_offsets(offset_type, run_index, self.offset_path, self.language)
+        duration = fetch_duration(duration_type, run_index, self.duration_path, self.language, default_size=len(dataframe))
         for col in representations:
             conditions = np.vstack((offsets, duration, dataframe[col]))
             tmp = compute_regressor(exp_condition=conditions,

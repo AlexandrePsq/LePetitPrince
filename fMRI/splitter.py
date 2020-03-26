@@ -15,18 +15,22 @@ class Splitter(object):
         Arguments:
             - X_list: list
             - Y_list: list
+        Returns:
+            - dict
         """
         result = []
         logo = LeavePOut(self.out_per_fold)
-        for train, valid in logo.split(X_list):
+        for train, test in logo.split(X_list):
             y_train = [Y_list[i] for i in train]
             x_train = [X_list[i] for i in train]
-            y_test = [Y_list[i] for i in valid]
-            x_test = [X_list[i] for i in valid]
-            result.append({'X_list': x_train,
-                        'Y_list': y_train,
+            y_test = [Y_list[i] for i in test]
+            x_test = [X_list[i] for i in test]
+            result.append({'X_train': x_train,
+                        'Y_train': y_train,
                         'X_test': x_test,
-                        'Y_test': y_test
+                        'Y_test': y_test,
+                        'run_train': train,
+                        'run_test': test
                         })
         return result
         

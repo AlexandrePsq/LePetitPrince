@@ -76,7 +76,7 @@ class Task(object):
         the input.
         """
         if self.flatten:
-            self.output = [input_[x : x + self.flattening_factor] for x in range(0, len(self.output), self.flattening_factor)]
+            self.output = [self.output[x : x + self.flattening_factor] for x in range(0, len(self.output), self.flattening_factor)]
     
     def execute(self):
     """ Execute all task functions on the serie of parents outputs."""

@@ -16,17 +16,17 @@ masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePeti
 language: english
 models:
   - model_name: bert_all-layers
-    columns_to_retrieve: "[i for i in range(0,50)]" #example
+    columns_to_retrieve: "[i for i in range(0,500)]" #example
     surname: BERT-small
-    data_compression: None
-    compression_kwargs: None
+    data_compression: pca
+    ncomponents: 300
     onset_type: 'word' # word / word+punctuation / ...
     shift_surprisal: False
   - model_name: wordrate
-    columns_to_retrieve: None
+    columns_to_retrieve: "[0]"
     surname: Word_rate
     data_compression: None
-    compression_kwargs: None
+    ncomponents: None
     onset_type: 'word' # word / word+punctuation / ...
     shift_surprisal: False
 model_name: BERT-small+Word_rate

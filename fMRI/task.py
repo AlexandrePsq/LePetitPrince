@@ -72,8 +72,6 @@ class Task(object):
             - input_: list (of list)
         """
         if self.flatten_:
-            if not self.parents:
-                raise Exception("No parents input to flatten...")
             flattening_factor = len(input_[0])
             self.flattening_factor = flattening_factor
             input_ = [item for sublist in input_ for item in sublist]

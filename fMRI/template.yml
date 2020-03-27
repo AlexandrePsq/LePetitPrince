@@ -16,7 +16,8 @@ masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePeti
 smoothed_masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/smoothed_global_masker_english"
 path_to_root: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
 path_to_fmridata: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/"
-offset_path: ""
+offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/wave"
+duration_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
 language: english
 models:
   - model_name: wordrate_all_model

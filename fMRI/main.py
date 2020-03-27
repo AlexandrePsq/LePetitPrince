@@ -26,25 +26,27 @@ if __name__=='__main__':
 
     args = parser.parse_args()
     parameters = read_yaml(args.yaml_file)
-    logs = Logger(args.logs)
     input_path = args.input
     output_path = args.output
     subject = get_subject_name(parameters['subject'])
     output_path = output_name(output_path, subject, parameters['model_name'])
+    logs = Logger(os.path.join(args.logs, '{}_{}.txt'.format(subject, parameters['model_name'])))
     logs.info("Fetching maskers...")
     masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path)
     smoothed_masker = fetch_masker(parameters['smoothed_masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, smoothing_fwhm=5)
-    logs.info("Masker fetched.")
+    logs.validate()
 
     logs.info("Structuring inputs for later computation...")
     indexes, new_indexes, offset_type_list, duration_type_list, compression_types, n_components_list = structuring_inputs(parameters['models'])
-    
+    logs.validate()
+
     logs.info("Instanciations of the classes...")
     transformer = Transformer(parameters['tr'], parameters['nscans'], new_indexes, offset_type_list, duration_type_list, parameters['offset_path'], parameters['duration_path'], parameters['language'], parameters['hrf'])
     encoding_model = EncodingModel(model=Ridge(), alpha=None, alpha_min_log_scale=2, alpha_max_log_scale=4, nb_alphas=25)
     splitter = Splitter(1)
     compressor = Compressor(n_components_list, indexes, compression_types)
-    
+    logs.validate()
+
     logs.info("Defining Pipeline flow...")
     splitter_cv_ext = Task([splitter.split], name='splitter_cv_ext')
     ## Pipeline int
@@ -69,20 +71,24 @@ if __name__=='__main__':
     transform_data_int.set_children([encoding_model_int])
     encoding_model_int.set_children([compressor_ext, encoding_model_ext])
     compressor_ext.set_children([transform_data_ext])
-    transform_data_ext.set_children([encoding_model_ext])    
+    transform_data_ext.set_children([encoding_model_ext])
+    logs.validate()
     
     logs.info("Formatting input...")
     deep_representations_paths, fMRI_paths = fetch_data(parameters['path_to_fmri_data'], input_path, subject, parameters['language'])
     deep_representations = transformer.process_representations(deep_representations_paths, parameters['models'])
     fMRI_data = transformer.process_fmri_data(fMRI_paths, masker)
+    logs.validate()
     
     logs.info("Executing pipeline...")
     pipeline = Pipeline()
     pipeline.fit([splitter_cv_ext], logs) # retrieve the flow from children and parents dependencies
     maps = pipeline.compute(deep_representations, fMRI_data, output_path, logger=logs)
+    logs.validate()
     
     logs.info("Aggregating over cross-validation results...")
     maps = {key: np.mean(np.stack(np.array([dic[key] for dic in maps]), axis=0), axis=0) for key in maps[0]}
+    logs.validate()
     
     logs.info("Plotting...")
     ## R2
@@ -97,5 +103,6 @@ if __name__=='__main__':
     output_path = os.path.join(output_path, 'alpha')
     create_maps(masker, maps['alpha'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['alpha'], output_path, vmax=None, logger=logs)
+    logs.validate()
     
     print("Model: {} for subject: {} --> Done".format(parameters['model_name'], subject))

@@ -12,21 +12,21 @@ class Logger(object):
     def __init__(self, path):
         self.log_path = path
     
-    def report_logs(self, logs, level):
+    def report_logs(self, logs, level, end):
         """General reporting function.
         Arguments:
             - logs: str
             - level: str
         """
         write(self.log_path, level, end=': ')
-        write(self.log_path, logs)
+        write(self.log_path, logs, end=end)
     
     def error(self, message):
         """Reports ERROR messages.
         Arguments:
             - message: str
         """
-        self.report_logs(message, level='ERROR')
+        self.report_logs(message, level='ERROR', end='\n')
         raise Exception(message)
     
     def warning(self, message):
@@ -34,14 +34,18 @@ class Logger(object):
         Arguments:
             - message: str
         """
-        self.report_logs(message, level='WARNING')
+        self.report_logs(message, level='WARNING', end='\n')
 
     def info(self, message):
         """Reports INFO messages.
         Arguments:
             - message: str
         """
-        self.report_logs(message, level='INFO')
+        self.report_logs(message, level='INFO', end=' ')
+    
+    def validate(self):
+        """Validate previous message."""
+        write(self.log_path, '--> Done', end='\n')
 
     def figure(self, array):
         """Reports a figure.

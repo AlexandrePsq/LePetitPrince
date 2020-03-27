@@ -27,7 +27,7 @@ class Pipeline(object):
         queue = [task]
         count = 0
         while queue:
-            task = queue.pop()[0]
+            task = queue.pop()
             if task.is_waiting():
                 if count==0:
                     logger.error("Loop detected... Please check tasks dependencies.")

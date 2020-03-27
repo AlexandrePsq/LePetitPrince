@@ -83,7 +83,7 @@ if __name__=='__main__':
     
     logs.info("Executing pipeline...")
     pipeline = Pipeline()
-    pipeline.fit([splitter_cv_ext], logs) # retrieve the flow from children and parents dependencies
+    pipeline.fit(splitter_cv_ext, logs) # retrieve the flow from children and parents dependencies
     maps = pipeline.compute(deep_representations, fMRI_data, output_path, logger=logs)
     logs.validate()
     

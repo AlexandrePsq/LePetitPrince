@@ -294,7 +294,7 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
                                                 'memory_level', 'n_jobs', 'smoothing_fwhm', 'standardize',
                                                 't_r', 'verbose']}
         nib.save(masker.mask_img_, masker_path + '.nii.gz')
-        save_yaml(, masker_path + '.yml')
+        save_yaml(params, masker_path + '.yml')
     return masker
 
 def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=False, logger=None):

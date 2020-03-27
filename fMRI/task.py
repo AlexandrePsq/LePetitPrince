@@ -7,7 +7,7 @@ class Task(object):
     possible to integrate in the pipeline.
     """
     
-    def __init__(self, functions=None, dependencies=[], name='', flatten=False, special_output_transform=None):
+    def __init__(self, functions=None, dependencies=[], name='', flatten=False, unflatten=False, special_output_transform=None):
         """ Instanciation of a task.
         Arguments:
             - functions: list (of functions)
@@ -21,6 +21,7 @@ class Task(object):
         self.name = name
         self.output = []
         self.flatten_ = flatten
+        self.unflatten_ = unflatten
         self.special_output_transform= None
     
     def set_children(self, children):
@@ -37,7 +38,7 @@ class Task(object):
     
     def add_output(self, output):
         """ Add value to self.output."""
-        self.output += output
+        self.output.append(output)
     
     def get_dependencies(self):
         """ Get parent tasks."""
@@ -81,7 +82,7 @@ class Task(object):
         """ Unflatten the output of the task when we have flattened
         the input.
         """
-        if self.flatten_:
+        if self.unflatten_:
             self.output = [self.output[x : x + self.flattening_factor] for x in range(0, len(self.output), self.flattening_factor)]
     
     def execute(self):
@@ -96,7 +97,7 @@ class Task(object):
                     input_tmp = filter_args(func, input_tmp)
                     input_tmp = func(**input_tmp)
                 self.add_output(input_tmp)
-            self.terminated = True
+            self.set_terminated(True)
             self.unflatten()
             if self.special_output_transform:
                 self.special_output_transform(self.output)

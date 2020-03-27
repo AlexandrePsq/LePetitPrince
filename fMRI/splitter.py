@@ -21,7 +21,7 @@ class Splitter(object):
             - X_train: list
             - Y_train: list
         Returns:
-            - dict
+            - list (of dict)
         """
         result = []
         logo = LeavePOut(self.out_per_fold)

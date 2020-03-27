@@ -52,13 +52,13 @@ if __name__=='__main__':
     splitter_cv_ext = Task([splitter.split], name='splitter_cv_ext')
     ## Pipeline int
     splitter_cv_int = Task([splitter.split], [splitter_cv_ext],
-                                name='splitter_cv_int')
+                                name='splitter_cv_int', flatten=True, unflatten=False)
     compressor_int = Task([compressor.compress], [splitter_cv_int],
-                                name='compressor_int', flatten=True) # define here the compression method wanted
+                                name='compressor_int', flatten=True, unflatten=True) # define here the compression method wanted
     transform_data_int = Task([transformer.standardize, transformer.make_regressor], [splitter_cv_int, compressor_int],
-                                name='transform_data_int', flatten=True) # functions in Task objects are read right to left
+                                name='transform_data_int', flatten=True, unflatten=True) # functions in Task objects are read right to left
     encoding_model_int = Task([encoding_model.grid_search], [splitter_cv_int, transform_data_int],
-                                name='encoding_model_int', flatten=True,
+                                name='encoding_model_int', flatten=True, unflatten=True,
                                 special_output_transform=aggregate_cv)
     ## Pipeline ext
     compressor_ext = Task([compressor.compress], [splitter_cv_ext, encoding_model_int], name='compressor_ext')

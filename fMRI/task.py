@@ -7,14 +7,14 @@ class Task(object):
     possible to integrate in the pipeline.
     """
     
-    def __init__(self, functions=None, parents=[], name='', flatten=False, special_output_transform=None):
+    def __init__(self, functions=None, dependencies=[], name='', flatten=False, special_output_transform=None):
         """ Instanciation of a task.
         Arguments:
             - functions: list (of functions)
-            - parents: list (of Tasks)
+            - dependencies: list (of Tasks)
             - name: str
         """
-        self.parents = parents
+        self.dependencies = dependencies
         self.children = None
         self.terminated = False
         self.functions = functions
@@ -41,7 +41,7 @@ class Task(object):
     
     def get_dependencies(self):
         """ Get parent tasks."""
-        return self.parents
+        return self.dependencies
         
     def get_children(self):
         """ Get children tasks."""
@@ -50,7 +50,7 @@ class Task(object):
     def is_waiting(self):
         """ Check if the task is temrinated."""
         result = True
-        for parent in self.parents:
+        for parent in self.dependencies:
             result = result and parent.is_terminated()
         return (not result)
 
@@ -87,7 +87,7 @@ class Task(object):
     def execute(self):
         """ Execute all task functions on the serie of parents outputs."""
         if not (self.is_waiting() or self.is_terminated()):
-            inputs_ =  list(zip(*[self.flatten(parent.output) for parent in self.parents]))
+            inputs_ =  list(zip(*[self.flatten(parent.output) for parent in self.dependencies]))
             inputs = [merge_dict(list(items)) for items in inputs_]
             for input in inputs:
                 input_tmp = input.copy()

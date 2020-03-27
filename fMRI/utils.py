@@ -147,6 +147,7 @@ def possible_subjects_id(language):
         result = [1] # TO DO
     else:
         raise Exception('Language {} not known.'.format(language))
+    return result
     
 def fetch_data(path_to_root, path_to_input, subject, language):
     """ Retrieve deep representations and fmri data.

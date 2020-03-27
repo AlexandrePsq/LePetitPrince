@@ -46,6 +46,10 @@ class Logger(object):
     def validate(self):
         """Validate previous message."""
         write(self.log_path, '--> Done', end='\n')
+    
+    def report_state(self, message):
+        """Report state of a computation."""
+        write(self.log_path, message, end=' ')
 
     def figure(self, array):
         """Reports a figure.

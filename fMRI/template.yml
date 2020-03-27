@@ -5,6 +5,7 @@ scaling_mean: True
 scaling_var: True
 parallel: False
 cuda: True
+hrf: spm
 voxel_wise: True
 atlas: cort-prob-2mm
 seed: 1111

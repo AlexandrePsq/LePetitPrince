@@ -88,7 +88,8 @@ class Task(object):
         """ Execute all task functions on the serie of parents outputs."""
         if not (self.is_waiting() or self.is_terminated()):
             inputs_ =  list(zip(*[self.flatten(parent.output) for parent in self.dependencies])) # regroup dictionaries outputs from parent tasks
-            inputs = [merge_dict(list(items)) for items in inputs_]
+            inputs_ = [list(item) for item in inputs_] # transform tuple to list -> problematic when 1 single parent
+            inputs = [merge_dict(items) for items in inputs_]
             for input_ in inputs:
                 input_tmp = input_.copy()
                 for func in self.functions:

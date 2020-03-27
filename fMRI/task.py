@@ -37,7 +37,7 @@ class Task(object):
     
     def add_output(self, output):
         """ Add value to self.output."""
-        self.output.append(output)
+        self.output += output
     
     def get_dependencies(self):
         """ Get parent tasks."""
@@ -104,3 +104,5 @@ class Task(object):
             print('Dependencies not fullfilled...')
     
     
+print([(len(parent.output), len(parent.output[0]), type(parent.output[0])) for parent in self.dependencies])
+print('len(input): ', len(inputs_), '\t', 'len(input[0]): ', len(inputs_[0]), type(inputs_[0][0]))

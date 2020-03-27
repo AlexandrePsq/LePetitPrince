@@ -42,15 +42,15 @@ class Pipeline(object):
         self.reset_tasks()
         logger.info("The pipeline was fitted without error.")
             
-    def compute(self, X_list, Y_list, output_path, logger):
+    def compute(self, X_train, Y_train, output_path, logger):
         """ Execute pipeline.
         Arguments:
-            - X_list: list (of np.array)
-            - Y_list: list (of np.array)
+            - X_train: list (of np.array)
+            - Y_train: list (of np.array)
             - output_path: str
             - logger: Logger object
         """
-        inputs = [{'X_list':X_list, 'Y_list':Y_list}]
+        inputs = [{'X_train':X_train, 'Y_train':Y_train}]
         if not self.tasks:
             logger.warning("Pipeline not fitted... Nothing to compute.")
         else:

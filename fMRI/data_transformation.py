@@ -117,8 +117,8 @@ class Transformer(object):
         # Computing design-matrices
         for i in range(len(runs)):
             # to modify in case the path leads to .npy file
-            merge = pd.concat([pd.read_csv(path2features, header=0)[eval(models[index]['columns2retrieve'])] for index, path2features in enumerate(runs[i])], axis=1) # concatenate horizontaly the read csv files of a run
-            arrays.append(merge.values)
+            merge = np.hstack([pd.read_csv(path2features, header=0).values[eval(models[index]['columns_to_retrieve'])] for index, path2features in enumerate(runs[i])]) # concatenate horizontaly the read csv files of a run
+            arrays.append(merge)
         return arrays
     
     def process_fmri_data(self, fmri_paths, masker):

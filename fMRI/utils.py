@@ -289,8 +289,12 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
             _, fmri_paths = fetch_data(path_to_fmridata, path_to_input, subject, language)
             fmri_runs[subject] = fmri_paths
         masker = compute_global_masker(list(fmri_runs.values()), smoothing_fwhm=smoothing_fwhm)
+        params = masker.get_params()
+        params = {key: params[key] for key in ['detrend', 'dtype', 'high_pass', 'low_pass', 'mask_strategy', 
+                                                'memory_level', 'n_jobs', 'smoothing_fwhm', 'standardize',
+                                                't_r', 'verbose']}
         nib.save(masker.mask_img_, masker_path + '.nii.gz')
-        save_yaml(masker.get_params(), masker_path + '.yml')
+        save_yaml(, masker_path + '.yml')
     return masker
 
 def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=False, logger=None):

@@ -31,8 +31,8 @@ if __name__=='__main__':
     output_path = args.output
     subject = get_subject_name(parameters['subject'])
     output_path = output_name(output_path, subject, parameters['model_name'])
-    masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_root'], input_path)
-    smoothed_masker = fetch_masker(parameters['smoothed_masker_path'], parameters['language'], parameters['path_to_root'], input_path, smoothing_fwhm=5)
+    masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path)
+    smoothed_masker = fetch_masker(parameters['smoothed_masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, smoothing_fwhm=5)
     
     # Structuring inputs for later computation
     indexes, new_indexes, offset_type_list, duration_type_list, compression_types, n_components_list = structuring_inputs(parameters['models'])
@@ -70,7 +70,7 @@ if __name__=='__main__':
     transform_data_ext.set_children([encoding_model_ext])    
     
     # Formatting input
-    deep_representations_paths, fMRI_paths = fetch_data(parameters['path_to_root'], input_path, subject, parameters['language'])
+    deep_representations_paths, fMRI_paths = fetch_data(parameters['path_to_fmri_data'], input_path, subject, parameters['language'])
     deep_representations = transformer.process_representations(deep_representations_paths, parameters['models'])
     fMRI_data = transformer.process_fmri_data(fMRI_paths, masker)
     

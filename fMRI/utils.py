@@ -149,15 +149,15 @@ def possible_subjects_id(language):
         raise Exception('Language {} not known.'.format(language))
     return result
     
-def fetch_data(path_to_root, path_to_input, subject, language):
+def fetch_data(path_to_fmridata, path_to_input, subject, language):
     """ Retrieve deep representations and fmri data.
     Arguments:
-        - path_to_root: str
+        - path_to_fmridata: str
         - path_to_input: str
         - subject: str
         - language: str
     """
-    fmri_path = os.path.join(path_to_root, "fMRI", language, subject, "func")
+    fmri_path = os.path.join(path_to_fmridata, "fMRI", language, subject, "func")
     fMRI_paths = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
     deep_representations_paths = sorted(glob.glob(os.path.join(path_to_input, '*run*.csv')))
     return deep_representations_paths, fMRI_paths
@@ -254,14 +254,14 @@ def compute_global_masker(files, smoothing_fwhm=None): # [[path, path2], [path3,
     masker.fit()
     return masker
 
-def fetch_masker(masker_path, language, path_to_root, path_to_input, smoothing_fwhm=None):
+def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothing_fwhm=None):
     """ Fetch or compute if needed a global masker from all subjects of a
     given language.
     Arguments:
         - masker_path: str
         - language: str
         - path_to_input: str
-        - path_to_root: str
+        - path_to_fmridata: str
         - smoothing_fwhm: int
     """
     if os.path.exists(masker_path):
@@ -270,7 +270,7 @@ def fetch_masker(masker_path, language, path_to_root, path_to_input, smoothing_f
         fmri_runs = {}
         subjects = [get_subject_name(id) for id in possible_subjects_id(language)]
         for subject in subjects:
-            _, fmri_paths = fetch_data(path_to_root, path_to_input, subject, language)
+            _, fmri_paths = fetch_data(path_to_fmridata, path_to_input, subject, language)
             fmri_runs[subject] = fmri_paths
         masker = compute_global_masker(list(fmri_runs.values()), smoothing_fwhm=smoothing_fwhm)
         nib.save(masker, masker_path)

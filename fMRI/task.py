@@ -104,6 +104,3 @@ class Task(object):
         else:
             print('Dependencies not fullfilled...')
     
-    
-print([(len(parent.output), len(parent.output[0]), type(parent.output[0])) for parent in self.dependencies])
-print('len(input): ', len(inputs_), '\t', 'len(input[0]): ', len(inputs_[0]), type(inputs_[0][0]))

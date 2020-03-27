@@ -37,7 +37,7 @@ if __name__=='__main__':
     logs.validate()
 
     logs.info("Structuring inputs for later computation...")
-    indexes, new_indexes, offset_type_list, duration_type_list, compression_types, n_components_list = structuring_inputs(parameters['models'])
+    indexes, new_indexes, offset_type_list, duration_type_list, compression_types, n_components_list = structuring_inputs(parameters['models'], parameters['nb_runs'])
     logs.validate()
 
     logs.info("Instanciations of the classes...")

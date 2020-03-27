@@ -208,10 +208,11 @@ def fetch_duration(duration_type, run_index, duration_path, language, default_si
         duration = pd.read_csv(path).values
     return duration
 
-def structuring_inputs(parameters):
+def structuring_inputs(models, nb_runs):
     """ Structure inputs from submitted yaml file.
     Arguments:
-        - parameters: dict
+        - models: dict
+        - nb_runs: int
     Returns:
         - indexes: list (of np.array)
         - new_indexes: list (of np.array)
@@ -222,14 +223,13 @@ def structuring_inputs(parameters):
     """
     indexes = []
     new_indexes = []
-    nb_runs = parameters['nb_runs']
     offset_type_dict = {'run{}'.format(i): [] for i in range(1, nb_runs = 1)}
     duration_type_dict = {'run{}'.format(i): [] for i in range(1, nb_runs = 1)}
     compression_types = []
     n_components_list = []
     i = 0
     i_ = 0
-    for model in parameters['models']:
+    for model in models:
         compression_types.append(model['data_compression'] if model['data_compression'] else 'identity')
         n_components_list.append(model['ncomponents'])
         indexes.append(eval(model['columns_to_retrieve']) + i)

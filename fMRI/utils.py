@@ -279,8 +279,8 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
         params = read_yaml(masker_path + '.yml')
         mask_img = nib.load(masker_path + '.nii.gz')
         masker = MultiNiftiMasker()
-        masker.set_params(params)
-        masker.fit(mask_img)
+        masker.set_params(**params)
+        masker.fit([mask_img])
     else:
         logger.report_state(" recomputing masker...")
         fmri_runs = {}

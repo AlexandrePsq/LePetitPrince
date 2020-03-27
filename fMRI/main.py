@@ -5,7 +5,7 @@ import numpy as np
 
 from sklearn.linear_model import Ridge
 
-from utils import check_folder, read_yaml, write, get_subject_name, output_name, structuring_inputs, aggregate_cv, create_maps, fetch_masker, fetch_data
+from utils import check_folder, read_yaml, write, get_subject_name, output_name, structuring_inputs, aggregate_cv, create_maps, fetch_masker, fetch_data, get_nscans
 from task import Task
 from logger import Logger
 from regression_pipeline import Pipeline
@@ -42,7 +42,7 @@ if __name__=='__main__':
     logs.validate()
 
     logs.info("Instanciations of the classes...")
-    transformer = Transformer(parameters['tr'], parameters['nscans'], new_indexes, offset_type_list, duration_type_list, parameters['offset_path'], parameters['duration_path'], parameters['language'], parameters['hrf'])
+    transformer = Transformer(parameters['tr'], get_nscans(parameters['language']), new_indexes, offset_type_list, duration_type_list, parameters['offset_path'], parameters['duration_path'], parameters['language'], parameters['hrf'])
     encoding_model = EncodingModel(model=Ridge(), alpha=None, alpha_min_log_scale=2, alpha_max_log_scale=4, nb_alphas=25)
     splitter = Splitter(1)
     compressor = Compressor(n_components_list, indexes, compression_types)

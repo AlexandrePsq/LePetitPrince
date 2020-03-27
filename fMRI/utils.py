@@ -275,14 +275,14 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
         - logger: Logger
     """
     if os.path.exists(masker_path):
-        logs.info(" Fetching existing masker...")
+        logger.info(" Fetching existing masker...")
         params = read_yaml(masker_path + '.yml')
         mask_img = nib.load(masker_path + '.nii.gz')
         masker = MultiNiftiMasker()
         masker.set_params(params)
         masker.fit(mask_img)
     else:
-        logs.info(" Recomputing masker...")
+        logger.info(" Recomputing masker...")
         fmri_runs = {}
         subjects = [get_subject_name(id) for id in possible_subjects_id(language)]
         for subject in subjects:

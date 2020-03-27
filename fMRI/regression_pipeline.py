@@ -32,7 +32,7 @@ class Pipeline(object):
                 if count==0:
                     logger.error("Loop detected... Please check tasks dependencies.")
                 else:
-                    queue = task + queue
+                    queue = [task] + queue
                     count -= 1
             else:
                 self.tasks.append(task)

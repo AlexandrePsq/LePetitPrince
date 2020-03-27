@@ -66,11 +66,11 @@ if __name__=='__main__':
     encoding_model_ext = Task([encoding_model.evaluate], [splitter_cv_ext, transform_data_ext, encoding_model_int], name='encoding_model_ext')
     
     # Creating tree structure
-    splitter_cv_ext.set_children([splitter_cv_int, compressor_ext, encoding_model_ext])
-    splitter_cv_int.set_children([compressor_int, transform_data_int, encoding_model_int])
+    splitter_cv_ext.set_children([splitter_cv_int, compressor_ext])
+    splitter_cv_int.set_children([compressor_int])
     compressor_int.set_children([transform_data_int])
     transform_data_int.set_children([encoding_model_int])
-    encoding_model_int.set_children([compressor_ext, encoding_model_ext])
+    encoding_model_int.set_children([compressor_ext])
     compressor_ext.set_children([transform_data_ext])
     transform_data_ext.set_children([encoding_model_ext])
     logs.validate()

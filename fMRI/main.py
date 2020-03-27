@@ -76,7 +76,7 @@ if __name__=='__main__':
     logs.validate()
     
     logs.info("Formatting input...")
-    deep_representations_paths, fMRI_paths = fetch_data(parameters['path_to_fmridata'], input_path, subject, parameters['language'])
+    deep_representations_paths, fMRI_paths = fetch_data(parameters['path_to_fmridata'], input_path, subject, parameters['language'], parameters['model_name'])
     deep_representations = transformer.process_representations(deep_representations_paths, parameters['models'])
     fMRI_data = transformer.process_fmri_data(fMRI_paths, masker)
     logs.validate()

@@ -145,7 +145,7 @@ def filter_args(func, d):
         - args: dict
     """
     keys = inspect.getfullargspec(func).args
-    args = {key: d[key] for key in keys}
+    args = {key: d[key] for key in keys if key!='self'}
     return args
 
 def output_name(folder_path, subject, model_name):
@@ -182,17 +182,18 @@ def possible_subjects_id(language):
         raise Exception('Language {} not known.'.format(language))
     return result
     
-def fetch_data(path_to_fmridata, path_to_input, subject, language):
+def fetch_data(path_to_fmridata, path_to_input, subject, language, model_name):
     """ Retrieve deep representations and fmri data.
     Arguments:
         - path_to_fmridata: str
         - path_to_input: str
         - subject: str
         - language: str
+        - model_name: str
     """
     fmri_path = os.path.join(path_to_fmridata, "fMRI", language, subject, "func")
     fMRI_paths = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
-    deep_representations_paths = sorted(glob.glob(os.path.join(path_to_input, '*run*.csv')))
+    deep_representations_paths = sorted(glob.glob(os.path.join(path_to_input, language, model_name,'*run*.csv')))
     return deep_representations_paths, fMRI_paths
 
 def fetch_offsets(offset_type, run_index, offset_path, language):

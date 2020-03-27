@@ -38,7 +38,7 @@ models:
 model_name: Word_rate+RMS
 #models:
 #  - model_name: bert_all-layers
-#    columns_to_retrieve: "np.array([i for i in range(0,500)])" #example # MUST BE a np.array !!
+#    columns_to_retrieve: "[i for i in range(0,500)]" #example 
 #    surname: BERT-small
 #    data_compression: pca
 #    ncomponents: 300

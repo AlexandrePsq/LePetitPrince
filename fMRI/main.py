@@ -33,6 +33,7 @@ if __name__=='__main__':
     logs = Logger(os.path.join(args.logs, '{}_{}.txt'.format(subject, parameters['model_name'])))
     logs.info("Fetching maskers...")
     masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, logger=logs)
+    logs.validate()
     smoothed_masker = fetch_masker(parameters['smoothed_masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, smoothing_fwhm=5, logger=logs)
     logs.validate()
 

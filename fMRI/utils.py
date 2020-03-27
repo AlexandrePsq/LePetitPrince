@@ -232,13 +232,13 @@ def structuring_inputs(models, nb_runs):
     for model in models:
         compression_types.append(model['data_compression'] if model['data_compression'] else 'identity')
         n_components_list.append(model['ncomponents'])
-        indexes.append(eval(model['columns_to_retrieve']) + i)
+        indexes.append(np.array(eval(model['columns_to_retrieve'])) + i)
         i += len(eval(model['columns_to_retrieve']))
         if model['data_compression']:
             new_indexes.append(np.arange(i_, i_ + model['ncomponents']))
             i_ += model['ncomponents']
         else:
-            new_indexes.append(eval(model['columns_to_retrieve']) + i_)
+            new_indexes.append(np.array(eval(model['columns_to_retrieve'])) + i_)
             i_ += len(eval(model['columns_to_retrieve']))
         for run_index in range(1, nb_runs + 1):
             offset_type_dict['run{}'.format(run_index)].append(model["offset_type"])
@@ -275,14 +275,14 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
         - logger: Logger
     """
     if os.path.exists(masker_path):
-        logger.report_state(" Fetching existing masker...")
+        logger.report_state(" loading existing masker...")
         params = read_yaml(masker_path + '.yml')
         mask_img = nib.load(masker_path + '.nii.gz')
         masker = MultiNiftiMasker()
         masker.set_params(params)
         masker.fit(mask_img)
     else:
-        logger.report_state(" Recomputing masker...")
+        logger.report_state(" recomputing masker...")
         fmri_runs = {}
         subjects = [get_subject_name(id) for id in possible_subjects_id(language)]
         for subject in subjects:

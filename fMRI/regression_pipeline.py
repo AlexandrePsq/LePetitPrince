@@ -25,7 +25,7 @@ class Pipeline(object):
         """
         self.tasks = []
         queue = [task]
-        count = 0
+        count = 1
         while queue:
             task = queue.pop()
             if task.is_waiting():

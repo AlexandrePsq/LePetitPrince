@@ -51,7 +51,7 @@ class Task(object):
         """ Check if the task is temrinated."""
         result = True
         for parent in self.parents:
-            result = result and parent.terminated
+            result = result and parent.is_terminated()
         return (not result)
 
     def is_terminated(self):

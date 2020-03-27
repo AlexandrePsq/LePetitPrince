@@ -36,6 +36,15 @@ def read_yaml(yaml_path):
             print("Couldn't load yaml file: {}.".format(yaml_path))
             quit()
     return parameters
+
+def save_yaml(data, yaml_path):
+    """Open and write safely in a yaml file.
+    Arguments:
+        - data: list/dict/str/int/float
+        -yaml_path: str
+    """
+    with open(yaml_path, 'w') as outfile:
+        yaml.dump(data, outfile, default_flow_style=False)
     
 def write(path, text, end='\n'):
     """Write in the specified text file."""
@@ -265,7 +274,11 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
         - smoothing_fwhm: int
     """
     if os.path.exists(masker_path):
-        masker = nib.load(masker_path)
+        params = read_yaml(masker_path + '.yml')
+        mask_img = nib.load(masker_path + '.nii.gz')
+        masker = MultiNiftiMasker()
+        masker.set_params(params)
+        masker.fit(mask_img)
     else:
         fmri_runs = {}
         subjects = [get_subject_name(id) for id in possible_subjects_id(language)]
@@ -273,7 +286,8 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
             _, fmri_paths = fetch_data(path_to_fmridata, path_to_input, subject, language)
             fmri_runs[subject] = fmri_paths
         masker = compute_global_masker(list(fmri_runs.values()), smoothing_fwhm=smoothing_fwhm)
-        nib.save(masker, masker_path)
+        nib.save(masker.mask_img_, masker_path + '.nii.gz')
+        save_yaml(masker.get_params(), masker_path + '.yml')
     return masker
 
 def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=False, logger=None):

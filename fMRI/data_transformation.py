@@ -19,7 +19,7 @@ class Transformer(object):
         """ Instanciation of Transformer class.
         Arguments:
             - tr: int
-            - nscans: int
+            - nscans: dict (of int)
             - indexes: list (of np.array)
             - offset_type_dict: dict (of list)
             - duration_type_dict: dict (of list)
@@ -95,7 +95,7 @@ class Transformer(object):
             conditions = np.vstack((offsets, duration, dataframe[col]))
             tmp = compute_regressor(exp_condition=conditions,
                                     hrf_model=self.hrf,
-                                    frame_times=np.arange(0.0, self.nscans * self.tr, self.tr),
+                                    frame_times=np.arange(0.0, self.nscans[run_index] * self.tr, self.tr),
                                     oversampling=self.oversampling)
             regressors.append(pd.DataFrame(tmp[0], columns=[col]))
         matrix = pd.concat(regressors, axis=1).values

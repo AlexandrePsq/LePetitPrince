@@ -274,7 +274,7 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
         - smoothing_fwhm: int
         - logger: Logger
     """
-    if os.path.exists(masker_path):
+    if os.path.exists(masker_path + '.nii.gz') and os.path.exists(masker_path + '.yml'):
         logger.report_state(" loading existing masker...")
         params = read_yaml(masker_path + '.yml')
         mask_img = nib.load(masker_path + '.nii.gz')

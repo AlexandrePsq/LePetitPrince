@@ -112,6 +112,30 @@ def get_subject_name(id):
     else:
         return 'sub-{}'.format(id)
 
+def get_nscans(language):
+    result = {'english':{'run1':282,
+                             'run2':298,
+                             'run3':340,
+                             'run4':303,
+                             'run5':265,
+                             'run6':343,
+                             'run7':325,
+                             'run8':292,
+                             'run9':368
+        },
+                       'french':{'run1':309,
+                             'run2':326,
+                             'run3':354,
+                             'run4':315,
+                             'run5':293,
+                             'run6':378,
+                             'run7':332,
+                             'run8':294,
+                             'run9':336
+        }
+        }
+    return result[language]
+
 def filter_args(func, d):
     """ Filter dictionary keys to match the function arguments.
     Arguments:

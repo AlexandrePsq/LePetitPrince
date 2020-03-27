@@ -15,7 +15,7 @@ class Task(object):
             - name: str
         """
         self.dependencies = dependencies
-        self.children = None
+        self.children = []
         self.terminated = False
         self.functions = functions
         self.name = name
@@ -89,8 +89,8 @@ class Task(object):
         if not (self.is_waiting() or self.is_terminated()):
             inputs_ =  list(zip(*[self.flatten(parent.output) for parent in self.dependencies]))
             inputs = [merge_dict(list(items)) for items in inputs_]
-            for input in inputs:
-                input_tmp = input.copy()
+            for input_ in inputs:
+                input_tmp = input_.copy()
                 for func in self.functions:
                     input_tmp = filter_args(func, input_tmp)
                     input_tmp = func(**input_tmp)

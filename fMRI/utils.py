@@ -182,18 +182,18 @@ def possible_subjects_id(language):
         raise Exception('Language {} not known.'.format(language))
     return result
     
-def fetch_data(path_to_fmridata, path_to_input, subject, language, model_name):
+def fetch_data(path_to_fmridata, path_to_input, subject, language, models):
     """ Retrieve deep representations and fmri data.
     Arguments:
         - path_to_fmridata: str
         - path_to_input: str
         - subject: str
         - language: str
-        - model_name: str
+        - models: list (of dict)
     """
     fmri_path = os.path.join(path_to_fmridata, "fMRI", language, subject, "func")
     fMRI_paths = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
-    deep_representations_paths = sorted(glob.glob(os.path.join(path_to_input, language, model_name,'*run*.csv')))
+    deep_representations_paths = [sorted(glob.glob(os.path.join(path_to_input, language, model['model_name'],'*run*.csv'))) for model in models]
     return deep_representations_paths, fMRI_paths
 
 def fetch_offsets(offset_type, run_index, offset_path, language):

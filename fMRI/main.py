@@ -31,19 +31,21 @@ if __name__=='__main__':
     output_path = args.output
     subject = get_subject_name(parameters['subject'])
     output_path = output_name(output_path, subject, parameters['model_name'])
+    logs.info("Fetching maskers...")
     masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path)
     smoothed_masker = fetch_masker(parameters['smoothed_masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, smoothing_fwhm=5)
-    
-    # Structuring inputs for later computation
+    logs.info("Masker fetched.")
+
+    logs.info("Structuring inputs for later computation...")
     indexes, new_indexes, offset_type_list, duration_type_list, compression_types, n_components_list = structuring_inputs(parameters['models'])
     
-    # Instanciations of the classes
+    logs.info("Instanciations of the classes...")
     transformer = Transformer(parameters['tr'], parameters['nscans'], new_indexes, offset_type_list, duration_type_list, parameters['offset_path'], parameters['duration_path'], parameters['language'], parameters['hrf'])
     encoding_model = EncodingModel(model=Ridge(), alpha=None, alpha_min_log_scale=2, alpha_max_log_scale=4, nb_alphas=25)
     splitter = Splitter(1)
     compressor = Compressor(n_components_list, indexes, compression_types)
     
-    # Pipeline flow
+    logs.info("Defining Pipeline flow...")
     splitter_cv_ext = Task([splitter.split], name='splitter_cv_ext')
     ## Pipeline int
     splitter_cv_int = Task([splitter.split], [splitter_cv_ext],
@@ -69,20 +71,20 @@ if __name__=='__main__':
     compressor_ext.set_children([transform_data_ext])
     transform_data_ext.set_children([encoding_model_ext])    
     
-    # Formatting input
+    logs.info("Formatting input...")
     deep_representations_paths, fMRI_paths = fetch_data(parameters['path_to_fmri_data'], input_path, subject, parameters['language'])
     deep_representations = transformer.process_representations(deep_representations_paths, parameters['models'])
     fMRI_data = transformer.process_fmri_data(fMRI_paths, masker)
     
-    # Executing pipeline
+    logs.info("Executing pipeline...")
     pipeline = Pipeline()
     pipeline.fit([splitter_cv_ext], logs) # retrieve the flow from children and parents dependencies
     maps = pipeline.compute(deep_representations, fMRI_data, output_path, logger=logs)
     
-    # Aggregate over cross-validation
+    logs.info("Aggregating over cross-validation results...")
     maps = {key: np.mean(np.stack(np.array([dic[key] for dic in maps]), axis=0), axis=0) for key in maps[0]}
     
-    # Plotting
+    logs.info("Plotting...")
     ## R2
     output_path = os.path.join(output_path, 'R2')
     create_maps(masker, maps['R2'], output_path, vmax=None, logger=logs)

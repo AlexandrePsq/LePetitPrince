@@ -56,6 +56,7 @@ class Pipeline(object):
         else:
             empty_task = Task()
             empty_task.set_output(inputs)
+            empty_task.set_terminated(True)
             self.tasks[0].parents = empty_task
             for index, task in enumerate(self.tasks):
                 logger.info("{}. Executing task: {}".format(index, task.name))

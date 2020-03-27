@@ -242,7 +242,7 @@ def structuring_inputs(models, nb_runs):
             i_ += len(eval(model['columns_to_retrieve']))
         for run_index in range(1, nb_runs + 1):
             offset_type_dict['run{}'.format(run_index)].append(model["offset_type"])
-            duration_type_dict['run{}'.format(run_index)].append(duration_type=model["duration_type"])
+            duration_type_dict['run{}'.format(run_index)].append(model["duration_type"])
     return indexes, new_indexes, offset_type_dict, duration_type_dict, compression_types, n_components_list
             
 

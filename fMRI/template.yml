@@ -22,18 +22,18 @@ models:
   - model_name: wordrate_all_model
     columns_to_retrieve: "[0]"
     surname: Word_rate
-    data_compression: None
-    ncomponents: None
+    data_compression: 
+    ncomponents: 
     offset_type: 'word' # word / word+punctuation / ...
-    duration_type: None
+    duration_type: 
     shift_surprisal: False
   - model_name: rms_model
     columns_to_retrieve: "[0]"
     surname: RMS
-    data_compression: None
-    ncomponents: None
+    data_compression: 
+    ncomponents: 
     offset_type: 'rms' # word / word+punctuation / ...
-    duration_type: None
+    duration_type: 
     shift_surprisal: False
 model_name: Word_rate+RMS
 #models:

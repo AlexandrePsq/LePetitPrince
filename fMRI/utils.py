@@ -259,13 +259,13 @@ def structuring_inputs(models, nb_runs):
     for model in models:
         compression_types.append(model['data_compression'] if model['data_compression'] else 'identity')
         n_components_list.append(model['ncomponents'])
-        indexes.append(np.array(eval(model['columns_to_retrieve'])) + i)
+        indexes.append(np.arange(i, len(eval(model['columns_to_retrieve']))) + i)
         i += len(eval(model['columns_to_retrieve']))
         if model['data_compression']:
             new_indexes.append(np.arange(i_, i_ + model['ncomponents']))
             i_ += model['ncomponents']
         else:
-            new_indexes.append(np.array(eval(model['columns_to_retrieve'])) + i_)
+            new_indexes.append(np.arange(i_, len(eval(model['columns_to_retrieve']))) + i_)
             i_ += len(eval(model['columns_to_retrieve']))
         for run_index in range(1, nb_runs + 1):
             offset_type_dict['run{}'.format(run_index)].append(model["offset_type"])

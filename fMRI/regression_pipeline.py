@@ -50,7 +50,7 @@ class Pipeline(object):
             - output_path: str
             - logger: Logger object
         """
-        inputs = [{'X_train':X_train, 'Y_train':Y_train}]
+        inputs = [{'X_train':X_train, 'Y_train':Y_train, 'run_train': None, 'run_test': None}]
         if not self.tasks:
             logger.warning("Pipeline not fitted... Nothing to compute.")
         else:

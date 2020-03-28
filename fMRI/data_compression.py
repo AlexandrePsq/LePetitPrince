@@ -69,8 +69,8 @@ class Compressor(object):
         """
         for index, indexes in enumerate(self.indexes):
             func = getattr(self, self.compression_types[index])
-            X_train_ = clean_nan_rows([X[:,indexes] for X in X_train])
-            X_test_ = clean_nan_rows([X[:,indexes] for X in X_test])
+            X_train_ = [clean_nan_rows(X[:,indexes]) for X in X_train]
+            X_test_ = [clean_nan_rows(X[:,indexes]) for X in X_test]
             self.bucket.append(func(X_train_, X_test_, self.ncomponents_list[index]))
         
         X_train = [pd.concat([pd.DataFrame(data['X_train'][run_index]) for data in self.bucket], axis=1).values for run_index in range(len(self.bucket[0]['X_train']))]

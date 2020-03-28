@@ -73,7 +73,7 @@ class Compressor(object):
             X_test_ = clean_nan_rows([X[:,indexes] for X in X_test])
             self.bucket.append(func(X_train_, X_test_, self.ncomponents_list[index]))
         
-        X_train = [pd.concat([pd.DataFrame(data[run_index]['X_train']) for data in self.bucket], axis=1).values for run_index in range(len(self.bucket[0]))]
-        X_test = [pd.concat([pd.DataFrame(data[run_index]['X_test']) for data in self.bucket], axis=1).values for run_index in range(len(self.bucket[0]))]
+        X_train = [pd.concat([pd.DataFrame(data['X_train'][run_index]) for data in self.bucket], axis=1).values for run_index in range(len(self.bucket[0]['X_train']))]
+        X_test = [pd.concat([pd.DataFrame(data['X_test'][run_index]) for data in self.bucket], axis=1).values for run_index in range(len(self.bucket[0]['X_test']))]
         self.clean_bucket()
         return {'X_train': X_train, 'X_test': X_test}

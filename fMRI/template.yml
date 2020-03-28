@@ -29,15 +29,15 @@ models:
     offset_type: 'word' # word / word+punctuation / ...
     duration_type: 
     shift_surprisal: False
-  - model_name: rms_model
-    columns_to_retrieve: "[0]"
-    surname: RMS
+  - model_name: wordrate_all_model
+    columns_to_retrieve: "[3]"
+    surname: unigram
     data_compression: 
     ncomponents: 
-    offset_type: 'rms' # word / word+punctuation / ...
+    offset_type: 'word' # word / word+punctuation / ...
     duration_type: 
     shift_surprisal: False
-model_name: Word_rate+RMS
+model_name: Word_rate+unigram
 #models:
 #  - model_name: bert_all-layers
 #    columns_to_retrieve: "[i for i in range(0,500)]" #example 

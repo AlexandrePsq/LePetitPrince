@@ -212,7 +212,7 @@ def fetch_offsets(offset_type, run_index, offset_path, language):
     if not os.path.exists(path):
         raise Exception("Please specify an offset file at: {}".format(path))
     else:
-        offset = pd.read_csv(path).values
+        offset = pd.read_csv(path)['offsets'].values
     return offset
 
 def fetch_duration(duration_type, run_index, duration_path, language, default_size=None):

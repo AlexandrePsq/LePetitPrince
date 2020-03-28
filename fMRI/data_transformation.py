@@ -72,7 +72,10 @@ class Transformer(object):
         """
         matrices_ = X_train + X_test
         runs = run_train + run_test
-        matrices = [self.compute_regressor(pd.DataFrame(array[:,index]), self.offset_type_dict['run{}'.format(runs[array_index] + 1)][i], self.duration_type_dict['run{}'.format(runs[array_index] + 1)][i], 'run{}'.format(runs[array_index] + 1)) for array_index, array in enumerate(matrices_) for i, index in enumerate(self.indexes)]
+        matrices = [self.compute_regressor(pd.DataFrame(array[:,index]), 
+                                            self.offset_type_dict['run{}'.format(runs[array_index] + 1)][i], 
+                                            self.duration_type_dict['run{}'.format(runs[array_index] + 1)][i], 
+                                            'run{}'.format(runs[array_index] + 1)) for array_index, array in enumerate(matrices_) for i, index in enumerate(self.indexes)]
         step = len(self.indexes)
         matrices = [np.hstack(matrices[x : x + step]) for x in range(0, len(matrices), step)]
         return {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):], 'run_train': run_train, 'run_test': run_test}
@@ -88,6 +91,7 @@ class Transformer(object):
             - matrix: np.array
         """
         regressors = []
+        dataframe = dataframe.dropna(axis=0)
         representations = [col for col in dataframe.columns]
         offsets = fetch_offsets(offset_type, run_index, self.offset_path, self.language)
         duration = fetch_duration(duration_type, run_index, self.duration_path, self.language, default_size=len(dataframe))

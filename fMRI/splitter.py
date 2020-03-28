@@ -36,8 +36,8 @@ class Splitter(object):
                         'Y_train': y_train,
                         'X_test': x_test,
                         'Y_test': y_test,
-                        'run_train': [run_train[index] for index in train] if run_train else train,
-                        'run_test': [run_train[index] for index in test] if run_train else test
+                        'run_train': [run_train[index] for index in train] if run_train is not None else train,
+                        'run_test': [run_train[index] for index in test] if run_train is not None else test
                         })
         return result
         

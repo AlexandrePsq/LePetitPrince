@@ -15,11 +15,13 @@ class Splitter(object):
         self.out_per_fold = out_per_fold
         pass
     
-    def split(self, X_train, Y_train):
+    def split(self, X_train, Y_train, run_train=None, run_test=None):
         """ Split lists in differents folds for cross validation.
         Arguments:
             - X_train: list
             - Y_train: list
+            - run_train: list
+            - run_test: list
         Returns:
             - list (of dict)
         """
@@ -34,8 +36,8 @@ class Splitter(object):
                         'Y_train': y_train,
                         'X_test': x_test,
                         'Y_test': y_test,
-                        'run_train': train,
-                        'run_test': test
+                        'run_train': [run_train[index] for index in train] if run_train else train,
+                        'run_test': [run_train[index] for index in test] if run_train else test
                         })
         return result
         

@@ -7,7 +7,7 @@ class Task(object):
     possible to integrate in the pipeline.
     """
     
-    def __init__(self, functions=None, dependencies=[], name='', flatten=False, unflatten=False, special_output_transform=None):
+    def __init__(self, functions=None, dependencies=[], name='', flatten=None, unflatten=None, special_output_transform=None):
         """ Instanciation of a task.
         Arguments:
             - functions: list (of functions)
@@ -20,9 +20,13 @@ class Task(object):
         self.functions = functions
         self.name = name
         self.output = []
-        self.flatten_ = flatten
-        self.unflatten_ = unflatten
-        self.special_output_transform= None
+        if len(flatten)==len(dependencies):
+            self.flatten = flatten if flatten else [False for item in dependencies]
+        else:
+            self.flatten = [False for item in dependencies]
+        self.unflatten = unflatten
+        self.unflatten_factor = unflatten if isinstance(unflatten, int) else None
+        self.special_output_transform= special_output_transform
     
     def set_children(self, children):
         """ Set self.children value."""
@@ -67,28 +71,29 @@ class Task(object):
         for index, result in enumerate(self.output):
             save(result, path + str(index))
     
-    def flatten(self, input_):
+    def flatten_(self, input_, index):
         """ Flatten a given input.
         Arguments:
             - input_: list (of list)
+            - index: int
         """
-        if self.flatten_:
-            flattening_factor = len(input_[0])
-            self.flattening_factor = flattening_factor
+        if self.flatten[index]:
+            if self.unflatten=='automatic':
+                self.unflatten_factor = len(input_[0])
             input_ = [item for sublist in input_ for item in sublist]
         return input_
     
-    def unflatten(self):
+    def unflatten_(self):
         """ Unflatten the output of the task when we have flattened
         the input.
         """
-        if self.unflatten_:
-            self.output = [self.output[x : x + self.flattening_factor] for x in range(0, len(self.output), self.flattening_factor)]
+        if self.unflatten:
+            self.output = [self.output[x : x + self.unflatten_factor] for x in range(0, len(self.output), self.unflatten_factor)]
     
     def execute(self):
         """ Execute all task functions on the serie of parents outputs."""
         if not (self.is_waiting() or self.is_terminated()):
-            inputs_ =  list(zip(*[self.flatten(parent.output) for parent in self.dependencies])) # regroup dictionaries outputs from parent tasks
+            inputs_ =  list(zip(*[self.flatten_(parent.output, index) for index, parent in enumerate(self.dependencies]))) # regroup dictionaries outputs from parent tasks
             inputs_ = [list(item) for item in inputs_] # transform tuple to list -> problematic when 1 single parent
             inputs = [merge_dict(items) for items in inputs_]
             for input_ in inputs:
@@ -98,9 +103,9 @@ class Task(object):
                     input_tmp = func(**input_tmp)
                 self.add_output(input_tmp)
             self.set_terminated(True)
-            self.unflatten()
+            self.unflatten_()
             if self.special_output_transform:
-                self.special_output_transform(self.output)
+                self.output = self.special_output_transform(self.output)
         else:
             print('Dependencies not fullfilled...')
     

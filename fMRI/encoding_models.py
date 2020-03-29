@@ -80,11 +80,12 @@ class EncodingModel(object):
         list of measures.
         Arguments:
             - data: np.array (3D)
-            - hyperparameter: list (of int)
+            - hyperparameter: np.array (2D)
         Returns:
             - voxel2alpha: list (of int)
             - alpha2voxel: dict (of list)
         """
+        hyperparameter = np.mean(hyperparameter, axis=0)
         best_alphas_indexes = np.argmax(np.mean(data, axis=0), axis=0)
         voxel2alpha = np.array([hyperparameter[i] for i in best_alphas_indexes])
         alpha2voxel = {key:[] for key in hyperparameter}
@@ -105,21 +106,21 @@ class EncodingModel(object):
         Returns:
             - result: dict
         """
-        R2 = np.zeros((Y_test[0].shape[1]))
-        Pearson_coeff = np.zeros((Y_test[0].shape[1]))
+        R2_ = np.zeros((Y_test[0].shape[1]))
+        Pearson_coeff_ = np.zeros((Y_test[0].shape[1]))
         x_test = np.vstack(X_test)
         data = R2 if self.optimizing_criteria=='R2' else Pearson_coeff
         voxel2alpha, alpha2voxel = self.optimize_alpha(data, alpha)
-        for alpha, voxels in alpha2voxel.items():
+        for alpha_, voxels in alpha2voxel.items():
             y_test = np.vstack(Y_test)[:, voxels]
             y_train = np.vstack(Y_train)[:, voxels]
             x_train = np.vstack(X_train)
-            self.fit(x_train, y_train, alpha)
+            self.fit(x_train, y_train, alpha_)
             predictions = self.predict(x_test)
-            R2[voxels] = self.get_R2_coeff(predictions, y_test)
-            Pearson_coeff[voxels] = self.get_Pearson_coeff(predictions, y_test)
-        result = {'R2': R2,
-                    'Pearson_coeff': Pearson_coeff,
+            R2_[voxels] = self.get_R2_coeff(predictions, y_test)
+            Pearson_coeff_[voxels] = self.get_Pearson_coeff(predictions, y_test)
+        result = {'R2': R2_,
+                    'Pearson_coeff': Pearson_coeff_,
                     'alpha': voxel2alpha
                     }
         return result

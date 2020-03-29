@@ -70,8 +70,8 @@ class Transformer(object):
         Returns:
             - dict
         """
-        matrices_ = X_train + X_test
-        runs = run_train + run_test
+        matrices_ = [*X_train, *X_test]
+        runs = [*run_train, *run_test]
         matrices = [self.compute_regressor(pd.DataFrame(array[:,index]), 
                                             self.offset_type_dict['run{}'.format(runs[array_index] + 1)][i], 
                                             self.duration_type_dict['run{}'.format(runs[array_index] + 1)][i], 

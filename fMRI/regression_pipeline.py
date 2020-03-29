@@ -17,6 +17,21 @@ class Pipeline(object):
         for task in self.tasks:
             task.set_terminated(False)
     
+    def in_memory(self, task, memory):
+        """Check if a task has already been added to the tasks to be executed.
+        Arguments:
+            - task: Task
+            - memory: list (of Task)
+        Returns:
+            - result: bool
+        """
+        result = False
+        index = len(memory) - 1
+        while (not result) or (index >= 0):
+            result = task.name==memory[index].name
+            index -= 1
+        return result
+    
     def fit(self, task, logger):
         """ Determine in which order to run the tasks depending on their dependencies.
         Arguments:
@@ -27,14 +42,14 @@ class Pipeline(object):
         queue = [task]
         count = 1
         while queue:
-            task = queue.pop()
-            if task.is_waiting():
+            task = queue.pop()                
+            if (not task.is_terminated()) and task.is_waiting():
                 if count==0:
                     logger.error("Loop detected... Please check tasks dependencies.")
                 else:
                     queue = [task] + queue
                     count -= 1
-            else:
+            elif (not task.is_terminated()):
                 self.tasks.append(task)
                 task.set_terminated(True)
                 queue = task.children + queue

@@ -61,9 +61,12 @@ if __name__=='__main__':
                                 name='encoding_model_int', flatten=[True, True], unflatten='automatic',
                                 special_output_transform=aggregate_cv)
     ## Pipeline ext
-    compressor_ext = Task([compressor.compress], [splitter_cv_ext, encoding_model_int], name='compressor_ext', flatten=[True, False])
-    transform_data_ext = Task([transformer.make_regressor, transformer.standardize], [splitter_cv_ext, compressor_ext], name='transform_data_ext')
-    encoding_model_ext = Task([encoding_model.evaluate], [splitter_cv_ext, transform_data_ext, encoding_model_int], name='encoding_model_ext')
+    compressor_ext = Task([compressor.compress], [splitter_cv_ext, encoding_model_int], 
+                                name='compressor_ext', flatten=[True, False])
+    transform_data_ext = Task([transformer.make_regressor, transformer.standardize], [splitter_cv_ext, compressor_ext], 
+                                name='transform_data_ext', flatten=[True, False])
+    encoding_model_ext = Task([encoding_model.evaluate], [splitter_cv_ext, transform_data_ext, encoding_model_int], 
+                                name='encoding_model_ext', flatten=[True, False, False])
     
     # Creating tree structure
     splitter_cv_ext.set_children([splitter_cv_int, compressor_ext])

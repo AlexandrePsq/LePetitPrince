@@ -90,7 +90,7 @@ def aggregate_cv(data):
     Returns:
         - result: list (of dict of list)
     """
-    result = [{key: np.stack(np.array([dic[key] for dic in data[index]]), axis=0) for key in data[0][0]} for index in len(data)]
+    result = [{key: np.stack(np.array([dic[key] for dic in data[index]]), axis=0) for key in data[0][0]} for index in range(len(data))]
     return result
 
 

@@ -57,7 +57,7 @@ class Pipeline(object):
             empty_task = Task()
             empty_task.set_output(inputs)
             empty_task.set_terminated(True)
-            self.tasks[0].dependencies = [empty_task]
+            self.tasks[0].add_dependencies(empty_task)
             for index, task in enumerate(self.tasks):
                 logger.info("{}. Executing task: {}".format(index, task.name))
                 task.execute()

@@ -20,7 +20,7 @@ class Task(object):
         self.functions = functions
         self.name = name
         self.output = []
-        if len(flatten)==len(dependencies):
+        if flatten and (len(flatten)==len(dependencies)):
             self.flatten = flatten if flatten else [False for item in dependencies]
         else:
             self.flatten = [False for item in dependencies]
@@ -39,6 +39,20 @@ class Task(object):
     def set_output(self, value):
         """ Set self.output value."""
         self.output = value
+
+    def update_flatten(self):
+        """Update self.flatten value."""
+        if len(self.dependencies) > 0:
+            if (not self.flatten) or (len(self.dependencies) != len(self.flatten)):
+                self.flatten = [False for item in self.dependencies]
+    
+    def add_dependencies(self, parent):
+        """Add parent task to current task.
+        Arguments:
+            - parent: Task
+        """
+        self.dependencies.append(parent)
+        self.update_flatten()
     
     def add_output(self, output):
         """ Add value to self.output."""
@@ -93,7 +107,7 @@ class Task(object):
     def execute(self):
         """ Execute all task functions on the serie of parents outputs."""
         if not (self.is_waiting() or self.is_terminated()):
-            inputs_ =  list(zip(*[self.flatten_(parent.output, index) for index, parent in enumerate(self.dependencies]))) # regroup dictionaries outputs from parent tasks
+            inputs_ =  list(zip(*[self.flatten_(parent.output, index) for index, parent in enumerate(self.dependencies)])) # regroup dictionaries outputs from parent tasks
             inputs_ = [list(item) for item in inputs_] # transform tuple to list -> problematic when 1 single parent
             inputs = [merge_dict(items) for items in inputs_]
             for input_ in inputs:

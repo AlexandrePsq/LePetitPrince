@@ -36,7 +36,7 @@ class EncodingModel(object):
         self.model.set_params(alpha=alpha)
         dm = np.vstack(X_train)
         fmri = np.vstack(Y_train)
-        self.model = self.model.fit(dm,fmri)
+        self.model.fit(dm,fmri)
     
     def predict(self, X_test):
         """ Compute the predictions of the model for a given
@@ -141,5 +141,5 @@ class EncodingModel(object):
             - predictions: np.array
             - Y_test: np.array
         """
-        pearson_corr = [pearsonr(Y_test[:,i], predictions[:,i])[0] for i in range(Y_test.shape[1])]
+        pearson_corr = np.array([pearsonr(Y_test[:,i], predictions[:,i])[0] for i in range(Y_test.shape[1])])
         return pearson_corr

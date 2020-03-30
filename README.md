@@ -134,13 +134,13 @@ To give more insights on the three main parts of the project:
 ### fMRI pipeline ###
 
 Protocol:
-    - Upload your deep-representation matrices as a .csv file in <pre>$LPP/derivatives/<i>source</i>/deep-representations/<i>language</i>/<i>model_name</i>/</pre>.
-    - Be careful that each '.csv' filename contain its run number.
-    - Be sure to have the adequate onsets/offsets files for each model included in your analysis (the path should be specified in the yaml template).
-    - Optional: if the creation of a regressor for a given model require specific *duration*, create the adequate array for each run (the path should be specified in the yaml template), otherwise a vector of *1* should be used.
-    - Check the *requirements.txt* to see if you have all the libraries needed.
-    - Run the following command:
-<pre>python main.py --yaml_file <i><path_to_yaml_file></i> --input <i><path_to_representations_folder></i> --output <i><path_to_output_folder></i> --logs <i><path_to_log_file></i></pre>
+- Upload your deep-representation matrices as a .csv file in <pre>$LPP/derivatives/fMRI/deep-representations/<i>language</i>/<i>model_name</i>/</pre>.
+- Be careful that each '.csv' filename contain its run number.
+- Be sure to have the adequate onsets/offsets files for each model included in your analysis (the path should be specified in the yaml template).
+- Optional: if the creation of a regressor for a given model require specific *duration*, create the adequate array for each run (the path should be specified in the yaml template), otherwise a vector of *1* should be used.
+- Check the *requirements.txt* to see if you have all the libraries needed.
+- Run the following command:
+<pre>python main.py --yaml_file <i>path_to_yaml_file</i> --input <i>path_to_representations_folder</i> --output <i>path_to_output_folder</i> --logs <i>path_to_log_file</i></pre>
 
 
 ### Analysis ###

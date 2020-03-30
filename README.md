@@ -45,7 +45,7 @@ Analysis pipeline:
 
 The nested cross-validation (NCV) is composed of a main cross-validation (CV) over the R2 values, and for each split of the main 
 cross-validation, another cross-validation is done to determined the regularization (hyperparameter) of the ridge-regression.
-If needed (and before the regression), a compression of the representations is done during the CV.
+If needed (and before the regression), a compression of the representations is done during the inner/outer CV.
 We then concatenate the dataframe of compressed representations with an onset file and convolve the newly constructed dataframe 
 with an 'hrf' kernel to get the regressors that will be aligned to the fMRI data thanks to the regression.
 
@@ -64,35 +64,40 @@ The files are organized in the following overall folder structure:
 ├── <b>paradigm</b> <i>(experiences information, stimuli)</i>
 ├── <b>oldstuff</b> <i>(oldscripts, personnal data/code, ...)</i>
 ├── <b>code</b> <i>(all the code of all the analysis)</i>
-│   ├── <b>MEG</b> <i>(code of the MEG analysis pipeline)</i>
-│   └── <b>fMRI</b> <i>(code of the fMRI analysis pipeline)</i>
-│
-│         └── <b>utilities</b> <i>(utilities functions: parameters settings, splitter for CV, ...)</i>
+│       ├── <b>MEG</b> <i>(code of the MEG analysis pipeline)</i>
+│       └── <b>fMRI</b> <i>(code of the fMRI analysis pipeline)</i>
+│               ├── <b>data_compression.py</b> <i>(Class regrouping methods to compress the representation data)</i>
+│               ├── <b>data_transformation.py</b> <i>(Class regrouping methods to transform the data: standardization, creating rergessors, ...)</i>
+│               ├── <b>encoding_models.py</b> <i>(Class where the Linear (regularized or not) model is implemented)</i>
+│               ├── <b>logger.py</b> <i>(Logging class to check piepeline status)</i>
+│               ├── <b>main.py</b> <i>(Launch the pipeline for the given yaml config file)</i>
+│               ├── <b>regression_pipeline.py</b> <i>(Class implementing the pipeline for the regression analysis)</i>
+│               ├── <b>requirements.txt</b> <i>(required librairies + versions)</i>
+│               ├── <b>splitter.py</b> <i>(Class regrouping splitting/distributing methods)</i>
+│               ├── <b>task.py</b> <i>(Class implementing a Task which is a step of the pipeline)</i>
+│               ├── <b>template.yml</b> <i>(Yaml config file to fill for each call of main.py)</i>
+│               └── <b>utils.py</b> <i>(utilities functions: parameters settings, fetching, reading/writing ...)</i>
 ├── <b>data</b> <i>(all the raw data acquired from sources)</i>
-│   ├── <b>fMRI</b> <i>(fMRI data, 9 runs per subject)</i>
-│   │   └── <b>english</b>
-│   │       └── <b>sub-057</b>
-│   │           └── <b>func</b>
-│   ├── <b>wave</b> <i>(wave files data, 9 runs, data for models training)</i>
-│   │   ├── <b>english</b>
-│   │   └── <b>french</b>
-│   └── <b>text</b> <i>(text data, raw text, division in 9 runs, onsets/offsets for each runs, data for models training)</i>
-│          ├── <b>english</b>
-│          │   ├── <b>lstm_training</b>
-│          │   └── <b>onsets-offsets</b>
-│          └── <b>french</b>
+│       └── <b>fMRI</b> <i>(fMRI data, 9 runs per subject)</i>
+│               └── <b>english</b>
+│                       └── <b>sub-057</b>
+│                               └── <b>func</b>
 └── <b>derivatives</b> <i>(results of the code above)</i>
       ├── <b>MEG</b>
       └── <b>fMRI</b> <i>(results from the fMRI pipeline in code/fMRI/)</i>
               ├── <b>deep-representations</b> <i>(deep representation dataframes extracted from the models activity)</i>
               │  ├── <b>english</b>
-              │  │  └──  <b> model_of_interest </b>
+              │  │  └── <b> model_of_interest </b>
               │  │         ├── <b> deep_representation_run_1.csv </b>
               │  │         ├──  ...
               │  │         └── <b> deep_representation_run_<i>n</i>.csv </b>
               │  └── <b>french</b>
               └── <b>maps</b> <i>Maps deriving from our pipeline</i>
                     ├── <b>english</b>
+                    │       └── <b>sub-057</b>
+                    │               └── <b> model_of_interest </b>
+                    │                           ├── R2.nii.gz
+                    │                           └── R2.png
                     └── <b>french</b>
 </pre>
 
@@ -101,24 +106,22 @@ To give more insights on the three main parts of the project:
 - **code**
     - MEG data analysis pipeline
     - fMRI data analysis pipeline
-    #### TO BE MODIFIED
-        - raw-features.py *(generate raw-features and concatenate them with onsets for a given model)*
-        - features.py *(convolve the raw-features with a 'hrf' kernel for a given model)*
-        - design-matrices.py *(concatenate features of different models of interest)*
-        - glm-indiv.py *(GLM model fitted on fMRI data with a design-matrix)*
-        - ridge-indiv.py *(Ridge model fitted on fMRI data with a design-matrix)*
-        - dodo.py *(this files in the python analog of makefile script)*
-    - utilities
-        - utils.py *(utility functions)*
-        - settings.py *(where we change the parameters)*
-        - first_level_analysis.py *(functions for first level analysis of fMRI)*
-        - splitter.py *(splitter for multi-groups Ridge CV)*
+        - splitter.py *(Split/distribute the data)*
+        - data_compression.py *(Compress data representations if needed: PCA, etc...)*
+        - data_transformation.py *(Transform data representations: create regressor by convolving with an HRF kernel and standardize before regression)*
+        - encoding_models.py *((Regularized) Linear model that fit the regressors to fmri data)*
+        - task.py *(Step of the pipeline to be executed)*
+        - regression_pipeline.py *(Define and execute the pipeline)*
+        - requirements.txt *(Required libraries)*
+        - logger.py *(Report pipeline progression)*
+        - main.py *(Execute pipeline with the config from the yaml file)*
+        - template.yml *(Yaml file specifying the configuration of the analysis)*
+        - utils.py *(Utilities functions)*
 
 - **data**
     - we have the fMRI data organized following the BIDS standard except for the name of the final file
     - the MEG should be added in a few months
     - there is the text of LPP, the text is divided into 9 runs, the original onset-offsets of LPP and training data for models
-    - wave files, meaning the content of the audio book with the textgrid files and training data for models
 
 - **derivatives**
     - MEG
@@ -128,12 +131,16 @@ To give more insights on the three main parts of the project:
 
 ## Executing scripts ##
 
-First, you will need to upload your deep-representation matrix as a .csv file or numpy array in <pre>$LPP/derivatives/<i>source</i>/deep-representations/<i>language</i>/<i>model_name</i>/</pre>
-
-
 ### fMRI pipeline ###
 
-To run the fMRI pipeline, first fill a yaml template specifying the parameters of your analysis and call `main.py`.
+Protocol:
+    - Upload your deep-representation matrices as a .csv file in <pre>$LPP/derivatives/<i>source</i>/deep-representations/<i>language</i>/<i>model_name</i>/</pre>.
+    - Be careful that each '.csv' filename contain its run number.
+    - Be sure to have the adequate onsets/offsets files for each model included in your analysis (the path should be specified in the yaml template).
+    - Optional: if the creation of a regressor for a given model require specific *duration*, create the adequate array for each run (the path should be specified in the yaml template), otherwise a vector of *1* should be used.
+    - Check the *requirements.txt* to see if you have all the libraries needed.
+    - Run the following command:
+<pre>python main.py --yaml_file <i><path_to_yaml_file></i> --input <i><path_to_representations_folder></i> --output <i><path_to_output_folder></i> --logs <i><path_to_log_file></i></pre>
 
 
 ### Analysis ###

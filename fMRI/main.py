@@ -27,9 +27,9 @@ if __name__=='__main__':
     args = parser.parse_args()
     parameters = read_yaml(args.yaml_file)
     input_path = args.input
-    output_path = args.output
+    output_path_ = args.output
     subject = get_subject_name(parameters['subject'])
-    output_path = output_name(output_path, subject, parameters['model_name'])
+    output_path = output_name(output_path_, subject, parameters['model_name'])
     logs = Logger(os.path.join(args.logs, '{}_{}.txt'.format(subject, parameters['model_name'])))
     save_yaml(parameters, output_path + 'config.yml')
     logs.info("Fetching maskers...", end='\n')
@@ -99,15 +99,15 @@ if __name__=='__main__':
     
     logs.info("Plotting...", end='\n')
     ## R2
-    output_path = output_name(output_path, subject, parameters['model_name'], 'R2')
+    output_path = output_name(output_path_, subject, parameters['model_name'], 'R2')
     create_maps(masker, maps['R2'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['R2'], output_path, vmax=None, logger=logs)
     ## Pearson
-    output_path = output_name(output_path, subject, parameters['model_name'], 'Pearson_coeff')
+    output_path = output_name(output_path_, subject, parameters['model_name'], 'Pearson_coeff')
     create_maps(masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs)
     ## Alpha (not exactly what should be done: averaging alphas)
-    output_path = output_name(output_path, subject, parameters['model_name'], 'alpha')
+    output_path = output_name(output_path_, subject, parameters['model_name'], 'alpha')
     create_maps(masker, maps['alpha'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['alpha'], output_path, vmax=None, logger=logs)
     logs.validate()

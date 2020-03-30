@@ -139,7 +139,7 @@ class Transformer(object):
         # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element
         for run in range(len(data)):
             zero = np.zeros(data[run].shape[0])
-            new = zero
+            new = zero.copy()
             new[0] += np.random.random()/1000
             data[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, data[run])
         return data

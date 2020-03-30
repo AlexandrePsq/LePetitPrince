@@ -83,7 +83,7 @@ class Task(object):
             - path: str
         """
         for index, result in enumerate(self.output):
-            save(result, path + str(index))
+            save(result, path + '_' + str(index))
     
     def flatten_(self, input_, index):
         """ Flatten a given input.

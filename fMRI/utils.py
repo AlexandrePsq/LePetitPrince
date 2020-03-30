@@ -74,6 +74,9 @@ def save(object_to_save, path):
                     fout.create_dataset(str(key), object_to_save[key].shape, data=object_to_save[key])
                 elif isinstance(object_to_save[key], dict):
                     fout.create_dataset(str(key), data=json.dumps(object_to_save[key]))
+    elif isinstance(object_to_save, list):
+        for index, item in enumerate(object_to_save):
+            save(item, path + '_' + str(index))
 
 def load(path):
     """ Load an object saved at a given path.

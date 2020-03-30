@@ -5,7 +5,7 @@ import numpy as np
 
 from sklearn.linear_model import Ridge
 
-from utils import check_folder, read_yaml, write, get_subject_name, output_name, structuring_inputs, aggregate_cv, create_maps, fetch_masker, fetch_data, get_nscans
+from utils import check_folder, read_yaml, save_yaml, write, get_subject_name, output_name, structuring_inputs, aggregate_cv, create_maps, fetch_masker, fetch_data, get_nscans
 from task import Task
 from logger import Logger
 from regression_pipeline import Pipeline
@@ -31,6 +31,7 @@ if __name__=='__main__':
     subject = get_subject_name(parameters['subject'])
     output_path = output_name(output_path, subject, parameters['model_name'])
     logs = Logger(os.path.join(args.logs, '{}_{}.txt'.format(subject, parameters['model_name'])))
+    save_yaml(parameters, output_path + 'config.yml')
     logs.info("Fetching maskers...", end='\n')
     masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, logger=logs)
     logs.validate()

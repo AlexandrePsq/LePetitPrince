@@ -1,4 +1,5 @@
 from utils import merge_dict, filter_args, save
+from tqdm import tqdm
 
 
 
@@ -110,7 +111,7 @@ class Task(object):
             inputs_ =  list(zip(*[self.flatten_(parent.output, index) for index, parent in enumerate(self.dependencies)])) # regroup dictionaries outputs from parent tasks
             inputs_ = [list(item) for item in inputs_] # transform tuple to list -> problematic when 1 single parent
             inputs = [merge_dict(items) for items in inputs_]
-            for input_ in inputs:
+            for input_ in tqdm(inputs):
                 input_tmp = input_.copy()
                 for func in self.functions:
                     input_tmp = filter_args(func, input_tmp)

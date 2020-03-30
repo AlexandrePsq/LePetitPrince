@@ -74,6 +74,12 @@ def save(object_to_save, path):
                     fout.create_dataset(str(key), object_to_save[key].shape, data=object_to_save[key])
                 elif isinstance(object_to_save[key], dict):
                     fout.create_dataset(str(key), data=json.dumps(object_to_save[key]))
+                elif isinstance(object_to_save[key], list):
+                    for index, arr in enumerate(object_to_save[key]):
+                        if isinstance(arr, np.ndarray):
+                            fout.create_dataset(str(key) + '_' + str(index), arr.shape, data=arr)
+                        elif isinstance(arr, dict):
+                            fout.create_dataset(str(key) + '_' + str(index), data=json.dumps(arr))
     elif isinstance(object_to_save, list):
         for index, item in enumerate(object_to_save):
             save(item, path + '_' + str(index))
@@ -181,7 +187,7 @@ def filter_args(func, d):
     args = {key: d[key] for key in keys if key!='self'}
     return args
 
-def output_name(folder_path, subject, model_name, data_name=None):
+def output_name(folder_path, subject, model_name, data_name=''):
     """ Create a template name for the output deriving from
     given subject and model.
     Arguments:

@@ -36,12 +36,12 @@ class Logger(object):
         """
         self.report_logs(message, level='WARNING', end='\n')
 
-    def info(self, message):
+    def info(self, message, end=' '):
         """Reports INFO messages.
         Arguments:
             - message: str
         """
-        self.report_logs(message, level='INFO', end=' ')
+        self.report_logs(message, level='INFO', end=end)
     
     def validate(self):
         """Validate previous message."""

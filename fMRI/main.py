@@ -31,7 +31,7 @@ if __name__=='__main__':
     subject = get_subject_name(parameters['subject'])
     output_path = output_name(output_path, subject, parameters['model_name'])
     logs = Logger(os.path.join(args.logs, '{}_{}.txt'.format(subject, parameters['model_name'])))
-    logs.info("Fetching maskers...")
+    logs.info("Fetching maskers...", end='\n')
     masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, logger=logs)
     logs.validate()
     smoothed_masker = fetch_masker(parameters['smoothed_masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, smoothing_fwhm=5, logger=logs)
@@ -42,7 +42,10 @@ if __name__=='__main__':
     logs.validate()
 
     logs.info("Instanciations of the classes...")
-    transformer = Transformer(parameters['tr'], get_nscans(parameters['language']), new_indexes, offset_type_list, duration_type_list, parameters['offset_path'], parameters['duration_path'], parameters['language'], parameters['hrf'])
+    transformer = Transformer(parameters['tr'], get_nscans(parameters['language']), 
+                                new_indexes, offset_type_list, duration_type_list,
+                                parameters['offset_path'], parameters['duration_path'], 
+                                parameters['language'], parameters['hrf'])
     encoding_model = EncodingModel(model=Ridge(), alpha=None, alpha_min_log_scale=2, alpha_max_log_scale=4, nb_alphas=25)
     splitter = Splitter(1)
     compressor = Compressor(n_components_list, indexes, compression_types)
@@ -84,27 +87,26 @@ if __name__=='__main__':
     fMRI_data = transformer.process_fmri_data(fMRI_paths, masker)
     logs.validate()
     
-    logs.info("Executing pipeline...")
+    logs.info("Executing pipeline...", end='\n')
     pipeline = Pipeline()
     pipeline.fit(splitter_cv_ext, logs) # retrieve the flow from children and parents dependencies
     maps = pipeline.compute(deep_representations, fMRI_data, output_path, logger=logs)
-    logs.validate()
     
     logs.info("Aggregating over cross-validation results...")
     maps = {key: np.mean(np.stack(np.array([dic[key] for dic in maps]), axis=0), axis=0) for key in maps[0]}
     logs.validate()
     
-    logs.info("Plotting...")
+    logs.info("Plotting...", end='\n')
     ## R2
-    output_path = os.path.join(output_path, 'R2')
+    output_path = output_name(output_path, subject, parameters['model_name'], 'R2')
     create_maps(masker, maps['R2'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['R2'], output_path, vmax=None, logger=logs)
     ## Pearson
-    output_path = os.path.join(output_path, 'Pearson_coeff')
+    output_path = output_name(output_path, subject, parameters['model_name'], 'Pearson_coeff')
     create_maps(masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs)
     ## Alpha (not exactly what should be done: averaging alphas)
-    output_path = os.path.join(output_path, 'alpha')
+    output_path = output_name(output_path, subject, parameters['model_name'], 'alpha')
     create_maps(masker, maps['alpha'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['alpha'], output_path, vmax=None, logger=logs)
     logs.validate()

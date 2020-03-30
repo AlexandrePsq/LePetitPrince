@@ -142,19 +142,3 @@ Protocol:
 - Run the following command:
 <pre>python main.py --yaml_file <i>path_to_yaml_file</i> --input <i>path_to_representations_folder</i> --output <i>path_to_output_folder</i> --logs <i>path_to_log_file</i></pre>
 
-
-### Analysis ###
-
-
-#### TO BE MODIFIED
-Available analysis so far:
-- scatter plot comparison of r2 distributions per ROI in the brain for 2 given models
-
-To run such an analysis, you should first fill in the `analysis.yaml` file with the name of the model you want to study and the name of the study that this scatter plot is suppose to enlighten (e.g. syntax VS semantic).
-Then run the following command line:
-
-<pre>
-cd $LPP
-cd code/fMRI
-python analysis.py $LPP/code/analysis.yaml
-</pre>

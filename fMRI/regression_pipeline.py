@@ -55,7 +55,7 @@ class Pipeline(object):
                 queue = task.children + queue
                 count += len(task.children)
         self.reset_tasks()
-        logger.info("The pipeline was fitted without error.")
+        logger.info("The pipeline was fitted without error.", end='\n')
             
     def compute(self, X_train, Y_train, output_path, logger):
         """ Execute pipeline.
@@ -80,6 +80,5 @@ class Pipeline(object):
             logger.info("Saving output...")
             task.save_output(output_path)
             logger.validate()
-        logger.info("The pipeline was executed without error.")
-        logger.validate()
+        logger.info("The pipeline was executed without error.", end='\n')
         return task.output

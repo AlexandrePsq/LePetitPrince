@@ -1,6 +1,8 @@
 import os
 import yaml
 import glob
+import h5py
+import json
 import inspect
 import numpy as np
 import pandas as pd
@@ -53,13 +55,41 @@ def write(path, text, end='\n'):
         f.write(end)
 
 def save(object_to_save, path):
+    """ Save an object to a given path.
+    Arguments:
+        - object_to_save: np.array / pd.DataFrame / dict (of np.array)
+        - path: str
+    """
     if isinstance(object_to_save, np.ndarray):
         extension = '.npy'
         np.save(path+extension, object_to_save)
     elif isinstance(object_to_save, pd.DataFrame):
         extension = '.csv'
         object_to_save.to_csv(path+extension, index=False)
-    # others to add ?
+    elif isinstance(object_to_save, dict):
+        extension = '.hdf5'
+        with h5py.File(path+extension, "w", libver='latest') as fout:
+            for key in object_to_save.keys():
+                if isinstance(object_to_save[key], np.ndarray):
+                    fout.create_dataset(str(key), object_to_save[key].shape, data=object_to_save[key])
+                elif isinstance(object_to_save[key], dict):
+                    fout.create_dataset(str(key), data=json.dumps(object_to_save[key]))
+
+def load(path):
+    """ Load an object saved at a given path.
+    Arguments:
+        - path: str
+    """
+    if path.endswith('.npy'):
+        data = np.load(path)
+    elif path.endswith('.csv'):
+        data = pd.read_csv(path)
+    elif path.endswith('.hdf5'):
+        with h5py.File(path, "r", swmr=True) as fin:
+            data = {key: json.loads(fin[key][()]) if isinstance(fin[key][()], str) else fin[key][()] for key in fin.keys()}
+    elif path.endswith('.nii.gz'):
+        data = nib.load(path)
+    return data    
 
 def merge_dict(list_of_dict):
     """ Merge a list of dictionaries into a single dictionary.
@@ -148,20 +178,21 @@ def filter_args(func, d):
     args = {key: d[key] for key in keys if key!='self'}
     return args
 
-def output_name(folder_path, subject, model_name):
+def output_name(folder_path, subject, model_name, data_name=None):
     """ Create a template name for the output deriving from
     given subject and model.
     Arguments:
         - folder_path: str
         - subject: str
         - model_name: str
+        - data_name: str
     Returns:
-        - template: str
+        - output_path: str
     """
     folder = os.path.join(folder_path, subject, model_name)
     check_folder(folder)
-    template = os.path.join(folder, '{}_{}_'.format(subject, model_name))
-    return template
+    output_path = os.path.join(folder, '{}_{}_'.format(subject, model_name)) + data_name
+    return output_path
 
 def possible_subjects_id(language):
     """ Returns possible subject id list for a given language.
@@ -182,7 +213,7 @@ def possible_subjects_id(language):
         raise Exception('Language {} not known.'.format(language))
     return result
     
-def fetch_data(path_to_fmridata, path_to_input, subject, language, models):
+def fetch_data(path_to_fmridata, path_to_input, subject, language, models=[]):
     """ Retrieve deep representations and fmri data.
     Arguments:
         - path_to_fmridata: str
@@ -335,8 +366,10 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
     """
     logger.info("Transforming array to .nii image...")
     img = masker.inverse_transform(distribution)
+    logger.validate()
     logger.info("Saving image...")
     nib.save(img, output_path + '.nii.gz')
+    logger.validate()
 
     plt.hist(distribution[~np.isnan(distribution)], bins=50)
     plt.savefig(output_path + '_hist.png')
@@ -351,3 +384,4 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
         display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
         display.savefig(output_path + '.png')
         display.close()
+    logger.validate()

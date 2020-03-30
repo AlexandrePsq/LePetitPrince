@@ -134,7 +134,7 @@ To give more insights on the three main parts of the project:
 ### fMRI pipeline ###
 
 Protocol:
-- Upload your deep-representation matrices as a .csv file in <pre>$LPP/derivatives/fMRI/deep-representations/<i>language</i>/<i>model_name</i>/</pre>.
+- Upload your deep-representation matrices as a .csv file in <pre>$LPP/derivatives/fMRI/deep-representations/<i>language</i>/<i>model_name</i>/</pre>
 - Be careful that each '.csv' filename contain its run number.
 - Be sure to have the adequate onsets/offsets files for each model included in your analysis (the path should be specified in the yaml template).
 - Optional: if the creation of a regressor for a given model require specific *duration*, create the adequate array for each run (the path should be specified in the yaml template), otherwise a vector of *1* should be used.

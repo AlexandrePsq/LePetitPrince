@@ -9,6 +9,7 @@ The code of this project enables to fit various models predictions from a sequen
 You possess:
 - a given sequence of stimuli, 
 - you have acquired fMRI data from exposing a number of subjects to this very stimuli,
+
 and you want to compare the predictions of a model (or an aggregation of models) from the same stimuli sequence to your fMRI data.
 
 This pipeline allows you to build malleable flow for your analysis, combining:
@@ -74,7 +75,7 @@ all the distributed instanciations of the pipeline for all subjects and models.
 3. For each split of the outter CV, we standardize the newly computed regressors before the Ridge regression.
 4. For each split of the outter CV, we fit Ridge encoding models with the best alpha* for each voxel and compute R2/Pearson values.
 
-*the best alpha is determined for each voxel
+*the best alpha is determined for each voxel.
 
 
 
@@ -97,48 +98,48 @@ The files are organized in the following overall folder structure:
 ├── <b>paradigm</b> <i>(experiences information, stimuli)</i>
 ├── <b>oldstuff</b> <i>(oldscripts, personnal data/code, ...)</i>
 ├── <b>code</b> <i>(all the code of all the analysis)</i>
-│       ├── <b>MEG</b> <i>(code of the MEG analysis pipeline)</i>
-│       └── <b>fMRI</b> <i>(code of the fMRI analysis pipeline)</i>
-│               ├── data_compression.py <i>(Class regrouping methods to compress the representation data)</i>
-│               ├── data_transformation.py <i>(Class regrouping methods to transform the data: standardization, creating rergessors, ...)</i>
-│               ├── encoding_models.py <i>(Class where the Linear (regularized or not) model is implemented)</i>
-│               ├── logger.py <i>(Logging class to check piepeline status)</i>
-│               ├── main.py <i>(Launch the pipeline for the given yaml config file)</i>
-│               ├── regression_pipeline.py <i>(Class implementing the pipeline for the regression analysis)</i>
-│               ├── requirements.txt <i>(required librairies + versions)</i>
-│               ├── splitter.py <i>(Class regrouping splitting/distributing methods)</i>
-│               ├── task.py <i>(Class implementing a Task which is a step of the pipeline)</i>
-│               ├── template.yml <i>(Yaml config file to fill for each call of main.py)</i>
-│               └── utils.py <i>(utilities functions: parameters settings, fetching, reading/writing ...)</i>
+│   ├── <b>MEG</b> <i>(code of the MEG analysis pipeline)</i>
+│   └── <b>fMRI</b> <i>(code of the fMRI analysis pipeline)</i>
+│       ├── data_compression.py <i>(Class regrouping methods to compress the representation data)</i>
+│       ├── data_transformation.py <i>(Class regrouping methods to transform the data: standardization, creating rergessors, ...)</i>
+│       ├── encoding_models.py <i>(Class where the Linear (regularized or not) model is implemented)</i>
+│       ├── logger.py <i>(Logging class to check piepeline status)</i>
+│       ├── main.py <i>(Launch the pipeline for the given yaml config file)</i>
+│       ├── regression_pipeline.py <i>(Class implementing the pipeline for the regression analysis)</i>
+│       ├── requirements.txt <i>(required librairies + versions)</i>
+│       ├── splitter.py <i>(Class regrouping splitting/distributing methods)</i>
+│       ├── task.py <i>(Class implementing a Task which is a step of the pipeline)</i>
+│       ├── template.yml <i>(Yaml config file to fill for each call of main.py)</i>
+│       └── utils.py <i>(utilities functions: parameters settings, fetching, reading/writing ...)</i>
 ├── <b>data</b> <i>(all the raw data acquired from sources)</i>
-│       ├── <b>fMRI</b> <i>(fMRI data, 9 runs per subject)</i>
-│       │      └── <b><i>language</i></b>
-│       │               └── <b>sub-057</b>
-│       │                       └── <b>func</b>
-│       ├── <b>onsets-offsets</b> <i>(onsets-offsets data)</i>
-│       │      └── <b><i>language</i></b>
-│       │               ├── <b>word_run_1.csv</b>
-│       │               ├──  ...
-│       │               ├── <b>word_run_<i>n</i>.csv</b>
-│       │               ├──  <b>word+punctuation_run_1.csv</b>
-│       │               ├──  ...
-│       │               └── <b>word+punctuation_run_<i>n</i>.csv</b>
-│       └── <b>stimuli-representations</b> <i>(stimuli representation dataframes extracted from the models activity)</i>
-│                   └── <b><i>language</i></b>
-│                               └── <b> <i>model_of_interest</i> </b>
-│                                             ├── deep_representation_run_1.csv 
-│                                             ├──  ...
-│                                             └── deep_representation_run_<i>n</i>.csv
+│   ├── <b>fMRI</b> <i>(fMRI data, 9 runs per subject)</i>
+│   │   └── <b><i>language</i></b>
+│   │       └── <b>sub-057</b>
+│   │           └── <b>func</b>
+│   ├── <b>onsets-offsets</b> <i>(onsets-offsets data)</i>
+│   │   └── <b><i>language</i></b>
+│   │       ├── <b>word_run_1.csv</b>
+│   │       ├──  ...
+│   │       ├── <b>word_run_<i>n</i>.csv</b>
+│   │       ├── <b>word+punctuation_run_1.csv</b>
+│   │       ├──  ...
+│   │       └── <b>word+punctuation_run_<i>n</i>.csv</b>
+│   └── <b>stimuli-representations</b> <i>(stimuli representation dataframes extracted from the models activity)</i>
+│       └── <b><i>language</i></b>
+│           └── <b> <i>model_of_interest</i> </b>
+│               ├── deep_representation_run_1.csv 
+│               ├──  ...
+│               └── deep_representation_run_<i>n</i>.csv
 │
 └── <b>derivatives</b> <i>(results of the code above)</i>
-              ├── <b>MEG</b>
-              └── <b>fMRI</b> <i>(results from the fMRI pipeline in code/fMRI/)</i>
-                          └── <b>maps</b> (<i>Maps deriving from our pipeline</i>)
-                                    └── <b><i>language</i></b>
-                                                └── <b>sub-057</b>
-                                                            └── <b> <i>model_of_interest</i> </b>
-                                                                        ├── R2.nii.gz
-                                                                        └── R2.png
+    ├── <b>MEG</b>
+        └── <b>fMRI</b> <i>(results from the fMRI pipeline in code/fMRI/)</i>
+            └── <b>maps</b> (<i>Maps deriving from our pipeline</i>)
+                └── <b><i>language</i></b>
+                    └── <b>sub-057</b>
+                        └── <b> <i>model_of_interest</i> </b>
+                            ├── R2.nii.gz
+                            └── R2.png
 </pre>
 
 To give more insights on the three main parts of the project:

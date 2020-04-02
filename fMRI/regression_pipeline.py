@@ -1,3 +1,16 @@
+"""
+General class to pipe the different steps of the encoding analysis.
+Allows flexible result aggregation between the functions of the defined flow.
+===================================================
+This module allows malleable task flow.
+It doesn't require any argument for instanciation.
+The two main functions of the class are:
+    - self.fit(root_task): which retrieves the order in which to execute the tasks
+    descending from the root_task, based on parents/child dependencies.
+    - self.compute(self, X_train, Y_train, output_path, logger): which sequentially 
+    computes the various steps of the pipeline starting from an initial input (X_train, 
+    Y_train), saving the last task output to output_path, and returning it.
+"""
 
 from task import Task
 
@@ -72,7 +85,7 @@ class Pipeline(object):
             empty_task = Task()
             empty_task.set_output(inputs)
             empty_task.set_terminated(True)
-            self.tasks[0].add_dependencies(empty_task)
+            self.tasks[0].add_input_dependencies(empty_task)
             for index, task in enumerate(self.tasks):
                 logger.info("{}. Executing task: {}".format(index, task.name))
                 task.execute()

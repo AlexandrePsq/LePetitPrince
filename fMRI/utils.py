@@ -187,7 +187,7 @@ def filter_args(func, d):
     args = {key: d[key] for key in keys if key!='self'}
     return args
 
-def output_name(folder_path, subject, model_name, data_name=''):
+def get_output_name(folder_path, subject, model_name, data_name=''):
     """ Create a template name for the output deriving from
     given subject and model.
     Arguments:
@@ -275,32 +275,53 @@ def fetch_duration(duration_type, run_index, duration_path, language, default_si
         duration = pd.read_csv(path).values
     return duration
 
-def structuring_inputs(models, nb_runs):
-    """ Structure inputs from submitted yaml file.
+def get_splitter_information(parameters):
+    """ Retrieve the inputs for data transformation (make_regressor + standardization).
     Arguments:
-        - models: dict
-        - nb_runs: int
+        - parameters: dict
     Returns:
-        - indexes: list (of np.array)
-        - new_indexes: list (of np.array)
-        - offset_type_dict: dict (of list)
-        - duration_type_dict: dict (of list)
-        - compression_types: list (of str)
-        - n_components_list: list (of int)
+        - dict 
+    """
+    result = {'out_per_fold': parameters['nb_runs_test']}
+    return result
+
+def get_compression_information(parameters):
+    """ Retrieve the inputs for data compression.
+    Arguments:
+        - parameters: dict
+    Returns:
+        - dict (indexes: list (of np.array),
+        compression_types: list (of str),
+        n_components_list: list (of int)
+        )
     """
     indexes = []
-    new_indexes = []
-    offset_type_dict = {'run{}'.format(i): [] for i in range(1, nb_runs + 1)}
-    duration_type_dict = {'run{}'.format(i): [] for i in range(1, nb_runs + 1)}
     compression_types = []
     n_components_list = []
     i = 0
-    i_ = 0
-    for model in models:
+    for model in parameters['models']:
         compression_types.append(model['data_compression'] if model['data_compression'] else 'identity')
         n_components_list.append(model['ncomponents'])
         indexes.append(np.arange(i, len(eval(model['columns_to_retrieve'])) + i))
         i += len(eval(model['columns_to_retrieve']))
+    return {'indexes': indexes, 'compression_types': compression_types, 'n_components_list': n_components_list}
+
+def get_data_transformation_information(parameters):
+    """ Retrieve the inputs for data transformation (make_regressor + standardization).
+    Arguments:
+        - parameters: dict
+    Returns:
+        - dict (new_indexes: list (of np.array),
+        offset_type_dict: dict (of list),
+        duration_type_dict: dict (of list)
+        )
+    """
+    nb_runs = parameters['nb_runs']
+    new_indexes = []
+    offset_type_dict = {'run{}'.format(i): [] for i in range(1, nb_runs + 1)}
+    duration_type_dict = {'run{}'.format(i): [] for i in range(1, nb_runs + 1)}
+    i_ = 0
+    for model in parameters['models']:
         if model['data_compression']:
             new_indexes.append(np.arange(i_, i_ + model['ncomponents']))
             i_ += model['ncomponents']
@@ -310,8 +331,24 @@ def structuring_inputs(models, nb_runs):
         for run_index in range(1, nb_runs + 1):
             offset_type_dict['run{}'.format(run_index)].append(model["offset_type"])
             duration_type_dict['run{}'.format(run_index)].append(model["duration_type"])
-    return indexes, new_indexes, offset_type_dict, duration_type_dict, compression_types, n_components_list
+    result =  {'indexes': new_indexes, 'offset_type_dict': offset_type_dict, 'duration_type_dict': duration_type_dict,
+                'tr': parameters['tr'], 'nscans': get_nscans(parameters['language']), 
+                'offset_path': parameters['offset_path'], 'duration_path': parameters['duration_path'], 
+                'language': parameters['language'], 'hrf': parameters['hrf']}
+    return result
             
+def get_encoding_model_information(parameters):
+    """ Retrieve the inputs for data transformation (make_regressor + standardization).
+    Arguments:
+        - parameters: dict
+    Returns:
+        - dict
+    """
+    result = {'model': eval(parameters['encoding_model']), 'alpha': parameters['alpha'], 
+                'alpha_min_log_scale': parameters['alpha_min_log_scale'], 
+                'alpha_max_log_scale': parameters['alpha_max_log_scale'], 
+                'nb_alphas': parameters['nb_alphas'], 'optimizing_criteria': parameters['optimizing_criteria']}
+    return result
 
 #########################################
 ########### Nilearn functions ###########

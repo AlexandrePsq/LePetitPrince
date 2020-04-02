@@ -1,3 +1,13 @@
+"""
+General framework regrouping the different splitting strategies possible to integrate in the 
+regression analysis pipeline.
+===================================================
+A Splitter instanciation requires:
+    - out_per_fold: the number of run to left out for the test set.
+It makes use of the sklearn LeavePOut, and allows to keep track of the indexesòf the runs.
+"""
+
+
 from sklearn.model_selection import LeavePOut
 
 

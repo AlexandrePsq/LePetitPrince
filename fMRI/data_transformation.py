@@ -1,3 +1,30 @@
+"""
+General framework regrouping various methods to perform transformations of the data.
+===================================================
+A Transformer instanciation requires:
+    - tr: int, it is the repetition time of the fMRI image acquisition,
+    - nscans: dict regrouping the number of scans for each run,
+    - indexes: list of numpy arrays specifying the columns indexes for each model,
+    - offset_type_dict: dict of list regrouping the offset type for each run (dict keys) and each model (in a list),
+    - duration_type_dict: dict of list regrouping the duration type for each run (dict keys) and each model (in a list),
+    - offset_path: string,
+    - duration_path: string,
+    - language: string,
+    - hrf: string specifying the kind of hemodynamic response function to use to create the regressors that wil 
+    be fitted to fMRI data,
+    - oversampling: int, oversampling of the signal before convolution,
+    - with_mean: bool specifying if we remove the mean from the data,
+    - with_std: bool specifying if we divide by the standard deviation the data.
+
+This class enables to perform a lots of transformations on a given dataset:
+    - from loading and preprocessing with the process_* functions
+    - to classical functions like standardization,
+    - or more complex ones like make_regressor.
+
+"""
+
+
+
 import os
 import numpy as np
 import pandas as pd

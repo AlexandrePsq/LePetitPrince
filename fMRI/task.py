@@ -9,7 +9,7 @@ A Task instanciation requires:
     - name: name (string) of the task,
     - flatten_inputs: list of bool specifying if we have to flatten the outputs of 
     the tasks in iputs_dependencies, 
-    - unflatten_output: bool specifying if we unflatten the output of this
+    - unflatten_output: ('automatic' / int / None), specifying if we unflatten the output of this
     particular task, 
     - special_output_transform: function that should be applied on the final output
     of the task.
@@ -34,6 +34,9 @@ class Task(object):
             - functions: list (of functions)
             - input_dependencies: list (of Tasks)
             - name: str
+            - flatten_inputs: list (of bool)
+            - unflatten_output: 'automatic' / int / None
+            - special_output_transform: function
         """
         self.input_dependencies = input_dependencies
         self.children = []

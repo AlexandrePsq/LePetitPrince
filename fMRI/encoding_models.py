@@ -1,3 +1,28 @@
+"""
+General class for encoding models: fit an array of regressors to fMRI data.
+===================================================
+A EncodingModel instanciation requires:
+    - model: an instance of sklearn.linear_model that will be use to fit a 
+    design-matrix to fMRI data,
+    - alpha: int (or None) regularization hyperparameter of the model,
+    - alpha_min_log_scale: int minimum of the log scale alpha values that we are testing,
+    - alpha_max_log_scale: int maximum of the log scale alpha values that we are testing ,
+    - nb_alphas: int, number of alphas to test in our log scale,
+    - optimizing_criteria': string specifying the measure to use for optimization (by default
+    we use the R2 value).
+
+The mains methods implemented in this class are:
+    - self.fit: train the encoding model from {X_train, Y_train, alpha}
+    - self.grid_search: compute R2 maps (or other depending on self.optimizing_criteria)
+    for multiple values of alphas from models fit on the whole brain.
+    - self.optimize_alpha: retrieve the best hyperparameter per voxel from the output
+    of the grid_search.
+    - self.evaluate: use optimize_alpha to fit a model for each set of voxels having the same 
+    hyperparameters and compute the R2/Pearson maps.
+"""
+
+
+
 import os
 import numpy as np
 
@@ -50,8 +75,9 @@ class EncodingModel(object):
         return predictions
     
     def grid_search(self, X_train, Y_train, X_test, Y_test):
-        """ Fit a model on the whole brain and return R2 coefficients,
-        Pearson coefficients and regularization parameters.
+        """ Fit a model on the whole brain for a list of hyperparameters, 
+        and return R2 coefficients, Pearson coefficients and regularization 
+        parameters.
         Arguments:
             - X_train: list (of np.array)
             - Y_train: list (of np.array)

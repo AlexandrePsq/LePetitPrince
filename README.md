@@ -25,6 +25,7 @@ In addition, some useful functions allow you to create brain maps from the outpu
 ## Default pipeline  ##
 
 For our project, we implemented the pipeline presented in *main.py* file, in which we abode by the following methodology:
+
 We fit the stimuli-representations of our models to the fMRI data (9 runs) thanks to a nested-cross validated Ridge-regression.
 We then plotted brain maps from the cross-validated R2 (or Pearson coefficient).
 
@@ -49,7 +50,7 @@ all the distributed instanciations of the pipeline for all subjects and models.
 
 0. Define variables.
 1. Fetch (or compute) a global masker (+ a smoothed version) over all subjects (to have a common analysis ground).
-2. Compute the indexes of the columns of each model (in the horizontaly-concatenated matrices) before and after data compression to be able to identify specific model representations in the design-matrices.
+2. Retrieve the arguments for classes instanciations.
 3. Instanciate the classes.
 4. Define dependencies relations between classes.
 5. Load paths to stimuli-representation and fMRI data.
@@ -126,13 +127,13 @@ The files are organized in the following overall folder structure:
 │   │       └── <b>word+punctuation_run_<i>n</i>.csv</b>
 │   └── <b>stimuli-representations</b> <i>(stimuli representation dataframes extracted from the models activity)</i>
 │       └── <b><i>language</i></b>
-│           └── <b> <i>model_of_interest</i> </b>
+│           └── <b><i>model_of_interest</i> </b>
 │               ├── deep_representation_run_1.csv 
 │               ├──  ...
 │               └── deep_representation_run_<i>n</i>.csv
 │
 └── <b>derivatives</b> <i>(results of the code above)</i>
-    ├── <b>MEG</b>
+    └── <b>MEG</b>
         └── <b>fMRI</b> <i>(results from the fMRI pipeline in code/fMRI/)</i>
             └── <b>maps</b> (<i>Maps deriving from our pipeline</i>)
                 └── <b><i>language</i></b>

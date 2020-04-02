@@ -1,5 +1,6 @@
 tr: 2.
 nb_runs: 9
+nb_runs_test: 1
 subject: 57
 scaling_mean: True
 scaling_var: True
@@ -10,9 +11,12 @@ voxel_wise: True
 atlas: cort-prob-2mm
 seed: 1111
 alpha_percentile: 99.9
+alpha:
 alpha_min_log_scale: 2
 alpha_max_log_scale: 5
 nb_alphas: 25
+optimizing_criteria: R2
+encoding_model: Ridge()
 masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/global_masker_english"
 smoothed_masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/smoothed_global_masker_english"
 path_to_root: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"

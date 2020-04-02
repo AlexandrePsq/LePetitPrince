@@ -1,3 +1,18 @@
+"""
+General framework regrouping various compression methods to be performed on the data.
+===================================================
+A Compressor instanciation requires:
+    - n_components_list: list regrouping the number of components to keep for each model
+    representations dimension reduction,
+    - indexes: list of numpy arrays listing the columns indexes for each model to retrieve the right
+    columns when compressing specific model representations,
+    - compression_types: list of string regrouping the specific data reduction methods to apply to 
+    each model representations.
+This class allows to compress differently specific parts of a list of matrices.
+"""
+
+
+
 import numpy as np
 import pandas as pd
 

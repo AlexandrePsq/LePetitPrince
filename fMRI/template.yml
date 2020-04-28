@@ -20,17 +20,19 @@ encoding_model: Ridge()
 masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/global_masker_english"
 smoothed_masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/smoothed_global_masker_english"
 path_to_root: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
-path_to_fmridata: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/"
-offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/wave"
+path_to_fmridata: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI"
+offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/wave/onsets-offsets"
 duration_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
 language: english
+output: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/" , # Path to the output folder
+input: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/stimuli-representation/" , # Path to the folder containing the representations
 models:
-  - model_name: wordrate_all_model
-    columns_to_retrieve: "[0]"
-    surname: Word_rate
+  - model_name: Bert-base-cased
+    columns_to_retrieve: "['hidden_state-layer-12-{}'.format(i) for i in range(1, 769)]"
+    surname: Bert
     data_compression: 
     ncomponents: 
-    offset_type: 'word' # word / word+punctuation / ...
+    offset_type: 'word+punctuation' # word / word+punctuation / ...
     duration_type: 
     shift_surprisal: False
   - model_name: wordrate_all_model

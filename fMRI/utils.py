@@ -187,18 +187,19 @@ def filter_args(func, d):
     args = {key: d[key] for key in keys if key!='self'}
     return args
 
-def get_output_name(folder_path, subject, model_name, data_name=''):
+def get_output_name(folder_path, language, subject, model_name, data_name=''):
     """ Create a template name for the output deriving from
     given subject and model.
     Arguments:
         - folder_path: str
+        - language: str
         - subject: str
         - model_name: str
         - data_name: str
     Returns:
         - output_path: str
     """
-    folder = os.path.join(folder_path, subject, model_name)
+    folder = os.path.join(folder_path, language, subject, model_name)
     check_folder(folder)
     output_path = os.path.join(folder, '{}_{}_'.format(subject, model_name)) + data_name
     return output_path

@@ -231,7 +231,7 @@ def fetch_data(path_to_fmridata, path_to_input, subject, language, models=[]):
         - language: str
         - models: list (of dict)
     """
-    fmri_path = os.path.join(path_to_fmridata, "fMRI", language, subject, "func")
+    fmri_path = os.path.join(path_to_fmridata, language, subject, "func")
     fMRI_paths = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
     deep_representations_paths = [sorted(glob.glob(os.path.join(path_to_input, language, model['model_name'],'*run*.csv'))) for model in models]
     return deep_representations_paths, fMRI_paths
@@ -247,7 +247,7 @@ def fetch_offsets(offset_type, run_index, offset_path, language):
         - vector: np.array
     """
     index = run_index[-1]
-    offset_template_path = os.path.join(offset_path, language, 'onsets-offsets', '{offset_type}' + '_run{index}.csv')
+    offset_template_path = os.path.join(offset_path, language, '{offset_type}' + '_run{index}.csv')
     path = offset_template_path.format(offset_type=offset_type, index=index)
     if not os.path.exists(path):
         raise Exception("Please specify an offset file at: {}".format(path))

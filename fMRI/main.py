@@ -20,18 +20,16 @@ from data_compression import Compressor
 if __name__=='__main__':
     
     parser = argparse.ArgumentParser(description="""Main script that compute the R2 maps for a given subject and model.""")
-    parser.add_argument("--yaml_file", type=str, default="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/fMRI/template.yml", help="Path to the yaml containing the parameters of the script execution.")
-    parser.add_argument("--input", type=str, help="Path to the folder containing the representations.")
-    parser.add_argument("--output", type=str, help="Path to the output folder.")
-    parser.add_argument("--logs", type=str, default=None, help="Path to the log file.")
+    parser.add_argument("--yaml_file", type=str, default="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/code/fMRI/template.yml", 
+                            help="Path to the yaml containing the parameters of the script execution.")
 
     args = parser.parse_args()
     parameters = read_yaml(args.yaml_file)
-    input_path = args.input
-    output_path_ = args.output
+    input_path = parameters['input']
+    output_path_ = parameters['output']
     subject = get_subject_name(parameters['subject'])
     output_path = get_output_name(output_path_, subject, parameters['model_name'])
-    logs = Logger(os.path.join(args.logs, '{}_{}.txt'.format(subject, parameters['model_name'])))
+    logs = Logger(os.path.join(parameters['logs'], '{}_{}.txt'.format(subject, parameters['model_name'])))
     save_yaml(parameters, output_path + 'config.yml')
 
     logs.info("Fetching maskers...", end='\n')

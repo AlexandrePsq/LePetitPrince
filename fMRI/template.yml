@@ -25,7 +25,7 @@ offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePeti
 duration_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
 language: english
 output: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/" , # Path to the output folder
-input: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/stimuli-representation/" , # Path to the folder containing the representations
+input: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/stimuli-representations/" , # Path to the folder containing the representations
 models:
   - model_name: Bert-base-cased
     columns_to_retrieve: "['hidden_state-layer-12-{}'.format(i) for i in range(1, 769)]"

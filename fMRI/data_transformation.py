@@ -120,8 +120,8 @@ class Transformer(object):
         regressors = []
         dataframe = dataframe.dropna(axis=0)
         representations = [col for col in dataframe.columns]
-        offsets = fetch_offsets(offset_type, run_index, self.offset_path, self.language)
-        duration = fetch_duration(duration_type, run_index, self.duration_path, self.language, default_size=len(dataframe))
+        offsets = fetch_offsets(offset_type, run_index, self.offset_path)
+        duration = fetch_duration(duration_type, run_index, self.duration_path, default_size=len(dataframe))
         for col in representations:
             conditions = np.vstack((offsets, duration, dataframe[col]))
             tmp = compute_regressor(exp_condition=conditions,
@@ -148,7 +148,7 @@ class Transformer(object):
         # Computing design-matrices
         for i in range(len(runs)):
             # to modify in case the path leads to .npy file
-            merge = pd.concat([pd.DataFrame(pd.read_csv(path2features, header=0).values[:, eval(models[index]['columns_to_retrieve'])]) for index, path2features in enumerate(runs[i])], axis=1) # concatenate horizontaly the read csv files of a run
+            merge = pd.concat([pd.read_csv(path2features)[eval(models[index]['columns_to_retrieve'])] for index, path2features in enumerate(runs[i])], axis=1) # concatenate horizontaly the read csv files of a run
             arrays.append(merge.values)
         return arrays
     

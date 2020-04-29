@@ -238,18 +238,17 @@ def fetch_data(path_to_fmridata, path_to_input, subject, language, models=[]):
     deep_representations_paths = [sorted(glob.glob(os.path.join(path_to_input, language, model['model_name'],'*run*.csv'))) for model in models]
     return deep_representations_paths, fMRI_paths
 
-def fetch_offsets(offset_type, run_index, offset_path, language):
+def fetch_offsets(offset_type, run_index, offset_path):
     """ Retrieve the offset vector.
     Arguments:
         - offset_type: str
         - run_index: int
         - offset_path: str
-        - language: str
     Returns:
         - vector: np.array
     """
     index = run_index[-1]
-    offset_template_path = os.path.join(offset_path, language, '{offset_type}' + '_run{index}.csv')
+    offset_template_path = os.path.join(offset_path, '{offset_type}' + '_run{index}.csv')
     path = offset_template_path.format(offset_type=offset_type, index=index)
     if not os.path.exists(path):
         raise Exception("Please specify an offset file at: {}".format(path))
@@ -257,19 +256,18 @@ def fetch_offsets(offset_type, run_index, offset_path, language):
         offset = pd.read_csv(path)['offsets'].values
     return offset
 
-def fetch_duration(duration_type, run_index, duration_path, language, default_size=None):
+def fetch_duration(duration_type, run_index, duration_path, default_size=None):
     """ Retrieve the duration vector.
     Arguments:
         - duration_type: str
         - run_index: int
         - duration_path: str
-        - language: str
         - default_size = int
     Returns:
         - vector: np.array
     """
     index = run_index[-1]
-    duration_template_path = os.path.join(duration_path, language, 'durations', '{duration_type}' + '_run{index}.csv')
+    duration_template_path = os.path.join(duration_path, 'durations', '{duration_type}' + '_run{index}.csv')
     path = duration_template_path.format(duration_type=duration_type, index=index)
     if not os.path.exists(path):
         duration = np.ones(default_size)

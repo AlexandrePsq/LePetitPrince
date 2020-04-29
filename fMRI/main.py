@@ -3,8 +3,6 @@ import yaml
 import argparse
 import numpy as np
 
-from sklearn.linear_model import Ridge
-
 from utils import check_folder, read_yaml, save_yaml, write, get_subject_name, get_output_name, aggregate_cv, create_maps, fetch_masker, fetch_data, get_nscans
 from utils import get_splitter_information, get_compression_information, get_data_transformation_information, get_encoding_model_information
 from task import Task

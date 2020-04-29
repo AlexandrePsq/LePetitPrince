@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
 import nibabel as nib
+from sklearn.linear_model import Ridge
 from nilearn.masking import compute_epi_mask
 from nilearn.image import math_img, mean_img
 from nilearn.input_data import MultiNiftiMasker

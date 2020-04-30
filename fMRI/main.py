@@ -115,15 +115,15 @@ if __name__=='__main__':
     
     logs.info("Plotting...", end='\n')
     ## R2
-    output_path = get_output_name(output_path_, subject, parameters['model_name'], 'R2')
+    output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'R2')
     create_maps(masker, maps['R2'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['R2'], output_path, vmax=None, logger=logs)
     ## Pearson
-    output_path = get_output_name(output_path_, subject, parameters['model_name'], 'Pearson_coeff')
+    output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'Pearson_coeff')
     create_maps(masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs)
     ## Alpha (not exactly what should be done: averaging alphas)
-    output_path = get_output_name(output_path_, subject, parameters['model_name'], 'alpha')
+    output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'alpha')
     create_maps(masker, maps['alpha'], output_path, vmax=None, logger=logs)
     create_maps(smoothed_masker, maps['alpha'], output_path, vmax=None, logger=logs)
     logs.validate()

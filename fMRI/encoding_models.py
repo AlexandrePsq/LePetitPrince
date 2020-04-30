@@ -57,6 +57,7 @@ class EncodingModel(object):
         Arguments:
             - X_train: list (of np.array)
             - Y_train: list (of np.array)
+            - alpha: float
         """
         self.model.set_params(alpha=alpha)
         dm = np.vstack(X_train)
@@ -138,13 +139,14 @@ class EncodingModel(object):
         data = R2 if self.optimizing_criteria=='R2' else Pearson_coeff
         voxel2alpha, alpha2voxel = self.optimize_alpha(data, alpha)
         for alpha_, voxels in alpha2voxel.items():
-            y_test = np.vstack(Y_test)[:, voxels]
-            y_train = np.vstack(Y_train)[:, voxels]
-            x_train = np.vstack(X_train)
-            self.fit(x_train, y_train, alpha_)
-            predictions = self.predict(x_test)
-            R2_[voxels] = self.get_R2_coeff(predictions, y_test)
-            Pearson_coeff_[voxels] = self.get_Pearson_coeff(predictions, y_test)
+            if voxels:
+                y_test = np.vstack(Y_test)[:, voxels]
+                y_train = np.vstack(Y_train)[:, voxels]
+                x_train = np.vstack(X_train)
+                self.fit(x_train, y_train, alpha_)
+                predictions = self.predict(x_test)
+                R2_[voxels] = self.get_R2_coeff(predictions, y_test)
+                Pearson_coeff_[voxels] = self.get_Pearson_coeff(predictions, y_test)
         result = {'R2': R2_,
                     'Pearson_coeff': Pearson_coeff_,
                     'alpha': voxel2alpha

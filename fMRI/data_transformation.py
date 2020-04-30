@@ -119,7 +119,7 @@ class Transformer(object):
         """
         regressors = []
         dataframe = dataframe.dropna(axis=0)
-        representations = [col for col in dataframe.columns]
+        representations = [str(col) for col in dataframe.columns]
         offsets = fetch_offsets(offset_type, run_index, self.offset_path)
         duration = fetch_duration(duration_type, run_index, self.duration_path, default_size=len(dataframe))
         for col in representations:

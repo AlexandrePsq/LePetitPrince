@@ -14,7 +14,7 @@ alpha_percentile: 99.9
 alpha:
 alpha_min_log_scale: 2
 alpha_max_log_scale: 5
-nb_alphas: 25
+nb_alphas: 10
 optimizing_criteria: R2
 encoding_model: Ridge()
 masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/global_masker_english"

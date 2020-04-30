@@ -103,7 +103,7 @@ class Task(object):
     
     def save_output(self, path):
         """ Save the output of the task.
-        Argume,ts:
+        Arguments:
             - path: str
         """
         for index, result in enumerate(self.output):

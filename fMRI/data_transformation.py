@@ -124,11 +124,11 @@ class Transformer(object):
         duration = fetch_duration(duration_type, run_index, self.duration_path, default_size=len(dataframe))
         for col in representations:
             conditions = np.vstack((offsets, duration, dataframe[col]))
-            tmp = compute_regressor(exp_condition=conditions,
+            signal, name = compute_regressor(exp_condition=conditions,
                                     hrf_model=self.hrf,
                                     frame_times=np.arange(0.0, self.nscans[run_index] * self.tr, self.tr),
                                     oversampling=self.oversampling)
-            regressors.append(pd.DataFrame(tmp[0], columns=[col]))
+            regressors.append(pd.DataFrame(signal, columns=[col] + [col + '_' + item for item in name[1:]] ))
         matrix = pd.concat(regressors, axis=1).values
         return matrix
     

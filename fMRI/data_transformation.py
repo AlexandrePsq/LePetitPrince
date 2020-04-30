@@ -119,7 +119,7 @@ class Transformer(object):
         """
         regressors = []
         dataframe = dataframe.dropna(axis=0)
-        representations = [str(col) for col in dataframe.columns]
+        representations = [col for col in dataframe.columns]
         offsets = fetch_offsets(offset_type, run_index, self.offset_path)
         duration = fetch_duration(duration_type, run_index, self.duration_path, default_size=len(dataframe))
         for col in representations:
@@ -128,6 +128,7 @@ class Transformer(object):
                                     hrf_model=self.hrf,
                                     frame_times=np.arange(0.0, self.nscans[run_index] * self.tr, self.tr),
                                     oversampling=self.oversampling)
+            col = str(col)
             regressors.append(pd.DataFrame(signal, columns=[col] + [col + '_' + item for item in name[1:]] ))
         matrix = pd.concat(regressors, axis=1).values
         return matrix

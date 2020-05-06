@@ -235,7 +235,7 @@ def fetch_data(path_to_fmridata, path_to_input, subject, language, models=[]):
     """
     fmri_path = os.path.join(path_to_fmridata, language, subject, "func")
     fMRI_paths = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
-    deep_representations_paths = [sorted(glob.glob(os.path.join(path_to_input, language, model['model_name'],'*run*.csv'))) for model in models]
+    deep_representations_paths = [sorted(glob.glob(os.path.join(path_to_input, language, model['model_name'], model['input_template'] + '*run*.csv'))) for model in models]
     return deep_representations_paths, fMRI_paths
 
 def fetch_offsets(offset_type, run_index, offset_path):

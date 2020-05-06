@@ -90,8 +90,8 @@ class Pipeline(object):
                 logger.info("{}. Executing task: {}".format(index, task.name))
                 task.execute()
                 logger.validate()
-            logger.info("Saving output...")
-            task.save_output(output_path)
-            logger.validate()
+            #logger.info("Saving output...")
+            #task.save_output(output_path)
+            #logger.validate()
         logger.info("The pipeline was executed without error.", end='\n')
         return task.output

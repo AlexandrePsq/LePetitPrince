@@ -29,6 +29,7 @@ input: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrinc
 models:
   - model_name: Bert-base-cased
     columns_to_retrieve: "['hidden_state-layer-12-{}'.format(i) for i in range(1, 769)]"
+    input_template: activations # cls / sep
     surname: Bert
     data_compression: 
     ncomponents: 

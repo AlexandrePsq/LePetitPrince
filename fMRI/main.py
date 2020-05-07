@@ -33,8 +33,6 @@ if __name__=='__main__':
     logs.info("Fetching maskers...", end='\n')
     masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, logger=logs)
     logs.validate()
-    smoothed_masker = fetch_masker(parameters['smoothed_masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, smoothing_fwhm=5, logger=logs)
-    logs.validate()
 
     logs.info("Retrieve arguments for each model...")
     kwargs_splitter = get_splitter_information(parameters)
@@ -118,15 +116,12 @@ if __name__=='__main__':
     ## R2
     output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'R2')
     create_maps(masker, maps['R2'], output_path, vmax=None, logger=logs)
-    create_maps(smoothed_masker, maps['R2'], output_path + 'smoothed_', vmax=None, logger=logs)
     ## Pearson
     output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'Pearson_coeff')
     create_maps(masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs)
-    create_maps(smoothed_masker, maps['Pearson_coeff'], output_path + 'smoothed_', vmax=None, logger=logs)
     ## Alpha (not exactly what should be done: averaging alphas)
     output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'alpha')
     create_maps(masker, maps['alpha'], output_path, vmax=None, logger=logs)
-    create_maps(smoothed_masker, maps['alpha'], output_path + 'smoothed_', vmax=None, logger=logs)
     logs.validate()
     
     print("Model: {} for subject: {} --> Done".format(parameters['model_name'], subject))

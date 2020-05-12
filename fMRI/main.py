@@ -95,33 +95,36 @@ if __name__=='__main__':
     compressor_external.set_children_tasks([transform_data_external])
     transform_data_external.set_children_tasks([encoding_model_external])
     logs.validate()
-    
-    logs.info("Fetching and preprocessing input data...")
-    stimuli_representations_paths, fMRI_paths = fetch_data(parameters['path_to_fmridata'], input_path, 
-                                                            subject, parameters['language'], parameters['models'])
-    stimuli_representations = transformer.process_representations(stimuli_representations_paths, parameters['models'])
-    fMRI_data = transformer.process_fmri_data(fMRI_paths, masker)
-    logs.validate()
-    
-    logs.info("Executing pipeline...", end='\n')
-    pipeline = Pipeline()
-    pipeline.fit(splitter_cv_external, logs) # retrieve the flow from children and input_dependencies
-    maps = pipeline.compute(stimuli_representations, fMRI_data, output_path, logger=logs)
-    
-    logs.info("Aggregating over cross-validation results...")
-    maps = {key: np.mean(np.stack(np.array([dic[key] for dic in maps]), axis=0), axis=0) for key in maps[0]}
-    logs.validate()
-    
-    logs.info("Plotting...", end='\n')
-    ## R2
-    output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'R2')
-    create_maps(masker, maps['R2'], output_path, vmax=None, logger=logs)
-    ## Pearson
-    output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'Pearson_coeff')
-    create_maps(masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs)
-    ## Alpha (not exactly what should be done: averaging alphas)
-    output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'alpha')
-    create_maps(masker, maps['alpha'], output_path, vmax=None, logger=logs)
-    logs.validate()
+
+    try:
+        logs.info("Fetching and preprocessing input data...")
+        stimuli_representations_paths, fMRI_paths = fetch_data(parameters['path_to_fmridata'], input_path, 
+                                                                subject, parameters['language'], parameters['models'])
+        stimuli_representations = transformer.process_representations(stimuli_representations_paths, parameters['models'])
+        fMRI_data = transformer.process_fmri_data(fMRI_paths, masker)
+        logs.validate()
+        
+        logs.info("Executing pipeline...", end='\n')
+        pipeline = Pipeline()
+        pipeline.fit(splitter_cv_external, logs) # retrieve the flow from children and input_dependencies
+        maps = pipeline.compute(stimuli_representations, fMRI_data, output_path, logger=logs)
+        
+        logs.info("Aggregating over cross-validation results...")
+        maps = {key: np.mean(np.stack(np.array([dic[key] for dic in maps]), axis=0), axis=0) for key in maps[0]}
+        logs.validate()
+        
+        logs.info("Plotting...", end='\n')
+        ## R2
+        output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'R2')
+        create_maps(masker, maps['R2'], output_path, vmax=None, logger=logs)
+        ## Pearson
+        output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'Pearson_coeff')
+        create_maps(masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs)
+        ## Alpha (not exactly what should be done: averaging alphas)
+        output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'alpha')
+        create_maps(masker, maps['alpha'], output_path, vmax=None, logger=logs)
+        logs.validate()
+    except Exception as err:
+        logs.error(err)
     
     print("Model: {} for subject: {} --> Done".format(parameters['model_name'], subject))

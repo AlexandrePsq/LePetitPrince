@@ -64,7 +64,6 @@ class Compressor(object):
         X_all = np.vstack(X_train)
         pca = PCA(n_components=n_components)
         pca.fit(X_all)
-        X_all = pca.transform(X_all)
         index = 0
         X_train_ = []
         X_test_ = []

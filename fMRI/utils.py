@@ -401,7 +401,7 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
         save_yaml(params, masker_path + '.yml')
     return masker
 
-def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=False, logger=None):
+def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=False, logger=None, distribution_max=None, distribution_min=None):
     """ Create the maps from the distribution.
     Arguments:
         - masker: NifitMasker
@@ -411,7 +411,8 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
         - not_glass_brain: bool
     """
     logger.info("Transforming array to .nii image...")
-    distribution[np.where(distribution < -10)] = np.nan # remove outliers
+    distribution[np.where(distribution < distribution_min)] = np.nan # remove outliers
+    distribution[np.where(distribution > distribution_max)] = np.nan # remove outliers
     img = masker.inverse_transform(distribution)
     logger.validate()
     logger.info("Saving image...")

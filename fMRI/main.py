@@ -125,6 +125,6 @@ if __name__=='__main__':
         create_maps(masker, maps['alpha'], output_path, vmax=None, logger=logs)
         logs.validate()
     except Exception as err:
-        logs.error(err)
+        logs.error(str(err))
     
     print("Model: {} for subject: {} --> Done".format(parameters['model_name'], subject))

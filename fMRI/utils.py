@@ -411,8 +411,10 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
         - not_glass_brain: bool
     """
     logger.info("Transforming array to .nii image...")
-    distribution[np.where(distribution < distribution_min)] = np.nan # remove outliers
-    distribution[np.where(distribution > distribution_max)] = np.nan # remove outliers
+    if distribution_min is not None:
+        distribution[np.where(distribution < distribution_min)] = np.nan # remove outliers
+    if distribution_max is not None:
+        distribution[np.where(distribution > distribution_max)] = np.nan # remove outliers
     img = masker.inverse_transform(distribution)
     logger.validate()
     logger.info("Saving image...")

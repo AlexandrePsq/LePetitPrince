@@ -79,7 +79,7 @@ class Transformer(object):
         Returns:
             - result: dict
         """
-        matrices = X_train + X_test
+        matrices = [*X_train, *X_test] # X_train + X_test
         for index in range(len(matrices)):
             scaler = StandardScaler(with_mean=self.with_mean, with_std=self.with_std)
             scaler.fit(matrices[index])

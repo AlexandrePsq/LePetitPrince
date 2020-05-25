@@ -85,7 +85,10 @@ class EncodingModel(object):
             - X_test: list (of np.array)
             - Y_test: list (of np.array)
         Returns:
-            - result: dict
+            - result: dict 
+                - R2: np.array (2D)
+                - Pearson_coeff: np.array (2D)
+                - alpha: np.array (1D)
         """
         result = {'R2': [],
                     'Pearson_coeff': [],
@@ -127,9 +130,12 @@ class EncodingModel(object):
             - Y_train: list (of np.array)
             - X_test: list (of np.array)
             - Y_test: list (of np.array)
-            - R2: np.array (2D)
-            - Pearson_coeff: np.array (2D)
-            - alpha: np.array (1D)
+            - R2: np.array (3D)
+            - Pearson_coeff: np.array (3D)
+            - alpha: np.array (2D)
+        The extra dimension of the last 3 arguments results from the ’aggregate_cv’
+        method that was applied to the output of ’grid_search’, concatenating cv
+        results over a new dimension places at the index 0.
         Returns:
             - result: dict
         """

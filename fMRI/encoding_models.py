@@ -37,7 +37,7 @@ class EncodingModel(object):
     of regressors to fMRI data.
     """
 
-    def __init__(self, model=Ridge(), alpha=None, alpha_min_log_scale=2, alpha_max_log_scale=4, nb_alphas=25, optimizing_criteria='R2'):
+    def __init__(self, model=Ridge(), alpha=None, alpha_min_log_scale=2, alpha_max_log_scale=4, nb_alphas=25, optimizing_criteria='R2', base=10.0):
         """ Instanciation of EncodingModel class.
         Arguments:
             - model: sklearn.linear_model
@@ -45,12 +45,13 @@ class EncodingModel(object):
             - alpha_min_log_scale: int
             - alpha_max_log_scale: int
             - nb_alphas: int
-            - optimizing_criteria, str
+            - optimizing_criteria: str
+            - base: float
         """
         self.alpha = alpha # regularization parameter
         self.model = model
         self.optimizing_criteria = optimizing_criteria
-        self.alpha_list = [round(tmp, 5) for tmp in np.logspace(alpha_min_log_scale, alpha_max_log_scale, nb_alphas)]
+        self.alpha_list = [round(tmp, 5) for tmp in np.logspace(alpha_min_log_scale, alpha_max_log_scale, nb_alphas, base=base)]
     
     def fit(self, X_train, Y_train, alpha):
         """ Fit the model for a given set of runs.

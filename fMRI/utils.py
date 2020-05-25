@@ -347,7 +347,8 @@ def get_encoding_model_information(parameters):
     result = {'model': eval(parameters['encoding_model']), 'alpha': parameters['alpha'], 
                 'alpha_min_log_scale': parameters['alpha_min_log_scale'], 
                 'alpha_max_log_scale': parameters['alpha_max_log_scale'], 
-                'nb_alphas': parameters['nb_alphas'], 'optimizing_criteria': parameters['optimizing_criteria']}
+                'nb_alphas': parameters['nb_alphas'], 'optimizing_criteria': parameters['optimizing_criteria'],
+                'base': parameters['base']}
     return result
 
 #########################################

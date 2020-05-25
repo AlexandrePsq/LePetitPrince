@@ -7,6 +7,7 @@ scaling_var: True
 parallel: False
 cuda: True
 hrf: spm
+base: 10.0
 voxel_wise: True
 atlas: cort-prob-2mm
 seed: 1111

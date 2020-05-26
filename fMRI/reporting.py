@@ -238,7 +238,7 @@ def get_voxel_wise_max_img(
     data_tmp = np.argmax(data_tmp, axis=0)
 
     img = masker.inverse_transform(data_tmp)
-    return img
+    return img, data_tmp
                 
 
 #########################################
@@ -370,7 +370,8 @@ def interactive_surf_plot(img, inflated=False, cmap='gist_ncar', symmetric_cmap=
         fsaverage[kwargs['surf_mesh']], 
         surf_img,
         cmap=cmap, 
-        symmetric_cmap=symmetric_cmap
+        symmetric_cmap=symmetric_cmap,
+        colorbar=True
         )
     plotting.show()
 

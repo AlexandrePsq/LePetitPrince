@@ -351,7 +351,7 @@ def plot_roi_img_surf(img, saving_path, plot_name, inflated=False, **kwargs):
         roi_map=surf_img,
         hemi=kwargs['hemi'],
         view=kwargs['view'],
-        bg_map=kwargs['bg_map'], 
+        bg_map=fsaverage[kwargs['bg_map']], 
         bg_on_data=kwargs['bg_on_data'],
         darkness=kwargs['darkness'])
     if saving_path:
@@ -382,7 +382,7 @@ def plot_img_surf(img, saving_path, plot_name, inflated=False, **kwargs):
                         stat_map=surf_img,
                         hemi=kwargs['hemi'], 
                         view=kwargs['view'],
-                        bg_map=kwargs['bg_map'], 
+                        bg_map=fsaverage[kwargs['bg_map']], 
                         bg_on_data=kwargs['bg_on_data'],
                         darkness=kwargs['darkness'])
     if saving_path:

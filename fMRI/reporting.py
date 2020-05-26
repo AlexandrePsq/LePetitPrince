@@ -166,6 +166,7 @@ def get_data_per_roi(
     atlas_maps,
     labels,
     analysis=None, 
+    model_name=None,
     language='english', 
     PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     ):
@@ -348,11 +349,11 @@ def plot_roi_img_surf(img, saving_path, plot_name, inflated=False, **kwargs):
     disp = plotting.plot_surf_roi(
         surf_mesh=fsaverage[kwargs['surf_mesh']], 
         roi_map=surf_img,
-        hemi=fsaverage[kwargs['hemi']], 
-        view=fsaverage[kwargs['view']],
-        bg_map=fsaverage[kwargs['bg_map']], 
-        bg_on_data=fsaverage[kwargs['bg_on_data']],
-        darkness=fsaverage[kwargs['darkness']])
+        hemi=kwargs['hemi'],
+        view=kwargs['view'],
+        bg_map=kwargs['bg_map'], 
+        bg_on_data=[kwargs['bg_on_data'],
+        darkness=[kwargs['darkness'])
     if saving_path:
         disp.savefig(saving_path + plot_name + '_{}_{}_{}.png'.format(kwargs['surf_mesh_type'], kwargs['hemi'], kwargs['view']))
     else:
@@ -379,11 +380,11 @@ def plot_img_surf(img, saving_path, plot_name, inflated=False, **kwargs):
     disp = plotting.plot_surf_stat_map(
                         surf_mesh=fsaverage[kwargs['surf_mesh']], 
                         stat_map=surf_img,
-                        hemi=fsaverage[kwargs['hemi']], 
-                        view=fsaverage[kwargs['view']],
-                        bg_map=fsaverage[kwargs['bg_map']], 
-                        bg_on_data=fsaverage[kwargs['bg_on_data']],
-                        darkness=fsaverage[kwargs['darkness']])
+                        hemi=kwargs['hemi'], 
+                        view=kwargs['view'],
+                        bg_map=kwargs['bg_map'], 
+                        bg_on_data=kwargs['bg_on_data'],
+                        darkness=kwargs['darkness'])
     if saving_path:
         disp.savefig(saving_path + plot_name + '_{}_{}_{}.png'.format(kwargs['surf_mesh_type'], kwargs['hemi'], kwargs['view']))
     else:

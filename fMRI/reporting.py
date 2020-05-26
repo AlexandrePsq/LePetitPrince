@@ -153,7 +153,7 @@ def fit_per_roi(maps, atlas_maps, labels):
     maximum = np.zeros((len(labels)-1, len(maps)))
     for index_mask in tqdm(range(len(labels)-1)):
         mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))  
-        masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
+        masker = NiftiMasker(mask_img=mask, verbose=0)
         masker.fit()
         for index_model, map_ in enumerate(maps):
             array = masker.transform(map_)
@@ -227,17 +227,21 @@ def get_data_per_roi(
     }
     return result
 
-def get_voxel_wise_max_img(
+def get_voxel_wise_max_img_on_surf(
     masker, 
     model_names, 
     language='english', 
-    PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
+    PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/',
+    **kwargs
     ):
     maps = []
+    fsaverage = datasets.fetch_surf_fsaverage()
     for model_name in model_names:
         path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, model_name))
         name = 'R2_group_fdr_effect'
         maps.append(fetch_map(path, name)[0])
+    
+    maps = [vol_to_surf(map_, fsaverage[kwargs['surf_mesh']]) for map_ in maps]
 
     arrays = [masker.transform(map_) for map_ in maps]
     data_tmp = np.vstack(arrays)
@@ -348,9 +352,10 @@ def vertical_plot(
     else:
         plt.show()
 
-def plot_roi_img_surf(img, saving_path, plot_name, inflated=False, colorbar=True, **kwargs):
+def plot_roi_img_surf(surf_img, saving_path, plot_name, inflated=False, compute_surf=True, colorbar=True, **kwargs):
     fsaverage = datasets.fetch_surf_fsaverage()
-    surf_img = vol_to_surf(img, fsaverage[kwargs['surf_mesh']])
+    if compute_surf:
+        surf_img = vol_to_surf(surf_img, fsaverage[kwargs['surf_mesh']])
     if inflated:
         kwargs['surf_mesh'] = 'infl_left' if 'left' in kwargs['surf_mesh_type'] else 'infl_right' 
     disp = plotting.plot_surf_roi(
@@ -381,9 +386,10 @@ def interactive_surf_plot(img, inflated=False, cmap='gist_ncar', symmetric_cmap=
         )
     plotting.show()
 
-def plot_img_surf(img, saving_path, plot_name, inflated=False, **kwargs):
+def plot_img_surf(surf_img, saving_path, plot_name, inflated=False, compute_surf=True, **kwargs):
     fsaverage = datasets.fetch_surf_fsaverage()
-    surf_img = vol_to_surf(img, fsaverage[kwargs['surf_mesh']])
+    if compute_surf:
+        surf_img = vol_to_surf(surf_img, fsaverage[kwargs['surf_mesh']])
     if inflated:
         kwargs['surf_mesh'] = 'infl_left' if 'left' in kwargs['surf_mesh_type'] else 'infl_right' 
     disp = plotting.plot_surf_stat_map(

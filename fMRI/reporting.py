@@ -241,14 +241,12 @@ def get_voxel_wise_max_img_on_surf(
         name = 'R2_group_fdr_effect'
         maps.append(fetch_map(path, name)[0])
     
-    maps = [vol_to_surf(map_, fsaverage[kwargs['surf_mesh']]) for map_ in maps]
+    arrays = [vol_to_surf(map_, fsaverage[kwargs['surf_mesh']]) for map_ in maps]
 
-    arrays = [masker.transform(map_) for map_ in maps]
     data_tmp = np.vstack(arrays)
-    data_tmp = np.argmax(data_tmp, axis=0)
+    img = np.argmax(data_tmp, axis=0)
 
-    img = masker.inverse_transform(data_tmp)
-    return img, data_tmp
+    return img
                 
 
 #########################################

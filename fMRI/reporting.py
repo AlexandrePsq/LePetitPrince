@@ -352,8 +352,8 @@ def plot_roi_img_surf(img, saving_path, plot_name, inflated=False, **kwargs):
         hemi=kwargs['hemi'],
         view=kwargs['view'],
         bg_map=kwargs['bg_map'], 
-        bg_on_data=[kwargs['bg_on_data'],
-        darkness=[kwargs['darkness'])
+        bg_on_data=kwargs['bg_on_data'],
+        darkness=kwargs['darkness'])
     if saving_path:
         disp.savefig(saving_path + plot_name + '_{}_{}_{}.png'.format(kwargs['surf_mesh_type'], kwargs['hemi'], kwargs['view']))
     else:

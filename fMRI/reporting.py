@@ -150,16 +150,18 @@ def fit_per_roi(maps, atlas_maps, labels):
     print("\tLooping through labeled masks...")
     mean = np.zeros((len(labels)-1, len(maps)))
     third_quartile = np.zeros((len(labels)-1, len(maps)))
+    maximum = np.zeros((len(labels)-1, len(maps)))
     for index_mask in tqdm(range(len(labels)-1)):
         mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))  
         masker = NiftiMasker(mask_img=mask, memory='nilearn_cache', verbose=0)
         masker.fit()
         for index_model, map_ in enumerate(maps):
             array = masker.transform(map_)
+            maximum[index_mask, index_model] = np.max(array)
             third_quartile[index_mask, index_model] = np.percentile(array, 75)
             mean[index_mask, index_model] = np.mean(array)
     print("\t\t-->Done")
-    return mean, third_quartile
+    return mean, third_quartile, maximum
 
 def get_data_per_roi(
     data, 
@@ -180,7 +182,7 @@ def get_data_per_roi(
             maps.append(fetch_map(path, name)[0])
         plot_name = ["Model comparison"]
         # extract data
-        mean, third_quartile = fit_per_roi(maps, atlas_maps, labels)
+        mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels)
     else:
         for key in analysis:
             maps = []
@@ -197,22 +199,26 @@ def get_data_per_roi(
             mean = np.zeros((len(labels)-1, len(models)))
             third_quartile = np.zeros((len(labels)-1, len(models)))
             # extract data
-            mean, third_quartile = fit_per_roi(maps, atlas_maps, labels)
+            mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels)
             print("\t\t-->Done")
             # Small reordering of models so that layers are in increasing order
             if key=='Hidden-layers':
                 mean = np.hstack([mean[:, :2], mean[:,5:], mean[:,2:5]])
                 third_quartile = np.hstack([third_quartile[:, :2], third_quartile[:,5:], third_quartile[:,2:5]])
+                maximum = np.hstack([maximum[:, :2], maximum[:,5:], maximum[:,2:5]])
                 models = models[:2] + models[5:] + models[2:5]
             elif key=='Attention-layers':
                 mean = np.hstack([mean[:, :1], mean[:,4:], mean[:,1:4]])
                 third_quartile = np.hstack([third_quartile[:, :1], third_quartile[:,4:], third_quartile[:,1:4]])
+                maximum = np.hstack([maximum[:, :1], maximum[:,4:], maximum[:,1:4]])
                 models = models[:1] + models[4:] + models[1:4]
             elif key=='Specific-attention-heads':
                 mean = np.hstack([mean[:, :4], mean[:,6:7], mean[:,4:6], mean[:,7:]])
                 third_quartile = np.hstack([third_quartile[:, :4], third_quartile[:,6:7], third_quartile[:,4:6], third_quartile[:,7:]])
+                maximum = np.hstack([maximum[:, :4], maximum[:,6:7], maximum[:,4:6], maximum[:,7:]])
                 models = models[:4] + models[6:7] + models[4:6] + models[7:]
     result = {
+        'maximum': maximum,
         'third_quartile': third_quartile,
         'mean': mean,
         'models': models,

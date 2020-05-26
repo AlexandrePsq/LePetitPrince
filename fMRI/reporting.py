@@ -342,7 +342,7 @@ def vertical_plot(
     else:
         plt.show()
 
-def plot_roi_img_surf(img, saving_path, plot_name, inflated=False, **kwargs):
+def plot_roi_img_surf(img, saving_path, plot_name, inflated=False, colorbar=True, **kwargs):
     fsaverage = datasets.fetch_surf_fsaverage()
     surf_img = vol_to_surf(img, fsaverage[kwargs['surf_mesh']])
     if inflated:
@@ -354,7 +354,8 @@ def plot_roi_img_surf(img, saving_path, plot_name, inflated=False, **kwargs):
         view=kwargs['view'],
         bg_map=fsaverage[kwargs['bg_map']], 
         bg_on_data=kwargs['bg_on_data'],
-        darkness=kwargs['darkness'])
+        darkness=kwargs['darkness'],
+        colorbar=colorbar)
     if saving_path:
         disp.savefig(saving_path + plot_name + '_{}_{}_{}.png'.format(kwargs['surf_mesh_type'], kwargs['hemi'], kwargs['view']))
     else:

@@ -171,6 +171,7 @@ def get_data_per_roi(
     PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     ):
     x_labels = labels[1:]
+    models = None
     if analysis is None:
         maps = []
         for model_name in data.keys():

@@ -370,9 +370,10 @@ def plot_roi_img_surf(surf_img, saving_path, plot_name, inflated=False, compute_
     else:
         plotting.show()
 
-def interactive_surf_plot(img, inflated=False, cmap='gist_ncar', symmetric_cmap=False, **kwargs):
+def interactive_surf_plot(surf_img, inflated=False, cmap='gist_ncar', compute_surf=True, symmetric_cmap=False, **kwargs):
     fsaverage = datasets.fetch_surf_fsaverage()
-    surf_img = vol_to_surf(img, fsaverage[kwargs['surf_mesh']])
+    if compute_surf:
+        surf_img = vol_to_surf(surf_img, fsaverage[kwargs['surf_mesh']])
     if inflated:
         kwargs['surf_mesh'] = 'infl_left' if 'left' in kwargs['surf_mesh_type'] else 'infl_right'  
     plotting.view_surf(

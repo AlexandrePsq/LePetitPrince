@@ -419,8 +419,9 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
             mask = np.where(distribution < distribution_min)
         distribution[mask] = np.nan # remove outliers
     else:
-        mask = np.where(distribution > distribution_max)
-        distribution[mask] = np.nan # remove outliers
+        if distribution_max is not None:
+            mask = np.where(distribution > distribution_max)
+            distribution[mask] = np.nan # remove outliers
     img = masker.inverse_transform(distribution)
     logger.validate()
     logger.info("Saving image...")

@@ -245,8 +245,45 @@ def get_voxel_wise_max_img_on_surf(
 
     data_tmp = np.vstack(arrays)
     img = np.argmax(data_tmp, axis=0)
-
     return img
+
+def prepare_data_for_anova(
+    model_names, 
+    atlas_maps, 
+    labels, 
+    object_of_interest='R2', 
+    language='english', 
+    OUTPUT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/english'
+    ):
+    print("\tLooping through labeled masks...")
+    result = []
+    data = {}
+    for model_name in model_names:
+        name = model_name.replace('_{}', '')
+        data[name] = {}
+        for subject_id in possible_subjects_id(language):
+            subject = get_subject_name(subject_id)
+            path_to_map = os.path.join(OUTPUT_PATH, subject, model_name.format(subject_id))
+            data[name][subject] = {
+                object_of_interest: fetch_map(path_to_map, object_of_interest)[0]
+            }
+            print(name, '-', subject, '-', len(data[name][subject][object_of_interest]))
+
+    for index_mask in tqdm(range(len(labels)-1)):
+        mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))  
+        masker = NiftiMasker(mask_img=mask, verbose=0)
+        masker.fit()
+        for name in data.keys():
+            for subject in data[name].keys():
+                array = masker.transform(data[name][subject][object_of_interest])
+                mean = np.mean(array)
+                median = np.median(array)
+                third_quartile = np.percentile(array, 75)
+                result.append([name, subject, labels[index_mask + 1], mean, median, third_quartile])
+    result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
+    print("\t\t-->Done")
+    return result
+
                 
 
 #########################################

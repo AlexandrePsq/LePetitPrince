@@ -353,7 +353,6 @@ def vertical_plot(
     order = np.argsort(np.mean(data, axis=1))
     data = data[order, :]
     x = [surnames[x[i]] for i in order]
-    ax = plt.axes()
     # set possible colors
     colormap = plt.cm.gist_ncar #nipy_spectral, Set1,Paired   
     colors = [colormap(i) for i in np.linspace(0, 1,data.shape[1] + 1)]
@@ -378,6 +377,51 @@ def vertical_plot(
             if label in syntactic_roi:
                 ax.get_yticklabels()[index].set_bbox(dict(facecolor="green", alpha=0.4)) # set box around label
             #ax.axhspan(index-0.5, index+0.5, alpha=0.1, color='red') #set shade over the line of interest
+    plt.tight_layout()
+    check_folder(save_folder)
+    if save_folder:
+        plt.savefig(os.path.join(save_folder, '{model_name}-{analysis_name}.png'.format(model_name=model_name,
+                                                                                        analysis_name=analysis_name)))
+        plt.close('all')
+    else:
+        plt.show()
+
+def horizontal_plot(
+    data, 
+    legend_names, 
+    analysis_name, 
+    save_folder, 
+    label_names,
+    figsize=(9,20), 
+    title=None, 
+    ylabel='Regions of interest (ROI)', 
+    xlabel='R2 value', 
+    model_name=''
+    ):
+    """Plots models horizontally.
+    """
+
+    limit = None
+    dash_inf = limit[0] if limit is not None else 0
+    plt.figure(figsize=figsize) # (7.6,12)
+    ax = plt.axes()
+    colormap = plt.cm.gist_ncar #nipy_spectral, Set1,Paired   
+    colors = [colormap(i) for i in np.linspace(0, 1, data.shape[0] + 1)]
+    for col in range(data.shape[0]):
+        plt.plot(legend_names, data[col, :], '.-', alpha=0.7, markersize=9, color=colors[col])
+    plt.title(title)
+    plt.ylabel(ylabel, fontsize=16)
+    plt.xlabel(xlabel, fontsize=16)
+
+    plt.xlim(limit)
+    plt.minorticks_on()
+    ax.tick_params(axis='x', labelsize=12)
+    ax.tick_params(axis='y', labelsize=12)
+    plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='y')
+    plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='x')
+    plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.1, axis='x')
+    plt.legend(label_names, ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=10)
+
     plt.tight_layout()
     check_folder(save_folder)
     if save_folder:

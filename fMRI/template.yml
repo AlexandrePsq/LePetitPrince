@@ -22,11 +22,11 @@ masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePeti
 smoothed_masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/smoothed_global_masker_english"
 path_to_root: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
 path_to_fmridata: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI"
-offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/wave/english/onsets-offsets"
+offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/wave/"
 duration_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
 language: english
-output: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/" , # Path to the output folder
-input: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/stimuli-representations/" , # Path to the folder containing the representations
+output: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/"  # Path to the output folder
+input: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/stimuli-representations/"  # Path to the folder containing the representations
 models:
   - model_name: Bert-base-cased
     columns_to_retrieve: "['hidden_state-layer-12-{}'.format(i) for i in range(1, 769)]"

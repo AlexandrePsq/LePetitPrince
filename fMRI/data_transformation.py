@@ -120,7 +120,7 @@ class Transformer(object):
         regressors = []
         dataframe = dataframe.dropna(axis=0)
         representations = [col for col in dataframe.columns]
-        offsets = fetch_offsets(offset_type, run_index, self.offset_path)
+        offsets = fetch_offsets(offset_type, run_index, self.offset_path, self.language)
         duration = fetch_duration(duration_type, run_index, self.duration_path, default_size=len(dataframe))
         for col in representations:
             conditions = np.vstack((offsets, duration, dataframe[col]))

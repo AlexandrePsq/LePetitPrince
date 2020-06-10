@@ -1,52 +1,43 @@
-# Analysis pipeline to compare model predictions to fMRI data 
+# Code to compute cross-validated R² or r maps from model predictions and fMRI data (and MEG???)
 
+Given
 
-The code of this project enables to fit various models predictions from a sequence of stimuli, to the fMRI data acquired with the same sequence of stimuli.
+- a sequence of stimuli, 
+- fMRI data from subjects exposed to these sequence
+- one or several models making quantitative predictions from each stimulus in  the sequence
 
+The code allows you build a flexible analysis pipeline combining:
 
-## Why using this code? ##
-
-You possess:
-- a given sequence of stimuli, 
-- you have acquired fMRI data from exposing a number of subjects to this very stimuli,
-
-and you want to compare the predictions of a model (or an aggregation of models) from the same stimuli sequence to your fMRI data.
-
-This pipeline allows you to build malleable flow for your analysis, combining:
 - data compression methods (already coded or that you can add),
 - data transformation methods (standardization, convolution with a kernel, or whatever your heart desires...),
 - splitting strategies,
 - encoding models,
-- or any task that you might find useful (and that you are willing to code).
-
-In addition, some useful functions allow you to create brain maps from the output maps of the pipeline.
-
-
-## Default pipeline  ##
-
-For our project, we implemented the pipeline presented in *main.py* file, in which we abode by the following methodology:
-
-We fit the stimuli-representations of our models to the fMRI data (9 runs) thanks to a nested-cross validated Ridge-regression.
-We then plotted brain maps from the cross-validated R2 (or Pearson coefficient).
-
-This project aims at computing maps for dozen of subjects and models.
-Therefore, we created a repository architecture that enable clear and consistent organization of data, code and derivatives among computations.
-We also rely on sequential computations: the pipeline runs for a tuple (1 subject, 1 model) on 1 node, in order not to be lost among 
-all the distributed instanciations of the pipeline for all subjects and models.
+- or any task that you might find useful (and that you are willing to code). <-???
+- functions that allow you to generate R² or r maps.
 
 
-### Requirements: ###
+For example,  the pipeline programmed in `main.py` fits stimuli-representations of several lanuage models to fMRI data obtained from participants listening to an audiobook (in 9 runs). R² are computed from a nested-cross validated Ridge-regression.
 
-0. Identification of a set of models of interest.
-1. Extraction of the stimuli-representations for each model from the sequence of stimuli.
-2. Upload your stimuli-representation matrices as a .csv file in <pre>$LPP/derivatives/fMRI/stimuli-representations/<i>language</i>/<i>model_name</i>/</pre>
-    - Be careful that each '.csv' filename contain its run number.
-3. Upload the adequate onsets/offsets files of the stimuli for each model included in your analysis (the path to onsets/offsets folder, and the type of each onset/offsets for each model should be specified in the yaml template).
+The pipeline runs for tuples (1 subject, 1 model), to facilitate distributing the code on a cluster.
+
+
+
+### Setup ###
+
+
+0. Check `requirements.txt` for the list of pyhton modules required.
+
+1. For each model to be evaluated, generate the "stimuli-representations" from the sequence of stimuli.
+
+  A "stimuli representation" is a set of "features", that is, numeric vectors of the same length as the sequence. It must be saved as a matrix in a `.csv` file in <pre>$LPP/derivatives/fMRI/stimuli-representations/<i>{language}</i>/<i>model_name</i>/</pre>, with one file per run.
+
+3. Upload the adequate onsets/offsets files of the stimuli for each model included in your analysis (the path to onsets/offsets folder, and the type of each onset/offsets for each model should be specified in the `yaml` template). <-- yaml template has not been mentioned yet ??? 
+
 4. Optional: if the creation of a regressor for a given model requires specific *duration*, you need to create the adequate array for each run (the path should be specified in the yaml template), otherwise a vector of *1* should be used.
-5. Check the *requirements.txt* to see if you have all the libraries needed.
 
 
-### Description of the main.py file: ###
+
+### Structure of main.py ###
 
 0. Define variables.
 1. Fetch (or compute) a global masker (+ a smoothed version) over all subjects (to have a common analysis ground).
@@ -92,15 +83,15 @@ After having verified the requirements, run the following command:
 
 ## Data architecture ##
 
-The files are organized in the following overall folder structure:
+The files are organized in the following overall folder structure (`{language}` can take the values `french` or `english`)
 
 <pre>
  ---
-├── <b>paradigm</b> <i>(experiences information, stimuli)</i>
-├── <b>oldstuff</b> <i>(oldscripts, personnal data/code, ...)</i>
-├── <b>code</b> <i>(all the code of all the analysis)</i>
-│   ├── <b>MEG</b> <i>(code of the MEG analysis pipeline)</i>
-│   └── <b>fMRI</b> <i>(code of the fMRI analysis pipeline)</i>
+├── <b>paradigm</b> <i>(scripts to run the experiment and stimuli)</i>
+├── <b>oldstuff</b> <i>(older scripts, personnal data/code, ...)</i>
+├── <b>code</b> <i>(complete code for analyses)</i>
+│   ├── <b>MEG</b> <i>(code for MEG analysis pipeline)</i>
+│   └── <b>fMRI</b> <i>(code for fMRI analysis pipeline)</i>
 │       ├── data_compression.py <i>(Class regrouping methods to compress the representation data)</i>
 │       ├── data_transformation.py <i>(Class regrouping methods to transform the data: standardization, creating rergessors, ...)</i>
 │       ├── encoding_models.py <i>(Class where the Linear (regularized or not) model is implemented)</i>
@@ -114,11 +105,14 @@ The files are organized in the following overall folder structure:
 │       └── utils.py <i>(utilities functions: parameters settings, fetching, reading/writing ...)</i>
 ├── <b>data</b> <i>(all the raw data acquired from sources)</i>
 │   ├── <b>fMRI</b> <i>(fMRI data, 9 runs per subject)</i>
-│   │   └── <b><i>language</i></b>
+│   │   └── <b><i>{language}</i></b>
 │   │       └── <b>sub-057</b>
 │   │           └── <b>func</b>
+│   ├── <b>text</b> <i>(text of each chapter)</i>
+│   │   └── <b><i>{language}</i></b>
+│   │       └── <b>text_{language}_run[1-9].txt</b>
 │   ├── <b>onsets-offsets</b> <i>(onsets-offsets data)</i>
-│   │   └── <b><i>language</i></b>
+│   │   └── <b><i>{language}</i></b>
 │   │       ├── <b>word_run_1.csv</b>
 │   │       ├──  ...
 │   │       ├── <b>word_run_<i>n</i>.csv</b>
@@ -126,7 +120,7 @@ The files are organized in the following overall folder structure:
 │   │       ├──  ...
 │   │       └── <b>word+punctuation_run_<i>n</i>.csv</b>
 │   └── <b>stimuli-representations</b> <i>(stimuli representation dataframes extracted from the models activity)</i>
-│       └── <b><i>language</i></b>
+│       └── <b><i>{language}</i></b>
 │           └── <b><i>model_of_interest</i> </b>
 │               ├── deep_representation_run_1.csv 
 │               ├──  ...
@@ -136,7 +130,7 @@ The files are organized in the following overall folder structure:
     └── <b>MEG</b>
         └── <b>fMRI</b> <i>(results from the fMRI pipeline in code/fMRI/)</i>
             └── <b>maps</b> (<i>Maps deriving from our pipeline</i>)
-                └── <b><i>language</i></b>
+                └── <b><i>{language}</i></b>
                     └── <b>sub-057</b>
                         └── <b> <i>model_of_interest</i> </b>
                             ├── R2.nii.gz
@@ -191,8 +185,8 @@ The audio stream was segmented into nine parts presented in 9 successive runs:
 
 - English Multiecho 
 - French Multiecho Siemens 3T
-- Chinese
 
 
 
-This huge dataset will be shared through neurovault.
+
+

@@ -77,6 +77,9 @@ class Pipeline(object):
             - Y_train: list (of np.array)
             - output_path: str
             - logger: Logger object
+        Returns:
+            - output: list of dictionaries
+            Each dictionary of the list is the output of the last function of the last task.
         """
         inputs = [{'X_train':X_train, 'Y_train':Y_train, 'run_train': None, 'run_test': None}]
         if not self.tasks:

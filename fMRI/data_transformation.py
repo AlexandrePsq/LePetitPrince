@@ -134,13 +134,13 @@ class Transformer(object):
         return matrix
     
     def process_representations(self, representation_paths, models):
-        """ Load representation dataframes and create the design matrix
+        """ Load and concatenate representation dataframes 
         for each run.
         Arguments:
             - representation_paths: list (of list of paths)
             - models: list (of dict)
         Returns:
-            - arrays: list (of np.array)
+            - arrays: list of length #runs (np.array of shape: #words * #features) 
         """
         arrays = []
         runs = list(zip(*representation_paths)) # list of 9 tuples (1 for each run), each tuple containing the representations for the specified models
@@ -161,7 +161,7 @@ class Transformer(object):
             - fmri_paths: list (of string)
             - masker: NiftiMasker object
         Returns:
-            - data: list (of np.array)
+            - data: list of length #runs (np.array of shape: #scans * #voxels) 
         """
         data = [masker.transform(f) for f in fmri_paths]
         # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element

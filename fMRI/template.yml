@@ -1,32 +1,48 @@
-tr: 2.
-nb_runs: 9
-nb_runs_test: 1
+# Shared General parameters
 subject: 57
-scaling_mean: True
-scaling_var: True
 parallel: False
 cuda: True
+seed: 1111
+language: english
+path_to_root: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
+path_to_fmridata: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI"
+output: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/"  # Path to the output folder
+input: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/stimuli-representations/"  # Path to the folder containing the representations
+
+# Shared Splitter parameters
+nb_runs: 9
+nb_runs_test: 1
+
+# Shared Compression parameters
+
+
+# Shared Transformation parameters (includes the making of regressor and scaling)
+tr: 2.
+scaling_mean: True
+scaling_var: True
+axis: 1
 hrf: spm
+offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/onsets-offsets/"
+duration_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
+
+# Shared Estimator model parameters
 base: 10.0
 voxel_wise: True
-atlas: cort-prob-2mm
-seed: 1111
 alpha_percentile: 99.9
 alpha:
 alpha_min_log_scale: 2
 alpha_max_log_scale: 5
 nb_alphas: 10
 optimizing_criteria: R2
-encoding_model: Ridge()
+estimator_model: Ridge()
+
+# Maps creation parameters
+atlas: cort-prob-2mm
 masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/global_masker_english"
 smoothed_masker_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/smoothed_global_masker_english"
-path_to_root: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
-path_to_fmridata: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI"
-offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/onsets-offsets/"
-duration_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
-language: english
-output: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/"  # Path to the output folder
-input: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/stimuli-representations/"  # Path to the folder containing the representations
+
+
+# Models
 models:
   - model_name: Bert-base-cased
     columns_to_retrieve: "['hidden_state-layer-12-{}'.format(i) for i in range(1, 769)]"
@@ -37,6 +53,21 @@ models:
     offset_type: 'word+punctuation' # word / word+punctuation / ...
     duration_type: 
     shift_surprisal: False
+    centering: True
+    order: 2
+    scaling_type: normalize
+  - model_name: Bert-base-cased
+    columns_to_retrieve: "['hidden_state-layer-11-{}'.format(i) for i in range(1, 769)]"
+    input_template: activations # cls / sep
+    surname: Bert
+    data_compression: 
+    ncomponents: 
+    offset_type: 'word+punctuation' # word / word+punctuation / ...
+    duration_type: 
+    shift_surprisal: False
+    centering: True
+    order: 2
+    scaling_type: normalize
   - model_name: wordrate_all_model
     columns_to_retrieve: "[3]"
     surname: unigram
@@ -45,22 +76,7 @@ models:
     offset_type: 'word' # word / word+punctuation / ...
     duration_type: 
     shift_surprisal: False
-model_name: Word_rate+unigram
-#models:
-#  - model_name: bert_all-layers
-#    columns_to_retrieve: "[i for i in range(0,500)]" #example 
-#    surname: BERT-small
-#    data_compression: pca
-#    ncomponents: 300
-#    offset_type: 'word' # word / word+punctuation / ...
-#    duration_type: None
-#    shift_surprisal: False
-#  - model_name: wordrate
-#    columns_to_retrieve: "[0]"
-#    surname: Word_rate
-#    data_compression: None
-#    ncomponents: None
-#    offset_type: 'word' # word / word+punctuation / ...
-#    duration_type: None
-#    shift_surprisal: False
-#model_name: BERT-small+Word_rate
+    centering:
+    order:
+    scaling_type:
+model_name: BERT-L11-12+Wordrate

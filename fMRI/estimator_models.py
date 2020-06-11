@@ -1,7 +1,7 @@
 """
-General class for encoding models: fit an array of regressors to fMRI data.
+General class for estimator models: fit an array of regressors to fMRI data.
 ===================================================
-A EncodingModel instanciation requires:
+A EstimatorModel instanciation requires:
     - model: an instance of sklearn.linear_model that will be use to fit a 
     design-matrix to fMRI data,
     - alpha: int (or None) regularization hyperparameter of the model,
@@ -12,7 +12,7 @@ A EncodingModel instanciation requires:
     we use the R2 value).
 
 The mains methods implemented in this class are:
-    - self.fit: train the encoding model from {X_train, Y_train, alpha}
+    - self.fit: train the estimator model from {X_train, Y_train, alpha}
     - self.grid_search: compute R2 maps (or other depending on self.optimizing_criteria)
     for multiple values of alphas from models fit on the whole brain.
     - self.optimize_alpha: retrieve the best hyperparameter per voxel from the output
@@ -32,13 +32,13 @@ from sklearn.linear_model import Ridge
 
 
 
-class EncodingModel(object):
-    """ General class for encoding models: fit an array
+class EstimatorModel(object):
+    """ General class for estimator models: fit an array
     of regressors to fMRI data.
     """
 
     def __init__(self, model=Ridge(), alpha=None, alpha_min_log_scale=2, alpha_max_log_scale=4, nb_alphas=25, optimizing_criteria='R2', base=10.0):
-        """ Instanciation of EncodingModel class.
+        """ Instanciation of EstimatorModel class.
         Arguments:
             - model: sklearn.linear_model
             - alpha: int

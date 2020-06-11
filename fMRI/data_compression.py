@@ -37,7 +37,6 @@ class Compressor(object):
         self.indexes = indexes
         self.compression_types = compression_types
         self.bucket = []
-        pass
         
     def clean_bucket(self):
         """ Clean instance bucket."""

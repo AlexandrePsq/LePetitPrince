@@ -50,7 +50,7 @@ class Transformer(object):
         indexes,
         scaling_types,
         centering,
-        axis,
+        scaling_axis,
         order,
         offset_type_dict,
         duration_type_dict, 
@@ -91,7 +91,7 @@ class Transformer(object):
         self.language = language
         self.scaling_types = scaling_types
         self.centering = centering
-        self.axis = axis
+        self.scaling_axis = scaling_axis
         self.order = order
         self.bucket = []
         
@@ -113,7 +113,7 @@ class Transformer(object):
             self.bucket.append(func(X_train_, X_test_, **filter_args(func, {
                 'centering': self.centering[index],
                 'order': self.order[index],
-                'axis': self.axis
+                'scaling_axis': self.scaling_axis
             })))
         
         X_train = [pd.concat([pd.DataFrame(data['X_train'][run_index]) for data in self.bucket], axis=1).values for run_index in range(len(self.bucket[0]['X_train']))]
@@ -147,14 +147,14 @@ class Transformer(object):
         """
         return {'X_train': X_train, 'X_test': X_test}
 
-    def normalize(self, X_train, X_test, order, centering=False, axis=1):
+    def normalize(self, X_train, X_test, order, centering=False, scaling_axis=1):
         """ Normalizing function.
         Arguments:
             - X_train: list
             - X_test: list
             - order: order of the norm (None, inf, -inf, 0, 1, -1 ,2, -2, ...)
             - centering: bool (center data)
-            - axis: int (0: column-wise=performs on rows, 1: row-wise=performs on columns)
+            - scaling_axis: int (0: column-wise=performs on rows, 1: row-wise=performs on columns)
         Returns:
             - result: dict
         """
@@ -163,7 +163,7 @@ class Transformer(object):
             scaler = StandardScaler(with_mean=centering, with_std=False)
             scaler.fit(matrices[index])
             matrices[index] = scaler.transform(matrices[index])
-            matrices[index] = matrices[index] / np.mean(la.norm(matrices[index], ord=order, axis=axis))
+            matrices[index] = matrices[index] / np.mean(la.norm(matrices[index], ord=order, scaling_axis=scaling_axis))
         result = {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):]}
         return result
     

@@ -92,7 +92,7 @@ class Transformer(object):
         self.scaling_types = scaling_types
         self.centering = centering
         self.scaling_axis = scaling_axis
-        self.order = order
+        self.order = [eval(item) for item in order]
         self.bucket = []
         
     def clean_bucket(self):
@@ -163,7 +163,7 @@ class Transformer(object):
             scaler = StandardScaler(with_mean=centering, with_std=False)
             scaler.fit(matrices[index])
             matrices[index] = scaler.transform(matrices[index])
-            matrices[index] = matrices[index] / np.mean(la.norm(matrices[index], ord=order, scaling_axis=scaling_axis))
+            matrices[index] = matrices[index] / np.mean(la.norm(matrices[index], ord=order, axis=scaling_axis))
         result = {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):]}
         return result
     

@@ -4,11 +4,11 @@ import argparse
 import numpy as np
 
 from utils import check_folder, read_yaml, save_yaml, write, get_subject_name, get_output_name, aggregate_cv, create_maps, fetch_masker, fetch_data, get_nscans
-from utils import get_splitter_information, get_compression_information, get_data_transformation_information, get_encoding_model_information
+from utils import get_splitter_information, get_compression_information, get_data_transformation_information, get_estimator_model_information
 from task import Task
 from logger import Logger
 from regression_pipeline import Pipeline
-from encoding_models import EncodingModel
+from estimator_models import EstimatorModel
 from splitter import Splitter
 from data_transformation import Transformer
 from data_compression import Compressor
@@ -38,14 +38,14 @@ if __name__=='__main__':
     kwargs_splitter = get_splitter_information(parameters)
     kwargs_compression = get_compression_information(parameters)
     kwargs_transformation = get_data_transformation_information(parameters)
-    kwargs_encoding_model = get_encoding_model_information(parameters)
+    kwargs_estimator_model = get_estimator_model_information(parameters)
     logs.validate()
 
     logs.info("Instanciations of the classes...")
     splitter = Splitter(**kwargs_splitter)
     compressor = Compressor(**kwargs_compression)
     transformer = Transformer(**kwargs_transformation)
-    encoding_model = EncodingModel(**kwargs_encoding_model)
+    estimator_model = EstimatorModel(**kwargs_estimator_model)
     logs.validate()
 
     logs.info("Defining Pipeline flow...")
@@ -61,39 +61,39 @@ if __name__=='__main__':
                                 name='compressor_internal', 
                                 flatten_inputs=[True], 
                                 unflatten_output='automatic') # define the data compression method
-    transform_data_internal = Task([transformer.make_regressor, transformer.standardize], 
+    transform_data_internal = Task([transformer.make_regressor, transformer.scale], 
                                 input_dependencies=[splitter_cv_internal, compressor_internal],
                                 name='transform_data_internal', 
                                 flatten_inputs=[True, True], 
                                 unflatten_output='automatic') # functions in Task.functions are read left to right
-    encoding_model_internal = Task([encoding_model.grid_search], 
+    estimator_model_internal = Task([estimator_model.grid_search], 
                                 input_dependencies=[splitter_cv_internal, transform_data_internal],
-                                name='encoding_model_internal', 
+                                name='estimator_model_internal', 
                                 flatten_inputs=[True, True], 
                                 unflatten_output='automatic',
                                 special_output_transform=aggregate_cv)
     ## External Pipeline
     compressor_external = Task([compressor.compress], 
-                                input_dependencies=[splitter_cv_external, encoding_model_internal], 
+                                input_dependencies=[splitter_cv_external, estimator_model_internal], 
                                 name='compressor_external', 
                                 flatten_inputs=[True, False])
-    transform_data_external = Task([transformer.make_regressor, transformer.standardize], 
+    transform_data_external = Task([transformer.make_regressor, transformer.scale], 
                                 input_dependencies=[splitter_cv_external, compressor_external], 
                                 name='transform_data_external', 
                                 flatten_inputs=[True, False])
-    encoding_model_external = Task([encoding_model.evaluate], 
-                                input_dependencies=[splitter_cv_external, transform_data_external, encoding_model_internal], 
-                                name='encoding_model_external', 
+    estimator_model_external = Task([estimator_model.evaluate], 
+                                input_dependencies=[splitter_cv_external, transform_data_external, estimator_model_internal], 
+                                name='estimator_model_external', 
                                 flatten_inputs=[True, False, False])
     
     # Creating tree structure (for output/input flow)
     splitter_cv_external.set_children_tasks([splitter_cv_internal, compressor_external])
     splitter_cv_internal.set_children_tasks([compressor_internal])
     compressor_internal.set_children_tasks([transform_data_internal])
-    transform_data_internal.set_children_tasks([encoding_model_internal])
-    encoding_model_internal.set_children_tasks([compressor_external])
+    transform_data_internal.set_children_tasks([estimator_model_internal])
+    estimator_model_internal.set_children_tasks([compressor_external])
     compressor_external.set_children_tasks([transform_data_external])
-    transform_data_external.set_children_tasks([encoding_model_external])
+    transform_data_external.set_children_tasks([estimator_model_external])
     logs.validate()
 
     try:

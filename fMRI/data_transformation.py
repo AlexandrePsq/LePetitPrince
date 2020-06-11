@@ -110,7 +110,9 @@ class Transformer(object):
             func = getattr(self, self.scaling_types[index])
             X_train_ = [X[:,indexes] for X in X_train]
             X_test_ = [X[:,indexes] for X in X_test]
-            self.bucket.append(func(X_train_, X_test_, **filter_args(func, {
+            self.bucket.append(func(**filter_args(func, {
+                'X_train': X_train_,
+                'X_test': X_test_,
                 'centering': self.centering[index],
                 'order': self.order[index],
                 'scaling_axis': self.scaling_axis

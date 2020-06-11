@@ -28,11 +28,12 @@ This class enables to perform a lots of transformations on a given dataset:
 import os
 import numpy as np
 import pandas as pd
+from numpy import linalg as la
 
 from sklearn.preprocessing import StandardScaler
 from nistats.hemodynamic_models import compute_regressor
 
-from utils import fetch_offsets, fetch_duration
+from utils import fetch_offsets, fetch_duration, filter_args
 
 
 
@@ -42,7 +43,25 @@ class Transformer(object):
     """
     
     
-    def __init__(self, tr, nscans, indexes, offset_type_dict, duration_type_dict, offset_path, duration_path, language, hrf='spm', oversampling=10, with_mean=True, with_std=True):
+    def __init__(
+        self, 
+        tr, 
+        nscans, 
+        indexes,
+        scaling_types,
+        centering,
+        axis,
+        order,
+        offset_type_dict,
+        duration_type_dict, 
+        offset_path, 
+        duration_path, 
+        language, 
+        hrf='spm', 
+        oversampling=10, 
+        with_mean=True, 
+        with_std=True
+        ):
         """ Instanciation of Transformer class.
         Arguments:
             - tr: int
@@ -70,6 +89,37 @@ class Transformer(object):
         self.offset_path = offset_path
         self.duration_path = duration_path
         self.language = language
+        self.scaling_types = scaling_types
+        self.centering = centering
+        self.axis = axis
+        self.order = order
+        self.bucket = []
+        
+    def clean_bucket(self):
+        """ Clean instance bucket."""
+        self.bucket = []
+    
+    def scale(self, X_train, X_test):
+        """ Scale the data with specific scaling function
+        for the different representations coming from different models.
+        Arguments:
+            - X_train: list
+            - X_test: list
+        """
+        for index, indexes in enumerate(self.indexes):
+            func = getattr(self, self.scaling_types[index])
+            X_train_ = [X[:,indexes] for X in X_train]
+            X_test_ = [X[:,indexes] for X in X_test]
+            self.bucket.append(func(X_train_, X_test_, **filter_args(func, {
+                'centering': self.centering[index],
+                'order': self.order[index],
+                'axis': self.axis
+            })))
+        
+        X_train = [pd.concat([pd.DataFrame(data['X_train'][run_index]) for data in self.bucket], axis=1).values for run_index in range(len(self.bucket[0]['X_train']))]
+        X_test = [pd.concat([pd.DataFrame(data['X_test'][run_index]) for data in self.bucket], axis=1).values for run_index in range(len(self.bucket[0]['X_test']))]
+        self.clean_bucket()
+        return {'X_train': X_train, 'X_test': X_test}
     
     def standardize(self, X_train, X_test):
         """Standardize a train and test sets.
@@ -84,6 +134,36 @@ class Transformer(object):
             scaler = StandardScaler(with_mean=self.with_mean, with_std=self.with_std)
             scaler.fit(matrices[index])
             matrices[index] = scaler.transform(matrices[index])
+        result = {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):]}
+        return result
+
+    def identity(self, X_train, X_test):
+        """ Identity function.
+        Arguments:
+            - X_train: list
+            - X_test: list
+        Returns:
+            - result: dict
+        """
+        return {'X_train': X_train, 'X_test': X_test}
+
+    def normalize(self, X_train, X_test, order, centering=False, axis=1):
+        """ Normalizing function.
+        Arguments:
+            - X_train: list
+            - X_test: list
+            - order: order of the norm (None, inf, -inf, 0, 1, -1 ,2, -2, ...)
+            - centering: bool (center data)
+            - axis: int (0: column-wise=performs on rows, 1: row-wise=performs on columns)
+        Returns:
+            - result: dict
+        """
+        matrices = [*X_train, *X_test] # X_train + X_test
+        for index in range(len(matrices)):
+            scaler = StandardScaler(with_mean=centering, with_std=False)
+            scaler.fit(matrices[index])
+            matrices[index] = scaler.transform(matrices[index])
+            matrices[index] = matrices[index] / np.mean(la.norm(matrices[index], ord=order, axis=axis))
         result = {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):]}
         return result
     

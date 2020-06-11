@@ -334,17 +334,20 @@ def get_data_transformation_information(parameters):
     result =  {'indexes': new_indexes, 'offset_type_dict': offset_type_dict, 'duration_type_dict': duration_type_dict,
                 'tr': parameters['tr'], 'nscans': get_nscans(parameters['language']), 
                 'offset_path': parameters['offset_path'], 'duration_path': parameters['duration_path'], 
-                'language': parameters['language'], 'hrf': parameters['hrf']}
+                'language': parameters['language'], 'hrf': parameters['hrf'], 
+                'scaling_types': [model['scaling_type'] if model['scaling_type'] else 'identity' for model in parameters['models']], 
+                'centering': [model['centering'] for model in parameters['models']], 
+                'axis': parameters['axis'], 'order': [model['order'] for model in parameters['models']]}
     return result
             
-def get_encoding_model_information(parameters):
+def get_estimator_model_information(parameters):
     """ Retrieve the inputs for data transformation (make_regressor + standardization).
     Arguments:
         - parameters: dict
     Returns:
         - dict
     """
-    result = {'model': eval(parameters['encoding_model']), 'alpha': parameters['alpha'], 
+    result = {'model': eval(parameters['estimator_model']), 'alpha': parameters['alpha'], 
                 'alpha_min_log_scale': parameters['alpha_min_log_scale'], 
                 'alpha_max_log_scale': parameters['alpha_max_log_scale'], 
                 'nb_alphas': parameters['nb_alphas'], 'optimizing_criteria': parameters['optimizing_criteria'],

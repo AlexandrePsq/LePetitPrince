@@ -20,7 +20,7 @@ nb_runs_test: 1
 tr: 2.
 scaling_mean: True
 scaling_var: True
-axis: 1
+scaling_axis: 1
 hrf: spm
 offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/onsets-offsets/"
 duration_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"

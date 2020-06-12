@@ -92,7 +92,7 @@ class Transformer(object):
         self.scaling_types = scaling_types
         self.centering = centering
         self.scaling_axis = scaling_axis
-        self.order = [eval(item) for item in order]
+        self.order = [eval(str(item)) for item in order]
         self.bucket = []
         
     def clean_bucket(self):

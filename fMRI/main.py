@@ -139,6 +139,20 @@ if __name__=='__main__':
         logs.validate()
         
         logs.info("Plotting...", end='\n')
+        kwargs = {
+            'detrend': False,
+            'standardize': False,
+            'high_pass': False,
+            'low_pass': False,
+            'mask_strategy': parameters['mask_strategy'],
+            #'dtype': parameters['dtype'],
+            'memory_level': parameters['memory_level'],
+            'n_jobs': parameters['n_jobs'],
+            'smoothing_fwhm': False,
+            'verbose': parameters['verbose'],
+            't_r': None
+        }
+        masker.set_params(**kwargs)
         ## R2
         output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'R2')
         create_maps(masker, maps_aggregated['R2'], output_path, vmax=None, logger=logs, distribution_min=-10, distribution_max=1)

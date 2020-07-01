@@ -39,7 +39,6 @@ if __name__=='__main__':
         'mask_strategy': parameters['mask_strategy'],
         #'dtype': parameters['dtype'],
         'memory_level': parameters['memory_level'],
-        'n_jobs': parameters['n_jobs'],
         'smoothing_fwhm': parameters['smoothing_fwhm'],
         'verbose': parameters['verbose'],
         't_r': parameters['tr']
@@ -147,7 +146,6 @@ if __name__=='__main__':
             'mask_strategy': parameters['mask_strategy'],
             #'dtype': parameters['dtype'],
             'memory_level': parameters['memory_level'],
-            'n_jobs': parameters['n_jobs'],
             'smoothing_fwhm': None,
             'verbose': parameters['verbose'],
             't_r': None

@@ -31,7 +31,26 @@ if __name__=='__main__':
     save_yaml(parameters, output_path + 'config.yml')
 
     logs.info("Fetching maskers...", end='\n')
-    masker = fetch_masker(parameters['masker_path'], parameters['language'], parameters['path_to_fmridata'], input_path, logger=logs)
+    kwargs = {
+        'detrend': parameters['detrend'],
+        'standardize': parameters['standardize'],
+        'high_pass': parameters['high_pass'],
+        'low_pass': parameters['low_pass'],
+        'mask_strategy': parameters['mask_strategy'],
+        #'dtype': parameters['dtype'],
+        'memory_level': parameters['memory_level'],
+        'n_jobs': parameters['n_jobs'],
+        'smoothing_fwhm': parameters['smoothing_fwhm'],
+        'verbose': parameters['verbose'],
+        't_r': parameters['tr']
+        }
+    masker = fetch_masker(
+        parameters['masker_path'], 
+        parameters['language'], 
+        parameters['path_to_fmridata'], 
+        input_path, 
+        logger=logs,
+        **kwargs)
     logs.validate()
 
     logs.info("Retrieve arguments for each model...")
@@ -108,21 +127,27 @@ if __name__=='__main__':
         pipeline = Pipeline()
         pipeline.fit(splitter_cv_external, logs) # retrieve the flow from children and input_dependencies
         maps = pipeline.compute(stimuli_representations, fMRI_data, output_path, logger=logs)
-        
+
         logs.info("Aggregating over cross-validation results...")
-        maps = {key: np.mean(np.stack(np.array([dic[key] for dic in maps]), axis=0), axis=0) for key in maps[0]}
+        maps_aggregated = {key: np.mean(np.stack(np.array([dic[key] for dic in maps]), axis=0), axis=0) for key in maps[0]}
+        logs.validate()
+
+        logs.info("Saving model weights...")
+        for key in maps_aggregated.keys():
+            output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], key)
+            np.save(output_path + '.npy', maps_aggregated[key])
         logs.validate()
         
         logs.info("Plotting...", end='\n')
         ## R2
         output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'R2')
-        create_maps(masker, maps['R2'], output_path, vmax=None, logger=logs, distribution_min=-10, distribution_max=1)
+        create_maps(masker, maps_aggregated['R2'], output_path, vmax=None, logger=logs, distribution_min=-10, distribution_max=1)
         ## Pearson
         output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'Pearson_coeff')
-        create_maps(masker, maps['Pearson_coeff'], output_path, vmax=None, logger=logs, distribution_min=-10, distribution_max=1)
+        create_maps(masker, maps_aggregated['Pearson_coeff'], output_path, vmax=None, logger=logs, distribution_min=-10, distribution_max=1)
         ## Alpha (not exactly what should be done: averaging alphas)
         output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'alpha')
-        create_maps(masker, maps['alpha'], output_path, vmax=None, logger=logs)
+        create_maps(masker, maps_aggregated['alpha'], output_path, vmax=None, logger=logs)
         logs.validate()
     except Exception as err:
         logs.error(str(err))

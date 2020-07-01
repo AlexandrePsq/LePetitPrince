@@ -142,13 +142,13 @@ if __name__=='__main__':
         kwargs = {
             'detrend': False,
             'standardize': False,
-            'high_pass': False,
-            'low_pass': False,
+            'high_pass': None,
+            'low_pass': None,
             'mask_strategy': parameters['mask_strategy'],
             #'dtype': parameters['dtype'],
             'memory_level': parameters['memory_level'],
             'n_jobs': parameters['n_jobs'],
-            'smoothing_fwhm': False,
+            'smoothing_fwhm': None,
             'verbose': parameters['verbose'],
             't_r': None
         }

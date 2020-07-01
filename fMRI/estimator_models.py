@@ -136,12 +136,14 @@ class EstimatorModel(object):
             - alpha: np.array (2D)
         The extra dimension of the last 3 arguments results from the ’aggregate_cv’
         method that was applied to the output of ’grid_search’, concatenating cv
-        results over a new dimension places at the index 0.
+        results over a new dimension placed at the index 0.
         Returns:
             - result: dict
         """
         R2_ = np.zeros((Y_test[0].shape[1]))
         Pearson_coeff_ = np.zeros((Y_test[0].shape[1]))
+        coefs = np.zeros((Y_test[0].shape[1], X_test[0].shape[1]))
+        intercepts = np.zeros((Y_test[0].shape[1], X_test[0].shape[1]))
         x_test = np.vstack(X_test)
         data = R2 if self.optimizing_criteria=='R2' else Pearson_coeff
         voxel2alpha, alpha2voxel = self.optimize_alpha(data, alpha)
@@ -154,9 +156,13 @@ class EstimatorModel(object):
                 predictions = self.predict(x_test)
                 R2_[voxels] = self.get_R2_coeff(predictions, y_test)
                 Pearson_coeff_[voxels] = self.get_Pearson_coeff(predictions, y_test)
+                coefs[voxels, :] = self.model.coef_
+                intercepts[voxels, :] = self.model.intercept_
         result = {'R2': R2_,
                     'Pearson_coeff': Pearson_coeff_,
-                    'alpha': voxel2alpha
+                    'alpha': voxel2alpha,
+                    'coef_': coefs,
+                    'intercept_': intercepts
                     }
         return result
 

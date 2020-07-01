@@ -736,7 +736,7 @@ def inter_subject_correlation(
         data2 = process_fmri_data(fMRI_paths2, masker)
         key = '{}_{}'.format(sub1, sub2)
         result[key] = check_correlation(data1, data2)
-        np.save(os.path.join(saving_path, key + 'npy'), result[key])
+        np.save(os.path.join(saving_path, key + '.npy'), result[key])
     return result
 
 def check_correlation(data1, data2):

@@ -402,7 +402,7 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, logger=
         masker = compute_global_masker(list(fmri_runs.values()), **kwargs)
         params = masker.get_params()
         params = {key: params[key] for key in ['detrend', 'dtype', 'high_pass', 'low_pass', 'mask_strategy', 
-                                                'memory_level', 'n_jobs', 'smoothing_fwhm', 'standardize',
+                                                'memory_level', 'smoothing_fwhm', 'standardize',
                                                 't_r', 'verbose']}
         nib.save(masker.mask_img_, masker_path + '.nii.gz')
         save_yaml(params, masker_path + '.yml')

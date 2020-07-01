@@ -3,6 +3,7 @@ import glob
 import matplotlib
 import numpy as np
 import pandas as pd
+import pingouin as pg
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
@@ -17,7 +18,7 @@ from scipy.stats import norm
 from nilearn.regions import RegionExtractor
 from nistats.thresholding import map_threshold
 from nistats.second_level_model import SecondLevelModel
-from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img, new_img_like
+from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img, new_img_like, resample_to_img
 from nilearn.input_data import NiftiMapsMasker, NiftiMasker, NiftiLabelsMasker, MultiNiftiMasker
 from nilearn.plotting import plot_surf_roi
 from nilearn.surface import vol_to_surf
@@ -146,20 +147,32 @@ def check_data(data, N):
         if 'Pearson_coeff' in data[key]:
             assert len(data[key]['Pearson_coeff'])==N
 
-def fit_per_roi(maps, atlas_maps, labels):
+def fit_per_roi(maps, atlas_maps, labels, global_mask):
     print("\tLooping through labeled masks...")
     mean = np.zeros((len(labels)-1, len(maps)))
     third_quartile = np.zeros((len(labels)-1, len(maps)))
     maximum = np.zeros((len(labels)-1, len(maps)))
     for index_mask in tqdm(range(len(labels)-1)):
-        mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))  
-        masker = NiftiMasker(mask_img=mask, verbose=0)
+        mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))
+        global_masker = nib.load(global_mask + '.nii.gz')
+        mask = resample_to_img(mask, global_masker, interpolation='nearest')
+        params = read_yaml(global_mask + '.yml')
+        params['detrend'] = False
+        params['standardize'] = False
+        masker = MultiNiftiMasker(mask)
+        masker.set_params(**params)
         masker.fit()
         for index_model, map_ in enumerate(maps):
-            array = masker.transform(map_)
-            maximum[index_mask, index_model] = np.max(array)
-            third_quartile[index_mask, index_model] = np.percentile(array, 75)
-            mean[index_mask, index_model] = np.mean(array)
+            try:
+                array = masker.transform(map_)
+                maximum[index_mask, index_model] = np.max(array)
+                third_quartile[index_mask, index_model] = np.percentile(array, 75)
+                mean[index_mask, index_model] = np.mean(array)
+            except ValueError:
+                maximum[index_mask, index_model] = np.nan
+                third_quartile[index_mask, index_model] = np.nan
+                mean[index_mask, index_model] = np.nan
+            
     print("\t\t-->Done")
     return mean, third_quartile, maximum
 
@@ -251,8 +264,11 @@ def prepare_data_for_anova(
     model_names, 
     atlas_maps, 
     labels, 
+    global_mask,
     object_of_interest='R2', 
     language='english', 
+    includ_context=False,
+    includ_norm=False,
     OUTPUT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/english'
     ):
     print("\tLooping through labeled masks...")
@@ -267,20 +283,39 @@ def prepare_data_for_anova(
             data[name][subject] = {
                 object_of_interest: fetch_map(path_to_map, object_of_interest)[0]
             }
-            print(name, '-', subject, '-', len(data[name][subject][object_of_interest]))
 
     for index_mask in tqdm(range(len(labels)-1)):
-        mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))  
-        masker = NiftiMasker(mask_img=mask, verbose=0)
+        mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))
+        global_masker = nib.load(global_mask + '.nii.gz')
+        mask = resample_to_img(mask, global_masker, interpolation='nearest')
+        params = read_yaml(global_mask + '.yml')
+        params['detrend'] = False
+        params['standardize'] = False
+        masker = MultiNiftiMasker(mask)
+        masker.set_params(**params)
         masker.fit()
         for name in data.keys():
             for subject in data[name].keys():
-                array = masker.transform(data[name][subject][object_of_interest])
-                mean = np.mean(array)
-                median = np.median(array)
-                third_quartile = np.percentile(array, 75)
+                try:
+                    array = masker.transform(data[name][subject][object_of_interest])
+                    mean = np.mean(array)
+                    median = np.median(array)
+                    third_quartile = np.percentile(array, 75)
+                except ValueError:
+                    mean = np.nan
+                    median = np.nan
+                    third_quartile = np.nan
                 result.append([name, subject, labels[index_mask + 1], mean, median, third_quartile])
     result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
+    if includ_context or includ_norm:
+        final_result = []
+        for index, row in result.iterrows():
+            context_pre = row['model'].split('pre-')[1].split('_')[0] if includ_context else None
+            context_post = row['model'].split('_norm_')[0].split('-')[-1] if includ_context else None
+            norm = row['model'].split('_norm_')[1].split('_')[0] if includ_norm else None
+            name = row['model'].split('_pre-')[0] + '_'.join(row['model'].split('_')[-3:])
+            final_result.append([name, context_pre, context_post, norm, row['subject'], row['ROI'], row['R2_mean'], row['R2_median'], row['R2_3rd_quartile']])
+        result = pd.DataFrame(final_result, columns=['model', 'context_pre', 'context_post', 'norm', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
     print("\t\t-->Done")
     return result
 
@@ -643,5 +678,23 @@ def compute_t_test_for_model_comparison(
         imgs = data[name]['Pearson_coeff']
         create_one_sample_t_test(name + '_Pearson_coeff', imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=vmax)
 
+def anova(data, anova_type, dv, within=None, between=None, subject=None, detailed=True, correction=False, effsize='np2', method='pearson', padjust='fdr_bh', columns=None):
+    """Compute various ANOVA type analysis on data. Available functions are:
+    anova, rm_anova, pairwise_ttests, mixed_anova, pairwise_corr.
+    """
+    if anova_type=='anova':
+        result = pg.anova(data=data, dv=dv, between=between, detailed=detailed)
+    elif anova_type=='rm_anova':
+        result = pg.rm_anova(data=data, dv=dv, within=within, subject=subject, detailed=detailed)
+    elif anova_type=='pairwise_ttests':
+        result = pg.pairwise_ttests(data=data, dv=dv, within=within, subject=subject,
+                             parametric=True, padjust=padjust, effsize='hedges')
+    elif anova_type=='mixed_anova':
+        result = pg.mixed_anova(data=data, dv=dv, between=between, within=within,
+                     subject=subject, correction=False, effsize=effsize)
+    elif anova_type=='pairwise_corr':
+        result = pg.pairwise_corr(data, columns=columns, method=method)
+    pg.print_table(result, floatfmt='.3f')
+    return result
 
 

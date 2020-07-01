@@ -383,7 +383,8 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, logger=
         - logger: Logger
     """
     if os.path.exists(masker_path + '.nii.gz') and os.path.exists(masker_path + '.yml'):
-        logger.report_state(" loading existing masker...")
+        if logger:
+            logger.report_state(" loading existing masker...")
         params = read_yaml(masker_path + '.yml')
         mask_img = nib.load(masker_path + '.nii.gz')
         masker = NiftiMasker(mask_img)
@@ -391,7 +392,8 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, logger=
         masker.set_params(**kwargs)
         masker.fit()
     else:
-        logger.report_state(" recomputing masker...")
+        if logger:
+            logger.report_state(" recomputing masker...")
         fmri_runs = {}
         subjects = [get_subject_name(id) for id in possible_subjects_id(language)]
         for subject in subjects:
@@ -415,7 +417,8 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
         - vmax: float
         - not_glass_brain: bool
     """
-    logger.info("Transforming array to .nii image...")
+    if logger:
+        logger.info("Transforming array to .nii image...")
     if distribution_min is not None:
         if distribution_max is not None:
             mask = np.where((distribution < distribution_min) | (distribution > distribution_max))
@@ -427,16 +430,19 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
             mask = np.where(distribution > distribution_max)
             distribution[mask] = np.nan # remove outliers
     img = masker.inverse_transform(distribution)
-    logger.validate()
-    logger.info("Saving image...")
+    if logger:
+        logger.validate()
+        logger.info("Saving image...")
     nib.save(img, output_path + '.nii.gz')
-    logger.validate()
+    if logger:
+        logger.validate()
 
     plt.hist(distribution[~np.isnan(distribution)], bins=50)
     plt.savefig(output_path + '_hist.png')
     plt.close()
 
-    logger.info("Saving glass brain...")
+    if logger:
+        logger.info("Saving glass brain...")
     if not_glass_brain:
         display = plot_img(img, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))
         display.savefig(output_path + '.png')
@@ -445,4 +451,5 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
         display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
         display.savefig(output_path + '.png')
         display.close()
-    logger.validate()
+    if logger:
+        logger.validate()

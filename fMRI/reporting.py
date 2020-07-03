@@ -309,16 +309,16 @@ def prepare_data_for_anova(
                     third_quartile = np.nan
                 result.append([name, subject, labels[index_mask + 1], mean, median, third_quartile])
     result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
-    if includ_context or includ_norm:
-        final_result = []
-        for index, row in result.iterrows():
-            context_pre = row['model'].split('pre-')[1].split('_')[0] if includ_context else None
-            context_post = row['model'].split('_norm_')[0].split('-')[-1] if includ_context else None
-            norm = row['model'].split('_norm_')[1].split('_')[0] if includ_norm else None
-            name = row['model'].split('_pre-')[0] + '_'.join(row['model'].split('_')[-3:])
-            final_result.append([name, context_pre, context_post, norm, row['subject'], row['ROI'], row['R2_mean'], row['R2_median'], row['R2_3rd_quartile']])
-        result = pd.DataFrame(final_result, columns=['model', 'context_pre', 'context_post', 'norm', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
-    print("\t\t-->Done")
+    #if includ_context or includ_norm:
+    #    final_result = []
+    #    for index, row in result.iterrows():
+    #        context_pre = row['model'].split('pre-')[1].split('_')[0] if includ_context else None
+    #        context_post = row['model'].split('_norm_')[0].split('-')[-1] if includ_context else None
+    #        norm = row['model'].split('_norm_')[1].split('_')[0] if includ_norm else None
+    #        name = row['model'].split('_pre-')[0] + '_'.join(row['model'].split('_')[-3:])
+    #        final_result.append([name, context_pre, context_post, norm, row['subject'], row['ROI'], row['R2_mean'], row['R2_median'], row['R2_3rd_quartile']])
+    #    result = pd.DataFrame(final_result, columns=['model', 'context_pre', 'context_post', 'norm', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
+    #print("\t\t-->Done")
     return result
 
 def process_fmri_data(fmri_paths, masker):
@@ -738,6 +738,25 @@ def inter_subject_correlation(
         result[key] = check_correlation(data1, data2)
         np.save(os.path.join(saving_path, key + '.npy'), result[key])
     return result
+
+def inter_subject_correlation_all_vs_1(
+    masker, 
+    language, 
+    saving_path="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/inter_subject_correlations",
+    path_to_fmri_data="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI"
+    ):
+    subjects = [get_subject_name(subject) for subject in possible_subjects_id(language)]
+    result = {}
+    data = [process_fmri_data(fetch_data(path_to_fmri_data, '', sub, language)[1], masker) for sub in subjects]
+    for index, data_sub in tqdm(enumerate(data)):
+        data_tmp = data[:index]+data[index+1:] if index < (len(data)-1) else data[:-1]
+        data_rest = zip(*data_tmp)
+        data_rest = [np.mean(np.stack(d, axis=0), axis=0) for d in list(data_rest)]
+        key = '{}'.format(subjects[index])
+        result[key] = check_correlation(data_sub, data_rest)
+        np.save(os.path.join(saving_path, key + '.npy'), result[key])
+    return result
+
 
 def check_correlation(data1, data2):
     pearson_corr = []

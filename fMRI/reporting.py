@@ -1,5 +1,6 @@
 import os
 import glob
+import itertools
 import matplotlib
 import numpy as np
 import pandas as pd
@@ -15,16 +16,17 @@ import nibabel as nib
 from nilearn import plotting
 from nilearn import datasets
 from scipy.stats import norm
+from scipy.stats import pearsonr
 from nilearn.regions import RegionExtractor
 from nistats.thresholding import map_threshold
 from nistats.second_level_model import SecondLevelModel
 from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img, new_img_like, resample_to_img
-from nilearn.input_data import NiftiMapsMasker, NiftiMasker, NiftiLabelsMasker, MultiNiftiMasker
+from nilearn.input_data import NiftiMasker
 from nilearn.plotting import plot_surf_roi
 from nilearn.surface import vol_to_surf
 
 from logger import Logger
-from utils import read_yaml, check_folder, fetch_masker, possible_subjects_id, get_subject_name
+from utils import read_yaml, check_folder, fetch_masker, possible_subjects_id, get_subject_name, fetch_data
 
 
 #########################################
@@ -159,7 +161,7 @@ def fit_per_roi(maps, atlas_maps, labels, global_mask):
         params = read_yaml(global_mask + '.yml')
         params['detrend'] = False
         params['standardize'] = False
-        masker = MultiNiftiMasker(mask)
+        masker = NiftiMasker(mask)
         masker.set_params(**params)
         masker.fit()
         for index_model, map_ in enumerate(maps):
@@ -291,7 +293,7 @@ def prepare_data_for_anova(
         params = read_yaml(global_mask + '.yml')
         params['detrend'] = False
         params['standardize'] = False
-        masker = MultiNiftiMasker(mask)
+        masker = NiftiMasker(mask)
         masker.set_params(**params)
         masker.fit()
         for name in data.keys():
@@ -307,17 +309,36 @@ def prepare_data_for_anova(
                     third_quartile = np.nan
                 result.append([name, subject, labels[index_mask + 1], mean, median, third_quartile])
     result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
-    if includ_context or includ_norm:
-        final_result = []
-        for index, row in result.iterrows():
-            context_pre = row['model'].split('pre-')[1].split('_')[0] if includ_context else None
-            context_post = row['model'].split('_norm_')[0].split('-')[-1] if includ_context else None
-            norm = row['model'].split('_norm_')[1].split('_')[0] if includ_norm else None
-            name = row['model'].split('_pre-')[0] + '_'.join(row['model'].split('_')[-3:])
-            final_result.append([name, context_pre, context_post, norm, row['subject'], row['ROI'], row['R2_mean'], row['R2_median'], row['R2_3rd_quartile']])
-        result = pd.DataFrame(final_result, columns=['model', 'context_pre', 'context_post', 'norm', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
-    print("\t\t-->Done")
+    #if includ_context or includ_norm:
+    #    final_result = []
+    #    for index, row in result.iterrows():
+    #        context_pre = row['model'].split('pre-')[1].split('_')[0] if includ_context else None
+    #        context_post = row['model'].split('_norm_')[0].split('-')[-1] if includ_context else None
+    #        norm = row['model'].split('_norm_')[1].split('_')[0] if includ_norm else None
+    #        name = row['model'].split('_pre-')[0] + '_'.join(row['model'].split('_')[-3:])
+    #        final_result.append([name, context_pre, context_post, norm, row['subject'], row['ROI'], row['R2_mean'], row['R2_median'], row['R2_3rd_quartile']])
+    #    result = pd.DataFrame(final_result, columns=['model', 'context_pre', 'context_post', 'norm', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
+    #print("\t\t-->Done")
     return result
+
+def process_fmri_data(fmri_paths, masker):
+    """ Load fMRI data and mask it with a given masker.
+    Preprocess it to avoid NaN value when using Pearson
+    Correlation coefficients in the following analysis.
+    Arguments:
+        - fmri_paths: list (of string)
+        - masker: NiftiMasker object
+    Returns:
+        - data: list of length #runs (np.array of shape: #scans * #voxels) 
+    """
+    data = [masker.transform(f) for f in fmri_paths]
+    # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element
+    for run in range(len(data)):
+        zero = np.zeros(data[run].shape[0])
+        new = zero.copy()
+        new[0] += np.random.random()/1000
+        data[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, data[run])
+    return data
 
                 
 
@@ -697,4 +718,48 @@ def anova(data, anova_type, dv, within=None, between=None, subject=None, detaile
     pg.print_table(result, floatfmt='.3f')
     return result
 
+def inter_subject_correlation(
+    masker, 
+    language, 
+    saving_path="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/inter_subject_correlations",
+    path_to_fmri_data="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI"
+    ):
+    subjects = [get_subject_name(subject) for subject in possible_subjects_id(language)]
+    iterator = itertools.combinations(subjects, 2)
+    result = {}
+    for sub1, sub2 in tqdm(iterator):
+        _, fMRI_paths1 = fetch_data(path_to_fmri_data, '', 
+                                    sub1, language)
+        _, fMRI_paths2 = fetch_data(path_to_fmri_data, '', 
+                                    sub2, language)
+        data1 = process_fmri_data(fMRI_paths1, masker)
+        data2 = process_fmri_data(fMRI_paths2, masker)
+        key = '{}_{}'.format(sub1, sub2)
+        result[key] = check_correlation(data1, data2)
+        np.save(os.path.join(saving_path, key + '.npy'), result[key])
+    return result
 
+def inter_subject_correlation_all_vs_1(
+    masker, 
+    language, 
+    saving_path="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/inter_subject_correlations",
+    path_to_fmri_data="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI"
+    ):
+    subjects = [get_subject_name(subject) for subject in possible_subjects_id(language)]
+    result = {}
+    data = [process_fmri_data(fetch_data(path_to_fmri_data, '', sub, language)[1], masker) for sub in subjects]
+    for index, data_sub in tqdm(enumerate(data)):
+        data_tmp = data[:index]+data[index+1:] if index < (len(data)-1) else data[:-1]
+        data_rest = zip(*data_tmp)
+        data_rest = [np.mean(np.stack(d, axis=0), axis=0) for d in list(data_rest)]
+        key = '{}'.format(subjects[index])
+        result[key] = check_correlation(data_sub, data_rest)
+        np.save(os.path.join(saving_path, key + '.npy'), result[key])
+    return result
+
+
+def check_correlation(data1, data2):
+    pearson_corr = []
+    for index, matrix in enumerate(data1):
+        pearson_corr.append(np.array([pearsonr(matrix[:,i], data2[index][:,i])[0] for i in range(matrix.shape[1])]))
+    return np.stack(pearson_corr, axis=0)

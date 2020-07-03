@@ -11,9 +11,10 @@ plt.switch_backend('agg')
 
 import nibabel as nib
 from sklearn.linear_model import Ridge
-from nilearn.masking import compute_epi_mask
+from nilearn.masking import compute_epi_mask, apply_mask
+from nilearn.signal import clean
 from nilearn.image import math_img, mean_img
-from nilearn.input_data import MultiNiftiMasker
+from nilearn.input_data import NiftiMasker
 from nilearn.plotting import plot_glass_brain, plot_img
 
 
@@ -358,20 +359,20 @@ def get_estimator_model_information(parameters):
 ########### Nilearn functions ###########
 #########################################
 
-def compute_global_masker(files, smoothing_fwhm=None): # [[path, path2], [path3, path4]]
-    """Returns a MultiNiftiMasker object from list (of list) of files.
+def compute_global_masker(files, **kwargs): # [[path, path2], [path3, path4]]
+    """Returns a NiftiMasker object from list (of list) of files.
     Arguments:
         - files: list (of list of str)
     Returns:
-        - masker: MultiNiftiMasker
+        - masker: NiftiMasker
     """
     masks = [compute_epi_mask(f) for f in files]
     global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
-    masker = MultiNiftiMasker(global_mask, detrend=True, standardize=True, smoothing_fwhm=smoothing_fwhm)
+    masker = NiftiMasker(global_mask, **kwargs)
     masker.fit()
     return masker
 
-def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothing_fwhm=None, logger=None):
+def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, logger=None, **kwargs):
     """ Fetch or compute if needed a global masker from all subjects of a
     given language.
     Arguments:
@@ -379,27 +380,29 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, smoothi
         - language: str
         - path_to_input: str
         - path_to_fmridata: str
-        - smoothing_fwhm: int
         - logger: Logger
     """
     if os.path.exists(masker_path + '.nii.gz') and os.path.exists(masker_path + '.yml'):
-        logger.report_state(" loading existing masker...")
+        if logger:
+            logger.report_state(" loading existing masker...")
         params = read_yaml(masker_path + '.yml')
         mask_img = nib.load(masker_path + '.nii.gz')
-        masker = MultiNiftiMasker()
+        masker = NiftiMasker(mask_img)
         masker.set_params(**params)
-        masker.fit([mask_img])
+        masker.set_params(**kwargs)
+        masker.fit()
     else:
-        logger.report_state(" recomputing masker...")
+        if logger:
+            logger.report_state(" recomputing masker...")
         fmri_runs = {}
         subjects = [get_subject_name(id) for id in possible_subjects_id(language)]
         for subject in subjects:
             _, fmri_paths = fetch_data(path_to_fmridata, path_to_input, subject, language)
             fmri_runs[subject] = fmri_paths
-        masker = compute_global_masker(list(fmri_runs.values()), smoothing_fwhm=smoothing_fwhm)
+        masker = compute_global_masker(list(fmri_runs.values()), **kwargs)
         params = masker.get_params()
         params = {key: params[key] for key in ['detrend', 'dtype', 'high_pass', 'low_pass', 'mask_strategy', 
-                                                'memory_level', 'n_jobs', 'smoothing_fwhm', 'standardize',
+                                                'memory_level', 'smoothing_fwhm', 'standardize',
                                                 't_r', 'verbose']}
         nib.save(masker.mask_img_, masker_path + '.nii.gz')
         save_yaml(params, masker_path + '.yml')
@@ -414,7 +417,8 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
         - vmax: float
         - not_glass_brain: bool
     """
-    logger.info("Transforming array to .nii image...")
+    if logger:
+        logger.info("Transforming array to .nii image...")
     if distribution_min is not None:
         if distribution_max is not None:
             mask = np.where((distribution < distribution_min) | (distribution > distribution_max))
@@ -426,16 +430,19 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
             mask = np.where(distribution > distribution_max)
             distribution[mask] = np.nan # remove outliers
     img = masker.inverse_transform(distribution)
-    logger.validate()
-    logger.info("Saving image...")
+    if logger:
+        logger.validate()
+        logger.info("Saving image...")
     nib.save(img, output_path + '.nii.gz')
-    logger.validate()
+    if logger:
+        logger.validate()
 
     plt.hist(distribution[~np.isnan(distribution)], bins=50)
     plt.savefig(output_path + '_hist.png')
     plt.close()
 
-    logger.info("Saving glass brain...")
+    if logger:
+        logger.info("Saving glass brain...")
     if not_glass_brain:
         display = plot_img(img, colorbar=True, black_bg=True, cut_coords=(-48, 24, -10))
         display.savefig(output_path + '.png')
@@ -444,4 +451,5 @@ def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=Fa
         display = plot_glass_brain(img, display_mode='lzry', colorbar=True, black_bg=True, vmax=vmax, plot_abs=False)
         display.savefig(output_path + '.png')
         display.close()
-    logger.validate()
+    if logger:
+        logger.validate()

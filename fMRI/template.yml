@@ -8,6 +8,15 @@ path_to_root: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePet
 path_to_fmridata: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/fMRI"
 output: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/"  # Path to the output folder
 input: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/stimuli-representations/"  # Path to the folder containing the representations
+detrend: True
+standardize: True
+high_pass: 
+low_pass: 
+mask_strategy: background
+#dtype: float32
+memory_level: 0
+smoothing_fwhm:  
+verbose: 0
 
 # Shared Splitter parameters
 nb_runs: 9

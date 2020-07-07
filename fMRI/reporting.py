@@ -182,6 +182,7 @@ def get_data_per_roi(
     data, 
     atlas_maps,
     labels,
+    global_mask=None,
     analysis=None, 
     model_name=None,
     language='english', 
@@ -197,7 +198,7 @@ def get_data_per_roi(
             maps.append(fetch_map(path, name)[0])
         plot_name = ["Model comparison"]
         # extract data
-        mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels)
+        mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask)
     else:
         for key in analysis:
             maps = []

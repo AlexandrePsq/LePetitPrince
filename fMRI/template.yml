@@ -33,6 +33,7 @@ scaling_axis: 1
 hrf: spm
 offset_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/data/onsets-offsets/"
 duration_path: "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
+temporal_shifting: 0
 
 # Shared Estimator model parameters
 base: 10.0

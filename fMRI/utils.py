@@ -338,7 +338,8 @@ def get_data_transformation_information(parameters):
                 'language': parameters['language'], 'hrf': parameters['hrf'], 
                 'scaling_types': [model['scaling_type'] if model['scaling_type'] else 'identity' for model in parameters['models']], 
                 'centering': [model['centering'] for model in parameters['models']], 
-                'scaling_axis': parameters['scaling_axis'], 'order': [model['order'] for model in parameters['models']]}
+                'scaling_axis': parameters['scaling_axis'], 'order': [model['order'] for model in parameters['models']],
+                'temporal_shifting': parameters['temporal_shifting']}
     return result
             
 def get_estimator_model_information(parameters):

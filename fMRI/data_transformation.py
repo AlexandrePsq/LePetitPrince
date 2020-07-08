@@ -57,6 +57,7 @@ class Transformer(object):
         offset_path, 
         duration_path, 
         language, 
+        temporal_shifting,
         hrf='spm', 
         oversampling=10, 
         with_mean=True, 
@@ -94,6 +95,7 @@ class Transformer(object):
         self.scaling_axis = scaling_axis
         self.order = [eval(str(item)) if (item!='std' and item is not None) else item for item in order]
         self.bucket = []
+        self.temporal_shifting = temporal_shifting
         
     def clean_bucket(self):
         """ Clean instance bucket."""
@@ -204,6 +206,7 @@ class Transformer(object):
         representations = [col for col in dataframe.columns]
         offsets = fetch_offsets(offset_type, run_index, self.offset_path, self.language)
         duration = fetch_duration(duration_type, run_index, self.duration_path, default_size=len(dataframe))
+        offsets += self.temporal_shifting # shift offsets by 'temporal_shifting' seconds
         for col in representations:
             conditions = np.vstack((offsets, duration, dataframe[col]))
             signal, name = compute_regressor(exp_condition=conditions,

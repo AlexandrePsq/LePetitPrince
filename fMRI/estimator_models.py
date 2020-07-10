@@ -143,7 +143,7 @@ class EstimatorModel(object):
         R2_ = np.zeros((Y_test[0].shape[1]))
         Pearson_coeff_ = np.zeros((Y_test[0].shape[1]))
         coefs = np.zeros((Y_test[0].shape[1], X_test[0].shape[1]))
-        intercepts = np.zeros((Y_test[0].shape[1], X_test[0].shape[1]))
+        intercepts = np.zeros((Y_test[0].shape[1]))
         x_test = np.vstack(X_test)
         data = R2 if self.optimizing_criteria=='R2' else Pearson_coeff
         voxel2alpha, alpha2voxel = self.optimize_alpha(data, alpha)
@@ -157,7 +157,7 @@ class EstimatorModel(object):
                 R2_[voxels] = self.get_R2_coeff(predictions, y_test)
                 Pearson_coeff_[voxels] = self.get_Pearson_coeff(predictions, y_test)
                 coefs[voxels, :] = self.model.coef_
-                intercepts[voxels, :] = self.model.intercept_
+                intercepts[voxels] = self.model.intercept_
         result = {'R2': R2_,
                     'Pearson_coeff': Pearson_coeff_,
                     'alpha': voxel2alpha,

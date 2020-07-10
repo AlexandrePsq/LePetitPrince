@@ -235,7 +235,7 @@ def fetch_data(path_to_fmridata, path_to_input, subject, language, models=[]):
         - models: list (of dict)
     """
     fmri_path = os.path.join(path_to_fmridata, language, subject, "func")
-    fMRI_paths = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*')))
+    fMRI_paths = sorted(glob.glob(os.path.join(fmri_path, 'fMRI_*run*.nii*')))
     deep_representations_paths = [sorted(glob.glob(os.path.join(path_to_input, language, model['model_name'], model['input_template'] + '*run*.csv'))) for model in models]
     return deep_representations_paths, fMRI_paths
 
@@ -367,7 +367,7 @@ def compute_global_masker(files, **kwargs): # [[path, path2], [path3, path4]]
         - masker: NiftiMasker
     """
     masks = [compute_epi_mask(f) for f in files]
-    global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
+    global_mask = math_img('img>0.95', img=mean_img(masks)) # take the average mask and threshold at 0.5
     masker = NiftiMasker(global_mask, **kwargs)
     masker.fit()
     return masker

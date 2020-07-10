@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 
 from sklearn.decomposition import PCA
+from sklearn.cluster import AgglomerativeClustering
 
 from utils import clean_nan_rows
 
@@ -52,7 +53,7 @@ class Compressor(object):
         return {'X_train': X_train, 'X_test': X_test}
 
     def pca(self, X_train, X_test, n_components):
-        """ Classical PCA train on the concatenated set
+        """ Classical PCA trained on the concatenated set
         of matrices given in X_train.
         Arguments:
             - X_train: list
@@ -71,6 +72,35 @@ class Compressor(object):
             index += i
         for matrix in X_test:
             X_test_.append(pca.transform(matrix))
+        return {'X_train': X_train_, 'X_test': X_test_}
+    
+    def similarity_cluster(self, X_train, X_test, n_components):
+        """ Average most similar features. Trained on the concatenated set
+        of matrices given in X_train. Details: cluster features according to their L2 norm
+        and average features among a given cluster.
+        Arguments:
+            - X_train: list
+            - X_test: list
+            - n_components: int
+        """
+        X_lengths = [m.shape[0] for m in X_train]
+        X_all = np.vstack(X_train)
+        sc = AgglomerativeClustering(n_clusters=n_components, linkage="ward")
+        sc.fit(X_all.T)
+        index = 0
+        X_train_ = []
+        X_test_ = []
+        for i in X_lengths:
+            result = np.zeros((X_all[index:index+i,:].shape[0], n_components))
+            for component in range(n_components):
+                result[:, component] = np.mean(X_all[index:index+i,:][:, sc.labels_==component], axis=1) 
+            X_train_.append(result)
+            index += i
+        for matrix in X_test:
+            result = np.zeros((matrix.shape[0], n_components))
+            for component in range(n_components):
+                result[:, component] = np.mean(matrix[:, sc.labels_==component], axis=1) 
+            X_test_.append(result)
         return {'X_train': X_train_, 'X_test': X_test_}
 
     def compress(self, X_train, X_test):

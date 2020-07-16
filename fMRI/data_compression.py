@@ -18,6 +18,10 @@ import pandas as pd
 
 from sklearn.decomposition import PCA
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.manifold import LocallyLinearEmbedding
+from sklearn.decomposition import FastICA 
+from sklearn import manifold
+import umap
 
 from utils import clean_nan_rows
 
@@ -27,7 +31,7 @@ class Compressor(object):
     """ Perform data compression over lists of numpy arrays.
     """
     
-    def __init__(self, n_components_list, indexes, compression_types):
+    def __init__(self, n_components_list, indexes, compression_types, manifold_method=None, manifold_args=None):
         """ Instanciation of the class Compressor.
         Arguments:
             - n_components_list: list (of list)
@@ -38,6 +42,8 @@ class Compressor(object):
         self.indexes = indexes
         self.compression_types = compression_types
         self.bucket = []
+        self.manifold_method = manifold_method
+        self.manifold_args = manifold_args
         
     def clean_bucket(self):
         """ Clean instance bucket."""
@@ -62,16 +68,102 @@ class Compressor(object):
         """
         X_lengths = [m.shape[0] for m in X_train]
         X_all = np.vstack(X_train)
-        pca = PCA(n_components=n_components)
-        pca.fit(X_all)
+        pca_ = PCA(n_components=n_components)
+        pca_.fit(X_all)
         index = 0
         X_train_ = []
         X_test_ = []
         for i in X_lengths:
-            X_train_.append(pca.transform(X_all[index:index+i,:]))
+            X_train_.append(pca_.transform(X_all[index:index+i,:]))
             index += i
         for matrix in X_test:
-            X_test_.append(pca.transform(matrix))
+            X_test_.append(pca_.transform(matrix))
+        return {'X_train': X_train_, 'X_test': X_test_}
+
+    def ica(self, X_train, X_test, n_components, random_state=1111):
+        """ Classical ICA trained on the concatenated set
+        of matrices given in X_train.
+        Arguments:
+            - X_train: list
+            - X_test: list
+            - n_components: int
+        """
+        X_lengths = [m.shape[0] for m in X_train]
+        X_all = np.vstack(X_train)
+        ica_ = FastICA(n_components=n_components, random_state=random_state)
+        ica_.fit(X_all)
+        index = 0
+        X_train_ = []
+        X_test_ = []
+        for i in X_lengths:
+            X_train_.append(ica_.transform(X_all[index:index+i,:]))
+            index += i
+        for matrix in X_test:
+            X_test_.append(ica_.transform(matrix))
+        return {'X_train': X_train_, 'X_test': X_test_}
+    
+    def manifold_reduction(self, X_train, X_test, n_components):
+        """ Classical PCA trained on the concatenated set
+        of matrices given in X_train.
+        Arguments:
+            - X_train: list
+            - X_test: list
+            - n_components: int
+        """
+        reduction_method = getattr(manifold, self.manifold_method)
+        reductor = reduction_method(**self.manifold_args)
+        reductor.set_params(n_components=n_components)
+        if hasattr(reduction_method, 'transform'):
+            X_lengths = [m.shape[0] for m in X_train]
+            X_all = np.vstack(X_train)
+            reductor.fit(X_all)
+            index = 0
+            X_train_ = []
+            X_test_ = []
+            for i in X_lengths:
+                X_train_.append(reductor.transform(X_all[index:index+i,:]))
+                index += i
+            for matrix in X_test:
+                X_test_.append(reductor.transform(matrix))
+        else:
+            X_lengths = [m.shape[0] for m in X_train] + [m.shape[0] for m in X_test]
+            X_all = np.vstack(X_train + X_test)
+            results = reductor.fit_transform(X_all)
+            index = 0
+            test_size = len(X_test)
+            X_train_ = []
+            X_test_ = []
+            print(i)
+            for i in X_lengths[:-test_size]:
+                X_train_.append(results[index:index+i,:])
+                index += i
+                print(i)
+            for i in X_lengths[-test_size:]:
+                X_test_.append(results[index:index+i,:])
+                index += i
+                print(i)
+        return {'X_train': X_train_, 'X_test': X_test_}
+
+    def umap(self, X_train, X_test, n_components, random_state=1111):
+        """ Classical ICA trained on the concatenated set
+        of matrices given in X_train.
+        Arguments:
+            - X_train: list
+            - X_test: list
+            - n_components: int
+        """
+        X_lengths = [m.shape[0] for m in X_train]
+        X_all = np.vstack(X_train)
+        ica_ = umap.UMAP(n_neighbors=5, min_dist=0.1, n_components=n_components)
+        ica_.fit(X_all)
+        index = 0
+        X_train_ = []
+        X_test_ = []
+        for i in X_lengths:
+            X_train_.append(ica_.transform(X_all[index:index+i,:]))
+            index += i
+        for matrix in X_test:
+            X_test_.append(ica_.transform(matrix))
         return {'X_train': X_train_, 'X_test': X_test_}
     
     def similarity_cluster(self, X_train, X_test, n_components):

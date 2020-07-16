@@ -13,9 +13,11 @@ import nibabel as nib
 from sklearn.linear_model import Ridge
 from nilearn.masking import compute_epi_mask, apply_mask
 from nilearn.signal import clean
-from nilearn.image import math_img, mean_img
+from nilearn.image import math_img, mean_img, resample_to_img, index_img
 from nilearn.input_data import NiftiMasker
 from nilearn.plotting import plot_glass_brain, plot_img
+
+PROJECT_PATH = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
 
 
 #########################################
@@ -360,6 +362,47 @@ def get_estimator_model_information(parameters):
 ########### Nilearn functions ###########
 #########################################
 
+def load_masker(path, **kwargs):
+    params = read_yaml(path + '.yml')
+    mask_img = nib.load(path + '.nii.gz')
+    masker = NiftiMasker(mask_img)
+    masker.set_params(**params)
+    masker.set_params(**kwargs)
+    masker.fit()
+    return masker
+
+def save_masker(masker, path):
+    params = masker.get_params()
+    params = {key: params[key] for key in ['detrend', 'dtype', 'high_pass', 'low_pass', 'mask_strategy', 
+                                            'memory_level', 'smoothing_fwhm', 'standardize',
+                                            't_r', 'verbose']}
+    nib.save(masker.mask_img_, path + '.nii.gz')
+    save_yaml(params, path + '.yml')
+
+
+def get_roi_mask(atlas_maps, index_mask, labels, path=None, global_mask=None):
+    """Return the Niftimasker object for a given ROI based on an atlas.
+    Optionally resampled based on a global masker.  
+    """
+    if path is None:
+        path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/ROI_masks', labels[index_mask+1])
+        check_folder(path)
+    if os.path.exists(path + '.nii.gz') and os.path.exists(path + '.yml'):
+        masker = load_masker(path)
+    else:
+        mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))
+        if global_mask:
+            global_masker = nib.load(global_mask + '.nii.gz')
+            mask = resample_to_img(mask, global_masker, interpolation='nearest')
+            params = read_yaml(global_mask + '.yml')
+            params['detrend'] = False
+            params['standardize'] = False
+        masker = NiftiMasker(mask)
+        masker.set_params(**params)
+        masker.fit()
+        save_masker(masker, path)
+    return masker
+
 def compute_global_masker(files, **kwargs): # [[path, path2], [path3, path4]]
     """Returns a NiftiMasker object from list (of list) of files.
     Arguments:
@@ -386,12 +429,7 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, logger=
     if os.path.exists(masker_path + '.nii.gz') and os.path.exists(masker_path + '.yml'):
         if logger:
             logger.report_state(" loading existing masker...")
-        params = read_yaml(masker_path + '.yml')
-        mask_img = nib.load(masker_path + '.nii.gz')
-        masker = NiftiMasker(mask_img)
-        masker.set_params(**params)
-        masker.set_params(**kwargs)
-        masker.fit()
+        masker = load_masker(masker_path, **kwargs)
     else:
         if logger:
             logger.report_state(" recomputing masker...")
@@ -401,12 +439,7 @@ def fetch_masker(masker_path, language, path_to_fmridata, path_to_input, logger=
             _, fmri_paths = fetch_data(path_to_fmridata, path_to_input, subject, language)
             fmri_runs[subject] = fmri_paths
         masker = compute_global_masker(list(fmri_runs.values()), **kwargs)
-        params = masker.get_params()
-        params = {key: params[key] for key in ['detrend', 'dtype', 'high_pass', 'low_pass', 'mask_strategy', 
-                                                'memory_level', 'smoothing_fwhm', 'standardize',
-                                                't_r', 'verbose']}
-        nib.save(masker.mask_img_, masker_path + '.nii.gz')
-        save_yaml(params, masker_path + '.yml')
+        save_masker(masker, masker_path)
     return masker
 
 def create_maps(masker, distribution, output_path, vmax=None, not_glass_brain=False, logger=None, distribution_max=None, distribution_min=None):

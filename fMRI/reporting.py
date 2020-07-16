@@ -1,4 +1,5 @@
 import os
+import umap
 import glob
 import itertools
 import matplotlib
@@ -10,6 +11,7 @@ import matplotlib.pyplot as plt
 
 
 import scipy
+import hdbscan
 import nistats
 import nilearn
 import nibabel as nib
@@ -19,14 +21,15 @@ from scipy.stats import norm
 from scipy.stats import pearsonr
 from nilearn.regions import RegionExtractor
 from nistats.thresholding import map_threshold
+from sklearn.cluster import AgglomerativeClustering
 from nistats.second_level_model import SecondLevelModel
-from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img, new_img_like, resample_to_img
+from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img, new_img_like
 from nilearn.input_data import NiftiMasker
 from nilearn.plotting import plot_surf_roi
 from nilearn.surface import vol_to_surf
 
 from logger import Logger
-from utils import read_yaml, check_folder, fetch_masker, possible_subjects_id, get_subject_name, fetch_data
+from utils import read_yaml, check_folder, fetch_masker, possible_subjects_id, get_subject_name, fetch_data, get_roi_mask
 
 
 #########################################
@@ -155,15 +158,7 @@ def fit_per_roi(maps, atlas_maps, labels, global_mask):
     third_quartile = np.zeros((len(labels)-1, len(maps)))
     maximum = np.zeros((len(labels)-1, len(maps)))
     for index_mask in tqdm(range(len(labels)-1)):
-        mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))
-        global_masker = nib.load(global_mask + '.nii.gz')
-        mask = resample_to_img(mask, global_masker, interpolation='nearest')
-        params = read_yaml(global_mask + '.yml')
-        params['detrend'] = False
-        params['standardize'] = False
-        masker = NiftiMasker(mask)
-        masker.set_params(**params)
-        masker.fit()
+        masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
         for index_model, map_ in enumerate(maps):
             try:
                 array = masker.transform(map_)
@@ -215,7 +210,7 @@ def get_data_per_roi(
             mean = np.zeros((len(labels)-1, len(models)))
             third_quartile = np.zeros((len(labels)-1, len(models)))
             # extract data
-            mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels)
+            mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask)
             print("\t\t-->Done")
             # Small reordering of models so that layers are in increasing order
             if key=='Hidden-layers':
@@ -288,15 +283,7 @@ def prepare_data_for_anova(
             }
 
     for index_mask in tqdm(range(len(labels)-1)):
-        mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))
-        global_masker = nib.load(global_mask + '.nii.gz')
-        mask = resample_to_img(mask, global_masker, interpolation='nearest')
-        params = read_yaml(global_mask + '.yml')
-        params['detrend'] = False
-        params['standardize'] = False
-        masker = NiftiMasker(mask)
-        masker.set_params(**params)
-        masker.fit()
+        masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
         for name in data.keys():
             for subject in data[name].keys():
                 try:
@@ -541,6 +528,49 @@ def plot_img_surf(surf_img, saving_path, plot_name, inflated=False, compute_surf
         disp.savefig(saving_path + plot_name + '_{}_{}_{}.png'.format(kwargs['surf_mesh_type'], kwargs['hemi'], kwargs['view']))
     else:
         plotting.show()
+
+def clustering(path_to_beta_maps, clustering_method, n_clusters, linkage="ward", global_mask=None, atlas_maps=None, labels=None, **kwargs):
+    """Clustering of voxels or ROI based on their beta maps.
+    """
+    data = np.load(path_to_beta_maps)
+    if global_mask and atlas_maps:
+        global_masker = nib.load(global_mask + '.nii.gz')
+        imgs = global_masker.inverse_transform([data[i, :] for i in range(data.shape[0])])
+        data = np.zeros((data.shape[1], len(labels)-1))
+        for index_mask in tqdm(range(len(labels)-1)):
+            masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
+            data[:, index_mask] = np.mean(masker.transform(imgs), axis=1)
+    data = data.T
+    if clustering_method=="umap":
+        clusterable_embedding = umap.UMAP(
+                                    n_neighbors=30,
+                                    min_dist=0.0,
+                                    n_components=10,
+                                    random_state=42,
+                                ).fit_transform(data)
+        labels = hdbscan.HDBSCAN(
+                        min_samples=10,
+                        min_cluster_size=500,
+                    ).fit_predict(clusterable_embedding)
+        clustered = (labels >= 0)
+        standard_embedding = umap.UMAP(random_state=42).fit_transform(data)
+        plt.scatter(standard_embedding[~clustered, 0],
+                    standard_embedding[~clustered, 1],
+                    c=(0.5, 0.5, 0.5),
+                    s=0.1,
+                    alpha=0.5)
+        plt.scatter(standard_embedding[clustered, 0],
+                    standard_embedding[clustered, 1],
+                    c=labels[clustered],
+                    s=0.1,
+                    cmap='Spectral')
+    elif clustering_method=="max":
+        labels = np.argmax(data, axis=1)
+    else:
+        sc = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage) #“ward”, “complete”, “average”, “single”
+        clustering = sc.fit(data)
+        labels = clustering.labels_
+    return labels
 
 
 #########################################

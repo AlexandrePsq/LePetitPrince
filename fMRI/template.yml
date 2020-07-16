@@ -23,7 +23,8 @@ nb_runs: 9
 nb_runs_test: 1
 
 # Shared Compression parameters
-
+manifold_method: 
+manifold_args: 
 
 # Shared Transformation parameters (includes the making of regressor and scaling)
 tr: 2.

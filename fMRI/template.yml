@@ -24,7 +24,10 @@ nb_runs_test: 1
 
 # Shared Compression parameters
 manifold_method: 
-manifold_args: 
+manifold_args:  # linkage: ('ward', 'average', 'complete', 'single'),
+        # n_neighbors=20, min_dist=0.1, random_state=1111,
+        # min_dist=0.0,
+        # n_components=10,
 
 # Shared Transformation parameters (includes the making of regressor and scaling)
 tr: 2.

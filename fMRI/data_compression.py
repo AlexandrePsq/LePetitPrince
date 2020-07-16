@@ -154,16 +154,16 @@ class Compressor(object):
         """
         X_lengths = [m.shape[0] for m in X_train]
         X_all = np.vstack(X_train)
-        ica_ = umap.UMAP(n_neighbors=5, min_dist=0.1, n_components=n_components)
-        ica_.fit(X_all)
+        umap_ = umap.UMAP(n_neighbors=5, min_dist=0.1, n_components=n_components)
+        umap_.fit(X_all)
         index = 0
         X_train_ = []
         X_test_ = []
         for i in X_lengths:
-            X_train_.append(ica_.transform(X_all[index:index+i,:]))
+            X_train_.append(umap_.transform(X_all[index:index+i,:]))
             index += i
         for matrix in X_test:
-            X_test_.append(ica_.transform(matrix))
+            X_test_.append(umap_.transform(matrix))
         return {'X_train': X_train_, 'X_test': X_test_}
     
     def similarity_cluster(self, X_train, X_test, n_components):
@@ -177,7 +177,9 @@ class Compressor(object):
         """
         X_lengths = [m.shape[0] for m in X_train]
         X_all = np.vstack(X_train)
-        sc = AgglomerativeClustering(n_clusters=n_components, linkage="ward")
+        if "linkage" not in self.manifold_args:
+            self.manifold_args["linkage"] = "ward"
+        sc = AgglomerativeClustering(n_clusters=n_components, **self.manifold_args)
         sc.fit(X_all.T)
         index = 0
         X_train_ = []

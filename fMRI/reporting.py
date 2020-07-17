@@ -29,7 +29,7 @@ from nilearn.plotting import plot_surf_roi
 from nilearn.surface import vol_to_surf
 
 from logger import Logger
-from utils import read_yaml, check_folder, fetch_masker, possible_subjects_id, get_subject_name, fetch_data, get_roi_mask, filter_args
+from utils import read_yaml, check_folder, fetch_masker, possible_subjects_id, get_subject_name, fetch_data, get_roi_mask, filter_args, load_masker
 
 
 SEED = 1111

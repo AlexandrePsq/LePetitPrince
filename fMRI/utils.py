@@ -367,7 +367,8 @@ def load_masker(path, **kwargs):
     mask_img = nib.load(path + '.nii.gz')
     masker = NiftiMasker(mask_img)
     masker.set_params(**params)
-    masker.set_params(**kwargs)
+    if kwargs:
+        masker.set_params(**kwargs)
     masker.fit()
     return masker
 

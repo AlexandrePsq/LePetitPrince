@@ -537,7 +537,7 @@ def clustering(path_to_beta_maps, clustering_method, global_mask=None, atlas_map
     """
     data = np.load(path_to_beta_maps)
     if global_mask and atlas_maps:
-        global_masker = nib.load(global_mask + '.nii.gz')
+        global_masker = load_masker(global_mask)
         imgs = global_masker.inverse_transform([data[i, :] for i in range(data.shape[0])])
         data = np.zeros((data.shape[1], len(labels)-1))
         for index_mask in tqdm(range(len(labels)-1)):

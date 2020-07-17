@@ -535,7 +535,7 @@ def plot_img_surf(surf_img, saving_path, plot_name, inflated=False, compute_surf
 def clustering(path_to_beta_maps, clustering_method, global_mask=None, atlas_maps=None, labels=None, **kwargs):
     """Clustering of voxels or ROI based on their beta maps.
     """
-    data = np.load(path_to_beta_maps)
+    data = np.load(path_to_beta_maps).T
     if global_mask and atlas_maps:
         global_masker = load_masker(global_mask)
         imgs = global_masker.inverse_transform([data[i, :] for i in range(data.shape[0])])
@@ -545,12 +545,12 @@ def clustering(path_to_beta_maps, clustering_method, global_mask=None, atlas_map
             data[:, index_mask] = np.mean(masker.transform(imgs), axis=1)
     data = data.T
     if clustering_method=="umap":
-        clusterable_embedding = umap.UMAP(**filter_args(umap.UMAP, kwargs)).fit_transform(data)
+        clusterable_embedding = umap.UMAP(**kwargs).fit_transform(data)
         # n_neighbors=30,
         # min_dist=0.0,
         # n_components=10,
         # random_state=SEED,
-        labels = hdbscan.HDBSCAN(**filter_args(hdbscan.HDBSCAN, kwargs)).fit_predict(clusterable_embedding)
+        labels = hdbscan.HDBSCAN(**kwargs).fit_predict(clusterable_embedding)
         # min_samples=10,
         # min_cluster_size=500,
                     
@@ -569,7 +569,7 @@ def clustering(path_to_beta_maps, clustering_method, global_mask=None, atlas_map
     elif clustering_method=="max":
         labels = np.argmax(data, axis=1)
     else:
-        sc = AgglomerativeClustering(**filter_args(AgglomerativeClustering, kwargs)) # n_clusters=n_clusters, linkage=“ward”, “complete”, “average”, “single”
+        sc = AgglomerativeClustering(**kwargs) # n_clusters=n_clusters, linkage=“ward”, “complete”, “average”, “single”
         clustering = sc.fit(data)
         labels = clustering.labels_
     return labels

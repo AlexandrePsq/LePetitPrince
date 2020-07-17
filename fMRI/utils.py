@@ -398,7 +398,8 @@ def get_roi_mask(atlas_maps, index_mask, labels, path=None, global_mask=None):
             params['detrend'] = False
             params['standardize'] = False
         masker = NiftiMasker(mask)
-        masker.set_params(**params)
+        if global_mask:
+            masker.set_params(**params)
         masker.fit()
         save_masker(masker, path)
     return masker

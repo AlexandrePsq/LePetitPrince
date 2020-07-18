@@ -331,7 +331,18 @@ def process_fmri_data(fmri_paths, masker):
         data[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, data[run])
     return data
 
-                
+def aggregate_beta_maps(data, nb_layers=13, layer_size=768):
+    """Clustering of voxels or ROI based on their beta maps.
+    maps: (#voxels x #features)
+    """
+    if isinstance(data, str):
+        data = np.load(data)
+    nb_layers = nb_layers
+    layer_size = layer_size
+    result = np.zeros((data.shape[0], nb_layers))
+    for index in range(nb_layers):
+        result[:, index] = np.mean(data[:, layer_size * index : layer_size * (index + 1)], axis=1)
+    return result
 
 #########################################
 ############ Plot functions #############
@@ -535,11 +546,14 @@ def plot_img_surf(surf_img, saving_path, plot_name, inflated=False, compute_surf
 def clustering(path_to_beta_maps, clustering_method, global_mask=None, atlas_maps=None, labels=None, **kwargs):
     """Clustering of voxels or ROI based on their beta maps.
     """
-    data = np.load(path_to_beta_maps).T
+    if isinstance(path_to_beta_maps, str):
+        data = np.load(path_to_beta_maps).T
+    else:
+        data = path_to_beta_maps.T
     if global_mask and atlas_maps:
         global_masker = load_masker(global_mask)
         imgs = global_masker.inverse_transform([data[i, :] for i in range(data.shape[0])])
-        data = np.zeros((data.shape[1], len(labels)-1))
+        data = np.zeros((data.shape[0], len(labels)-1))
         for index_mask in tqdm(range(len(labels)-1)):
             masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
             data[:, index_mask] = np.mean(masker.transform(imgs), axis=1)

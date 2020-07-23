@@ -111,7 +111,7 @@ class Compressor(object):
             - n_components: int
         """
         reduction_method = getattr(manifold, self.manifold_method)
-        reductor = reduction_method(**filter_args(reduction_method, self.manifold_args))
+        reductor = reduction_method(**self.manifold_args)
         reductor.set_params(n_components=n_components)
         if hasattr(reduction_method, 'transform'):
             X_lengths = [m.shape[0] for m in X_train]
@@ -154,7 +154,7 @@ class Compressor(object):
         """
         X_lengths = [m.shape[0] for m in X_train]
         X_all = np.vstack(X_train)
-        umap_ = umap.UMAP(n_components=n_components, **filter_args(umap.UMAP, self.manifold_args))
+        umap_ = umap.UMAP(n_components=n_components,  **self.manifold_args)
         umap_.fit(X_all)
         index = 0
         X_train_ = []
@@ -179,7 +179,7 @@ class Compressor(object):
         X_all = np.vstack(X_train)
         if "linkage" not in self.manifold_args:
             self.manifold_args["linkage"] = "ward"
-        sc = AgglomerativeClustering(n_clusters=n_components, **filter_args(AgglomerativeClustering, self.manifold_args))
+        sc = AgglomerativeClustering(n_clusters=n_components, **self.manifold_args)
         sc.fit(X_all.T)
         index = 0
         X_train_ = []

@@ -307,7 +307,12 @@ def get_compression_information(parameters):
         n_components_list.append(model['ncomponents'])
         indexes.append(np.arange(i, len(eval(model['columns_to_retrieve'])) + i))
         i += len(eval(model['columns_to_retrieve']))
-    return {'indexes': indexes, 'compression_types': compression_types, 'n_components_list': n_components_list}
+    result = {
+        'indexes': indexes, 'compression_types': compression_types, 
+        'n_components_list': n_components_list, 'manifold_args': parameters['manifold_args'], 
+        'manifold_method': parameters['manifold_method']
+        }
+    return result
 
 def get_data_transformation_information(parameters):
     """ Retrieve the inputs for data transformation (make_regressor + standardization).

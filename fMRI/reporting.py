@@ -171,16 +171,20 @@ def check_data(data, N):
         if 'Pearson_coeff' in data[key]:
             assert len(data[key]['Pearson_coeff'])==N
 
-def fit_per_roi(maps, atlas_maps, labels, global_mask):
+def fit_per_roi(maps, atlas_maps, labels, global_mask, threshold_img=None):
     print("\tLooping through labeled masks...")
-    mean = np.zeros((len(labels)-1, len(maps)))
-    third_quartile = np.zeros((len(labels)-1, len(maps)))
-    maximum = np.zeros((len(labels)-1, len(maps)))
-    for index_mask in tqdm(range(len(labels)-1)):
+    mean = np.zeros((len(labels), len(maps)))
+    third_quartile = np.zeros((len(labels), len(maps)))
+    maximum = np.zeros((len(labels), len(maps)))
+    for index_mask in tqdm(range(len(labels))):
         masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
         for index_model, map_ in enumerate(maps):
             try:
                 array = masker.transform(map_)
+                if threshold_img is not None:
+                    threshold = masker.transform(threshold_img)
+                    threshold[threshold==0.0] = 10**8 # due to some voxel equal to 0 in threshold image we have nan value
+                    array = np.divide(array, threshold)
                 maximum[index_mask, index_model] = np.max(array)
                 third_quartile[index_mask, index_model] = np.percentile(array, 75)
                 mean[index_mask, index_model] = np.mean(array)
@@ -199,12 +203,12 @@ def get_data_per_roi(
     global_mask=None,
     analysis=None, 
     model_name=None,
+    threshold_img=None, 
     language='english', 
     object_of_interest='Pearson_coeff', 
     attention_head_reordering=[0, 1, 2, 3, 6, 4, 5, 7],
     PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     ):
-    x_labels = labels[1:]
     models = None
     if analysis is None:
         maps = []
@@ -214,49 +218,50 @@ def get_data_per_roi(
             maps.append(fetch_map(path, name)[0])
         plot_name = ["Model comparison"]
         # extract data
-        mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask)
+        mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img)
     else:
+        result = {}
         for key in analysis:
-            maps = []
-            for model in data[model_name][key].keys():
-                if model == 'models':
-                    models = data[model_name][key][model]
-                else:
-                    name = '_'.join([model_name, model])
-                    path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, name))
-                    name = '{}_group_fdr_effect'.format(object_of_interest)
-                    maps.append(fetch_map(path, name)[0])
-            plot_name = ["{} for {}".format(model_name, key)]
+            result[key] = []
+            for model_name in data.keys():
+                maps = []
+                for model in data[model_name][key].keys():
+                    if model == 'models':
+                        models = data[model_name][key][model]
+                    else:
+                        name = '_'.join([model_name, model])
+                        path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, name))
+                        name = '{}_group_fdr_effect'.format(object_of_interest)
+                        maps.append(fetch_map(path, name)[0])
+                plot_name = ["{} for {}".format(model_name, key)]
 
-            mean = np.zeros((len(labels)-1, len(models)))
-            third_quartile = np.zeros((len(labels)-1, len(models)))
-            # extract data
-            mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask)
-            print("\t\t-->Done")
-            # Small reordering of models so that layers are in increasing order
-            if key=='Hidden-layers':
-                mean = np.hstack([mean[:, :2], mean[:,5:], mean[:,2:5]])
-                third_quartile = np.hstack([third_quartile[:, :2], third_quartile[:,5:], third_quartile[:,2:5]])
-                maximum = np.hstack([maximum[:, :2], maximum[:,5:], maximum[:,2:5]])
-                models = models[:2] + models[5:] + models[2:5]
-            elif key=='Attention-layers':
-                mean = np.hstack([mean[:, :1], mean[:,4:], mean[:,1:4]])
-                third_quartile = np.hstack([third_quartile[:, :1], third_quartile[:,4:], third_quartile[:,1:4]])
-                maximum = np.hstack([maximum[:, :1], maximum[:,4:], maximum[:,1:4]])
-                models = models[:1] + models[4:] + models[1:4]
-            elif key=='Specific-attention-heads': 
-                mean = mean[:, attention_head_reordering]
-                third_quartile = third_quartile[:, attention_head_reordering]
-                maximum = maximum[:, attention_head_reordering]
-                models = models[attention_head_reordering]
-    result = {
-        'maximum': maximum,
-        'third_quartile': third_quartile,
-        'mean': mean,
-        'models': models,
-        'x_labels': x_labels,
-        'plot_name': plot_name,
-    }
+                # extract data
+                mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img)
+                print("\t\t-->Done")
+                # Small reordering of models so that layers are in increasing order
+                if key=='Hidden-layers':
+                    mean = np.hstack([mean[:, :2], mean[:,5:], mean[:,2:5]])
+                    third_quartile = np.hstack([third_quartile[:, :2], third_quartile[:,5:], third_quartile[:,2:5]])
+                    maximum = np.hstack([maximum[:, :2], maximum[:,5:], maximum[:,2:5]])
+                    models = models[:2] + models[5:] + models[2:5]
+                elif key=='Attention-layers':
+                    mean = np.hstack([mean[:, :1], mean[:,4:], mean[:,1:4]])
+                    third_quartile = np.hstack([third_quartile[:, :1], third_quartile[:,4:], third_quartile[:,1:4]])
+                    maximum = np.hstack([maximum[:, :1], maximum[:,4:], maximum[:,1:4]])
+                    models = models[:1] + models[4:] + models[1:4]
+                elif key=='Specific-attention-heads': 
+                    mean = mean[:, attention_head_reordering]
+                    third_quartile = third_quartile[:, attention_head_reordering]
+                    maximum = maximum[:, attention_head_reordering]
+                    models = models[attention_head_reordering]
+                result[key].append({
+                    'maximum': maximum,
+                    'third_quartile': third_quartile,
+                    'mean': mean,
+                    'models': models,
+                    'labels': labels,
+                    'plot_name': plot_name,
+                })
     return result
 
 def get_voxel_wise_max_img_on_surf(
@@ -279,11 +284,31 @@ def get_voxel_wise_max_img_on_surf(
     img = np.argmax(data_tmp, axis=0)
     return img
 
+def extract_model_data(masker, data, object_of_interest, name, label, threshold_img=None):
+    result = []
+    for subject in data.keys():
+        try:
+            array = masker.transform(data[subject][object_of_interest])
+            if threshold_img is not None:
+                threshold = masker.transform(threshold_img)
+                threshold[threshold==0.0] = 10**8 # due to some voxel equal to 0 in threshold image we have nan value
+                array = np.divide(array, threshold)
+            mean = np.mean(array)
+            median = np.median(array)
+            third_quartile = np.percentile(array, 75)
+        except ValueError:
+            mean = np.nan
+            median = np.nan
+            third_quartile = np.nan
+        result.append([name, subject, label, mean, median, third_quartile])
+    return result
+
 def prepare_data_for_anova(
     model_names, 
     atlas_maps, 
     labels, 
     global_mask,
+    threshold_img=None,
     object_of_interest='R2', 
     language='english', 
     OUTPUT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/english'
@@ -303,29 +328,10 @@ def prepare_data_for_anova(
 
     for index_mask in tqdm(range(len(labels))):
         masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
-        for name in data.keys():
-            for subject in data[name].keys():
-                try:
-                    array = masker.transform(data[name][subject][object_of_interest])
-                    mean = np.mean(array)
-                    median = np.median(array)
-                    third_quartile = np.percentile(array, 75)
-                except ValueError:
-                    mean = np.nan
-                    median = np.nan
-                    third_quartile = np.nan
-                result.append([name, subject, labels[index_mask + 1], mean, median, third_quartile])
+        result.append(Parallel(n_jobs=-2)(delayed(extract_model_data)(masker, data[name], object_of_interest, name, labels[index_mask], threshold_img=threshold_img) for name in data.keys()))
+    result = [item for sublist_mask in result for subsublist_model in sublist_mask for item in subsublist_model]
     result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', '{}_mean'.format(object_of_interest), '{}_median'.format(object_of_interest), '{}_3rd_quartile'.format(object_of_interest)])
-    #if includ_context or includ_norm:
-    #    final_result = []
-    #    for index, row in result.iterrows():
-    #        context_pre = row['model'].split('pre-')[1].split('_')[0] if includ_context else None
-    #        context_post = row['model'].split('_norm_')[0].split('-')[-1] if includ_context else None
-    #        norm = row['model'].split('_norm_')[1].split('_')[0] if includ_norm else None
-    #        name = row['model'].split('_pre-')[0] + '_'.join(row['model'].split('_')[-3:])
-    #        final_result.append([name, context_pre, context_post, norm, row['subject'], row['ROI'], row['R2_mean'], row['R2_median'], row['R2_3rd_quartile']])
-    #    result = pd.DataFrame(final_result, columns=['model', 'context_pre', 'context_post', 'norm', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
-    #print("\t\t-->Done")
+
     return result
 
 def process_fmri_data(fmri_paths, masker):
@@ -401,11 +407,14 @@ def vertical_plot(
     title=None, 
     ylabel='Regions of interest (ROI)', 
     xlabel='Pearson coefficients', 
-    model_name=''
+    model_name='',
+    percentage=False
     ):
     """Plots models vertically.
     """
     #limit = (-0.01, 0.05) if object_of_interest=='R2' else None
+    if percentage:
+        data = data * 100
     limit = None
     surnames = load_surnames()
     dash_inf = limit[0] if limit is not None else 0
@@ -450,15 +459,16 @@ def vertical_plot(
 
 def horizontal_plot(
     data, 
-    legend_names, 
+    model_names, 
     analysis_name,  
-    label_names,
+    roi_names,
+    title=None,
     figsize=(9,20), 
-    title=None, 
     save_folder=None,
-    ylabel='Regions of interest (ROI)', 
-    xlabel='Pearson coefficients', 
-    model_name=''
+    ylabel='', 
+    xlabel='', 
+    plot_name='',
+    percentage=False
     ):
     """Plots models horizontally.
     """
@@ -468,13 +478,14 @@ def horizontal_plot(
     plt.figure(figsize=figsize) # (7.6,12)
     ax = plt.axes()
     order = np.argsort(np.mean(data, axis=1))
+    roi_names = [surnames[roi_names[i]] for i in order]
+    if percentage:
+        data = data * 100
     data = data[order, :]
-    legend_names = [surnames[legend_names[i]] for i in order]
     colormap = plt.cm.gist_ncar #nipy_spectral, Set1,Paired   
     colors = [colormap(i) for i in np.linspace(0, 1, data.shape[0] + 1)]
     for col in range(data.shape[0]):
-        plt.plot(legend_names, data[col, :], '.-', alpha=0.7, markersize=9, color=colors[col])
-    plt.title(title)
+        plt.plot(model_names, data[col, :], '.-', alpha=0.7, markersize=9, color=colors[col])
     plt.ylabel(ylabel, fontsize=16)
     plt.xlabel(xlabel, fontsize=16)
 
@@ -485,18 +496,32 @@ def horizontal_plot(
     plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='y')
     plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='x')
     plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.1, axis='x')
-    plt.legend(label_names, ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=10)
+    plt.legend(roi_names, ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=10)
 
     plt.tight_layout()
     check_folder(save_folder)
+    plt.title(title)
     if save_folder is not None:
-        plt.savefig(os.path.join(save_folder, '{model_name}-{analysis_name}.png'.format(model_name=model_name,
+        plt.savefig(os.path.join(save_folder, '{plot_name}-{analysis_name}.png'.format(plot_name=plot_name,
                                                                                         analysis_name=analysis_name)))
     else:
         plt.show()
     plt.close('all')
 
-def clever_plot(data, labels, model_names, save_folder=None, roi_filter=load_syntactic_roi()):
+def clever_plot(
+    data, 
+    labels, 
+    model_names, 
+    save_folder=None, 
+    roi_filter=load_syntactic_roi(), 
+    analysis_name='',
+    title='',
+    ylabel='',
+    xlabel='',
+    plot_name='Model_comparison',
+    figsize=(15,12),
+    percentage=False
+):
     data_filtered = []
     # For syntactic ROIs
     legends = []
@@ -508,14 +533,15 @@ def clever_plot(data, labels, model_names, save_folder=None, roi_filter=load_syn
     horizontal_plot(
         data_filtered, 
         model_names, 
-        analysis_name='Third_Quartile_Pearson-coeff_per_syntactic_ROI', 
+        analysis_name=analysis_name, 
         save_folder=save_folder, 
-        label_names=legends,
-        figsize=(15,12), 
-        title=None, 
-        ylabel='Regions of interest (ROI)', 
-        xlabel='Pearson coefficients', 
-        model_name='Model_comparison'
+        roi_names=legends,
+        title=title,
+        figsize=figsize, 
+        ylabel=ylabel, 
+        xlabel=xlabel, 
+        plot_name=plot_name,
+        percentage=percentage
         )
 
 def interactive_surf_plot(surf_img, inflated=False, cmap='gist_ncar', compute_surf=True, symmetric_cmap=False, **kwargs):
@@ -532,6 +558,20 @@ def interactive_surf_plot(surf_img, inflated=False, cmap='gist_ncar', compute_su
         colorbar=True
         )
     plotting.show()
+
+def cluster_map(path_to_beta_maps, title='', saving_path=None):
+    if isinstance(path_to_beta_maps, str):
+        data = np.load(path_to_beta_maps)
+    else:
+        data = path_to_beta_maps
+    plt.figure(figsize=(40,40))
+    sns.clustermap(data, row_cluster=False, method='ward', metric='cosine')
+    plt.title('Heatmap -' + title)
+    if saving_path is not None:
+        plt.savefig(saving_path)
+        plt.close()
+    else:
+        plt.show()
 
 
 #########################################

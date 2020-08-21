@@ -391,12 +391,12 @@ def get_roi_mask(atlas_maps, index_mask, labels, path=None, global_mask=None):
     Optionally resampled based on a global masker.  
     """
     if path is None:
-        path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/ROI_masks', labels[index_mask+1])
-        check_folder(path)
+        check_folder(os.path.join(PROJECT_PATH, 'derivatives/fMRI/ROI_masks'))
+        path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/ROI_masks', labels[index_mask])
     if os.path.exists(path + '.nii.gz') and os.path.exists(path + '.yml'):
         masker = load_masker(path)
     else:
-        mask = math_img('img > 50', img=index_img(atlas_maps, index_mask))
+        mask = math_img('img=={}'.format(index_mask), img=atlas_maps)
         if global_mask:
             global_masker = nib.load(global_mask + '.nii.gz')
             mask = resample_to_img(mask, global_masker, interpolation='nearest')

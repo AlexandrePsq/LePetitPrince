@@ -1,14 +1,23 @@
 import os
 import umap
+import gc
 import glob
 import itertools
 import matplotlib
 import numpy as np
 import pandas as pd
-import pingouin as pg
 from tqdm import tqdm
-import matplotlib.pyplot as plt
+from textwrap import wrap
+from joblib import dump, load
+from itertools import combinations
+from joblib import Parallel, delayed
 
+import matplotlib
+import seaborn as sns
+import matplotlib.cm as cmx
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from ipywidgets import interact
 
 import scipy
 import hdbscan
@@ -19,9 +28,15 @@ from nilearn import plotting
 from nilearn import datasets
 from scipy.stats import norm
 from scipy.stats import pearsonr
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.manifold import LocallyLinearEmbedding
+from sklearn.decomposition import FastICA 
+from sklearn import manifold
+from sklearn.neighbors import kneighbors_graph
 from nilearn.regions import RegionExtractor
 from nistats.thresholding import map_threshold
-from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import AgglomerativeClustering, KMeans
 from nistats.second_level_model import SecondLevelModel
 from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img, new_img_like
 from nilearn.input_data import NiftiMasker
@@ -29,6 +44,7 @@ from nilearn.plotting import plot_surf_roi
 from nilearn.surface import vol_to_surf
 
 from logger import Logger
+from linguistics_info import *
 from utils import read_yaml, check_folder, fetch_masker, possible_subjects_id, get_subject_name, fetch_data, get_roi_mask, filter_args, load_masker
 
 
@@ -44,8 +60,8 @@ def fetch_map(path, distribution_name):
     files = sorted(glob.glob(path))
     return files
 
-def load_atlas(name='cort-prob-2mm'):
-    atlas = datasets.fetch_atlas_harvard_oxford(name)
+def load_atlas(name='cort-maxprob-thr25-2mm', symmetric_split=True):
+    atlas = datasets.fetch_atlas_harvard_oxford(name, symmetric_split=symmetric_split)
     labels = atlas['labels']
     maps = nilearn.image.load_img(atlas['maps'])
     return maps, labels
@@ -57,7 +73,7 @@ def batchify(x, y, size=10):
     x_batch = []
     y_batch = []
     last = 0
-    for i in range(m//size):
+    for _ in range(m//size):
         x_batch.append(x[last:last+size])
         y_batch.append(y[last:last+size])
         last = last+size
@@ -184,6 +200,8 @@ def get_data_per_roi(
     analysis=None, 
     model_name=None,
     language='english', 
+    object_of_interest='Pearson_coeff', 
+    attention_head_reordering=[0, 1, 2, 3, 6, 4, 5, 7],
     PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     ):
     x_labels = labels[1:]
@@ -192,7 +210,7 @@ def get_data_per_roi(
         maps = []
         for model_name in data.keys():
             path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, model_name))
-            name = 'R2_group_fdr_effect'
+            name = '{}_group_fdr_effect'.format(object_of_interest)
             maps.append(fetch_map(path, name)[0])
         plot_name = ["Model comparison"]
         # extract data
@@ -206,7 +224,7 @@ def get_data_per_roi(
                 else:
                     name = '_'.join([model_name, model])
                     path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, name))
-                    name = 'R2_group_fdr_effect'
+                    name = '{}_group_fdr_effect'.format(object_of_interest)
                     maps.append(fetch_map(path, name)[0])
             plot_name = ["{} for {}".format(model_name, key)]
 
@@ -226,11 +244,11 @@ def get_data_per_roi(
                 third_quartile = np.hstack([third_quartile[:, :1], third_quartile[:,4:], third_quartile[:,1:4]])
                 maximum = np.hstack([maximum[:, :1], maximum[:,4:], maximum[:,1:4]])
                 models = models[:1] + models[4:] + models[1:4]
-            elif key=='Specific-attention-heads':
-                mean = np.hstack([mean[:, :4], mean[:,6:7], mean[:,4:6], mean[:,7:]])
-                third_quartile = np.hstack([third_quartile[:, :4], third_quartile[:,6:7], third_quartile[:,4:6], third_quartile[:,7:]])
-                maximum = np.hstack([maximum[:, :4], maximum[:,6:7], maximum[:,4:6], maximum[:,7:]])
-                models = models[:4] + models[6:7] + models[4:6] + models[7:]
+            elif key=='Specific-attention-heads': 
+                mean = mean[:, attention_head_reordering]
+                third_quartile = third_quartile[:, attention_head_reordering]
+                maximum = maximum[:, attention_head_reordering]
+                models = models[attention_head_reordering]
     result = {
         'maximum': maximum,
         'third_quartile': third_quartile,
@@ -268,8 +286,6 @@ def prepare_data_for_anova(
     global_mask,
     object_of_interest='R2', 
     language='english', 
-    includ_context=False,
-    includ_norm=False,
     OUTPUT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/english'
     ):
     print("\tLooping through labeled masks...")
@@ -285,7 +301,7 @@ def prepare_data_for_anova(
                 object_of_interest: fetch_map(path_to_map, object_of_interest)[0]
             }
 
-    for index_mask in tqdm(range(len(labels)-1)):
+    for index_mask in tqdm(range(len(labels))):
         masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
         for name in data.keys():
             for subject in data[name].keys():
@@ -299,7 +315,7 @@ def prepare_data_for_anova(
                     median = np.nan
                     third_quartile = np.nan
                 result.append([name, subject, labels[index_mask + 1], mean, median, third_quartile])
-    result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', 'R2_mean', 'R2_median', 'R2_3rd_quartile'])
+    result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', '{}_mean'.format(object_of_interest), '{}_median'.format(object_of_interest), '{}_3rd_quartile'.format(object_of_interest)])
     #if includ_context or includ_norm:
     #    final_result = []
     #    for index, row in result.iterrows():
@@ -330,19 +346,7 @@ def process_fmri_data(fmri_paths, masker):
         new[0] += np.random.random()/1000
         data[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, data[run])
     return data
-
-def aggregate_beta_maps(data, nb_layers=13, layer_size=768):
-    """Clustering of voxels or ROI based on their beta maps.
-    maps: (#voxels x #features)
-    """
-    if isinstance(data, str):
-        data = np.load(data)
-    nb_layers = nb_layers
-    layer_size = layer_size
-    result = np.zeros((data.shape[0], nb_layers))
-    for index in range(nb_layers):
-        result[:, index] = np.mean(data[:, layer_size * index : layer_size * (index + 1)], axis=1)
-    return result
+    
 
 #########################################
 ############ Plot functions #############
@@ -389,21 +393,21 @@ def vertical_plot(
     analysis_name, 
     save_folder, 
     object_of_interest, 
-    surnames, 
     legend_names, 
     syntactic_roi, 
     language_roi, 
-    figsize=(9,12), 
+    figsize=(9,18), 
     count=False, 
     title=None, 
     ylabel='Regions of interest (ROI)', 
-    xlabel='R2 value', 
+    xlabel='Pearson coefficients', 
     model_name=''
     ):
     """Plots models vertically.
     """
     #limit = (-0.01, 0.05) if object_of_interest=='R2' else None
     limit = None
+    surnames = load_surnames()
     dash_inf = limit[0] if limit is not None else 0
     x = x_names.copy()
     plt.figure(figsize=figsize) # (7.6,12)
@@ -447,22 +451,25 @@ def vertical_plot(
 def horizontal_plot(
     data, 
     legend_names, 
-    analysis_name, 
-    save_folder, 
+    analysis_name,  
     label_names,
     figsize=(9,20), 
     title=None, 
+    save_folder=None,
     ylabel='Regions of interest (ROI)', 
-    xlabel='R2 value', 
+    xlabel='Pearson coefficients', 
     model_name=''
     ):
     """Plots models horizontally.
     """
 
     limit = None
-    dash_inf = limit[0] if limit is not None else 0
+    surnames = load_surnames()
     plt.figure(figsize=figsize) # (7.6,12)
     ax = plt.axes()
+    order = np.argsort(np.mean(data, axis=1))
+    data = data[order, :]
+    legend_names = [surnames[legend_names[i]] for i in order]
     colormap = plt.cm.gist_ncar #nipy_spectral, Set1,Paired   
     colors = [colormap(i) for i in np.linspace(0, 1, data.shape[0] + 1)]
     for col in range(data.shape[0]):
@@ -482,32 +489,34 @@ def horizontal_plot(
 
     plt.tight_layout()
     check_folder(save_folder)
-    if save_folder:
+    if save_folder is not None:
         plt.savefig(os.path.join(save_folder, '{model_name}-{analysis_name}.png'.format(model_name=model_name,
                                                                                         analysis_name=analysis_name)))
-        plt.close('all')
     else:
         plt.show()
+    plt.close('all')
 
-def plot_roi_img_surf(surf_img, saving_path, plot_name, inflated=False, compute_surf=True, colorbar=True, **kwargs):
-    fsaverage = datasets.fetch_surf_fsaverage()
-    if compute_surf:
-        surf_img = vol_to_surf(surf_img, fsaverage[kwargs['surf_mesh']])
-    if inflated:
-        kwargs['surf_mesh'] = 'infl_left' if 'left' in kwargs['surf_mesh_type'] else 'infl_right' 
-    disp = plotting.plot_surf_roi(
-        surf_mesh=fsaverage[kwargs['surf_mesh']], 
-        roi_map=surf_img,
-        hemi=kwargs['hemi'],
-        view=kwargs['view'],
-        bg_map=fsaverage[kwargs['bg_map']], 
-        bg_on_data=kwargs['bg_on_data'],
-        darkness=kwargs['darkness'],
-        colorbar=colorbar)
-    if saving_path:
-        disp.savefig(saving_path + plot_name + '_{}_{}_{}.png'.format(kwargs['surf_mesh_type'], kwargs['hemi'], kwargs['view']))
-    else:
-        plotting.show()
+def clever_plot(data, labels, model_names, save_folder=None, roi_filter=load_syntactic_roi()):
+    data_filtered = []
+    # For syntactic ROIs
+    legends = []
+    for name in roi_filter:
+        if name in labels:
+            data_filtered.append(data[labels.index(name), :])
+            legends.append(name)
+    data_filtered = np.vstack(data_filtered)
+    horizontal_plot(
+        data_filtered, 
+        model_names, 
+        analysis_name='Third_Quartile_Pearson-coeff_per_syntactic_ROI', 
+        save_folder=save_folder, 
+        label_names=legends,
+        figsize=(15,12), 
+        title=None, 
+        ylabel='Regions of interest (ROI)', 
+        xlabel='Pearson coefficients', 
+        model_name='Model_comparison'
+        )
 
 def interactive_surf_plot(surf_img, inflated=False, cmap='gist_ncar', compute_surf=True, symmetric_cmap=False, **kwargs):
     fsaverage = datasets.fetch_surf_fsaverage()
@@ -523,70 +532,6 @@ def interactive_surf_plot(surf_img, inflated=False, cmap='gist_ncar', compute_su
         colorbar=True
         )
     plotting.show()
-
-def plot_img_surf(surf_img, saving_path, plot_name, inflated=False, compute_surf=True, **kwargs):
-    fsaverage = datasets.fetch_surf_fsaverage()
-    if compute_surf:
-        surf_img = vol_to_surf(surf_img, fsaverage[kwargs['surf_mesh']])
-    if inflated:
-        kwargs['surf_mesh'] = 'infl_left' if 'left' in kwargs['surf_mesh_type'] else 'infl_right' 
-    disp = plotting.plot_surf_stat_map(
-                        surf_mesh=fsaverage[kwargs['surf_mesh']], 
-                        stat_map=surf_img,
-                        hemi=kwargs['hemi'], 
-                        view=kwargs['view'],
-                        bg_map=fsaverage[kwargs['bg_map']], 
-                        bg_on_data=kwargs['bg_on_data'],
-                        darkness=kwargs['darkness'])
-    if saving_path:
-        disp.savefig(saving_path + plot_name + '_{}_{}_{}.png'.format(kwargs['surf_mesh_type'], kwargs['hemi'], kwargs['view']))
-    else:
-        plotting.show()
-
-def clustering(path_to_beta_maps, clustering_method, global_mask=None, atlas_maps=None, labels=None, **kwargs):
-    """Clustering of voxels or ROI based on their beta maps.
-    """
-    if isinstance(path_to_beta_maps, str):
-        data = np.load(path_to_beta_maps).T
-    else:
-        data = path_to_beta_maps.T
-    if global_mask and atlas_maps:
-        global_masker = load_masker(global_mask)
-        imgs = global_masker.inverse_transform([data[i, :] for i in range(data.shape[0])])
-        data = np.zeros((data.shape[0], len(labels)-1))
-        for index_mask in tqdm(range(len(labels)-1)):
-            masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
-            data[:, index_mask] = np.mean(masker.transform(imgs), axis=1)
-    data = data.T
-    if clustering_method=="umap":
-        clusterable_embedding = umap.UMAP(**kwargs).fit_transform(data)
-        # n_neighbors=30,
-        # min_dist=0.0,
-        # n_components=10,
-        # random_state=SEED,
-        labels = hdbscan.HDBSCAN(**kwargs).fit_predict(clusterable_embedding)
-        # min_samples=10,
-        # min_cluster_size=500,
-                    
-        ##clustered = (labels >= 0)
-        ##standard_embedding = umap.UMAP(random_state=42).fit_transform(data)
-        ##plt.scatter(standard_embedding[~clustered, 0],
-        ##            standard_embedding[~clustered, 1],
-        ##            c=(0.5, 0.5, 0.5),
-        ##            s=0.1,
-        ##            alpha=0.5)
-        ##plt.scatter(standard_embedding[clustered, 0],
-        ##            standard_embedding[clustered, 1],
-        ##            c=labels[clustered],
-        ##            s=0.1,
-        ##            cmap='Spectral')
-    elif clustering_method=="max":
-        labels = np.argmax(data, axis=1)
-    else:
-        sc = AgglomerativeClustering(**kwargs) # n_clusters=n_clusters, linkage=“ward”, “complete”, “average”, “single”
-        clustering = sc.fit(data)
-        labels = clustering.labels_
-    return labels
 
 
 #########################################
@@ -746,24 +691,24 @@ def compute_t_test_for_model_comparison(
         imgs = data[name]['Pearson_coeff']
         create_one_sample_t_test(name + '_Pearson_coeff', imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=vmax)
 
-def anova(data, anova_type, dv, within=None, between=None, subject=None, detailed=True, correction=False, effsize='np2', method='pearson', padjust='fdr_bh', columns=None):
-    """Compute various ANOVA type analysis on data. Available functions are:
-    anova, rm_anova, pairwise_ttests, mixed_anova, pairwise_corr.
-    """
-    if anova_type=='anova':
-        result = pg.anova(data=data, dv=dv, between=between, detailed=detailed)
-    elif anova_type=='rm_anova':
-        result = pg.rm_anova(data=data, dv=dv, within=within, subject=subject, detailed=detailed)
-    elif anova_type=='pairwise_ttests':
-        result = pg.pairwise_ttests(data=data, dv=dv, within=within, subject=subject,
-                             parametric=True, padjust=padjust, effsize='hedges')
-    elif anova_type=='mixed_anova':
-        result = pg.mixed_anova(data=data, dv=dv, between=between, within=within,
-                     subject=subject, correction=False, effsize=effsize)
-    elif anova_type=='pairwise_corr':
-        result = pg.pairwise_corr(data, columns=columns, method=method)
-    pg.print_table(result, floatfmt='.3f')
-    return result
+#def anova(data, anova_type, dv, within=None, between=None, subject=None, detailed=True, correction=False, effsize='np2', method='pearson', padjust='fdr_bh', columns=None):
+#    """Compute various ANOVA type analysis on data. Available functions are:
+#    anova, rm_anova, pairwise_ttests, mixed_anova, pairwise_corr.
+#    """
+#    if anova_type=='anova':
+#        result = pg.anova(data=data, dv=dv, between=between, detailed=detailed)
+#    elif anova_type=='rm_anova':
+#        result = pg.rm_anova(data=data, dv=dv, within=within, subject=subject, detailed=detailed)
+#    elif anova_type=='pairwise_ttests':
+#        result = pg.pairwise_ttests(data=data, dv=dv, within=within, subject=subject,
+#                             parametric=True, padjust=padjust, effsize='hedges')
+#    elif anova_type=='mixed_anova':
+#        result = pg.mixed_anova(data=data, dv=dv, between=between, within=within,
+#                     subject=subject, correction=False, effsize=effsize)
+#    elif anova_type=='pairwise_corr':
+#        result = pg.pairwise_corr(data, columns=columns, method=method)
+#    pg.print_table(result, floatfmt='.3f')
+#    return result
 
 def inter_subject_correlation(
     masker, 
@@ -810,3 +755,814 @@ def check_correlation(data1, data2):
     for index, matrix in enumerate(data1):
         pearson_corr.append(np.array([pearsonr(matrix[:,i], data2[index][:,i])[0] for i in range(matrix.shape[1])]))
     return np.stack(pearson_corr, axis=0)
+
+def explained_variance(X, plot_name, n_components_max=1000, n_components_to_plot=[], saving_path=None):
+    """Plot the explained variance of PCA dimensionality reduction.
+    Arguments:
+    - X: list of matrices
+    - n_components_max: int
+    """
+    X_all = np.vstack(X)
+    pca = PCA(n_components=n_components_max)
+    pca.fit(X_all)
+    # plot explained variance
+    cm = plt.get_cmap('jet')
+    cNorm = matplotlib.colors.Normalize(vmin=0, vmax=n_components_max)
+    scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cm)
+    
+    plt.figure(figsize=(15,15))
+    plt.plot(100 * np.cumsum(pca.explained_variance_ratio_), color='black')
+    plt.xlabel('eigenvalue number')
+    plt.ylabel('explained variance (%)')
+    variances = []
+    for n_components in n_components_to_plot:
+        var_model = 100 * sum(pca.explained_variance_ratio_[:n_components])
+        variances.append(var_model)
+        plt.axhline(y=var_model, color=scalarMap.to_rgba(n_components), linestyle='--', label='{}% variance explained with {} components'.format(round(var_model, 1), n_components))
+        plt.axvline(x=n_components, color=scalarMap.to_rgba(n_components), linestyle='--')
+    plt.xticks(list(plt.xticks()[0]) + n_components_to_plot)
+    plt.yticks(list(plt.xticks()[0]) + variances)
+    plt.title('\n'.join(wrap(plot_name)))
+    plt.legend()
+    plt.xlim((0, n_components_max))
+    plt.ylim((0, 100))
+    plt.tight_layout()
+    if saving_path:
+        plt.savefig(saving_path)
+    else:
+        plt.show()
+    plt.close()
+
+
+
+#########################################
+############ Voxel Clustering ###########
+#########################################
+
+def heat_map(path_to_beta_maps, aggregate=False, title='', saving_path=None):
+    if isinstance(path_to_beta_maps, str):
+        data = np.load(path_to_beta_maps)
+    else:
+        data = path_to_beta_maps
+    plt.figure(figsize=(40,40))
+    if aggregate:
+        data = aggregate_beta_maps(data, nb_layers=13, layer_size=768)
+    sns.heatmap(data)
+    plt.title('Heatmap -' + title)
+    if saving_path is not None:
+        plt.savefig(saving_path)
+        plt.close()
+    else:
+        plt.show()
+
+def resample_beta_maps(path_to_beta_maps, original_masker, new_masker):
+    """Resample beta map with a new masker.
+    path_to_beta_maps: #voxels x #features"""
+    if isinstance(original_masker, str):
+        original_masker = load_masker(original_masker)
+    if isinstance(new_masker, str):
+        new_masker = load_masker(new_masker)
+    if isinstance(path_to_beta_maps, str):
+        data = np.load(path_to_beta_maps)
+    else:
+        data = path_to_beta_maps
+    print("Original data has dimension: ", data.shape)
+    imgs = original_masker.inverse_transform([data[:, i] for i in range(data.shape[1])])
+    new_data = new_masker.transform(imgs) # dimension: #samples x #voxels
+    print("New data has dimension: ", new_data.T.shape)
+    return new_data.T
+
+def create_subject_mask(mask_template, subject_name, subject_id, model_name, global_masker, threshold=75):
+    mask_img = nib.load(mask_template.format(model_name=model_name, subject_name=subject_name, subject_id=subject_id))
+    mask_tmp = global_masker.transform(mask_img)
+    mask = np.zeros(mask_tmp.shape)
+    mask[mask_tmp > np.percentile(mask_tmp, threshold)] = 1
+    mask = mask.astype(int)
+    mask = mask[0].astype(bool)
+    return mask
+
+def aggregate_beta_maps(data, nb_layers=13, layer_size=768, attention_head_size=64, nb_attention_heads=12, aggregation_type='layer', n_components=100):
+    """Clustering of voxels or ROI based on their beta maps.
+    maps: (#voxels x #features)
+    """
+    if isinstance(data, str):
+        data = np.load(data)
+    nb_layers = nb_layers
+    layer_size = layer_size
+    if aggregation_type=='layer':
+        result = np.zeros((data.shape[0], nb_layers))
+        for index in range(nb_layers):
+            result[:, index] = np.mean(data[:, layer_size * index : layer_size * (index + 1)], axis=1)
+    elif aggregation_type=='pca':
+        result = PCA(n_components=n_components, random_state=1111).fit_transform(data)
+    elif aggregation_type=='umap':
+        result = np.hstack([umap.UMAP(n_neighbors=5, min_dist=0., n_components=n_components, random_state=1111, metric='cosine', output_metric='euclidean').fit_transform(data[:, layer_size * index : layer_size * (index + 1)]) for index in range(nb_layers)])
+    elif aggregation_type=='attention_head':
+        result = np.zeros((data.shape[0], (nb_layers-1)*nb_attention_heads))
+        for index in range((nb_layers-1)*nb_attention_heads):
+            result[:, index] = np.mean(data[:, 768 + attention_head_size * index : 768 + attention_head_size * (index + 1)], axis=1)
+    return result
+
+def plot_roi_img_surf(surf_img, saving_path, plot_name, mask=None, labels=None, inflated=False, compute_surf=True, colorbar=True, return_plot=False, **kwargs):
+    fsaverage = datasets.fetch_surf_fsaverage()
+    if compute_surf:
+        surf_img = vol_to_surf(surf_img, fsaverage[kwargs['surf_mesh']], interpolation='nearest', mask_img=mask)
+        surf_img[np.isnan(surf_img)] = -1
+    if labels is not None:
+        surf_img = np.round(surf_img)
+        
+    surf_img += 1
+    if saving_path:
+        plt.close('all')
+        plt.hist(surf_img, bins=50)
+        plt.title(plot_name)
+        plt.savefig(saving_path + "hist_{}.png".format(plot_name))
+    #plt.close('all')
+    if inflated:
+        kwargs['surf_mesh'] = 'infl_left' if 'left' in kwargs['surf_mesh_type'] else 'infl_right' 
+    disp = plotting.plot_surf_roi(
+        surf_mesh=fsaverage[kwargs['surf_mesh']], 
+        roi_map=surf_img,
+        hemi=kwargs['hemi'],
+        view=kwargs['view'],
+        bg_map=fsaverage[kwargs['bg_map']], 
+        bg_on_data=kwargs['bg_on_data'],
+        darkness=kwargs['darkness'],
+        colorbar=colorbar,
+        axes=kwargs['axes'],
+        figure=kwargs['figure'])
+    if saving_path:
+        disp.savefig(saving_path + plot_name + '_{}_{}_{}.png'.format(kwargs['surf_mesh_type'], kwargs['hemi'], kwargs['view']))
+    if return_plot:
+        return disp
+    else:
+        plotting.show()
+
+def scatter3d(data, cs, colorsMap='jet', reduction_type='', other=None, **kwargs):
+    """3D scatter plot with random color to distinguish the shape."""
+    cm = plt.get_cmap(colorsMap)
+    cNorm = matplotlib.colors.Normalize(vmin=min(cs), vmax=max(cs))
+    scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cm)
+    fig = plt.figure(figsize=(12,12))
+    ax = fig.add_subplot(111, projection='3d')
+    
+    ax.scatter(data[:, 0], data[:, 1], data[:, 2], marker='o', c=scalarMap.to_rgba(cs), **kwargs)
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    ax.view_init(other['elevation'], other['azimuth'])
+
+    #ax.scatter(x, y, z, c=scalarMap.to_rgba(cs))
+    scalarMap.set_array(cs)
+    fig.colorbar(scalarMap)
+    plt.title('Activations embedding for {}'.format(reduction_type), fontsize=24)
+    ax.view_init(other['elevation'], other['azimuth'])
+    interact()
+
+def plot_reduction(data, plot_type='2D', reduction_type='', other=None, **kwargs):
+    """kwargs includes: 
+     - s=5
+     - c='density'
+     - cmap='Spectral'
+    """
+    plt.close('all')
+    if plot_type=='2D':
+        plt.scatter(data[:, 0], data[:, 1], **kwargs)
+        interact()
+    elif plot_type=='3D':
+        scatter3d(data, data[:, 2], colorsMap='jet', reduction_type=reduction_type, other=other, **kwargs)
+
+def plot_reduc(path_to_beta_maps, n_neighbors=30, min_dist=0.0, n_components=3, random_state=1111, cluster_selection_epsilon=0.0):
+    """Clustering of voxels or ROI based on their beta maps.
+    """
+    if isinstance(path_to_beta_maps, str):
+        data = np.load(path_to_beta_maps).T
+    else:
+        data = path_to_beta_maps.T
+    
+    plot_kwargs = {
+        's':2,
+        #'c':'density',
+        'cmap':'Spectral'
+    }
+    data = data.T
+    print("UMAP...")
+    umap_result_3D = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, n_components=n_components, random_state=random_state, metric='manhattan').fit_transform(data)
+    plot_reduction(umap_result_3D, plot_type='3D', reduction_type='UMAP', other={'elevation': 15, 'azimuth': 15}, **plot_kwargs)
+    
+def reduce(data, reduction, n_neighbors=30, min_dist=0.0, n_components=10, random_state=1111, affinity_reduc='nearest_neighbors', metric_r='cosine', output_metric='euclidean', mapper=None, mapper_plot=None):
+    """Reduce dimemnsion of beta maps.
+    """
+    gc.collect()
+    if mapper is not None:
+        data_reduced = mapper.transform(data)
+        standard_embedding = mapper_plot.transform(data)
+    elif reduction=="umap":
+        mapper = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, n_components=n_components, random_state=random_state, metric=metric_r, output_metric=output_metric).fit(data)
+        mapper_plot = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, n_components=2, random_state=random_state, metric=metric_r, output_metric=output_metric).fit(data)
+        data_reduced = mapper.transform(data)
+        standard_embedding = mapper_plot.transform(data)
+    elif reduction=="pca":
+        mapper = PCA(n_components=n_components, random_state=random_state).fit(data)
+        mapper_plot = PCA(n_components=2, random_state=random_state).fit(data)
+        data_reduced = mapper.transform(data)
+        standard_embedding = mapper_plot.transform(data)
+    elif reduction=="ica":
+        mapper = FastICA(n_components=n_components, random_state=random_state).fit(data)
+        mapper_plot = FastICA(n_components=2, random_state=random_state).fit(data)
+        data_reduced = mapper.transform(data)
+        standard_embedding = mapper_plot.transform(data)
+    else:
+        data_reduced = data
+        mapper = None
+        mapper_plot = None
+        standard_embedding = None
+    return data_reduced, standard_embedding, mapper, mapper_plot
+
+def cluster(data_reduced, mask, clustering, min_cluster_size=20, min_samples=10, n_clusters=13, random_state=1111, cluster_selection_epsilon=0.0, affinity_cluster='cosine', linkage='average', saving_folder=None, plot_name=None, metric_c='euclidean', memory=None, predictor=None):
+    """Clustering of voxels or ROI based on their beta maps.
+    """ 
+    gc.collect()
+    if predictor is not None:
+        labels_, proba = hdbscan.approximate_predict(predictor, data_reduced)
+    elif clustering=='hdbscan':
+        predictor = hdbscan.HDBSCAN(min_samples=min_samples, min_cluster_size=min_cluster_size, cluster_selection_epsilon=cluster_selection_epsilon, metric=metric_c, prediction_data=True).fit(data_reduced)
+        labels_, proba = hdbscan.approximate_predict(predictor, data_reduced)
+    #elif clustering=='agg-clus':
+    #    #kneighbors_graph_ = kneighbors_graph(data_, n_neighbors=5)
+    #    sc = AgglomerativeClustering(n_clusters=n_clusters, linkage=linkage, affinity=affinity_cluster, memory=memory) #  connectivity=kneighbors_graph_
+    #    clustering = sc.fit(data_reduced)
+    #    labels_ = clustering.labels_
+    #elif clustering=="max":
+    #    labels_ = np.argmax(data_reduced, axis=1)
+    if mask is not None:
+        all_labels = np.zeros(len(mask))
+        all_labels[mask] = labels_
+        all_labels[~mask] = -1
+    else:
+        all_labels = labels_
+    plot_name += '_nb_clusters-{}'.format(len(np.unique(all_labels)))
+    return all_labels, labels_, plot_name, predictor
+
+def plot_scatter(labels, standard_embedding, plot_name, saving_folder, return_plot=False):
+    # Printing scatter plot
+    plt.close('all')
+    fig = plt.figure(figsize=(15, 15))
+    clustered = (labels >= 0)
+    colorsMap='jet'
+    cm = plt.get_cmap(colorsMap)
+    cNorm = matplotlib.colors.Normalize(vmin=min(labels), vmax=max(labels))
+    scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cm)
+
+    plt.scatter(standard_embedding[clustered, 0],
+                standard_embedding[clustered, 1],
+                c=scalarMap.to_rgba(labels[clustered]),
+                s=0.1,
+                cmap='Spectral')
+    plt.title(plot_name)
+    check_folder(saving_folder)
+    if saving_folder is not None:
+        plt.savefig(saving_folder + "scatter_{}.png".format(plot_name), dpi=300)
+    if return_plot:
+        plt.show()
+    plt.close('all')
+
+def plot_text(labels, standard_embedding, onsets, plot_name, saving_folder, return_plot=False):
+    # Printing scatter plot
+    plt.close('all')
+    fig = plt.figure(figsize=(30, 30))
+    clustered = (labels >= 0)
+    colorsMap='jet'
+    cm = plt.get_cmap(colorsMap)
+    cNorm = matplotlib.colors.Normalize(vmin=min(labels), vmax=max(labels))
+    scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cm)
+    
+    for a,b,c,d in zip(standard_embedding[clustered, 0], standard_embedding[clustered, 1], onsets, scalarMap.to_rgba(labels[clustered])):
+
+        plt.text(
+            a,
+            b,
+            c,
+            c=d, 
+            size=1,
+            wrap=True#s=0.1,
+        )
+    plt.xlim((-5, 25))
+    plt.ylim((-5, 25))
+    plt.tight_layout()
+    plt.title(plot_name)
+    check_folder(saving_folder)
+    if saving_folder is not None:
+        plt.savefig(saving_folder + "text_{}.png".format(plot_name), dpi=1000)
+    if return_plot:
+        plt.show()
+    plt.close('all')
+
+def create_name(subject_name, params):
+    keys = [
+            'reduction',
+            'clustering',
+            'min_cluster_size',
+            'n_neighbors',
+            'n_components',
+            'affinity_cluster',
+            'linkage',
+            'min_samples',
+            'metric_r',
+            'metric_c',
+            'output_metric'
+    ]
+    keys_surname = [
+            'red',
+            'clust',
+            'min-c-size',
+            'n-neigh',
+            'n-comp',
+            'aff-clus',
+            'link',
+            'min-samples',
+            'metric-r',
+            'metric-c',
+            'out-metric'
+    ]
+    name = subject_name
+    for index, key in enumerate(keys):
+        name += '_' + keys_surname[index] + '-' + str(params[key])
+    return name
+
+def save_results(data, all_original_length, saving_folder, plot_name, global_masker, mask, return_plot=False, subject_wise=True, inflated=False, **kwargs):
+    """Save surface plot."""
+    gc.collect()
+    if isinstance(data, str):
+        data = np.load(data)
+    elif saving_folder is not None:
+        check_folder(os.path.join(saving_folder, 'labels'))
+        np.save(os.path.join(saving_folder, 'labels', plot_name+'.npy'), data)
+    if subject_wise: # data computed on single subject
+        img = global_masker.inverse_transform(data)
+        plot_roi_img_surf(img, saving_folder, plot_name, mask=mask, labels='round', inflated=inflated, compute_surf=True, return_plot=return_plot, colorbar=True, **kwargs)
+    else: # data computed on all subjects
+        i = 0
+        results = []
+        nb_clusters = len(np.unique(data))
+        print('Input shape: ', data.shape)
+        print('Number of clusters: ', nb_clusters)
+        for l in all_original_length:
+            results.append(get_prob_matrix(data[i: i+l], nb_clusters))
+            i += l
+        l = results[0].shape[1]
+        print('Number of voxels:', l)
+        for index, item in enumerate(results):
+            assert item.shape[1]==l
+        matrix_ = np.stack(results, axis=0)
+        prob_matrix = np.mean(matrix_, axis=0)
+        argmax_matrix = np.argmax(prob_matrix, axis=0)
+        #final_matrix = np.zeros((nb_clusters, len(argmax_matrix)))
+        #for index, i in enumerate(rois):
+        #    final_matrix[i, index] = 1
+        print('Effective number of clusters:', len(np.unique(argmax_matrix)))
+        
+        img = global_masker.inverse_transform(argmax_matrix)
+        # Cleaning memory
+        gc.collect()
+        del matrix_
+        del prob_matrix
+        del argmax_matrix
+        del results
+        plot_roi_img_surf(img, saving_folder, plot_name, mask=mask, labels='round', inflated=False, compute_surf=True, return_plot=return_plot, colorbar=True, **kwargs)
+        #plot_roi_img_surf(img, saving_folder, plot_name, mask=None, labels=np.unique(results), inflated=False, compute_surf=True, colorbar=True, **kwargs)
+
+def get_connectivity_matrix(labels):
+    if isinstance(labels, str):
+        labels = np.load(labels)
+    result = np.equal.outer(labels,labels).astype(int)
+    return result
+
+def get_prob_matrix(labels, nb_clusters):
+    if isinstance(labels, str):
+        labels = np.load(labels)
+    nb_voxels = len(labels)
+    prob_matrix = np.zeros((nb_clusters, nb_voxels))
+    for index, i in enumerate(range(nb_clusters)):
+        prob_matrix[index, labels==i] = 1
+    return prob_matrix
+
+def get_labels(subject_name, reduction, clustering, saving_folder, params):
+    """Retrieve computed labels for a given subject."""
+    saving_folder = os.path.join(saving_folder, '_'.join([reduction, clustering]) + '/')
+    plot_name = create_name(subject_name, params)
+    path = sorted(glob.glob(os.path.join(saving_folder, 'labels', plot_name + '*.npy')))
+    return path
+
+def get_images(subject_name, reduction, clustering, saving_folder, params):
+    """Retrieve computed labels for a given subject."""
+    saving_folder = os.path.join(saving_folder, '_'.join([reduction, clustering]) + '/')
+    plot_name = create_name(subject_name, params)
+    path = sorted(glob.glob(os.path.join(saving_folder, plot_name + '*.png')))
+    return path
+
+def extract_indexes(list_, item):
+    return np.where(list_==item)
+
+def extract_clusters(labels_, onsets):
+    result = {}
+    for value in np.unique(labels_):
+        result[value] = onsets[np.where(labels_==value)]
+    return result
+
+def plot_functional_clustering(
+    data, 
+    mask,
+    masker,
+    average_mask,
+    nb_voxels,
+    nb_subjects,
+    data_name,
+    params,
+    saving_folder,
+    n_neighbors_list=[3, 4, 5],
+    min_samples_list=[5, 8, 10, 12, 15, 17, 20, 23,  25, 27, 30],
+    min_cluster_size_list=[200, 300, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1100, 1200, 1300, 1350 ,1400, 1450, 1500, 1550, 1600, 1700, 1750, 1800, 1850, 1900],
+    tmp_folder='', 
+    reduction='umap',
+    clustering='hdbscan',
+    metric_reduction='cosine',
+    metric_clustering='euclidean',
+    output_metric='euclidean',
+    random_state=1111,
+    min_dist=0.,
+    affinity_reduc='nearest_neighbors',
+    n_components=3,
+    cluster_selection_epsilon=0.,
+    subject_id=None,
+    return_plot=False,
+    **kwargs
+    ):
+    """Plot functional clustering of voxels determined over a set of subjects.
+    Arguments:
+    - data: np.array (2D - size #subects*#voxels x #features)
+    - mask:np.array (1D - size #subects*#voxels)
+    - masker: nifti-masker
+    - average_mask: nifti image
+    - nb_voxels: int
+    - nb_subjects: int
+    - data_name: str
+    - params: dict
+    - n_neighbors_list: list of int
+    - reduction: str
+    - clustering: str
+    - metric_reduction: str
+    - metric_clustering: str
+    - random_state: int
+    - min_dist: float
+    - affinity_reduc: str
+    - n_components: int
+    - cluster_selection_epsilon: float
+
+    Returns:
+    - display plot(s)
+    """
+
+    for n_neighbors in n_neighbors_list:
+        
+        if os.path.exists(os.path.join(tmp_folder, f'data_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy')):
+            print('Loading...')
+            data_reduced = np.load(os.path.join(tmp_folder, f'data_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
+            standard_embedding = np.load(os.path.join(tmp_folder, f'standard_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
+            mapper = load(os.path.join(tmp_folder, f'mapper_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+            mapper_plot = load(os.path.join(tmp_folder, f'mapper_plot_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+        else:
+            print('Reducing...')
+            data_reduced, standard_embedding, mapper, mapper_plot = reduce(
+                data, 
+                reduction, 
+                n_neighbors=n_neighbors, 
+                min_dist=min_dist, 
+                n_components=n_components, 
+                random_state=random_state, 
+                affinity_reduc=affinity_reduc, 
+                metric_r=metric_reduction, 
+                output_metric=output_metric)
+            np.save(os.path.join(tmp_folder, f'data_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), data_reduced)
+            np.save(os.path.join(tmp_folder, f'standard_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), standard_embedding)
+            dump(mapper, os.path.join(tmp_folder, f'mapper_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+            dump(mapper_plot, os.path.join(tmp_folder, f'mapper_plot_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+                    
+        saving_folder_ = os.path.join(saving_folder, 'data-{}_'.format(data_name) + '_'.join([reduction, clustering]) + '/')
+                
+        for min_samples in min_samples_list:
+
+            for min_cluster_size in min_cluster_size:
+                params.update({
+                    'reduction':reduction,
+                    'clustering':clustering, 
+                    'n_components':n_components,
+                    'n_clusters':0,
+                    'min_samples': min_samples,
+                    'min_cluster_size': min_cluster_size,
+                    'cluster_selection_epsilon': cluster_selection_epsilon,
+                    'min_dist': min_dist,
+                    'n_neighbors': n_neighbors,
+                    'metric_r': metric_reduction,
+                    'metric_c': metric_clustering,
+                    'output_metric': output_metric
+                })
+                plot_name = create_name('all-subjects', params) if nb_subjects > 1 else create_name(str(subject_id), params)
+
+                all_labels, labels_, plot_name, predictor = cluster(
+                        data_reduced, 
+                        mask, 
+                        clustering, 
+                        min_cluster_size=min_cluster_size, 
+                        min_samples=min_samples, 
+                        n_clusters=0, 
+                        random_state=random_state, 
+                        cluster_selection_epsilon=cluster_selection_epsilon, 
+                        affinity_cluster='', 
+                        linkage='', 
+                        saving_folder=saving_folder_, 
+                        plot_name=plot_name, 
+                        metric_c=metric_clustering)
+
+                plot_scatter(labels_, standard_embedding, plot_name, saving_folder_, return_plot=return_plot)
+                save_results(all_labels, np.ones(nb_subjects)*nb_voxels, saving_folder_, plot_name, masker, average_mask, return_plot=return_plot, subject_wise=False, **kwargs)
+
+def plot_semantic_clustering(
+    data_words,
+    path_to_data_template,
+    mask_template,
+    original_masker,
+    new_masker,
+    onsets,
+    subject_names_list,
+    subject_ids_list,
+    data_name,
+    params,
+    saving_folder,
+    n_neighbors_list=[3, 4, 5],
+    min_samples_list=[5, 8, 10, 12, 15, 17, 20, 23,  25, 27, 30],
+    min_cluster_size_list=[200, 300, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1100, 1200],
+    tmp_folder='', 
+    model_name='',
+    aggregation_type='attention_head',
+    reduction='umap',
+    clustering='hdbscan',
+    metric_reduction='cosine',
+    metric_clustering='euclidean',
+    output_metric='euclidean',
+    random_state=1111,
+    min_dist=0.,
+    affinity_reduc='nearest_neighbors',
+    n_components=3,
+    cluster_selection_epsilon=0.,
+    subject_id=None,
+    threshold=90,
+    nb_layers=13,
+    layer_size=768,
+    return_plot=False,
+    standardize_beta_maps=True,
+    **kwargs
+    ):
+    """Plot functional clustering of voxels determined over a set of subjects.
+    Arguments:
+    - data_words: np.array (2D - size #words x #features)
+    - path_to_data_template: str
+    - mask_template: str
+    - original_masker: nifti-masker
+    - new_masker: nifti-masker
+    - onsets: np.array (1D) - list of words
+    - subject_names_list: list of string
+    - subject_ids_list: list of string
+    - data_name: str
+    - params: dict
+    - saving_folder: str (folder to save results)
+    - min_samples_list: list of int
+    - min_cluster_size_list: list of int
+    - tmp_folder: str (folder to save past computations)
+    - model_name: str
+    - aggregation_type: str
+    - n_neighbors_list: list of int
+    - reduction: str
+    - clustering: str
+    - metric_reduction: str
+    - metric_clustering: str
+    - random_state: int
+    - min_dist: float
+    - affinity_reduc: str
+    - n_components: int
+    - cluster_selection_epsilon: float
+    - nb_layers: int
+    - layer_size: int
+    - return_plot: bool
+    - standardize_beta_maps: bool
+
+    Returns:
+    - display plot(s)
+    """
+    for subject_name, subject_id in zip(subject_names_list, subject_ids_list):
+        path_to_beta_map = path_to_data_template.format(subject_name=subject_name, subject_id=subject_id)
+        voxels_mask = create_subject_mask(mask_template, subject_name, subject_id, model_name, new_masker, threshold=threshold)
+
+        data_fmri = resample_beta_maps(
+                            aggregate_beta_maps(
+                                path_to_beta_map,
+                                nb_layers=nb_layers,
+                                layer_size=layer_size, 
+                                aggregation_type=aggregation_type), 
+                            original_masker, 
+                            new_masker)[voxels_mask, :]
+
+        # standardize beta maps if necessary
+        if standardize_beta_maps:
+            scaler = StandardScaler(with_mean=True, with_std=True)
+            data_fmri = scaler.fit_transform(data_fmri.T).T
+
+        for n_neighbors in n_neighbors_list:
+            
+            if os.path.exists(os.path.join(tmp_folder, f'data_words_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy')):
+                print('Loading...')
+                data_words_reduced = np.load(os.path.join(tmp_folder, f'data_words_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
+                standard_words_embedding = np.load(os.path.join(tmp_folder, f'standard_words_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
+                data_voxels_reduced = np.load(os.path.join(tmp_folder, f'data_voxels_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
+                standard_voxels_embedding = np.load(os.path.join(tmp_folder, f'standard_voxels_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
+                mapper = load(os.path.join(tmp_folder, f'mapper_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+                mapper_plot = load(os.path.join(tmp_folder, f'mapper_plot_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+            else:
+                print('Reducing...')
+                data_words_reduced, standard_words_embedding, mapper, mapper_plot = reduce(
+                    data_words, 
+                    reduction, 
+                    n_neighbors=n_neighbors, 
+                    min_dist=min_dist, 
+                    n_components=n_components, 
+                    random_state=random_state, 
+                    affinity_reduc=affinity_reduc, 
+                    metric_r=metric_reduction, 
+                    output_metric=output_metric)
+                np.save(os.path.join(tmp_folder, f'data_words_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), data_words_reduced)
+                np.save(os.path.join(tmp_folder, f'standard_words_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), standard_words_embedding)
+                dump(mapper, os.path.join(tmp_folder, f'mapper_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+                dump(mapper_plot, os.path.join(tmp_folder, f'mapper_plot_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+
+                data_voxels_reduced, standard_voxels_embedding, _, _ = reduce(
+                    data_fmri, 
+                    reduction, 
+                    mapper=mapper,
+                    mapper_plot=mapper_plot)
+                np.save(os.path.join(tmp_folder, f'data_voxels_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), data_voxels_reduced)
+                np.save(os.path.join(tmp_folder, f'standard_voxels_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), standard_voxels_embedding)
+                        
+            saving_folder_ = os.path.join(saving_folder, 'data-{}_'.format(data_name) + '_'.join([reduction, clustering]) + '/')
+                    
+            for min_samples in min_samples_list:
+
+                for min_cluster_size in min_cluster_size:
+                    params.update({
+                        'reduction':reduction,
+                        'clustering':clustering, 
+                        'n_components':n_components,
+                        'n_clusters':0,
+                        'min_samples': min_samples,
+                        'min_cluster_size': min_cluster_size,
+                        'cluster_selection_epsilon': cluster_selection_epsilon,
+                        'min_dist': min_dist,
+                        'n_neighbors': n_neighbors,
+                        'metric_r': metric_reduction,
+                        'metric_c': metric_clustering,
+                        'output_metric': output_metric
+                    })
+                    plot_name = create_name(subject_name, params)
+
+                    _, words_labels_, plot_name, predictor = cluster(
+                            data_words_reduced,
+                            None, 
+                            clustering, 
+                            min_cluster_size=min_cluster_size, 
+                            min_samples=min_samples, 
+                            n_clusters=0, 
+                            random_state=random_state, 
+                            cluster_selection_epsilon=cluster_selection_epsilon, 
+                            affinity_cluster='', 
+                            linkage='', 
+                            saving_folder=saving_folder_, 
+                            plot_name=plot_name, 
+                            metric_c=metric_clustering)
+                    all_voxels_labels, voxels_labels_, plot_name, _ = cluster(
+                            data_voxels_reduced,
+                            voxels_mask, 
+                            clustering, 
+                            min_cluster_size=min_cluster_size, 
+                            min_samples=min_samples, 
+                            n_clusters=0, 
+                            random_state=random_state, 
+                            cluster_selection_epsilon=cluster_selection_epsilon, 
+                            affinity_cluster='', 
+                            linkage='', 
+                            saving_folder=saving_folder_, 
+                            plot_name=plot_name, 
+                            metric_c=metric_clustering,
+                            predictor=predictor)
+                    
+                    words_labels_ += 1 # because we want the '-1' labelled voxels (those that do not belong to any cluster), to appear transparent
+                    voxels_labels_ += 1 # idem
+
+                    plot_scatter(words_labels_, standard_words_embedding, 'words_' + plot_name, saving_folder_, return_plot=return_plot)
+                    plot_scatter(voxels_labels_, standard_voxels_embedding, 'voxels_' + plot_name, saving_folder_, return_plot=return_plot)
+                    plot_text(words_labels_, standard_words_embedding, onsets, plot_name, saving_folder_)
+
+                    save_results(all_voxels_labels, None, saving_folder_, plot_name, new_masker, new_masker.inverse_transform(voxels_mask), return_plot=return_plot, inflated=True,  **kwargs) 
+
+def multi_plot(
+    paths, 
+    saving_path,
+    nb_subjects,
+    nb_voxels,
+    plot_name, 
+    new_masker, 
+    average_mask,
+    return_plot=True, 
+    **kwargs
+    ):
+    """Plots all 4 surface views.
+    """
+    for path in paths:
+        
+        item = os.path.basename(os.path.dirname(os.path.dirname(path)))
+        data_name = '_'.join(item.split('_')[:-2])
+        reduction = item.split('_')[-2]
+        clustering = item.split('_')[-1]
+        name = '_'.join(os.path.basename(path).split('clust-')[1].split('_')[1:]).split('.')[0]
+        model_name = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(path))))
+        if model_name not in ['bert-base-cased_pre-7_1_post-0_norm-None_norm-inf', 'gpt2_pre-20_1_norm-inf_norm-inf']:
+            model_name = 'bert-base-cased_pre-7_1_post-0_norm-None_norm-inf'
+            
+            
+        save_in = os.path.join(saving_path, 'results', data_name, model_name, reduction, clustering)
+        check_folder(save_in)
+        
+        plt.close('all')
+        fig1 = plt.figure(figsize=(15,10))
+        ax1 = fig1.add_subplot(2, 2, 1, projection= '3d')
+        ax2 = fig1.add_subplot(2, 2, 2, projection= '3d')
+        ax3 = fig1.add_subplot(2, 2, 3, projection= '3d')
+        ax4 = fig1.add_subplot(2, 2, 4, projection= '3d')
+
+        view = 'left' #left
+        kwargs = {
+            'surf_mesh': f'pial_{view}', # pial_right, infl_left, infl_right
+            'surf_mesh_type': f'pial_{view}',
+            'hemi': view, # right
+            'view':'lateral', # medial
+            'bg_map': f'sulc_{view}', # sulc_right
+            'bg_on_data':True,
+            'darkness':.8,
+            'axes': ax1,
+            'figure': fig1
+        }
+        save_results(path, np.ones(nb_subjects)*nb_voxels, None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
+
+        view = 'left' #left
+        kwargs = {
+            'surf_mesh': f'pial_{view}', # pial_right, infl_left, infl_right
+            'surf_mesh_type': f'pial_{view}',
+            'hemi': view, # right
+            'view':'medial', # medial
+            'bg_map': f'sulc_{view}', # sulc_right
+            'bg_on_data':True,
+            'darkness':.8,
+            'axes': ax2,
+            'figure': fig1
+        }
+        save_results(path, np.ones(nb_subjects)*nb_voxels, None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
+        
+        view = 'right' #left
+        kwargs = {
+            'surf_mesh': f'pial_{view}', # pial_right, infl_left, infl_right
+            'surf_mesh_type': f'pial_{view}',
+            'hemi': view, # right
+            'view':'lateral', # medial
+            'bg_map': f'sulc_{view}', # sulc_right
+            'bg_on_data':True,
+            'darkness':.8,
+            'axes': ax3,
+            'figure': fig1
+        }
+        save_results(path, np.ones(nb_subjects)*nb_voxels, None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
+        
+        view = 'right' #left
+        kwargs = {
+            'surf_mesh': f'pial_{view}', # pial_right, infl_left, infl_right
+            'surf_mesh_type': f'pial_{view}',
+            'hemi': view, # right
+            'view':'medial', # medial
+            'bg_map': f'sulc_{view}', # sulc_right
+            'bg_on_data':True,
+            'darkness':.8,
+            'axes': ax4,
+            'figure': fig1
+        }
+        save_results(path, np.ones(nb_subjects)*nb_voxels, None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
+        
+        plt.suptitle(name)
+        plt.savefig(os.path.join(save_in, name+'.png'))
+        plt.close('all')

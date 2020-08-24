@@ -122,7 +122,7 @@ def get_layers_data(
             if analysis_of_interest == 'Hidden-layers':
                 data[model_name][analysis_of_interest]['models'] = [os.path.dirname(name).split('_')[-1] for name in list(Pearson_coeff_maps.values())[-1]]
             else:
-                data[model_name][analysis_of_interest]['models'] = ['-'.join(os.path.dirname(name).split('_')[-2:]) for name in list(Pearson_coeff_maps.values())[-1]]
+                data[model_name][analysis_of_interest]['models'] = ['_'.join(os.path.dirname(name).split('_')[-2:]) for name in list(Pearson_coeff_maps.values())[-1]]
             R2_lists = list(zip(*R2_maps.values()))
             Pearson_coeff_lists = list(zip(*Pearson_coeff_maps.values()))
             for index, model in enumerate(data[model_name][analysis_of_interest]['models']):
@@ -171,11 +171,12 @@ def check_data(data, N):
         if 'Pearson_coeff' in data[key]:
             assert len(data[key]['Pearson_coeff'])==N
 
-def fit_per_roi(maps, atlas_maps, labels, global_mask, threshold_img=None):
+def fit_per_roi(maps, atlas_maps, labels, global_mask, threshold_img=None, voxels_filter=None):
     print("\tLooping through labeled masks...")
     mean = np.zeros((len(labels), len(maps)))
     third_quartile = np.zeros((len(labels), len(maps)))
     maximum = np.zeros((len(labels), len(maps)))
+    size = np.zeros((len(labels), len(maps)))
     for index_mask in tqdm(range(len(labels))):
         masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
         for index_model, map_ in enumerate(maps):
@@ -184,17 +185,23 @@ def fit_per_roi(maps, atlas_maps, labels, global_mask, threshold_img=None):
                 if threshold_img is not None:
                     threshold = masker.transform(threshold_img)
                     threshold[threshold==0.0] = 10**8 # due to some voxel equal to 0 in threshold image we have nan value
+                    if voxels_filter is not None:
+                        mask = threshold >= voxels_filter
+                        array = array[mask]
+                        threshold = threshold[mask]
                     array = np.divide(array, threshold)
                 maximum[index_mask, index_model] = np.max(array)
                 third_quartile[index_mask, index_model] = np.percentile(array, 75)
                 mean[index_mask, index_model] = np.mean(array)
+                size[index_mask, index_model] = array.shape[0]
             except ValueError:
                 maximum[index_mask, index_model] = np.nan
                 third_quartile[index_mask, index_model] = np.nan
                 mean[index_mask, index_model] = np.nan
+                size[index_mask, index_model] = np.nan
             
     print("\t\t-->Done")
-    return mean, third_quartile, maximum
+    return mean, third_quartile, maximum, size
 
 def get_data_per_roi(
     data, 
@@ -204,6 +211,7 @@ def get_data_per_roi(
     analysis=None, 
     model_name=None,
     threshold_img=None, 
+    voxels_filter=None,
     language='english', 
     object_of_interest='Pearson_coeff', 
     attention_head_reordering=[0, 1, 2, 3, 6, 4, 5, 7],
@@ -218,7 +226,16 @@ def get_data_per_roi(
             maps.append(fetch_map(path, name)[0])
         plot_name = ["Model comparison"]
         # extract data
-        mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img)
+        mean, third_quartile, maximum, size = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter)
+        result = {
+                    'maximum': maximum,
+                    'third_quartile': third_quartile,
+                    'mean': mean,
+                    'models': data.keys(),
+                    'labels': labels,
+                    'plot_name': '',
+                    'size': size
+                }
     else:
         result = {}
         for key in analysis:
@@ -227,7 +244,7 @@ def get_data_per_roi(
                 maps = []
                 for model in data[model_name][key].keys():
                     if model == 'models':
-                        models = data[model_name][key][model]
+                        models = np.array(data[model_name][key][model])
                     else:
                         name = '_'.join([model_name, model])
                         path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, name))
@@ -236,23 +253,26 @@ def get_data_per_roi(
                 plot_name = ["{} for {}".format(model_name, key)]
 
                 # extract data
-                mean, third_quartile, maximum = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img)
+                mean, third_quartile, maximum, size = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter)
                 print("\t\t-->Done")
                 # Small reordering of models so that layers are in increasing order
                 if key=='Hidden-layers':
                     mean = np.hstack([mean[:, :2], mean[:,5:], mean[:,2:5]])
                     third_quartile = np.hstack([third_quartile[:, :2], third_quartile[:,5:], third_quartile[:,2:5]])
                     maximum = np.hstack([maximum[:, :2], maximum[:,5:], maximum[:,2:5]])
+                    size = np.hstack([size[:, :2], size[:,5:], size[:,2:5]])
                     models = models[:2] + models[5:] + models[2:5]
                 elif key=='Attention-layers':
                     mean = np.hstack([mean[:, :1], mean[:,4:], mean[:,1:4]])
                     third_quartile = np.hstack([third_quartile[:, :1], third_quartile[:,4:], third_quartile[:,1:4]])
                     maximum = np.hstack([maximum[:, :1], maximum[:,4:], maximum[:,1:4]])
+                    size = np.hstack([size[:, :1], size[:,4:], size[:,1:4]])
                     models = models[:1] + models[4:] + models[1:4]
                 elif key=='Specific-attention-heads': 
                     mean = mean[:, attention_head_reordering]
                     third_quartile = third_quartile[:, attention_head_reordering]
                     maximum = maximum[:, attention_head_reordering]
+                    size = size[:, attention_head_reordering]
                     models = models[attention_head_reordering]
                 result[key].append({
                     'maximum': maximum,
@@ -261,6 +281,7 @@ def get_data_per_roi(
                     'models': models,
                     'labels': labels,
                     'plot_name': plot_name,
+                    'size': size
                 })
     return result
 
@@ -268,6 +289,7 @@ def get_voxel_wise_max_img_on_surf(
     masker, 
     model_names, 
     language='english', 
+    object_of_interest='Pearson_coeff', 
     PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/',
     **kwargs
     ):
@@ -275,7 +297,7 @@ def get_voxel_wise_max_img_on_surf(
     fsaverage = datasets.fetch_surf_fsaverage()
     for model_name in model_names:
         path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, model_name))
-        name = 'R2_group_fdr_effect'
+        name = '{}_group_fdr_effect'.format(object_of_interest)
         maps.append(fetch_map(path, name)[0])
     
     arrays = [vol_to_surf(map_, fsaverage[kwargs['surf_mesh']]) for map_ in maps]
@@ -284,7 +306,7 @@ def get_voxel_wise_max_img_on_surf(
     img = np.argmax(data_tmp, axis=0)
     return img
 
-def extract_model_data(masker, data, object_of_interest, name, label, threshold_img=None):
+def extract_model_data(masker, data, object_of_interest, name, label, threshold_img=None, voxels_filter=None):
     result = []
     for subject in data.keys():
         try:
@@ -292,15 +314,21 @@ def extract_model_data(masker, data, object_of_interest, name, label, threshold_
             if threshold_img is not None:
                 threshold = masker.transform(threshold_img)
                 threshold[threshold==0.0] = 10**8 # due to some voxel equal to 0 in threshold image we have nan value
+                if voxels_filter is not None:
+                    mask = threshold >= voxels_filter
+                    array = array[mask]
+                    threshold = threshold[mask]
                 array = np.divide(array, threshold)
             mean = np.mean(array)
             median = np.median(array)
             third_quartile = np.percentile(array, 75)
+            size = array.shape[0]
         except ValueError:
             mean = np.nan
             median = np.nan
             third_quartile = np.nan
-        result.append([name, subject, label, mean, median, third_quartile])
+            size = np.nan
+        result.append([name, subject, label, mean, median, third_quartile, size])
     return result
 
 def prepare_data_for_anova(
@@ -309,6 +337,7 @@ def prepare_data_for_anova(
     labels, 
     global_mask,
     threshold_img=None,
+    voxels_filter=None,
     object_of_interest='R2', 
     language='english', 
     OUTPUT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/english'
@@ -328,9 +357,9 @@ def prepare_data_for_anova(
 
     for index_mask in tqdm(range(len(labels))):
         masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
-        result.append(Parallel(n_jobs=-2)(delayed(extract_model_data)(masker, data[name], object_of_interest, name, labels[index_mask], threshold_img=threshold_img) for name in data.keys()))
+        result.append(Parallel(n_jobs=-2)(delayed(extract_model_data)(masker, data[name], object_of_interest, name, labels[index_mask], threshold_img=threshold_img, voxels_filter=voxels_filter) for name in data.keys()))
     result = [item for sublist_mask in result for subsublist_model in sublist_mask for item in subsublist_model]
-    result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', '{}_mean'.format(object_of_interest), '{}_median'.format(object_of_interest), '{}_3rd_quartile'.format(object_of_interest)])
+    result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', '{}_mean'.format(object_of_interest), '{}_median'.format(object_of_interest), '{}_3rd_quartile'.format(object_of_interest), '{}_size'.format(object_of_interest)])
 
     return result
 

@@ -171,6 +171,28 @@ def check_data(data, N):
         if 'Pearson_coeff' in data[key]:
             assert len(data[key]['Pearson_coeff'])==N
 
+def extract_roi_data(map_, masker, threshold_img=None, voxels_filter=None):
+    try:
+        array = masker.transform(map_)
+        if threshold_img is not None:
+            threshold = masker.transform(threshold_img)
+            if voxels_filter is not None:
+                mask = threshold >= voxels_filter
+                array = array[mask]
+                threshold = threshold[mask]
+            threshold[threshold==0.0] = 10**8 # due to some voxel equal to 0 in threshold image we have nan value
+            array = np.divide(array, threshold)
+        maximum = np.max(array)
+        third_quartile = np.percentile(array, 75)
+        mean = np.mean(array)
+        size = len(array.reshape(-1))
+    except ValueError:
+        maximum = np.nan
+        third_quartile = np.nan
+        mean = np.nan
+        size = np.nan
+    return mean, third_quartile, maximum, size
+
 def fit_per_roi(maps, atlas_maps, labels, global_mask, threshold_img=None, voxels_filter=None):
     print("\tLooping through labeled masks...")
     mean = np.zeros((len(labels), len(maps)))
@@ -179,26 +201,18 @@ def fit_per_roi(maps, atlas_maps, labels, global_mask, threshold_img=None, voxel
     size = np.zeros((len(labels), len(maps)))
     for index_mask in tqdm(range(len(labels))):
         masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
-        for index_model, map_ in enumerate(maps):
-            try:
-                array = masker.transform(map_)
-                if threshold_img is not None:
-                    threshold = masker.transform(threshold_img)
-                    threshold[threshold==0.0] = 10**8 # due to some voxel equal to 0 in threshold image we have nan value
-                    if voxels_filter is not None:
-                        mask = threshold >= voxels_filter
-                        array = array[mask]
-                        threshold = threshold[mask]
-                    array = np.divide(array, threshold)
-                maximum[index_mask, index_model] = np.max(array)
-                third_quartile[index_mask, index_model] = np.percentile(array, 75)
-                mean[index_mask, index_model] = np.mean(array)
-                size[index_mask, index_model] = array.shape[0]
-            except ValueError:
-                maximum[index_mask, index_model] = np.nan
-                third_quartile[index_mask, index_model] = np.nan
-                mean[index_mask, index_model] = np.nan
-                size[index_mask, index_model] = np.nan
+        results = Parallel(n_jobs=-2)(delayed(extract_roi_data)(
+            map_, 
+            masker, 
+            threshold_img=threshold_img,
+            voxels_filter=voxels_filter
+        ) for map_ in maps)
+        results = list(zip(*results))
+        mean[index_mask, :] = np.hstack(np.array(results[0]))
+        third_quartile[index_mask, :] = np.hstack(np.array(results[1]))
+        maximum[index_mask, :] = np.hstack(np.array(results[2]))
+        size[index_mask, :] = np.hstack(np.array(results[3]))
+            
             
     print("\t\t-->Done")
     return mean, third_quartile, maximum, size
@@ -261,13 +275,13 @@ def get_data_per_roi(
                     third_quartile = np.hstack([third_quartile[:, :2], third_quartile[:,5:], third_quartile[:,2:5]])
                     maximum = np.hstack([maximum[:, :2], maximum[:,5:], maximum[:,2:5]])
                     size = np.hstack([size[:, :2], size[:,5:], size[:,2:5]])
-                    models = models[:2] + models[5:] + models[2:5]
+                    models = np.hstack([models[:2], models[5:], models[2:5]])
                 elif key=='Attention-layers':
                     mean = np.hstack([mean[:, :1], mean[:,4:], mean[:,1:4]])
                     third_quartile = np.hstack([third_quartile[:, :1], third_quartile[:,4:], third_quartile[:,1:4]])
                     maximum = np.hstack([maximum[:, :1], maximum[:,4:], maximum[:,1:4]])
                     size = np.hstack([size[:, :1], size[:,4:], size[:,1:4]])
-                    models = models[:1] + models[4:] + models[1:4]
+                    models = np.hstack([models[:1], models[4:], models[1:4]])
                 elif key=='Specific-attention-heads': 
                     mean = mean[:, attention_head_reordering]
                     third_quartile = third_quartile[:, attention_head_reordering]
@@ -313,16 +327,16 @@ def extract_model_data(masker, data, object_of_interest, name, label, threshold_
             array = masker.transform(data[subject][object_of_interest])
             if threshold_img is not None:
                 threshold = masker.transform(threshold_img)
-                threshold[threshold==0.0] = 10**8 # due to some voxel equal to 0 in threshold image we have nan value
                 if voxels_filter is not None:
                     mask = threshold >= voxels_filter
                     array = array[mask]
                     threshold = threshold[mask]
+                threshold[threshold==0.0] = 10**8 # due to some voxel equal to 0 in threshold image we have nan value
                 array = np.divide(array, threshold)
             mean = np.mean(array)
             median = np.median(array)
             third_quartile = np.percentile(array, 75)
-            size = array.shape[0]
+            size = len(array.reshape(-1))
         except ValueError:
             mean = np.nan
             median = np.nan
@@ -437,16 +451,16 @@ def vertical_plot(
     ylabel='Regions of interest (ROI)', 
     xlabel='Pearson coefficients', 
     model_name='',
-    percentage=False
+    percentage=False,
+    x_limit=None,
+    y_limit=None
     ):
     """Plots models vertically.
     """
-    #limit = (-0.01, 0.05) if object_of_interest=='R2' else None
     if percentage:
         data = data * 100
-    limit = None
     surnames = load_surnames()
-    dash_inf = limit[0] if limit is not None else 0
+    dash_inf = 0
     x = x_names.copy()
     plt.figure(figsize=figsize) # (7.6,12)
     ax = plt.axes()
@@ -465,7 +479,8 @@ def vertical_plot(
         plt.axvline(x=100, color='k', linestyle='-', alpha=0.2)
     for col in range(data.shape[1]):
         plt.hlines(x, dash_inf, data[:,col], linestyle="dashed", alpha=0.05)
-    plt.xlim(limit)
+    plt.xlim(x_limit)
+    plt.ylim(y_limit)
     plt.minorticks_on()
     ax.tick_params(axis='x', labelsize=12)
     ax.tick_params(axis='y', labelsize=12)
@@ -497,12 +512,13 @@ def horizontal_plot(
     ylabel='', 
     xlabel='', 
     plot_name='',
-    percentage=False
+    percentage=False,
+    rotation=0.,
+    x_limit=None,
+    y_limit=None
     ):
     """Plots models horizontally.
     """
-
-    limit = None
     surnames = load_surnames()
     plt.figure(figsize=figsize) # (7.6,12)
     ax = plt.axes()
@@ -518,9 +534,10 @@ def horizontal_plot(
     plt.ylabel(ylabel, fontsize=16)
     plt.xlabel(xlabel, fontsize=16)
 
-    plt.xlim(limit)
+    plt.xlim(x_limit)
+    plt.ylim(y_limit)
     plt.minorticks_on()
-    ax.tick_params(axis='x', labelsize=12)
+    ax.tick_params(axis='x', labelsize=12, rotation=rotation)
     ax.tick_params(axis='y', labelsize=12)
     plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='y')
     plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='x')
@@ -549,7 +566,10 @@ def clever_plot(
     xlabel='',
     plot_name='Model_comparison',
     figsize=(15,12),
-    percentage=False
+    percentage=False,
+    rotation=0.,
+    x_limit=None,
+    y_limit=None
 ):
     data_filtered = []
     # For syntactic ROIs
@@ -570,7 +590,10 @@ def clever_plot(
         ylabel=ylabel, 
         xlabel=xlabel, 
         plot_name=plot_name,
-        percentage=percentage
+        percentage=percentage,
+        rotation=rotation,
+        x_limit=x_limit,
+        y_limit=y_limit
         )
 
 def interactive_surf_plot(surf_img, inflated=False, cmap='gist_ncar', compute_surf=True, symmetric_cmap=False, **kwargs):
@@ -963,9 +986,9 @@ def plot_roi_img_surf(surf_img, saving_path, plot_name, mask=None, labels=None, 
     if saving_path:
         disp.savefig(saving_path + plot_name + '_{}_{}_{}.png'.format(kwargs['surf_mesh_type'], kwargs['hemi'], kwargs['view']))
     if return_plot:
-        return disp
-    else:
         plotting.show()
+        return disp
+    plt.close('all')
 
 def scatter3d(data, cs, colorsMap='jet', reduction_type='', other=None, **kwargs):
     """3D scatter plot with random color to distinguish the shape."""
@@ -1321,7 +1344,7 @@ def plot_functional_clustering(
                 
         for min_samples in min_samples_list:
 
-            for min_cluster_size in min_cluster_size:
+            for min_cluster_size in min_cluster_size_list:
                 params.update({
                     'reduction':reduction,
                     'clustering':clustering, 
@@ -1354,12 +1377,12 @@ def plot_functional_clustering(
                         metric_c=metric_clustering)
 
                 plot_scatter(labels_, standard_embedding, plot_name, saving_folder_, return_plot=return_plot)
-                save_results(all_labels, np.ones(nb_subjects)*nb_voxels, saving_folder_, plot_name, masker, average_mask, return_plot=return_plot, subject_wise=False, **kwargs)
+                save_results(all_labels, (np.ones(nb_subjects)*nb_voxels).astype(int), saving_folder_, plot_name, masker, average_mask, return_plot=return_plot, subject_wise=False, **kwargs)
 
 def plot_semantic_clustering(
     data_words,
     path_to_data_template,
-    mask_template,
+    average_mask,
     original_masker,
     new_masker,
     onsets,
@@ -1388,6 +1411,7 @@ def plot_semantic_clustering(
     threshold=90,
     nb_layers=13,
     layer_size=768,
+    n_components_aggregation=100,
     return_plot=False,
     standardize_beta_maps=True,
     **kwargs
@@ -1396,7 +1420,7 @@ def plot_semantic_clustering(
     Arguments:
     - data_words: np.array (2D - size #words x #features)
     - path_to_data_template: str
-    - mask_template: str
+    - average_mask: niftii image
     - original_masker: nifti-masker
     - new_masker: nifti-masker
     - onsets: np.array (1D) - list of words
@@ -1422,102 +1446,147 @@ def plot_semantic_clustering(
     - cluster_selection_epsilon: float
     - nb_layers: int
     - layer_size: int
+    - n_components_aggregation: int (pre-reduction)
     - return_plot: bool
     - standardize_beta_maps: bool
 
     Returns:
     - display plot(s)
     """
-    for subject_name, subject_id in zip(subject_names_list, subject_ids_list):
+    voxels_mask = new_masker.transform(average_mask)
+    voxels_mask = voxels_mask.astype(int)
+    voxels_mask = voxels_mask[0].astype(bool)
+    
+    fmri_data_dict = {}
+    data_voxels_reduced_dict = {}
+    standard_voxels_embedding_dict = {}
+    
+    def get_subject_data(path_to_data_template, subject_name, subject_id, voxels_mask,
+                     original_masker, new_masker, nb_layers, layer_size, 
+                     aggregation_type, n_components, standardize_beta_maps=True):
         path_to_beta_map = path_to_data_template.format(subject_name=subject_name, subject_id=subject_id)
-        voxels_mask = create_subject_mask(mask_template, subject_name, subject_id, model_name, new_masker, threshold=threshold)
-
         data_fmri = resample_beta_maps(
                             aggregate_beta_maps(
                                 path_to_beta_map,
                                 nb_layers=nb_layers,
                                 layer_size=layer_size, 
-                                aggregation_type=aggregation_type), 
+                                aggregation_type=aggregation_type,
+                                n_components=n_components_aggregation
+                            ), 
                             original_masker, 
                             new_masker)[voxels_mask, :]
-
         # standardize beta maps if necessary
         if standardize_beta_maps:
             scaler = StandardScaler(with_mean=True, with_std=True)
             data_fmri = scaler.fit_transform(data_fmri.T).T
-
-        for n_neighbors in n_neighbors_list:
             
-            if os.path.exists(os.path.join(tmp_folder, f'data_words_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy')):
-                print('Loading...')
-                data_words_reduced = np.load(os.path.join(tmp_folder, f'data_words_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
-                standard_words_embedding = np.load(os.path.join(tmp_folder, f'standard_words_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
-                data_voxels_reduced = np.load(os.path.join(tmp_folder, f'data_voxels_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
-                standard_voxels_embedding = np.load(os.path.join(tmp_folder, f'standard_voxels_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
-                mapper = load(os.path.join(tmp_folder, f'mapper_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
-                mapper_plot = load(os.path.join(tmp_folder, f'mapper_plot_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
-            else:
-                print('Reducing...')
-                data_words_reduced, standard_words_embedding, mapper, mapper_plot = reduce(
-                    data_words, 
-                    reduction, 
-                    n_neighbors=n_neighbors, 
-                    min_dist=min_dist, 
-                    n_components=n_components, 
-                    random_state=random_state, 
-                    affinity_reduc=affinity_reduc, 
-                    metric_r=metric_reduction, 
-                    output_metric=output_metric)
-                np.save(os.path.join(tmp_folder, f'data_words_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), data_words_reduced)
-                np.save(os.path.join(tmp_folder, f'standard_words_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), standard_words_embedding)
-                dump(mapper, os.path.join(tmp_folder, f'mapper_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
-                dump(mapper_plot, os.path.join(tmp_folder, f'mapper_plot_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+        return data_fmri
+    
+    data_fmri_list = Parallel(n_jobs=-2)(delayed(get_subject_data)(
+            path_to_data_template, 
+            subject_name, 
+            subject_id,
+            voxels_mask, 
+            original_masker, 
+            new_masker, 
+            nb_layers=nb_layers, 
+            layer_size=layer_size,
+            aggregation_type=aggregation_type, 
+            n_components=n_components_aggregation,
+            standardize_beta_maps=standardize_beta_maps
+        ) for subject_name, subject_id in zip(subject_names_list, subject_ids_list))
+        
+        
+    for index_sub, subject_name in enumerate(subject_names_list):
+        fmri_data_dict[subject_name] = data_fmri_list[index_sub]
 
-                data_voxels_reduced, standard_voxels_embedding, _, _ = reduce(
-                    data_fmri, 
-                    reduction, 
-                    mapper=mapper,
-                    mapper_plot=mapper_plot)
-                np.save(os.path.join(tmp_folder, f'data_voxels_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), data_voxels_reduced)
-                np.save(os.path.join(tmp_folder, f'standard_voxels_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), standard_voxels_embedding)
-                        
-            saving_folder_ = os.path.join(saving_folder, 'data-{}_'.format(data_name) + '_'.join([reduction, clustering]) + '/')
+    for n_neighbors in n_neighbors_list:
+        
+        print('Number of neighbors: ', n_neighbors)
+            
+        if os.path.exists(os.path.join(tmp_folder, f'data_words_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy')):
+            print('Loading...')
+            data_words_reduced = np.load(os.path.join(tmp_folder, f'data_words_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
+            standard_words_embedding = np.load(os.path.join(tmp_folder, f'standard_words_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'))
+            mapper = load(os.path.join(tmp_folder, f'mapper_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+            mapper_plot = load(os.path.join(tmp_folder, f'mapper_plot_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+        else:
+            print('Reducing...')
+            data_words_reduced, standard_words_embedding, mapper, mapper_plot = reduce(
+                data_words, 
+                reduction, 
+                n_neighbors=n_neighbors, 
+                min_dist=min_dist, 
+                n_components=n_components, 
+                random_state=random_state, 
+                affinity_reduc=affinity_reduc, 
+                metric_r=metric_reduction, 
+                output_metric=output_metric)
+            np.save(os.path.join(tmp_folder, f'data_words_reduced_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), data_words_reduced)
+            np.save(os.path.join(tmp_folder, f'standard_words_embedding_{reduction}_{n_neighbors}_{n_components}_{data_name}.npy'), standard_words_embedding)
+            dump(mapper, os.path.join(tmp_folder, f'mapper_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+            dump(mapper_plot, os.path.join(tmp_folder, f'mapper_plot_{reduction}_{n_neighbors}_{n_components}_{data_name}.joblib'))
+            
+        for subject_name in tqdm(fmri_data_dict.keys()):
+            data_fmri = fmri_data_dict[subject_name]
+
+            data_voxels_reduced, standard_voxels_embedding, _, _ = reduce(
+                data_fmri, 
+                reduction, 
+                mapper=mapper,
+                mapper_plot=mapper_plot)
+            data_voxels_reduced_dict[subject_name] = data_voxels_reduced
+            standard_voxels_embedding_dict[subject_name] = standard_voxels_embedding
+
+        saving_folder_ = os.path.join(saving_folder, data_name + '_'.join([reduction, clustering]) + '/')
+
+        for min_samples in min_samples_list:
+
+            for min_cluster_size in min_cluster_size_list:
+                
+                print('min_cluster_size: ', min_cluster_size, 'min_samples: ', min_samples)
+                
+                params.update({
+                    'reduction':reduction,
+                    'clustering':clustering, 
+                    'n_components':n_components,
+                    'n_clusters':0,
+                    'min_samples': min_samples,
+                    'min_cluster_size': min_cluster_size,
+                    'cluster_selection_epsilon': cluster_selection_epsilon,
+                    'min_dist': min_dist,
+                    'n_neighbors': n_neighbors,
+                    'metric_r': metric_reduction,
+                    'metric_c': metric_clustering,
+                    'output_metric': output_metric
+                })
+                plot_name = create_name('', params)
+
+                _, words_labels_, plot_name, predictor = cluster(
+                        data_words_reduced,
+                        None, 
+                        clustering, 
+                        min_cluster_size=min_cluster_size, 
+                        min_samples=min_samples, 
+                        n_clusters=0, 
+                        random_state=random_state, 
+                        cluster_selection_epsilon=cluster_selection_epsilon, 
+                        affinity_cluster='', 
+                        linkage='', 
+                        saving_folder=saving_folder_, 
+                        plot_name=plot_name, 
+                        metric_c=metric_clustering)
+                
+                words_labels_ += 1 # because we want the '-1' labelled voxels (those that do not belong to any cluster), to appear transparent
+                plot_scatter(words_labels_, standard_words_embedding, 'words_' + plot_name, saving_folder_, return_plot=return_plot)
+                plot_text(words_labels_, standard_words_embedding, onsets, plot_name, saving_folder_)
+                
+                for subject_name in tqdm(data_voxels_reduced_dict.keys()):
                     
-            for min_samples in min_samples_list:
-
-                for min_cluster_size in min_cluster_size:
-                    params.update({
-                        'reduction':reduction,
-                        'clustering':clustering, 
-                        'n_components':n_components,
-                        'n_clusters':0,
-                        'min_samples': min_samples,
-                        'min_cluster_size': min_cluster_size,
-                        'cluster_selection_epsilon': cluster_selection_epsilon,
-                        'min_dist': min_dist,
-                        'n_neighbors': n_neighbors,
-                        'metric_r': metric_reduction,
-                        'metric_c': metric_clustering,
-                        'output_metric': output_metric
-                    })
                     plot_name = create_name(subject_name, params)
-
-                    _, words_labels_, plot_name, predictor = cluster(
-                            data_words_reduced,
-                            None, 
-                            clustering, 
-                            min_cluster_size=min_cluster_size, 
-                            min_samples=min_samples, 
-                            n_clusters=0, 
-                            random_state=random_state, 
-                            cluster_selection_epsilon=cluster_selection_epsilon, 
-                            affinity_cluster='', 
-                            linkage='', 
-                            saving_folder=saving_folder_, 
-                            plot_name=plot_name, 
-                            metric_c=metric_clustering)
+                    
                     all_voxels_labels, voxels_labels_, plot_name, _ = cluster(
-                            data_voxels_reduced,
+                            data_voxels_reduced_dict[subject_name],
                             voxels_mask, 
                             clustering, 
                             min_cluster_size=min_cluster_size, 
@@ -1532,13 +1601,10 @@ def plot_semantic_clustering(
                             metric_c=metric_clustering,
                             predictor=predictor)
                     
-                    words_labels_ += 1 # because we want the '-1' labelled voxels (those that do not belong to any cluster), to appear transparent
                     voxels_labels_ += 1 # idem
-
-                    plot_scatter(words_labels_, standard_words_embedding, 'words_' + plot_name, saving_folder_, return_plot=return_plot)
+                    
                     plot_scatter(voxels_labels_, standard_voxels_embedding, 'voxels_' + plot_name, saving_folder_, return_plot=return_plot)
-                    plot_text(words_labels_, standard_words_embedding, onsets, plot_name, saving_folder_)
-
+                    
                     save_results(all_voxels_labels, None, saving_folder_, plot_name, new_masker, new_masker.inverse_transform(voxels_mask), return_plot=return_plot, inflated=True,  **kwargs) 
 
 def multi_plot(
@@ -1588,7 +1654,7 @@ def multi_plot(
             'axes': ax1,
             'figure': fig1
         }
-        save_results(path, np.ones(nb_subjects)*nb_voxels, None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
+        save_results(path, (np.ones(nb_subjects)*nb_voxels).astype(int), None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
 
         view = 'left' #left
         kwargs = {
@@ -1602,7 +1668,7 @@ def multi_plot(
             'axes': ax2,
             'figure': fig1
         }
-        save_results(path, np.ones(nb_subjects)*nb_voxels, None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
+        save_results(path, (np.ones(nb_subjects)*nb_voxels).astype(int), None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
         
         view = 'right' #left
         kwargs = {
@@ -1616,7 +1682,7 @@ def multi_plot(
             'axes': ax3,
             'figure': fig1
         }
-        save_results(path, np.ones(nb_subjects)*nb_voxels, None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
+        save_results(path, (np.ones(nb_subjects)*nb_voxels).astype(int), None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
         
         view = 'right' #left
         kwargs = {
@@ -1630,7 +1696,7 @@ def multi_plot(
             'axes': ax4,
             'figure': fig1
         }
-        save_results(path, np.ones(nb_subjects)*nb_voxels, None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
+        save_results(path, (np.ones(nb_subjects)*nb_voxels).astype(int), None, plot_name, new_masker, average_mask, return_plot=return_plot, **kwargs) #params['saving_folder']
         
         plt.suptitle(name)
         plt.savefig(os.path.join(save_in, name+'.png'))

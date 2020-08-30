@@ -117,10 +117,19 @@ def get_layers_data(
                 subject = get_subject_name(subject_id)
                 path_to_map = os.path.join(OUTPUT_PATH, subject, '_'.join([model_name, str(subject_id), analysis[analysis_of_interest]]))
                 R2_maps[subject] = fetch_map(path_to_map, 'R2')
+                if analysis_of_interest == 'Attention-layers':
+                    R2_maps[subject] = [map_ for map_ in R2_maps[subject] if 'head' not in map_]
                 Pearson_coeff_maps[subject] = fetch_map(path_to_map, 'Pearson_coeff')
+                if analysis_of_interest == 'Attention-layers':
+                    Pearson_coeff_maps[subject] = [map_ for map_ in Pearson_coeff_maps[subject] if 'head' not in map_]
                 print(subject, '-', len(R2_maps[subject]), '-', len(Pearson_coeff_maps[subject]))
             if analysis_of_interest == 'Hidden-layers':
                 data[model_name][analysis_of_interest]['models'] = [os.path.dirname(name).split('_')[-1] for name in list(Pearson_coeff_maps.values())[-1]]
+            elif analysis_of_interest == 'Attention-layers':
+                if 'bert-' in model_name:
+                    data[model_name][analysis_of_interest]['models'] = ['_'.join(os.path.dirname(name).split('_')[-2:]) for name in list(Pearson_coeff_maps.values())[-1]]
+                else:
+                    data[model_name][analysis_of_interest]['models'] = [os.path.dirname(name).split('_')[-1] for name in list(Pearson_coeff_maps.values())[-1]]
             else:
                 data[model_name][analysis_of_interest]['models'] = ['_'.join(os.path.dirname(name).split('_')[-2:]) for name in list(Pearson_coeff_maps.values())[-1]]
             R2_lists = list(zip(*R2_maps.values()))
@@ -782,25 +791,6 @@ def compute_t_test_for_model_comparison(
         # Pearson coefficient
         imgs = data[name]['Pearson_coeff']
         create_one_sample_t_test(name + '_Pearson_coeff', imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=vmax)
-
-#def anova(data, anova_type, dv, within=None, between=None, subject=None, detailed=True, correction=False, effsize='np2', method='pearson', padjust='fdr_bh', columns=None):
-#    """Compute various ANOVA type analysis on data. Available functions are:
-#    anova, rm_anova, pairwise_ttests, mixed_anova, pairwise_corr.
-#    """
-#    if anova_type=='anova':
-#        result = pg.anova(data=data, dv=dv, between=between, detailed=detailed)
-#    elif anova_type=='rm_anova':
-#        result = pg.rm_anova(data=data, dv=dv, within=within, subject=subject, detailed=detailed)
-#    elif anova_type=='pairwise_ttests':
-#        result = pg.pairwise_ttests(data=data, dv=dv, within=within, subject=subject,
-#                             parametric=True, padjust=padjust, effsize='hedges')
-#    elif anova_type=='mixed_anova':
-#        result = pg.mixed_anova(data=data, dv=dv, between=between, within=within,
-#                     subject=subject, correction=False, effsize=effsize)
-#    elif anova_type=='pairwise_corr':
-#        result = pg.pairwise_corr(data, columns=columns, method=method)
-#    pg.print_table(result, floatfmt='.3f')
-#    return result
 
 def inter_subject_correlation(
     masker, 

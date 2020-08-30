@@ -20,6 +20,8 @@ It then apply sequentially the functions in self.functions on each item of its i
 
 from utils import merge_dict, filter_args, save
 from tqdm import tqdm
+import gc
+
 
 
 
@@ -134,8 +136,8 @@ class Task(object):
             inputs_ =  list(zip(*[self.flatten_(parent.output, index) for index, parent in enumerate(self.input_dependencies)])) # regroup dictionaries outputs from parent tasks
             inputs_ = [list(item) for item in inputs_] # transform tuple to list -> problematic when 1 single parent
             inputs = [merge_dict(items) for items in inputs_]
-            for input_ in tqdm(inputs):
-                input_tmp = input_.copy()
+            for input_tmp in tqdm(inputs):
+                gc.collect()
                 for func in self.functions:
                     input_tmp = filter_args(func, input_tmp)
                     input_tmp = func(**input_tmp)

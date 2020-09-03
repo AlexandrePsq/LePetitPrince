@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 General framework regrouping the different splitting strategies possible to integrate in the 
 regression analysis pipeline.

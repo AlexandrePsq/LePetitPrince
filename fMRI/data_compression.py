@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 General framework regrouping various compression methods to be performed on the data.
 ===================================================

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 General class to pipe the different steps of the encoding analysis.
 Allows flexible result aggregation between the functions of the defined flow.

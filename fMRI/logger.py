@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from utils import write
 import matplotlib.pyplot as plt

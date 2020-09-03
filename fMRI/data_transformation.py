@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 General framework regrouping various methods to perform transformations of the data.
 ===================================================

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 General class for estimator models: fit an array of regressors to fMRI data.
 ===================================================

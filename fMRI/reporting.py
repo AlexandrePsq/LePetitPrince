@@ -700,7 +700,7 @@ def create_one_sample_t_test(
         colorbar=True,
         plot_abs=False,
         display_mode='lzry',
-        title=None, 
+        title=name + ' - Effect size ', 
         vmax=vmax)
     if output_dir:
         nib.save(eff_map, os.path.join(output_dir, "{}_group_effect.nii.gz".format(name)))
@@ -710,14 +710,14 @@ def create_one_sample_t_test(
     #thr = thresholded_zmap.get_data()
     thr = np.abs(z_map.get_data())
     eff = eff_map.get_data()
-    thr_eff = eff * (thr > 3.09) # ? z_th ?
+    thr_eff = eff * (thr > z_th) # 3.09
     eff_thr_map = new_img_like(eff_map, thr_eff)
     display = plotting.plot_glass_brain(
         smooth_img(eff_thr_map, fwhm=fwhm),
         colorbar=True,
         plot_abs=False,
         display_mode='lzry',
-        title=None,
+        title=name + ' - Effect size (Pfdr<{}'.format(p_val),
         vmax=vmax)
     if output_dir:
         nib.save(eff_thr_map, os.path.join(output_dir, "{}_group_fdr_effect.nii.gz".format(name)))
@@ -725,6 +725,7 @@ def create_one_sample_t_test(
     else:
         plotting.show()
     plt.close('all')
+    return new_img_like(eff_map, (thr > z_th))
 
 def compute_t_test_for_layer_analysis(
     data, 
@@ -756,7 +757,7 @@ def compute_model_contrasts_t_test(
     model1_name, 
     model2_name, 
     analysis_name,
-    observed_data='R2',
+    observed_data='Pearson_coeff',
     language='english',
     smoothing_fwhm=6,
     PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
@@ -768,10 +769,13 @@ def compute_model_contrasts_t_test(
         i1 = nib.load(img1)
         i2 = nib.load(img2)
         imgs.append(new_img_like(i1, i1.get_data() - i2.get_data()))
-    name = '{}-vs-{}_{}'.format(model1_name, model2_name, analysis_name)
+    name = '{}-vs-{}'.format(model1_name, model2_name)
+    if analysis_name != '':
+        name += '_' + analysis_name
     output_dir = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, name))
     check_folder(output_dir)
-    create_one_sample_t_test(name + '_' + observed_data, imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=None)
+    threshold = create_one_sample_t_test(name + '_' + observed_data, imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=None)
+    return threshold
 
 
 def compute_t_test_for_model_comparison(

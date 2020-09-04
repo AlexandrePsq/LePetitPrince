@@ -18,7 +18,6 @@ from nilearn.image import math_img, mean_img, resample_to_img, index_img
 from nilearn.input_data import NiftiMasker
 from nilearn.plotting import plot_glass_brain, plot_img
 
-PROJECT_PATH = "/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"
 
 
 #########################################
@@ -387,7 +386,13 @@ def save_masker(masker, path):
     save_yaml(params, path + '.yml')
 
 
-def get_roi_mask(atlas_maps, index_mask, labels, path=None, global_mask=None):
+def get_roi_mask(
+    atlas_maps, 
+    index_mask, 
+    labels, 
+    path=None, 
+    global_mask=None, 
+    PROJECT_PATH="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"):
     """Return the Niftimasker object for a given ROI based on an atlas.
     Optionally resampled based on a global masker.  
     """

@@ -202,14 +202,14 @@ def extract_roi_data(map_, masker, threshold_img=None, voxels_filter=None):
         size = np.nan
     return mean, third_quartile, maximum, size
 
-def fit_per_roi(maps, atlas_maps, labels, global_mask, threshold_img=None, voxels_filter=None):
+def fit_per_roi(maps, atlas_maps, labels, global_mask, PROJECT_PATH, threshold_img=None, voxels_filter=None):
     print("\tLooping through labeled masks...")
     mean = np.zeros((len(labels), len(maps)))
     third_quartile = np.zeros((len(labels), len(maps)))
     maximum = np.zeros((len(labels), len(maps)))
     size = np.zeros((len(labels), len(maps)))
     for index_mask in tqdm(range(len(labels))):
-        masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
+        masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask, PROJECT_PATH=PROJECT_PATH)
         results = Parallel(n_jobs=-2)(delayed(extract_roi_data)(
             map_, 
             masker, 
@@ -249,7 +249,7 @@ def get_data_per_roi(
             maps.append(fetch_map(path, name)[0])
         plot_name = ["Model comparison"]
         # extract data
-        mean, third_quartile, maximum, size = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter)
+        mean, third_quartile, maximum, size = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter, PROJECT_PATH=PROJECT_PATH)
         result = {
                     'maximum': maximum,
                     'third_quartile': third_quartile,
@@ -276,7 +276,7 @@ def get_data_per_roi(
                 plot_name = ["{} for {}".format(model_name, key)]
 
                 # extract data
-                mean, third_quartile, maximum, size = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter)
+                mean, third_quartile, maximum, size = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter, PROJECT_PATH=PROJECT_PATH)
                 print("\t\t-->Done")
                 # Small reordering of models so that layers are in increasing order
                 if key=='Hidden-layers':
@@ -363,7 +363,8 @@ def prepare_data_for_anova(
     voxels_filter=None,
     object_of_interest='R2', 
     language='english', 
-    OUTPUT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/english'
+    OUTPUT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/english',
+    PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     ):
     print("\tLooping through labeled masks...")
     result = []
@@ -379,7 +380,7 @@ def prepare_data_for_anova(
             }
 
     for index_mask in tqdm(range(len(labels))):
-        masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask)
+        masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask, PROJECT_PATH=PROJECT_PATH)
         result.append(Parallel(n_jobs=-2)(delayed(extract_model_data)(masker, data[name], object_of_interest, name, labels[index_mask], threshold_img=threshold_img, voxels_filter=voxels_filter) for name in data.keys()))
     result = [item for sublist_mask in result for subsublist_model in sublist_mask for item in subsublist_model]
     result = pd.DataFrame(result, columns=['model', 'subject', 'ROI', '{}_mean'.format(object_of_interest), '{}_median'.format(object_of_interest), '{}_3rd_quartile'.format(object_of_interest), '{}_size'.format(object_of_interest)])
@@ -550,7 +551,7 @@ def horizontal_plot(
     ax.tick_params(axis='y', labelsize=12)
     plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='y')
     plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='x')
-    plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.1, axis='x')
+    plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.1, axis='y')
     plt.legend(roi_names, ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=10)
 
     plt.tight_layout()

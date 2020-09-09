@@ -35,9 +35,9 @@ from sklearn.decomposition import FastICA
 from sklearn import manifold
 from sklearn.neighbors import kneighbors_graph
 from nilearn.regions import RegionExtractor
+from nistats.second_level_model import SecondLevelModel
 from nistats.thresholding import map_threshold
 from sklearn.cluster import AgglomerativeClustering, KMeans
-from nistats.second_level_model import SecondLevelModel
 from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img, new_img_like
 from nilearn.input_data import NiftiMasker
 from nilearn.plotting import plot_surf_roi
@@ -726,7 +726,7 @@ def create_one_sample_t_test(
     else:
         plotting.show()
     plt.close('all')
-    return new_img_like(eff_map, (thr > z_th))
+    return new_img_like(eff_map, (thr > z_th)), (thr > z_th)
 
 def compute_t_test_for_layer_analysis(
     data, 
@@ -775,27 +775,30 @@ def compute_model_contrasts_t_test(
         name += '_' + analysis_name
     output_dir = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, name))
     check_folder(output_dir)
-    threshold = create_one_sample_t_test(name + '_' + observed_data, imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=None)
-    return threshold
+    threshold_img, mask = create_one_sample_t_test(name + '_' + observed_data, imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=None)
+    return threshold_img, mask
 
 
 def compute_t_test_for_model_comparison(
     data, 
+    name,
     smoothing_fwhm=None, 
     language='english',
     vmax=None,
     PROJECT_PATH='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/'
     ):
-    for name in data.keys():
-        # R2
-        name = name.replace('_{}', '')
-        imgs = data[name]['R2']
-        output_dir = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, name))
-        check_folder(output_dir)
-        create_one_sample_t_test(name + '_R2', imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=vmax)
-        # Pearson coefficient
-        imgs = data[name]['Pearson_coeff']
-        create_one_sample_t_test(name + '_Pearson_coeff', imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=vmax)
+    # R2
+    name = name.replace('_{}', '')
+    imgs = data[name]['R2']
+    output_dir = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, name))
+    check_folder(output_dir)
+    name_tmp = name.replace('.', '')
+    _, _ = create_one_sample_t_test(name_tmp + '_R2', imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=vmax)
+    # Pearson coefficient
+    imgs = data[name]['Pearson_coeff']
+    threshold_img, mask = create_one_sample_t_test(name_tmp + '_Pearson_coeff', imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=vmax)
+    return threshold_img, mask
+
 
 def inter_subject_correlation(
     masker, 

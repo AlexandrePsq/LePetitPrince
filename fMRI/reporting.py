@@ -200,7 +200,8 @@ def extract_roi_data(map_, masker, threshold_img=None, voxels_filter=None):
         third_quartile = np.nan
         mean = np.nan
         size = np.nan
-    return mean, third_quartile, maximum, size
+        array = np.nan
+    return mean, third_quartile, maximum, size, array
 
 def fit_per_roi(maps, atlas_maps, labels, global_mask, PROJECT_PATH, threshold_img=None, voxels_filter=None):
     print("\tLooping through labeled masks...")
@@ -208,6 +209,7 @@ def fit_per_roi(maps, atlas_maps, labels, global_mask, PROJECT_PATH, threshold_i
     third_quartile = np.zeros((len(labels), len(maps)))
     maximum = np.zeros((len(labels), len(maps)))
     size = np.zeros((len(labels), len(maps)))
+    distribution = []
     for index_mask in tqdm(range(len(labels))):
         masker = get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask, PROJECT_PATH=PROJECT_PATH)
         results = Parallel(n_jobs=-2)(delayed(extract_roi_data)(
@@ -221,10 +223,10 @@ def fit_per_roi(maps, atlas_maps, labels, global_mask, PROJECT_PATH, threshold_i
         third_quartile[index_mask, :] = np.hstack(np.array(results[1]))
         maximum[index_mask, :] = np.hstack(np.array(results[2]))
         size[index_mask, :] = np.hstack(np.array(results[3]))
-            
+        distribution.append(results[4])
             
     print("\t\t-->Done")
-    return mean, third_quartile, maximum, size
+    return mean, third_quartile, maximum, size, distribution
 
 def get_data_per_roi(
     data, 
@@ -249,7 +251,7 @@ def get_data_per_roi(
             maps.append(fetch_map(path, name)[0])
         plot_name = ["Model comparison"]
         # extract data
-        mean, third_quartile, maximum, size = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter, PROJECT_PATH=PROJECT_PATH)
+        mean, third_quartile, maximum, size, distribution = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter, PROJECT_PATH=PROJECT_PATH)
         result = {
                     'maximum': maximum,
                     'third_quartile': third_quartile,
@@ -257,7 +259,8 @@ def get_data_per_roi(
                     'models': data.keys(),
                     'labels': labels,
                     'plot_name': '',
-                    'size': size
+                    'size': size,
+                    'distribution': distribution,
                 }
     else:
         result = {}
@@ -276,7 +279,7 @@ def get_data_per_roi(
                 plot_name = ["{} for {}".format(model_name, key)]
 
                 # extract data
-                mean, third_quartile, maximum, size = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter, PROJECT_PATH=PROJECT_PATH)
+                mean, third_quartile, maximum, size, distribution = fit_per_roi(maps, atlas_maps, labels, global_mask=global_mask, threshold_img=threshold_img, voxels_filter=voxels_filter, PROJECT_PATH=PROJECT_PATH)
                 print("\t\t-->Done")
                 # Small reordering of models so that layers are in increasing order
                 if key=='Hidden-layers':
@@ -284,18 +287,21 @@ def get_data_per_roi(
                     third_quartile = np.hstack([third_quartile[:, :2], third_quartile[:,5:], third_quartile[:,2:5]])
                     maximum = np.hstack([maximum[:, :2], maximum[:,5:], maximum[:,2:5]])
                     size = np.hstack([size[:, :2], size[:,5:], size[:,2:5]])
+                    distribution = distribution[:2] + distribution[5:] + distribution[2:5]
                     models = np.hstack([models[:2], models[5:], models[2:5]])
                 elif key=='Attention-layers':
                     mean = np.hstack([mean[:, :1], mean[:,4:], mean[:,1:4]])
                     third_quartile = np.hstack([third_quartile[:, :1], third_quartile[:,4:], third_quartile[:,1:4]])
                     maximum = np.hstack([maximum[:, :1], maximum[:,4:], maximum[:,1:4]])
                     size = np.hstack([size[:, :1], size[:,4:], size[:,1:4]])
+                    distribution = distribution[:1] + distribution[4:] + distribution[1:4]
                     models = np.hstack([models[:1], models[4:], models[1:4]])
                 elif key=='Specific-attention-heads': 
                     mean = mean[:, attention_head_reordering]
                     third_quartile = third_quartile[:, attention_head_reordering]
                     maximum = maximum[:, attention_head_reordering]
                     size = size[:, attention_head_reordering]
+                    distribution = np.array(distribution)[attention_head_reordering]
                     models = models[attention_head_reordering]
                 result[key].append({
                     'maximum': maximum,
@@ -304,7 +310,8 @@ def get_data_per_roi(
                     'models': models,
                     'labels': labels,
                     'plot_name': plot_name,
-                    'size': size
+                    'size': size,
+                    'distribution': distribution,
                 })
     return result
 

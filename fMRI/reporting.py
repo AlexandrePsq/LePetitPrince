@@ -336,7 +336,7 @@ def get_voxel_wise_max_img_on_surf(
     img = np.argmax(data_tmp, axis=0)
     return img
 
-def extract_model_data(masker, data, object_of_interest, name, label, threshold_img=None, voxels_filter=None):
+def extract_model_data(masker, data, object_of_interest, name, label, threshold_img=None, voxels_filter=None, threshold_zero=10**8):
     result = []
     for subject in data.keys():
         try:
@@ -347,7 +347,7 @@ def extract_model_data(masker, data, object_of_interest, name, label, threshold_
                     mask = threshold >= voxels_filter
                     array = array[mask]
                     threshold = threshold[mask]
-                threshold[threshold==0.0] = 10**8 # due to some voxel equal to 0 in threshold image we have nan value
+                threshold[threshold==0.0] = threshold_zero # due to some voxel equal to 0 in threshold image we have nan value
                 array = np.divide(array, threshold)
             mean = np.mean(array)
             median = np.median(array)
@@ -512,8 +512,8 @@ def vertical_plot(
     plt.tight_layout()
     check_folder(save_folder)
     if save_folder:
-        plt.savefig(os.path.join(save_folder, '{model_name}-{analysis_name}.png'.format(model_name=model_name,
-                                                                                        analysis_name=analysis_name)))
+        plt.savefig(os.path.join(save_folder, '{model_name}-{analysis_name}.svg'.format(model_name=model_name,
+                                                                                        analysis_name=analysis_name)), format='svg')
         plt.close('all')
     else:
         plt.show()
@@ -523,6 +523,7 @@ def horizontal_plot(
     model_names, 
     analysis_name,  
     roi_names,
+    order = None,
     title=None,
     figsize=(9,20), 
     save_folder=None,
@@ -531,6 +532,7 @@ def horizontal_plot(
     plot_name='',
     percentage=False,
     rotation=0.,
+    plot_legend=True,
     x_limit=None,
     y_limit=None
     ):
@@ -539,7 +541,7 @@ def horizontal_plot(
     surnames = load_surnames()
     plt.figure(figsize=figsize) # (7.6,12)
     ax = plt.axes()
-    order = np.argsort(np.mean(data, axis=1))
+    order = np.argsort(np.mean(data, axis=1)) if order is None else order
     roi_names = [surnames[roi_names[i]] for i in order]
     if percentage:
         data = data * 100
@@ -559,17 +561,19 @@ def horizontal_plot(
     plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='y')
     plt.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='x')
     plt.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.1, axis='y')
-    plt.legend(roi_names, ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=10)
+    if plot_legend:
+        plt.legend(roi_names, ncol=3, bbox_to_anchor=(0,0,1,1), fontsize=10)
 
     plt.tight_layout()
     check_folder(save_folder)
     plt.title(title)
     if save_folder is not None:
-        plt.savefig(os.path.join(save_folder, '{plot_name}-{analysis_name}.png'.format(plot_name=plot_name,
-                                                                                        analysis_name=analysis_name)))
+        plt.savefig(os.path.join(save_folder, '{plot_name}-{analysis_name}.svg'.format(plot_name=plot_name,
+                                                                                        analysis_name=analysis_name)), format='svg')
     else:
         plt.show()
     plt.close('all')
+    return order
 
 def clever_plot(
     data, 
@@ -581,9 +585,11 @@ def clever_plot(
     title='',
     ylabel='',
     xlabel='',
+    order=None,
     plot_name='Model_comparison',
     figsize=(15,12),
     percentage=False,
+    plot_legend=True,
     rotation=0.,
     x_limit=None,
     y_limit=None
@@ -596,12 +602,14 @@ def clever_plot(
             data_filtered.append(data[labels.index(name), :])
             legends.append(name)
     data_filtered = np.vstack(data_filtered)
-    horizontal_plot(
+    order = horizontal_plot(
         data_filtered, 
         model_names, 
         analysis_name=analysis_name, 
         save_folder=save_folder, 
         roi_names=legends,
+        plot_legend=plot_legend,
+        order=order,
         title=title,
         figsize=figsize, 
         ylabel=ylabel, 
@@ -612,6 +620,7 @@ def clever_plot(
         x_limit=x_limit,
         y_limit=y_limit
         )
+    return order
 
 def interactive_surf_plot(surf_img, inflated=False, cmap='gist_ncar', compute_surf=True, symmetric_cmap=False, **kwargs):
     fsaverage = datasets.fetch_surf_fsaverage()
@@ -667,7 +676,6 @@ def create_one_sample_t_test(
     model = model.fit(maps,
                       design_matrix=design_matrix)
     z_map = model.compute_contrast(output_type='z_score')
-    p_val = p_val
     z_th = norm.isf(p_val)  # 3.09
     display = plotting.plot_glass_brain(
         z_map,
@@ -715,10 +723,9 @@ def create_one_sample_t_test(
         display.savefig(os.path.join(output_dir, "{}_group_effect".format(name)))
     else:
         plotting.show()
-    #thr = thresholded_zmap.get_data()
-    thr = np.abs(z_map.get_data())
+    thr = np.abs(thresholded_zmap.get_data())
     eff = eff_map.get_data()
-    thr_eff = eff * (thr > z_th) # 3.09
+    thr_eff = eff * (np.abs(thr) > z_th) # 3.09
     eff_thr_map = new_img_like(eff_map, thr_eff)
     display = plotting.plot_glass_brain(
         smooth_img(eff_thr_map, fwhm=fwhm),
@@ -733,7 +740,7 @@ def create_one_sample_t_test(
     else:
         plotting.show()
     plt.close('all')
-    return new_img_like(eff_map, (thr > z_th)), (thr > z_th)
+    return new_img_like(eff_map, (np.abs(thr) > z_th)), (np.abs(thr) > z_th), th, z_th
 
 def compute_t_test_for_layer_analysis(
     data, 
@@ -765,6 +772,8 @@ def compute_model_contrasts_t_test(
     model1_name, 
     model2_name, 
     analysis_name,
+    p_val=0.001,
+    fdr=0.01,
     observed_data='Pearson_coeff',
     language='english',
     smoothing_fwhm=6,
@@ -782,7 +791,7 @@ def compute_model_contrasts_t_test(
         name += '_' + analysis_name
     output_dir = os.path.join(PROJECT_PATH, 'derivatives/fMRI/analysis/{}/{}'.format(language, name))
     check_folder(output_dir)
-    threshold_img, mask = create_one_sample_t_test(name + '_' + observed_data, imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=None)
+    threshold_img, mask = create_one_sample_t_test(name + '_' + observed_data, imgs, output_dir, smoothing_fwhm=smoothing_fwhm, vmax=None, p_val=p_val, fdr=fdr)
     return threshold_img, mask
 
 
@@ -942,6 +951,7 @@ def aggregate_beta_maps(data, nb_layers=13, layer_size=768, attention_head_size=
     """Clustering of voxels or ROI based on their beta maps.
     maps: (#voxels x #features)
     """
+    result = data
     if isinstance(data, str):
         data = np.load(data)
     nb_layers = nb_layers

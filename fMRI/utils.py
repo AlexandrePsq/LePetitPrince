@@ -18,6 +18,8 @@ from nilearn.image import math_img, mean_img, resample_to_img, index_img
 from nilearn.input_data import NiftiMasker
 from nilearn.plotting import plot_glass_brain, plot_img
 
+from regressors import B2B_reg
+
 
 
 #########################################

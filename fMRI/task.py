@@ -20,6 +20,7 @@ It then apply sequentially the functions in self.functions on each item of its i
 """
 
 from utils import merge_dict, filter_args, save
+from joblib import Parallel, delayed
 from tqdm import tqdm
 import gc
 
@@ -31,7 +32,7 @@ class Task(object):
     possible to integrate in the pipeline.
     """
     
-    def __init__(self, functions=None, input_dependencies=[], name='', flatten_inputs=None, unflatten_output=None, special_output_transform=None):
+    def __init__(self, functions=None, input_dependencies=[], name='', flatten_inputs=None, unflatten_output=None, special_output_transform=None, parallel=False):
         """ Instanciation of a task.
         Arguments:
             - functions: list (of functions)
@@ -43,6 +44,7 @@ class Task(object):
         """
         self.input_dependencies = input_dependencies
         self.children = []
+        self.parallel=parallel
         self.terminated = False
         self.functions = functions
         self.name = name
@@ -131,18 +133,44 @@ class Task(object):
         if self.unflatten:
             self.output = [self.output[x : x + self.unflatten_factor] for x in range(0, len(self.output), self.unflatten_factor)]
     
+    def execute_on_singleton(self, input_tmp):
+        """ Execute task on single input."""
+        gc.collect()
+        for func in self.functions:
+            input_tmp = filter_args(func, input_tmp)
+            input_tmp = func(**input_tmp)
+        return input_tmp
+    
+    #def batchify_input(self, inputs, batch_size):
+    #    """ Batchify input list."""
+    #    batch = []
+    #    i = 0
+    #    while i < len(inputs):
+    #        batch.append(inputs[i:i+batch_size]
+    #        i += batch_size
+    #    return batch
+    
+    def execute_on_list(self, inputs):
+        """ Execute task on list of inputs."""
+        if self.parallel:
+            outputs = Parallel(n_jobs=1, verbose=0, max_nbytes=None)(delayed(self.execute_on_singleton)(
+                        input_tmp
+                    ) for input_tmp in inputs)
+            for output in outputs:
+                self.add_output(output)
+        else:
+            for input_tmp in tqdm(inputs):
+                input_tmp = self.execute_on_singleton(input_tmp)
+                self.add_output(input_tmp)
+    
     def execute(self):
         """ Execute all task functions on the serie of parents outputs."""
+        print(self.name)
         if not (self.is_waiting() or self.is_terminated()):
             inputs_ =  list(zip(*[self.flatten_(parent.output, index) for index, parent in enumerate(self.input_dependencies)])) # regroup dictionaries outputs from parent tasks
             inputs_ = [list(item) for item in inputs_] # transform tuple to list -> problematic when 1 single parent
             inputs = [merge_dict(items) for items in inputs_]
-            for input_tmp in tqdm(inputs):
-                gc.collect()
-                for func in self.functions:
-                    input_tmp = filter_args(func, input_tmp)
-                    input_tmp = func(**input_tmp)
-                self.add_output(input_tmp)
+            self.execute_on_list(inputs)
             self.set_terminated(True)
             self.unflatten_()
             if self.special_output_transform:

@@ -69,7 +69,8 @@ if __name__=='__main__':
 
     logs.info("Defining Pipeline flow...")
     splitter_cv_external = Task([splitter.split], 
-                                name='splitter_cv_external')
+                                name='splitter_cv_external'
+                               )
     ## Internal Pipeline
     splitter_cv_internal = Task([splitter.split], 
                                 input_dependencies=[splitter_cv_external],
@@ -84,13 +85,15 @@ if __name__=='__main__':
                                 input_dependencies=[splitter_cv_internal, compressor_internal],
                                 name='transform_data_internal', 
                                 flatten_inputs=[True, True], 
-                                unflatten_output='automatic') # functions in Task.functions are read left to right
+                                unflatten_output='automatic',
+                                parallel=parameters['parallel']) # functions in Task.functions are read left to right
     estimator_model_internal = Task([estimator_model.grid_search], 
                                 input_dependencies=[splitter_cv_internal, transform_data_internal],
                                 name='estimator_model_internal', 
                                 flatten_inputs=[True, True], 
                                 unflatten_output='automatic',
-                                special_output_transform=aggregate_cv)
+                                special_output_transform=aggregate_cv,
+                                parallel=parameters['parallel'])
     ## External Pipeline
     compressor_external = Task([compressor.compress], 
                                 input_dependencies=[splitter_cv_external, estimator_model_internal], 
@@ -99,11 +102,13 @@ if __name__=='__main__':
     transform_data_external = Task([transformer.make_regressor, transformer.scale], 
                                 input_dependencies=[splitter_cv_external, compressor_external], 
                                 name='transform_data_external', 
-                                flatten_inputs=[True, False])
+                                flatten_inputs=[True, False],
+                                parallel=parameters['parallel'])
     estimator_model_external = Task([estimator_model.evaluate], 
                                 input_dependencies=[splitter_cv_external, transform_data_external, estimator_model_internal], 
                                 name='estimator_model_external', 
-                                flatten_inputs=[True, False, False])
+                                flatten_inputs=[True, False, False],
+                                parallel=parameters['parallel'])
     
     # Creating tree structure (for output/input flow)
     splitter_cv_external.set_children_tasks([splitter_cv_internal, compressor_external])
@@ -137,6 +142,15 @@ if __name__=='__main__':
             output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], key)
             np.save(output_path + '.npy', maps_aggregated[key])
         logs.validate()
+        
+        if parameters['save_all_weights']:
+            logs.info("Saving non-aggregated weights...")
+            for key in maps[0].keys():
+                output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], key)
+                for run in range(1, len(maps) + 1):
+                    np.save(output_path + '_run{}.npy'.format(run), maps[run-1][key])
+            logs.validate()
+                  
         
         logs.info("Plotting...", end='\n')
         kwargs = {

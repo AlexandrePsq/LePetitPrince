@@ -396,7 +396,7 @@ def get_roi_mask(
     global_mask=None, 
     PROJECT_PATH="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"):
     """Return the Niftimasker object for a given ROI based on an atlas.
-    Optionally resampled based on a global masker.  
+    Optionally resampled based on a global masker. Remove ‘Background‘ from labels !!!
     """
     if path is None:
         check_folder(os.path.join(PROJECT_PATH, 'derivatives/fMRI/ROI_masks'))
@@ -404,7 +404,7 @@ def get_roi_mask(
     if os.path.exists(path + '.nii.gz') and os.path.exists(path + '.yml'):
         masker = load_masker(path)
     else:
-        mask = math_img('img=={}'.format(index_mask), img=atlas_maps)
+        mask = math_img('img=={}'.format(index_mask+1), img=atlas_maps)
         if global_mask:
             global_masker = nib.load(global_mask + '.nii.gz')
             mask = resample_to_img(mask, global_masker, interpolation='nearest')

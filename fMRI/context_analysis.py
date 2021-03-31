@@ -16,7 +16,6 @@ from scipy.stats import norm
 import statsmodels.api as sm 
 from sklearn import manifold
 from scipy.special import erf
-from scipy.stats import zscore
 from scipy.optimize import curve_fit
 from statsmodels.formula.api import ols
 from statsmodels.stats.multitest import fdrcorrection
@@ -74,9 +73,38 @@ TMP_FOLDER = f"/home/ap259944/tmp"
 
 logger = Logger(os.path.join(PROJECT_PATH, 'logs.txt'))
 
+plot_coords = [
+    [-48, 15, -27],
+    [-54, -12, -12],
+    [-51, -39, 3],
+    [-39, -57, 18],
+    [-45, 33, -6],
+    [-51, 21, 21],
+    [-42, 10, 22],
+    [-35, -10, 65],
+    [-61, -33, -6],
+    [-17, 30, 61],
+    [-43, 20, 49],
+    [-7, 0, 50],
+    [-23, 31, 48],
+    [-64, -42, 38],
+    [56, -41, 14],
+    [-26, -97, 5],
+    [-61, -11, -6],
+    [56, -41, -14],
+    [61, -22, -6],
+    [-61, -33, -7],
+    [-17, 30, 61],
+    [-43, 20, 49],
+    [-7, 0, 50],
+    [-64, -42, 38],
+    [-4, 46, 12],
+    [4, 0, 47],
+]
+
 ### Atlas definiton
 #atlas_maps, labels = reporting.load_atlas()
-atlas_detailed = nilearn.datasets.fetch_atlas_schaefer_2018(n_rois=1000, yeo_networks=17, resolution_mm=1, data_dir=None, base_url=None, resume=True, verbose=1)
+atlas_detailed = nilearn.datasets.fetch_atlas_schaefer_2018(n_rois=400, yeo_networks=17, resolution_mm=1, data_dir=None, base_url=None, resume=True, verbose=1)
 
 labels = [roi.decode("utf-8") for roi in atlas_detailed['labels']]
 atlas_maps = nilearn.image.load_img(atlas_detailed['maps'])
@@ -96,7 +124,7 @@ new_masker.set_params(detrend=False, standardize=False)
 
 
 params = global_masker_95.get_params()
-new_img = new_img_like(global_masker_95.mask_img, scipy.ndimage.binary_dilation(global_masker_95.mask_img.get_data()))
+new_img = new_img_like(global_masker_95.mask_img, scipy.ndimage.binary_dilation(global_masker_95.mask_img.get_fdata()))
 dilated_global_masker_95 = NiftiMasker()
 dilated_global_masker_95.set_params(**params)
 dilated_global_masker_95.mask_img = new_img
@@ -182,8 +210,8 @@ def voxel_masker(coords, img, plot=False, **kwargs_masker):
     translation = img.affine[:3, 3]
     data_coords = np.matmul(np.linalg.inv(affine), np.array(coords) - translation)
     a,b,c = np.apply_along_axis(lambda x: np.round(x, 0), 0, data_coords).astype(int)
-    value = img.get_data()[a, b, c]
-    new_data = np.zeros(img.get_data().shape)
+    value = img.get_fdata()[a, b, c]
+    new_data = np.zeros(img.get_fdata().shape)
     new_data[a,b,c] = 1
     masker = nilearn.input_data.NiftiMasker(new_img_like(img, new_data))
     masker.set_params(**kwargs_masker)
@@ -227,7 +255,6 @@ def create_one_sample_t_test(
     model = model.fit(maps,
                       design_matrix=design_matrix)
     z_map = model.compute_contrast(output_type='z_score')
-    p_val = p_val
     z_th = norm.isf(p_val, loc=loc, scale=scale)  # 3.09
 
     # apply fdr to zmap
@@ -242,14 +269,14 @@ def create_one_sample_t_test(
     # effect size-map
     eff_map = model.compute_contrast(output_type='effect_size')
 
-    thr = np.abs(thresholded_zmap.get_data())
+    thr = np.abs(thresholded_zmap.get_fdata())
  
     return z_map, eff_map, new_img_like(eff_map, (thr > z_th)), (thr > z_th)
 
 def dilate_img(img):
     if type(img)==str:
         img = nib.load(img)
-    data = img.get_data()
+    data = img.get_fdata()
     new_data = dilate_data(data)
     new_img = new_img_like(img, new_data)
     return new_img
@@ -303,8 +330,7 @@ def get_group_information(
     sample_size=50,
 ):
     data = []
-    all_results = {}
-    saving_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/median_{}.npy'.format(model_type)
+    saving_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/median_{}_fdr-{}.npy'.format(model_type, fdr)
     model_folder = os.path.join(PROJECT_PATH, 'derivatives/fMRI/context/english/{}_fdr-{}_pval-{}'.format(model_type, fdr, p_val))
     utils.check_folder(model_folder)
     logs_path = os.path.join(model_folder, 'logs.txt')
@@ -333,13 +359,13 @@ def get_group_information(
         np.save(saving_path, data)
     
     if bootstrap:
-        context_sizes, z_map, eff_map, img_mask, array_mask = context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_maps, n_times=n_times, sample_size=sample_size, voxel_wise=voxel_wise, masker=masker, method=method, factor=factor, plot=plot, titles=['Signal per subject with {}'.format(model_type), 'Scaled signal per subject with {}'.format(model_type)], PROJECT_PATH=PROJECT_PATH, p_val=p_val, fdr=fdr, plot_coords=plot_coords)
+        context_sizes, z_map, eff_map, img_mask, array_mask = context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_maps, n_times=n_times, sample_size=sample_size, voxel_wise=voxel_wise, masker=masker, method=method, factor=factor, plot=plot, titles=['Signal per subject', 'Scaled signal per subject'], PROJECT_PATH=PROJECT_PATH, p_val=p_val, fdr=fdr, plot_coords=plot_coords)
     else:
         context_sizes, z_map, eff_map, img_mask, array_mask = context_analysis(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=voxel_wise, masker=masker, method=method, factor=factor, plot=plot, titles=['Signal per subject with {}'.format(model_type), 'Scaled signal per subject with {}'.format(model_type)], PROJECT_PATH=PROJECT_PATH, p_val=p_val, fdr=fdr, plot_coords=plot_coords)
     
     return context_sizes, z_map, eff_map, img_mask, array_mask
 
-def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=False, masker=dilated_global_masker_95, method='mean', n_times=100, sample_size=50, factor=0, plot=False, cst=0, titles=['', ''], PROJECT_PATH=PROJECT_PATH, fdr=0.01, p_val=0.001, plot_coords=[]):
+def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=False, masker=dilated_global_masker_95, method='mean', n_times=100, sample_size=50, factor=0, plot=False, cst=0, titles=['', ''], PROJECT_PATH=PROJECT_PATH, fdr=0.01, p_val=0.001, plot_coords=plot_coords):
     """Do regional context analysis.
     """
     model_folder = os.path.join(PROJECT_PATH, 'derivatives/fMRI/context/english/{}_fdr-{}_pval-{}'.format(model_type, fdr, p_val))
@@ -347,6 +373,8 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
     utils.check_folder(model_folder)
     tmp_path = os.path.join(model_folder, 'tmp_slopes_{}_fdr-{}.npy'.format(model_type, fdr))
     scaled_data_path = os.path.join(model_folder, 'scaled_data_{}_fdr-{}.npy'.format(model_type, fdr))
+    data_path = os.path.join(model_folder, 'data_{}_fdr-{}.npy'.format(model_type, fdr))
+    np.save(data_path, data) # size: (#models, #voxels, #subjects)
     dimensions = atlas_maps.shape
     if os.path.exists(tmp_path) and os.path.exists(scaled_data_path):
         utils.write(logs_path, 'Resuming operations...')
@@ -392,9 +420,8 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
         tstat, pvalue = scipy.stats.ttest_1samp(tmp, 0, axis=1, alternative='greater')
         tstat[np.isnan(tstat)] = 0
         pvalue[np.isnan(pvalue)] = 1
-        z_values = zscore(tstat)
+        z_values = norm.isf(pvalue)
         significant_values, corrected_pvalues = fdrcorrection(pvalue, alpha=fdr, method='indep', is_sorted=False)
-        significant_values[0] = False
         np.save(os.path.join(model_folder, 'significant-values_{}_fdr-{}.npy'.format(model_type, fdr)), significant_values)
         np.save(os.path.join(model_folder, 'corrected-pvalues_{}_fdr-{}.npy'.format(model_type, fdr)), corrected_pvalues)
         img_mask = nilearn.image.new_img_like(atlas_maps, np.stack([np.zeros((dimensions[1], dimensions[2])) for i in range(dimensions[0])], axis=0))
@@ -404,7 +431,7 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
         for index_mask, value in tqdm(enumerate(significant_values)):
             value = int(value)
             if value: #(index_mask != 0) and
-                mask_ = math_img('img=={}'.format(index_mask), img=atlas_maps)
+                mask_ = math_img('img=={}'.format(index_mask+1), img=atlas_maps)
                 # mask img
                 img_mask = math_img(f"img1 + img2*{index_mask+1}", img1=img_mask, img2=mask_)
                 # Z map
@@ -413,7 +440,7 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
                 # eff map
                 mask_eff = math_img('img * {}'.format(tstat[index_mask]), img=mask_)
                 eff_map = math_img("img1 + img2", img1=eff_map, img2=mask_eff)
-        array_mask = img_mask.get_data()
+        array_mask = img_mask.get_fdata()
     
     nib.save(z_map, os.path.join(model_folder, 'zmap_{}_fdr-{}.nii.gz'.format(model_type, fdr)))
     nib.save(eff_map, os.path.join(model_folder, 'eff-map_{}_fdr-{}.nii.gz'.format(model_type, fdr)))
@@ -488,15 +515,16 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
                 X, 
                 data[:, index_label, :], 
                 titles[0], 
-                'Number of tokens', 
-                'R value'
+                'Context size', 
+                'R value',
+                bbox={'facecolor': title_color, 'alpha': 0.5, 'pad': 10}
             )
             format_ax(
                 ax3, 
                 X, 
                 scaled_data[:, index_label, :], 
                 titles[1], 
-                'Number of tokens', 
+                'Context size', 
                 'Scaled R value',
                 vertical_line=context_sizes[index_label]
             )
@@ -523,8 +551,9 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
                 }
             _, _, data_coords = voxel_masker(coords, masker.mask_img, plot=False, **kwargs_masker)
             index = extract_voxel_data(masker, data_coords)[0][0]
+            title_color = 'green' if significant_values[index] else 'red'
             
-            fig1 = plt.figure(figsize=(20, 10))
+            fig1 = plt.figure(figsize=(20, 5))
             gs = fig1.add_gridspec(2, 2, height_ratios=[10, 90])
 
             ax1 = fig1.add_subplot(gs[0, :])
@@ -540,23 +569,24 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
                 X, 
                 data[:, index, :], 
                 titles[0], 
-                'Number of tokens', 
-                'R value'
+                'Context size', 
+                'R value',
+                bbox={'facecolor': title_color, 'alpha': 0.5, 'pad': 10}
             )
             format_ax(
                 ax3, 
                 X, 
                 scaled_data[:, index, :], 
                 titles[1], 
-                'Number of tokens', 
+                'Context size', 
                 'Scaled R value',
-                vertical_line=context_sizes[index]
+                vertical_line=np.mean(np.stack(context_sizes_all, axis=0), axis=0)[index]
             )
-            title_color = 'green' if significant_values[index] else 'red'
-            plt.suptitle(label + ' - ' + model_type, fontsize=40, bbox={'facecolor': title_color, 'alpha': 0.5, 'pad': 10})
+            #plt.suptitle(label + ' - ' + model_type, fontsize=40, bbox={'facecolor': title_color, 'alpha': 0.5, 'pad': 10})
             plt.subplots_adjust(top=2, bottom=0.1, left=0.125, right=0.9, hspace=0.2, wspace=0.2)
             plt.tight_layout()
-            plt.savefig('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/raw_figures/{}_{}_method-{}_significant-factor-{}.png'.format(model_type, label.replace(' ', '-'), method, factor))
+            saving_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/raw_figures/{}_{}_method-{}_significant-factor-{}.png'.format(model_type, label.replace(' ', '-'), method, factor)
+            plt.savefig(saving_path, bbox_inches = 'tight', pad_inches = 0)
             plt.show()
     return context_sizes, z_map, eff_map, img_mask, array_mask
 
@@ -615,22 +645,21 @@ def context_analysis(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_w
         effect_sizes = np.array(masker.transform(eff_map)[0])
     
     else:
-        tstat, pvalue = scipy.stats.ttest_1samp(tmp, 0, axis=1)
+        tstat, pvalue = scipy.stats.ttest_1samp(tmp, 0, axis=1, alternative='greater')
         tstat[np.isnan(tstat)] = 0
         pvalue[np.isnan(pvalue)] = 1
-        z_values = zscore(tstat)
+        z_values = norm.isf(pvalue)
         significant_values, corrected_pvalues = fdrcorrection(pvalue, alpha=fdr, method='indep', is_sorted=False)
-        significant_values[0] = False
         np.save(os.path.join(model_folder, 'significant-values_{}_fdr-{}.npy'.format(model_type, fdr)), significant_values)
         np.save(os.path.join(model_folder, 'corrected-pvalues_{}_fdr-{}.npy'.format(model_type, fdr)), corrected_pvalues)
         img_mask = nilearn.image.new_img_like(atlas_maps, np.stack([np.zeros((dimensions[1], dimensions[2])) for i in range(dimensions[0])], axis=0))
         z_map = nilearn.image.new_img_like(atlas_maps, np.stack([np.zeros((dimensions[1], dimensions[2])) for i in range(dimensions[0])], axis=0))        
-        eff_map = nilearn.image.new_img_like(atlas_maps, np.stack([np.zeros((dimensions[1], dimensions[2])) for i in range(dimensions[0])], axis=0))        
+        eff_map = nilearn.image.new_img_like(atlas_maps, np.stack([np.zeros((dimensions[1], dimensions[2])) for i in range(dimensions[0])], axis=0))
         
         for index_mask, value in tqdm(enumerate(significant_values)):
             value = int(value)
-            if (index_mask != 0) and value:
-                mask_ = math_img('img=={}'.format(index_mask), img=atlas_maps)
+            if value:
+                mask_ = math_img('img=={}'.format(index_mask+1), img=atlas_maps)
                 # mask img
                 img_mask = math_img("img1 + img2", img1=img_mask, img2=mask_)
                 # Z map
@@ -639,7 +668,7 @@ def context_analysis(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_w
                 # eff map
                 mask_eff = math_img('img * {}'.format(tstat[index_mask]), img=mask_)
                 eff_map = math_img("img1 + img2", img1=eff_map, img2=mask_eff)
-        array_mask = img_mask.get_data()
+        array_mask = img_mask.get_fdata()
     
     nib.save(z_map, os.path.join(model_folder, 'zmap_{}_fdr-{}.nii.gz'.format(model_type, fdr)))
     nib.save(eff_map, os.path.join(model_folder, 'eff-map_{}_fdr-{}.nii.gz'.format(model_type, fdr)))
@@ -802,7 +831,7 @@ def linear_fit(x, y, num_points):
     Y = np.array([a * item + b for item in X])
     return X, Y
 
-def format_ax(ax, X, data, title, xlabel, ylabel, confidence_interval=95, vertical_line=None):
+def format_ax(ax, X, data, title, xlabel, ylabel, confidence_interval=95, vertical_line=None, bbox=None):
     """Format a matplotlib ax with given data and information...
     """
     dataframe = pd.DataFrame()
@@ -812,12 +841,12 @@ def format_ax(ax, X, data, title, xlabel, ylabel, confidence_interval=95, vertic
     dataframe.columns = ['X', 'subject_id', 'Y']
     plot_ = sns.lineplot(data=dataframe, x='X', y='Y', ci=confidence_interval, ax=ax, estimator=np.median, legend='brief')
     ax.plot(X, data, c='black', alpha=0.2)
-    ax.tick_params(axis='y', labelsize=20)
-    ax.set_title(title, fontsize=30)
-    ax.tick_params(axis='x', labelsize=10, rotation=0)
+    ax.tick_params(axis='y', labelsize=15)
+    ax.set_title(title, fontsize=30, bbox=bbox)
+    ax.tick_params(axis='x', labelsize=15, rotation=0)
     ax.minorticks_on()
-    ax.set_xlabel(xlabel, fontsize=18)
-    ax.set_ylabel(ylabel, fontsize=18)
+    ax.set_xlabel(xlabel, fontsize=20)
+    ax.set_ylabel(ylabel, fontsize=20)
     ax.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='y')
     ax.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='x')
     ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.1, axis='y')
@@ -988,7 +1017,7 @@ if __name__=='__main__':
     model_type = parameters['model_type']
     bootstrap = parameters['bootstrap']
 
-    data_full = reporting.get_model_data(model_names, language, OUTPUT_PATH)
+    data_full = reporting.get_model_data(model_names, language, OUTPUT_PATH=OUTPUT_PATH)
     maps = [data_full[name]['Pearson_coeff'] for name in data_full.keys()]
 
     # Per Voxels
@@ -1008,15 +1037,17 @@ if __name__=='__main__':
     #        bootstrap=bootstrap,
     #        n_times=100, 
     #        sample_size=50,
+    #        plot_coords=plot_coords,
     #    )
-    
+    #
     # Per ROI
     tmp = get_group_information(
             maps, 
             X, 
-            ['ROI-{}'.format(i) for i in range(1000)], 
+            labels=labels, 
+            atlas_maps=atlas_maps,
             masker=dilated_global_masker_95,
-            model_type=model_type.format('per-ROI-1000'), 
+            model_type=model_type.format('per-ROI'), 
             PROJECT_PATH=PROJECT_PATH,
             method='mean',
             plot=False,

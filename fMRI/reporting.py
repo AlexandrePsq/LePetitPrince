@@ -150,6 +150,7 @@ def get_layers_data(
 def get_model_data(
     model_names, 
     language='english',
+    verbose=1,
     OUTPUT_PATH="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/maps/english"
     ):
     data_full = {}
@@ -157,12 +158,13 @@ def get_model_data(
         data_full[model_name.replace('_{}', '')] = {}
         R2_maps = {}
         Pearson_coeff_maps = {}
-        for subject_id in tqdm(possible_subjects_id(language)):
+        for subject_id in possible_subjects_id(language):
             subject = get_subject_name(subject_id)
             path_to_map = os.path.join(OUTPUT_PATH, subject, model_name.format(subject_id))
             R2_maps[subject] = fetch_map(path_to_map, 'R2')
             Pearson_coeff_maps[subject] = fetch_map(path_to_map, 'Pearson_coeff')
-            print(subject, '-', len(R2_maps[subject]), '-', len(Pearson_coeff_maps[subject]))
+            if verbose > 0:
+                print(subject, '-', len(R2_maps[subject]), '-', len(Pearson_coeff_maps[subject]))
         R2_lists = list(zip(*R2_maps.values()))
         Pearson_coeff_lists = list(zip(*Pearson_coeff_maps.values()))
         try:

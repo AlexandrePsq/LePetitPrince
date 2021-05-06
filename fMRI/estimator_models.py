@@ -31,6 +31,8 @@ from scipy.stats import pearsonr
 from sklearn.metrics import r2_score
 from sklearn.linear_model import Ridge
 
+from regressors import B2B_reg
+
 
 
 class EstimatorModel(object):
@@ -117,7 +119,6 @@ class EstimatorModel(object):
             - voxel2alpha: list (of int)
             - alpha2voxel: dict (of list)
         """
-        hyperparameter = np.mean(hyperparameter, axis=0)
         best_alphas_indexes = np.argmax(np.mean(data, axis=0), axis=0)
         voxel2alpha = np.array([hyperparameter[i] for i in best_alphas_indexes])
         alpha2voxel = {key:[] for key in hyperparameter}
@@ -141,29 +142,47 @@ class EstimatorModel(object):
         Returns:
             - result: dict
         """
-        R2_ = np.zeros((Y_test[0].shape[1]))
-        Pearson_coeff_ = np.zeros((Y_test[0].shape[1]))
-        coefs = np.zeros((Y_test[0].shape[1], X_test[0].shape[1]))
-        intercepts = np.zeros((Y_test[0].shape[1]))
-        x_test = np.vstack(X_test)
         data = R2 if self.optimizing_criteria=='R2' else Pearson_coeff
-        voxel2alpha, alpha2voxel = self.optimize_alpha(data, alpha)
-        for alpha_, voxels in alpha2voxel.items():
-            if voxels:
-                y_test = np.vstack(Y_test)[:, voxels]
-                y_train = np.vstack(Y_train)[:, voxels]
-                x_train = np.vstack(X_train)
-                self.fit(x_train, y_train, alpha_)
-                predictions = self.predict(x_test)
-                R2_[voxels] = self.get_R2_coeff(predictions, y_test)
-                Pearson_coeff_[voxels] = self.get_Pearson_coeff(predictions, y_test)
-                coefs[voxels, :] = self.model.coef_
-                intercepts[voxels] = self.model.intercept_
+        alpha = np.mean(alpha, axis=0)
+        y_test = np.vstack(Y_test)
+        x_test = np.vstack(X_test)
+        y_train = np.vstack(Y_train)
+        x_train = np.vstack(X_train)
+        if 'B2B' in str(self.model):
+            mean_per_alpha = np.mean(np.mean(data, axis=0), axis=-1)
+            alpha_ = alpha[np.argmax(mean_per_alpha)]
+            self.fit(x_train, y_train, alpha_)
+            predictions = self.predict(x_test)
+            R2_ = self.get_R2_coeff(predictions, y_test)
+            Pearson_coeff_ = self.get_Pearson_coeff(predictions, y_test)
+            coefs = self.model.coef_
+            intercepts = self.model.intercept_
+            diag_matrix = self.model.diag_matrix_
+            voxel2alpha = np.array([alpha_ for i in range(y_train.shape[-1])])
+        else:
+            R2_ = np.zeros((Y_test[0].shape[1]))
+            Pearson_coeff_ = np.zeros((Y_test[0].shape[1]))
+            coefs = np.zeros((Y_test[0].shape[1], X_test[0].shape[1]))
+            intercepts = np.zeros((Y_test[0].shape[1]))
+            diag_matrix = np.array([])
+
+            voxel2alpha, alpha2voxel = self.optimize_alpha(data, alpha)
+            for alpha_, voxels in alpha2voxel.items():
+                if voxels:
+                    y_test_ = y_test[:, voxels]
+                    y_train_ = y_train[:, voxels]
+                    self.fit(x_train, y_train_, alpha_)
+                    predictions = self.predict(x_test)
+                    R2_[voxels] = self.get_R2_coeff(predictions, y_test_)
+                    Pearson_coeff_[voxels] = self.get_Pearson_coeff(predictions, y_test_)
+                    coefs[voxels, :] = self.model.coef_
+                    intercepts[voxels] = self.model.intercept_
         result = {'R2': R2_,
                     'Pearson_coeff': Pearson_coeff_,
                     'alpha': voxel2alpha,
                     'coef_': coefs,
-                    'intercept_': intercepts
+                    'intercept_': intercepts,
+                  'diag_matrix': diag_matrix,
                     }
         return result
 

@@ -150,7 +150,9 @@ def get_subject_name(id):
     Returns:
         - str
     """
-    if id < 10:
+    if type(id)==str:
+        return 'sub-{}'.format(id)
+    elif id < 10:
         return 'sub-00{}'.format(id)
     elif id < 100:
         return 'sub-0{}'.format(id)
@@ -369,9 +371,13 @@ def get_estimator_model_information(parameters):
 ########### Nilearn functions ###########
 #########################################
 
-def load_masker(path, **kwargs):
+def load_masker(path, resample_to_img_=None, intersect_with_img=False, **kwargs):
     params = read_yaml(path + '.yml')
     mask_img = nib.load(path + '.nii.gz')
+    if resample_to_img_ is not None:
+        mask_img = resample_to_img(mask_img, resample_to_img_, interpolation='nearest')
+        if intersect_with_img:
+            mask_img = math_img('img==2', img=math_img('img1+img2', img1=mask_img, img2=resample_to_img_))
     masker = NiftiMasker(mask_img)
     masker.set_params(**params)
     if kwargs:
@@ -394,25 +400,28 @@ def get_roi_mask(
     labels, 
     path=None, 
     global_mask=None, 
+    resample_to_img_=None,
+    intersect_with_img=False,
     PROJECT_PATH="/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/"):
     """Return the Niftimasker object for a given ROI based on an atlas.
-    Optionally resampled based on a global masker. Remove ‘Background‘ from labels !!!
+    Optionally resampled based on a resample_to_img_ image and another masker (global masker) parameters.  
     """
     if path is None:
         check_folder(os.path.join(PROJECT_PATH, 'derivatives/fMRI/ROI_masks'))
-        path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/ROI_masks', labels[index_mask])
+        path = os.path.join(PROJECT_PATH, 'derivatives/fMRI/ROI_masks', labels[index_mask]) #be careful to remove ‘background‘ from labels
     if os.path.exists(path + '.nii.gz') and os.path.exists(path + '.yml'):
-        masker = load_masker(path)
+        masker = load_masker(path, resample_to_img_=resample_to_img_, intersect_with_img=intersect_with_img)
     else:
-        mask = math_img('img=={}'.format(index_mask+1), img=atlas_maps)
+        mask = math_img('img=={}'.format(index_mask + 1), img=atlas_maps)
+        if resample_to_img_ is not None:
+            mask = resample_to_img(mask, resample_to_img_, interpolation='nearest')
+            if intersect_with_img:
+                mask_img = math_img('img==2', img=math_img('img1+img2', img1=mask_img, img2=resample_to_img_))
+        masker = NiftiMasker(mask)
         if global_mask:
-            global_masker = nib.load(global_mask + '.nii.gz')
-            mask = resample_to_img(mask, global_masker, interpolation='nearest')
             params = read_yaml(global_mask + '.yml')
             params['detrend'] = False
             params['standardize'] = False
-        masker = NiftiMasker(mask)
-        if global_mask:
             masker.set_params(**params)
         masker.fit()
         save_masker(masker, path)
@@ -426,7 +435,7 @@ def compute_global_masker(files, **kwargs): # [[path, path2], [path3, path4]]
         - masker: NiftiMasker
     """
     masks = [compute_epi_mask(f) for f in files]
-    global_mask = math_img('img>0.95', img=mean_img(masks)) # take the average mask and threshold at 0.5
+    global_mask = math_img('img>0.5', img=mean_img(masks)) # take the average mask and threshold at 0.5
     masker = NiftiMasker(global_mask, **kwargs)
     masker.fit()
     return masker

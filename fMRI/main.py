@@ -125,7 +125,7 @@ if __name__=='__main__':
         stimuli_representations_paths, fMRI_paths = fetch_data(parameters['path_to_fmridata'], input_path, 
                                                                 subject, parameters['language'], parameters['models'])
         stimuli_representations = transformer.process_representations(stimuli_representations_paths, parameters['models'])
-        fMRI_data = transformer.process_fmri_data(fMRI_paths, masker)
+        fMRI_data = transformer.process_fmri_data(fMRI_paths, masker, parameters['add_noise_to_constant'])
         logs.validate()
         
         logs.info("Executing pipeline...", end='\n')

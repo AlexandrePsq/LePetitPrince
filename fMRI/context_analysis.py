@@ -170,6 +170,8 @@ def fit_per_roi(
     global_mask, 
     PROJECT_PATH, 
     mask_img=None, 
+    resample_to_img_=None,
+    intersect_with_img=False,
     threshold_img=None, 
     voxels_filter=None, 
     threshold_error=10**8):
@@ -179,7 +181,14 @@ def fit_per_roi(
     maximum = np.zeros((len(labels), len(maps)))
     size = np.zeros((len(labels), len(maps)))
     for index_mask in tqdm(range(len(labels))):
-        masker = utils.get_roi_mask(atlas_maps, index_mask, labels, global_mask=global_mask, PROJECT_PATH=PROJECT_PATH)
+        masker = utils.get_roi_mask(
+            atlas_maps, 
+            index_mask, 
+            labels, 
+            global_mask=global_mask, 
+            resample_to_img_=resample_to_img_, 
+            intersect_with_img=intersect_with_img,
+            PROJECT_PATH=PROJECT_PATH)
         results = Parallel(n_jobs=-2)(delayed(extract_roi_data)(
             map_, 
             masker, 
@@ -317,11 +326,13 @@ def get_group_information(
     model_type, 
     PROJECT_PATH=PROJECT_PATH,
     atlas_maps=atlas_maps,
+    resample_to_img_=global_masker_50.mask_img,
+    intersect_with_img=True,
     method='mean',
     factor=0,
     voxel_wise=False,
     plot=False,
-    masker=dilated_global_masker_95,
+    masker=global_masker_50,
     p_val=0.001,
     fdr=0.01,
     plot_coords=[],
@@ -350,6 +361,8 @@ def get_group_information(
                     atlas_maps, 
                     labels, 
                     global_mask=None, 
+                    resample_to_img_=resample_to_img_,
+                    intersect_with_img=intersect_with_img,
                     mask_img=None, #dilate_img(mask_img) if mask_img is not None else 
                     PROJECT_PATH=PROJECT_PATH
                 )
@@ -365,7 +378,7 @@ def get_group_information(
     
     return context_sizes, z_map, eff_map, img_mask, array_mask
 
-def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=False, masker=dilated_global_masker_95, method='mean', n_times=100, sample_size=50, factor=0, plot=False, cst=0, titles=['', ''], PROJECT_PATH=PROJECT_PATH, fdr=0.01, p_val=0.001, plot_coords=plot_coords):
+def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=False, masker=global_masker_50, method='mean', n_times=100, sample_size=50, factor=0, plot=False, cst=0, titles=['', ''], PROJECT_PATH=PROJECT_PATH, fdr=0.01, p_val=0.001, plot_coords=plot_coords):
     """Do regional context analysis.
     """
     model_folder = os.path.join(PROJECT_PATH, 'derivatives/fMRI/context/english/{}_fdr-{}_pval-{}'.format(model_type, fdr, p_val))
@@ -591,7 +604,7 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
     return context_sizes, z_map, eff_map, img_mask, array_mask
 
 
-def context_analysis(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=False, masker=dilated_global_masker_95, method='mean', factor=0, plot=False, cst=0, titles=['', ''], PROJECT_PATH=PROJECT_PATH, fdr=0.01, p_val=0.001, plot_coords=[]):
+def context_analysis(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=False, masker=global_masker_50, method='mean', factor=0, plot=False, cst=0, titles=['', ''], PROJECT_PATH=PROJECT_PATH, fdr=0.01, p_val=0.001, plot_coords=[]):
     """Do regional context analysis.
     """
     model_folder = os.path.join(PROJECT_PATH, 'derivatives/fMRI/context/english/{}_fdr-{}_pval-{}'.format(model_type, fdr, p_val))
@@ -869,87 +882,6 @@ def format_ax(ax, X, data, title, xlabel, ylabel, confidence_interval=95, vertic
     ax.legend(legend_elements, legend_names)
 
 
-def plot_roi_analysis(model_name, values, labels, plot_name, mask_img=None, saving_path='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/raw_figures/'):
-    """Plot at ROI level.
-    """
-    filtered_sizes = [item for item in values if item is not None]
-    new_img_diff = nilearn.image.new_img_like(atlas_maps, np.stack([np.zeros((109, 91)) for i in range(91)], axis=0))
-    for index_mask in tqdm(range(len(labels))):
-        value = values[index_mask] if values[index_mask] is not None else 0
-        if index_mask == 0:
-            value = 0
-
-        mask = math_img('img=={}'.format(index_mask), img=atlas_maps)
-
-        mask_ = math_img('img * {}'.format(value), img=mask)
-        new_img_diff = math_img("img1 + img2", img1=new_img_diff, img2=mask_)
-
-    if 'gpt2' in model_name:
-        mask_img=os.path.join(ALL_MASKS_PATH, 'gpt2_pre-20_1_norm-inf_norm-inf_{}_hidden-all-layers_pca_300_significant-voxels.nii.gz')
-    elif 'lstm' in model_name:
-        mask_img=os.path.join(ALL_MASKS_PATH, 'LSTM_embedding-size-600_nhid-300_nlayers-1_dropout-02_memory-size-inf_wiki-kristina_english_{}_hidden-all-layers_pca_300_significant-voxels.nii.gz')
-    elif 'bert' in model_name:
-        mask_img=os.path.join(ALL_MASKS_PATH, 'bert-base-uncased_pre-2_1_post-0_norm-None_norm-inf_temporal-shifting-0_hidden-all-layers_pca_300_significant-voxels.nii.gz')    
-
-    plot_name = '_'.join([plot_name + model_name])
-    multi_plot(
-        data=new_img_diff, 
-        mask=mask_img,
-        plot_name=plot_name, 
-        saving_path=saving_path,
-        return_plot=True, 
-        inflated=False,
-        suptitle=None, #'Significant Context effect in ROIs (in number of tokens)',
-        vmax=np.max(filtered_sizes),
-        vmin=0,
-        cmap='cold_hot',
-        colorbar=False,
-        **kwargs)
-    plt.close('all')
-    fig = plt.figure(figsize=(1,10))
-    gs = fig.add_gridspec(1, 1)
-    ax = fig.add_subplot(gs[0, 0])
-    _draw_colorbar(ax, vmax=np.max(filtered_sizes), vmin=0, cmap='black_red')
-    #plt.savefig(os.path.join(saving_path, plot_name + '_colorbar.png'), bbox_inches = 'tight', pad_inches = 0)
-    plt.show()
-
-def plot_voxel_wise_analysis(model_name, masker, data, labels, plot_name, vmax=None, save_independently=False, saving_path='/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/raw_figures/', mask_img=None, inflated=False, categorical_values=False, cmap='cold_hot', draw_cbar=True):
-    """Plot voxel-wise.
-    """
-    img = masker.inverse_transform(np.array(data).reshape(1, -1))
-    if vmax is None: 
-        vmax = np.max(data)
-    
-    plot_name = '_'.join([plot_name + model_name])
-    multi_plot(
-        data=img, 
-        mask=mask_img,
-        plot_name=plot_name, 
-        saving_path=saving_path,
-        return_plot=True, 
-        inflated=inflated,
-        suptitle=None, #'Significant Context effect in ROIs (in number of tokens)',
-        vmax=vmax,
-        vmin=0,
-        cmap=cmap,
-        colorbar=False,
-        save_independently=save_independently,
-        categorical_values=categorical_values,
-        **kwargs)
-    plt.close('all')
-    if draw_cbar:
-        if categorical_values:
-            cmap=cmap
-        else:
-            cmap='black_red'
-        fig = plt.figure(figsize=(1,10))
-        gs = fig.add_gridspec(1, 1)
-        ax = fig.add_subplot(gs[0, 0])
-        _draw_colorbar(ax, vmax=vmax, vmin=0, cmap=cmap)
-        if saving_path is not None:
-            plt.savefig(os.path.join(saving_path, plot_name + '_colorbar.png'), bbox_inches = 'tight', pad_inches = 0, format='png')
-        plt.show()
-
 def bootstrap_confidence_interval(array, axis, statistic=np.median, confidence=0.95, seed=1111):
     np.random.seed(seed)
     withdrawal = array.shape[-1]
@@ -978,13 +910,20 @@ def bootstrap_confidence_interval(array, axis, statistic=np.median, confidence=0
     upper = np.percentile(scores, upper_p, axis=0)
     return lower, upper
 
-def ROI_voxels_indexes(img, masker, labels=labels, atlas_maps=atlas_maps, PROJECT_PATH=PROJECT_PATH):
+def ROI_voxels_indexes(img, masker, labels=labels, atlas_maps=atlas_maps, resample_to_img_=None, intersect_with_img=False, PROJECT_PATH=PROJECT_PATH):
     data = masker.transform(img)
     data_indexes = np.arange(1, 1 + data.shape[-1]).reshape(1, -1)
     img_indexes = masker.inverse_transform(data_indexes)
     
     def f(index):
-        masker = utils.get_roi_mask(atlas_maps, index, labels, global_mask=None, PROJECT_PATH=PROJECT_PATH)
+        masker = utils.get_roi_mask(
+            atlas_maps, 
+            index, 
+            labels, 
+            global_mask=None, 
+            resample_to_img_=resample_to_img_, 
+            intersect_with_img=intersect_with_img,
+            PROJECT_PATH=PROJECT_PATH)
         result = masker.transform(img_indexes)
         return result[result>0]
         
@@ -1017,7 +956,7 @@ if __name__=='__main__':
     model_type = parameters['model_type']
     bootstrap = parameters['bootstrap']
 
-    data_full = reporting.get_model_data(model_names, language, OUTPUT_PATH=OUTPUT_PATH)
+    data_full = reporting.get_model_data(model_names, language, OUTPUT_PATH=OUTPUT_PATH, verbose=0)
     maps = [data_full[name]['Pearson_coeff'] for name in data_full.keys()]
 
     # Per Voxels
@@ -1025,7 +964,7 @@ if __name__=='__main__':
     #        maps, 
     #        X, 
     #        ['voxel-{}'.format(i) for i in range(26074)], 
-    #        masker=dilated_global_masker_95,
+    #        masker=global_masker_50,
     #        model_type=model_type.format('voxel-wise'), 
     #        PROJECT_PATH=PROJECT_PATH,
     #        method='mean',
@@ -1046,9 +985,11 @@ if __name__=='__main__':
             X, 
             labels=labels, 
             atlas_maps=atlas_maps,
-            masker=dilated_global_masker_95,
+            masker=None,
             model_type=model_type.format('per-ROI'), 
             PROJECT_PATH=PROJECT_PATH,
+            resample_to_img_=global_masker_50.mask_img,
+            intersect_with_img=True,
             method='mean',
             plot=False,
             voxel_wise=False,

@@ -142,7 +142,7 @@ class Transformer(object):
         result = {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):]}
         return result
 
-    def identity(self, X_train, X_test):
+    def identity(self, X_train, X_test, centering=False,):
         """ Identity function.
         Arguments:
             - X_train: list
@@ -150,7 +150,14 @@ class Transformer(object):
         Returns:
             - result: dict
         """
-        return {'X_train': X_train, 'X_test': X_test}
+        matrices = [*X_train, *X_test] # X_train + X_test
+        if centering:
+            for index in range(len(matrices)):
+                scaler = StandardScaler(with_mean=centering, with_std=False)
+                scaler.fit(matrices[index])
+                matrices[index] = scaler.transform(matrices[index])
+        result = {'X_train': matrices[:-len(X_test)], 'X_test': matrices[-len(X_test):]}
+        return result
 
     def normalize(self, X_train, X_test, order, centering=False, scaling_axis=1):
         """ Normalizing function.
@@ -239,7 +246,7 @@ class Transformer(object):
             arrays.append(merge.values)
         return arrays
     
-    def process_fmri_data(self, fmri_paths, masker):
+    def process_fmri_data(self, fmri_paths, masker, add_noise_to_constant=True):
         """ Load fMRI data and mask it with a given masker.
         Preprocess it to avoid NaN value when using Pearson
         Correlation coefficients in the following analysis.
@@ -251,9 +258,10 @@ class Transformer(object):
         """
         data = [masker.transform(f) for f in fmri_paths]
         # voxels with activation at zero at each time step generate a nan-value pearson correlation => we add a small variation to the first element
-        for run in range(len(data)):
-            zero = np.zeros(data[run].shape[0])
-            new = zero.copy()
-            new[0] += np.random.random()/1000
-            data[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, data[run])
+        if add_noise_to_constant:
+            for run in range(len(data)):
+                zero = np.zeros(data[run].shape[0])
+                new = zero.copy()
+                new[0] += np.random.random()/1000
+                data[run] = np.apply_along_axis(lambda x: x if not np.array_equal(x, zero) else new, 0, data[run])
         return data

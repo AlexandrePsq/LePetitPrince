@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import argparse
 #import pingouin as pg
-from scipy.stats import norm
+from scipy.stats import norm, trim_mean
 import statsmodels.api as sm 
 from sklearn import manifold
 from scipy.special import erf
@@ -372,12 +372,10 @@ def get_group_information(
         np.save(saving_path, data)
     
     if bootstrap:
-        context_sizes, z_map, eff_map, img_mask, array_mask = context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_maps, n_times=n_times, sample_size=sample_size, voxel_wise=voxel_wise, masker=masker, method=method, factor=factor, plot=plot, titles=['Signal per subject', 'Scaled signal per subject'], PROJECT_PATH=PROJECT_PATH, p_val=p_val, fdr=fdr, plot_coords=plot_coords)
+        context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_maps, n_times=n_times, sample_size=sample_size, voxel_wise=voxel_wise, masker=masker, method=method, factor=factor, plot=plot, titles=['Signal per subject', 'Scaled signal per subject', 'Centered signal per subject'], PROJECT_PATH=PROJECT_PATH, p_val=p_val, fdr=fdr, plot_coords=plot_coords)
     else:
-        context_sizes, z_map, eff_map, img_mask, array_mask = context_analysis(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=voxel_wise, masker=masker, method=method, factor=factor, plot=plot, titles=['Signal per subject with {}'.format(model_type), 'Scaled signal per subject with {}'.format(model_type)], PROJECT_PATH=PROJECT_PATH, p_val=p_val, fdr=fdr, plot_coords=plot_coords)
+        context_analysis(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=voxel_wise, masker=masker, method=method, factor=factor, plot=plot, titles=['Signal per subject with {}'.format(model_type), 'Scaled signal per subject with {}'.format(model_type)], PROJECT_PATH=PROJECT_PATH, p_val=p_val, fdr=fdr, plot_coords=plot_coords)
     
-    return context_sizes, z_map, eff_map, img_mask, array_mask
-
 def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=False, masker=global_masker_50, method='mean', n_times=100, sample_size=50, factor=0, plot=False, cst=0, titles=['', ''], PROJECT_PATH=PROJECT_PATH, fdr=0.01, p_val=0.001, plot_coords=plot_coords):
     """Do regional context analysis.
     """
@@ -386,6 +384,7 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
     utils.check_folder(model_folder)
     tmp_path = os.path.join(model_folder, 'tmp_slopes_{}_fdr-{}.npy'.format(model_type, fdr))
     scaled_data_path = os.path.join(model_folder, 'scaled_data_{}_fdr-{}.npy'.format(model_type, fdr))
+    centered_data_path = os.path.join(model_folder, 'centered_data_{}_fdr-{}.npy'.format(model_type, fdr))
     data_path = os.path.join(model_folder, 'data_{}_fdr-{}.npy'.format(model_type, fdr))
     np.save(data_path, data) # size: (#models, #voxels, #subjects)
     dimensions = atlas_maps.shape
@@ -393,9 +392,14 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
         utils.write(logs_path, 'Resuming operations...')
         tmp = np.load(tmp_path)
         scaled_data = np.load(scaled_data_path)
+        centered_data = np.load(centered_data_path)
         utils.write(logs_path, 'Slopes & Scaled-data loaded.')
     else:
         utils.write(logs_path, 'Computing: Scaled-data & Slopes...')
+        # Center data
+        centered_data = np.stack([StandardScaler(with_mean=True, with_std=False).fit_transform(data[:, index, :]) for index in tqdm(range(data.shape[1]))], axis=0)
+        centered_data = np.rollaxis(centered_data, 1, 0)
+        # standardize data
         scaled_data = np.stack([StandardScaler(with_mean=True, with_std=True).fit_transform(data[:, index, :]) for index in tqdm(range(data.shape[1]))], axis=0)
         scaled_data = np.rollaxis(scaled_data, 1, 0)
         context_sizes = None
@@ -412,6 +416,7 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
         tmp = np.stack(tmp, axis=0)
         np.save(tmp_path, tmp)
         np.save(scaled_data_path, scaled_data) # size: (#models, #voxels, #subjects)
+        np.save(centered_data_path, centered_data) # size: (#models, #voxels, #subjects)
     utils.write(logs_path, 'Computed.')
     
     if voxel_wise:
@@ -430,8 +435,8 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
         effect_sizes = np.array(masker.transform(eff_map)[0])
     
     else:
-        tstat, pvalue = scipy.stats.ttest_1samp(tmp, 0, axis=1, alternative='greater')
-        tstat[np.isnan(tstat)] = 0
+        effect_sizes, pvalue = scipy.stats.ttest_1samp(tmp, 0, axis=1, alternative='greater')
+        effect_sizes[np.isnan(effect_sizes)] = 0
         pvalue[np.isnan(pvalue)] = 1
         z_values = norm.isf(pvalue)
         significant_values, corrected_pvalues = fdrcorrection(pvalue, alpha=fdr, method='indep', is_sorted=False)
@@ -451,7 +456,7 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
                 mask_z = math_img('img * {}'.format(z_values[index_mask]), img=mask_)
                 z_map = math_img("img1 + img2", img1=z_map, img2=mask_z)
                 # eff map
-                mask_eff = math_img('img * {}'.format(tstat[index_mask]), img=mask_)
+                mask_eff = math_img('img * {}'.format(effect_sizes[index_mask]), img=mask_)
                 eff_map = math_img("img1 + img2", img1=eff_map, img2=mask_eff)
         array_mask = img_mask.get_fdata()
     
@@ -461,67 +466,51 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
     np.save(os.path.join(model_folder, 'mask_{}_fdr-{}.npy'.format(model_type, fdr)), array_mask)
     utils.write(logs_path, 'Bootstrapping...')
     # bootstrap over subject to get statistics
-    samples = bootstrap_sampling(scaled_data, -1, n_times=n_times, sample_size=sample_size, seed=1111) # size: #samples* ( #models, #voxels, #subjects)
-    median_curves = [np.median(scaled_data_sample, axis=-1) for scaled_data_sample in samples]
+    samples_standardized = bootstrap_sampling(scaled_data, -1, n_times=n_times, sample_size=sample_size, seed=1111) # size: #samples* ( #models, #voxels, #subjects)
+    median_curves_standardized = [np.median(scaled_data_sample, axis=-1) for scaled_data_sample in samples_standardized]
+    trim_mean_curves_standardized = [trim_mean(scaled_data_sample, 0.10, axis=-1) for scaled_data_sample in samples_standardized]
 
-    median_all = np.stack(median_curves, axis=0) # size: (#samples, #models, #voxels)
+    samples_centered = bootstrap_sampling(centered_data, -1, n_times=n_times, sample_size=sample_size, seed=1111) # size: #samples* ( #models, #voxels, #subjects)
+    median_curves_centered = [np.median(centered_data_sample, axis=-1) for centered_data_sample in samples_centered]
+    trim_mean_curves_centered = [trim_mean(centered_data_sample, 0.10, axis=-1) for centered_data_sample in samples_centered]
+
+
+    median_standardized = np.stack(median_curves_standardized, axis=0) # size: (#samples, #models, #voxels)
+    trim_mean_standardized = np.stack(trim_mean_curves_standardized, axis=0) # size: (#samples, #models, #voxels)
+    median_centered = np.stack(median_curves_centered, axis=0) # size: (#samples, #models, #voxels)
+    trim_mean_centered = np.stack(trim_mean_curves_centered, axis=0) # size: (#samples, #models, #voxels)
     #std = np.std(median_all, axis=0) # size: (#models, #voxels)
     #limit_curves = [np.max(median - std, axis=0) for median in median_curves] # size: #voxels
 
-    bootstrap = Parallel(n_jobs=-1)(delayed(bootstrap_confidence_interval)(sample, axis=-1, statistic=np.median, confidence=0.95) for sample in samples)
+    bootstrap_median_standardized = Parallel(n_jobs=-1)(delayed(bootstrap_confidence_interval)(sample, axis=-1, statistic=np.median, confidence=0.95) for sample in samples_standardized)
+    bootstrap_trim_mean_standardized = Parallel(n_jobs=-1)(delayed(bootstrap_confidence_interval)(sample, axis=-1, statistic=trim_mean, confidence=0.95, **{'proportiontocut': 0.1}) for sample in samples_standardized)
+    bootstrap_median_centered = Parallel(n_jobs=-1)(delayed(bootstrap_confidence_interval)(sample, axis=-1, statistic=np.median, confidence=0.95) for sample in samples_centered)
+    bootstrap_trim_mean_centered = Parallel(n_jobs=-1)(delayed(bootstrap_confidence_interval)(sample, axis=-1, statistic=trim_mean, confidence=0.95, **{'proportiontocut': 0.1}) for sample in samples_centered)
     
-    lower, upper = zip(*bootstrap)
-    lower = np.stack(lower, axis=0) # size: (#samples, #models, #voxels)
-    upper = np.stack(upper, axis=0)
-    np.save(os.path.join(model_folder, 'lower-conf-interv_{}_fdr-{}.npy'.format(model_type, fdr)), lower)
-    np.save(os.path.join(model_folder, 'upper-conf-interv_{}_fdr-{}.npy'.format(model_type, fdr)), upper)
-    limit = np.max(lower, axis=1) # size: (#samples, #models, #voxels)
-    
-    def function(X, m, l, s):
-        """Return first index of X at which the limit l if crossed by m, if s (significant.)"""
-        try:
-            return int(round(X[np.argwhere(m > l)[0]][0], 0)) if s else None
-        except:
-            return min(X) if s else None
-    
-    def function2(X, context_sizes, median, limit, num_points=10):
-        new_X = [np.array([
-            X[list(X).index(context_sizes[index]) - 1] if list(X).index(context_sizes[index]) > 0 else X[list(X).index(context_sizes[index])], 
-            context_sizes[index]
-        ]) for index in range(len(context_sizes))]
+    context_sizes_all_median_standardized = get_context_size(bootstrap_median_standardized, samples_standardized, X, median_curves_standardized, median_standardized, model_folder, model_type, fdr, logs_path, name='standardized-median')
+    context_sizes_all_trim_mean_standardized = get_context_size(bootstrap_trim_mean_standardized, samples_standardized, X, trim_mean_curves_standardized, trim_mean_standardized, model_folder, model_type, fdr, logs_path, name='standardized-trim-mean')
+    context_sizes_all_median_centered = get_context_size(bootstrap_median_centered, samples_centered, X, median_curves_centered, median_centered, model_folder, model_type, fdr, logs_path, name='centered-median')
+    context_sizes_all_trim_mean_centered = get_context_size(bootstrap_trim_mean_centered, samples_centered, X, trim_mean_curves_centered, trim_mean_centered, model_folder, model_type, fdr, logs_path, name='centered-trim-mean')
 
-        estimations = Parallel(n_jobs=-2)(delayed(linear_fit)(
-            new_X[index], 
-            median[list(X).index(new_X[index][0]): list(X).index(new_X[index][1]) + 1, index], 
-            num_points=10
-        ) for index in range(len(context_sizes)))
-
-        estimated_X = np.stack(np.array(list(zip(*estimations))[0]), axis=-1)
-        estimated_median = np.stack(np.array(list(zip(*estimations))[1]), axis=-1)
-        context_sizes = Parallel(n_jobs=-1)(delayed(function)(estimated_X[:, index], estimated_median[:, index], limit[index], True) for index in range(median.shape[-1]))
-        return context_sizes
-
-    utils.write(logs_path, 'Computing context sizes...')
-    context_sizes_all = []
-    for sample_index in tqdm(range(len(samples))):
-        context_sizes = Parallel(n_jobs=-1)(delayed(function)(X, median_curves[sample_index][:, index], limit[sample_index, :][index], True) for index in range(median_all.shape[-1]))
-        context_sizes = function2(X, context_sizes, median_curves[sample_index], limit[sample_index, :], num_points=10)
-        context_sizes_all.append(np.array(context_sizes))
-
-    np.save(os.path.join(model_folder, 'context_sizes_bootstrap_{}_fdr-{}.npy'.format(model_type, fdr)), np.stack(context_sizes_all, axis=0))
+    np.save(os.path.join(model_folder, 'context_sizes_bootstrap_standardized-median_{}_fdr-{}.npy'.format(model_type, fdr)), np.stack(context_sizes_all_median_standardized, axis=0))
+    np.save(os.path.join(model_folder, 'context_sizes_bootstrap_standardized-trim-mean_{}_fdr-{}.npy'.format(model_type, fdr)), np.stack(context_sizes_all_trim_mean_standardized, axis=0))
+    np.save(os.path.join(model_folder, 'context_sizes_bootstrap_centered-median_{}_fdr-{}.npy'.format(model_type, fdr)), np.stack(context_sizes_all_median_centered, axis=0))
+    np.save(os.path.join(model_folder, 'context_sizes_bootstrap_centered-trim-mean_{}_fdr-{}.npy'.format(model_type, fdr)), np.stack(context_sizes_all_trim_mean_centered, axis=0))
     
     if plot:
         for index_label, label in tqdm(enumerate(labels)):
             fig1 = plt.figure(figsize=(20, 10))
-            gs = fig1.add_gridspec(2, 2, height_ratios=[10, 90])
+            gs = fig1.add_gridspec(2, 3, height_ratios=[10, 90])
 
             ax1 = fig1.add_subplot(gs[0, :])
             ax2 = fig1.add_subplot(gs[1, 0])
             ax3 = fig1.add_subplot(gs[1, 1])
+            ax4 = fig1.add_subplot(gs[1, 2])
             ax1.axis('off')
 
             ax1.text(0, 1, 'Effect size: {} \np-value: {}'.format(round(effect_sizes[index_label], 2), significant_values[index_label]))
             #ax3.fill_between(X, lower, upper, color='red', alpha=0.7)
+            title_color = 'green' if significant_values[index_label] else 'red'
 
             format_ax(
                 ax2, 
@@ -539,16 +528,31 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
                 titles[1], 
                 'Context size', 
                 'Scaled R value',
-                vertical_line=context_sizes[index_label]
+                vertical_line=[
+                    np.mean(np.stack(context_sizes_all_median_standardized, axis=0), axis=0)[index_label],
+                    np.mean(np.stack(context_sizes_all_trim_mean_standardized, axis=0), axis=0)[index_label],
+                ]
+            )
+            format_ax(
+                ax4, 
+                X, 
+                centered_data[:, index_label, :], 
+                titles[2], 
+                'Context size', 
+                'Centered R value',
+                vertical_line=[
+                    np.mean(np.stack(context_sizes_all_median_centered, axis=0), axis=0)[index_label], 
+                    np.mean(np.stack(context_sizes_all_trim_mean_centered, axis=0), axis=0)[index_label], 
+                ]
             )
             title_color = 'green' if significant_values[index_label] else 'red'
             plt.suptitle(label + ' - ' + model_type, fontsize=40, bbox={'facecolor': title_color, 'alpha': 0.5, 'pad': 10})
             plt.subplots_adjust(top=2, bottom=0.1, left=0.125, right=0.9, hspace=0.2, wspace=0.2)
             plt.tight_layout()
-            plt.savefig('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/raw_figures/{}_{}_method-{}_significant-factor-{}.png'.format(model_type, label.replace(' ', '-'), method, factor))
-            plt.show()
-            if input()!='':
-                break
+            plt.savefig('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/raw_figures/{}_{}_method-{}_significant-factor-{}.png'.format(model_type, label.replace(' ', '-'), method, factor), bbox_inches = 'tight', pad_inches = 0)
+            plt.close('all')
+            #if input()!='':
+            #    break
     else:
         for coords in plot_coords:
             label = '{}_{}_{}'.format(*coords)
@@ -566,12 +570,13 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
             index = extract_voxel_data(masker, data_coords)[0][0]
             title_color = 'green' if significant_values[index] else 'red'
             
-            fig1 = plt.figure(figsize=(20, 5))
-            gs = fig1.add_gridspec(2, 2, height_ratios=[10, 90])
+            fig1 = plt.figure(figsize=(20, 10))
+            gs = fig1.add_gridspec(2, 3, height_ratios=[10, 90])
 
             ax1 = fig1.add_subplot(gs[0, :])
             ax2 = fig1.add_subplot(gs[1, 0])
             ax3 = fig1.add_subplot(gs[1, 1])
+            ax4 = fig1.add_subplot(gs[1, 2])
             ax1.axis('off')
 
             ax1.text(0, 1, 'Effect size: {} \np-value: {}'.format(round(effect_sizes[index], 2), significant_values[index]))
@@ -593,15 +598,29 @@ def context_analysis_bootstrapped(data, X, labels, model_type, atlas_maps=atlas_
                 titles[1], 
                 'Context size', 
                 'Scaled R value',
-                vertical_line=np.mean(np.stack(context_sizes_all, axis=0), axis=0)[index]
+                vertical_line=[
+                    np.mean(np.stack(context_sizes_all_median_standardized, axis=0), axis=0)[index],
+                    np.mean(np.stack(context_sizes_all_trim_mean_standardized, axis=0), axis=0)[index],
+                ]
+            )
+            format_ax(
+                ax4, 
+                X, 
+                centered_data[:, index, :], 
+                titles[2], 
+                'Context size', 
+                'Centered R value',
+                vertical_line=[
+                    np.mean(np.stack(context_sizes_all_median_centered, axis=0), axis=0)[index], 
+                    np.mean(np.stack(context_sizes_all_trim_mean_centered, axis=0), axis=0)[index], 
+                ]
             )
             #plt.suptitle(label + ' - ' + model_type, fontsize=40, bbox={'facecolor': title_color, 'alpha': 0.5, 'pad': 10})
             plt.subplots_adjust(top=2, bottom=0.1, left=0.125, right=0.9, hspace=0.2, wspace=0.2)
             plt.tight_layout()
             saving_path = '/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/raw_figures/{}_{}_method-{}_significant-factor-{}.png'.format(model_type, label.replace(' ', '-'), method, factor)
             plt.savefig(saving_path, bbox_inches = 'tight', pad_inches = 0)
-            plt.show()
-    return context_sizes, z_map, eff_map, img_mask, array_mask
+            plt.close('all')
 
 
 def context_analysis(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_wise=False, masker=global_masker_50, method='mean', factor=0, plot=False, cst=0, titles=['', ''], PROJECT_PATH=PROJECT_PATH, fdr=0.01, p_val=0.001, plot_coords=[]):
@@ -807,7 +826,49 @@ def context_analysis(data, X, labels, model_type, atlas_maps=atlas_maps, voxel_w
             plt.tight_layout()
             plt.savefig('/neurospin/unicog/protocols/IRMf/LePetitPrince_Pallier_2018/LePetitPrince/derivatives/fMRI/context/english/raw_figures/{}_{}_method-{}_significant-factor-{}.png'.format(model_type, label.replace(' ', '-'), method, factor))
             plt.show()
-    return context_sizes, z_map, eff_map, img_mask, array_mask
+
+def get_context_size(bootstrap, samples, X, median_curves, median_all, model_folder, model_type, fdr, logs_path, name=''):
+    """
+    """
+    lower, upper = zip(*bootstrap)
+    lower = np.stack(lower, axis=0) # size: (#samples, #models, #voxels)
+    upper = np.stack(upper, axis=0)
+    np.save(os.path.join(model_folder, 'lower-conf-interv_{}_{}_fdr-{}.npy'.format(model_type, name, fdr)), lower)
+    np.save(os.path.join(model_folder, 'upper-conf-interv_{}_{}_fdr-{}.npy'.format(model_type, name, fdr)), upper)
+    limit = np.max(lower, axis=1) # size: (#samples, #models, #voxels)
+    
+    def function(X, m, l, s):
+        """Return first index of X at which the limit l if crossed by m, if s (significant.)"""
+        try:
+            return int(round(X[np.argwhere(m > l)[0]][0], 0)) if s else None
+        except:
+            return min(X) if s else None
+    
+    def function2(X, context_sizes, median, limit, num_points=10):
+        new_X = [np.array([
+            X[list(X).index(context_sizes[index]) - 1] if list(X).index(context_sizes[index]) > 0 else X[list(X).index(context_sizes[index])], 
+            context_sizes[index]
+        ]) for index in range(len(context_sizes))]
+
+        estimations = Parallel(n_jobs=-2)(delayed(linear_fit)(
+            new_X[index], 
+            median[list(X).index(new_X[index][0]): list(X).index(new_X[index][1]) + 1, index], 
+            num_points=10
+        ) for index in range(len(context_sizes)))
+
+        estimated_X = np.stack(np.array(list(zip(*estimations))[0]), axis=-1)
+        estimated_median = np.stack(np.array(list(zip(*estimations))[1]), axis=-1)
+        context_sizes = Parallel(n_jobs=-1)(delayed(function)(estimated_X[:, index], estimated_median[:, index], limit[index], True) for index in range(median.shape[-1]))
+        return context_sizes
+
+    utils.write(logs_path, 'Computing context sizes...')
+    context_sizes_all = []
+    for sample_index in tqdm(range(len(samples))):
+        context_sizes = Parallel(n_jobs=-1)(delayed(function)(X, median_curves[sample_index][:, index], limit[sample_index, :][index], True) for index in range(median_all.shape[-1]))
+        context_sizes = function2(X, context_sizes, median_curves[sample_index], limit[sample_index, :], num_points=10)
+        context_sizes_all.append(np.array(context_sizes))
+        
+    return context_sizes_all
 
 def mean_abs_deviation(array, axis):
     return np.mean(np.abs(array - np.mean(array, axis=axis)), axis=axis)
@@ -844,7 +905,7 @@ def linear_fit(x, y, num_points):
     Y = np.array([a * item + b for item in X])
     return X, Y
 
-def format_ax(ax, X, data, title, xlabel, ylabel, confidence_interval=95, vertical_line=None, bbox=None):
+def format_ax(ax, X, data, title, xlabel, ylabel, confidence_interval=95, vertical_line=[], bbox=None):
     """Format a matplotlib ax with given data and information...
     """
     dataframe = pd.DataFrame()
@@ -852,7 +913,8 @@ def format_ax(ax, X, data, title, xlabel, ylabel, confidence_interval=95, vertic
     dataframe = pd.concat([dataframe, pd.DataFrame(data)], axis=1)
     dataframe = pd.melt(dataframe, id_vars=['X'])
     dataframe.columns = ['X', 'subject_id', 'Y']
-    plot_ = sns.lineplot(data=dataframe, x='X', y='Y', ci=confidence_interval, ax=ax, estimator=np.median, legend='brief')
+    plot_1 = sns.lineplot(data=dataframe, x='X', y='Y', ci=confidence_interval, ax=ax, estimator=np.median, legend='brief', color='red')
+    plot_2 = sns.lineplot(data=dataframe, x='X', y='Y', ci=confidence_interval, ax=ax, estimator=lambda x: trim_mean(x, 0.1), legend='brief', color='blue')
     ax.plot(X, data, c='black', alpha=0.2)
     ax.tick_params(axis='y', labelsize=15)
     ax.set_title(title, fontsize=30, bbox=bbox)
@@ -864,25 +926,32 @@ def format_ax(ax, X, data, title, xlabel, ylabel, confidence_interval=95, vertic
     ax.grid(which='major', linestyle=':', linewidth='0.5', color='black', alpha=0.4, axis='x')
     ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.1, axis='y')
     ax.grid(which='minor', linestyle=':', linewidth='0.5', color='black', alpha=0.1, axis='x')
-    if (vertical_line!=None): ax.axvline(x=vertical_line ,color='red', linestyle='--')
+    vertical_lines_colors = ['red', 'blue']
+    vertical_lines_labels = ['median', 'trim_mean-10']
+    for index, vertical in enumerate(vertical_line):
+        ax.axvline(x=vertical, color=vertical_lines_colors[index], linestyle='--')
     legend_elements = [
         Line2D([0], [0], color='black', alpha=0.2, lw=2),
+        Line2D([0], [0], color='red', lw=2, alpha=0.6),
         Line2D([0], [0], color='blue', lw=2, alpha=0.6),
+        mpatches.Patch(color='red', alpha=0.2),
         mpatches.Patch(color='blue', alpha=0.2)
     ]
     legend_names = [
         "Subject's data",
         'Median signal',
-        'Confidence interval: {}%'.format(confidence_interval)
+        'Trim-mean (0.1) signal',
+        'Confidence interval median: {}%'.format(confidence_interval),
+        'Confidence interval trim-mean-0.1: {}%'.format(confidence_interval)
     ]
-    if (vertical_line!=None):
-        legend_elements.append(Line2D([0], [0], color='red', lw=2, linestyle='--'))
-        legend_names.append('Context saturation: {}'.format(vertical_line))
+    for index, vertical in enumerate(vertical_line):
+        legend_elements.append(Line2D([0], [0], color=vertical_lines_colors[index], lw=2, linestyle='--'))
+        legend_names.append('Context saturation: {} - {}'.format(vertical_line, vertical_lines_labels[index]))
 
     ax.legend(legend_elements, legend_names)
 
 
-def bootstrap_confidence_interval(array, axis, statistic=np.median, confidence=0.95, seed=1111):
+def bootstrap_confidence_interval(array, axis, statistic=np.median, confidence=0.95, seed=1111, **kwargs_statistic):
     np.random.seed(seed)
     withdrawal = array.shape[-1]
     # bootstrap
@@ -895,7 +964,7 @@ def bootstrap_confidence_interval(array, axis, statistic=np.median, confidence=0
         elif len(array.shape)==3:
             sample = array[:, :, indices]
         # calculate and store statistic
-        statistic_results = statistic(sample, axis=axis)
+        statistic_results = statistic(sample, axis=axis, **kwargs_statistic)
         scores.append(statistic_results)
     scores = np.stack(scores, axis=0)
     # calculate confidence intervals
@@ -980,7 +1049,7 @@ if __name__=='__main__':
     #    )
     #
     # Per ROI
-    tmp = get_group_information(
+    get_group_information(
             maps, 
             X, 
             labels=labels, 
@@ -991,7 +1060,7 @@ if __name__=='__main__':
             resample_to_img_=global_masker_50.mask_img,
             intersect_with_img=True,
             method='mean',
-            plot=False,
+            plot=True,
             voxel_wise=False,
             factor=0,
             fdr=fdr,

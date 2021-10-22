@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 
 import nibabel as nib
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import Ridge, LinearRegression
 from nilearn.masking import compute_epi_mask, apply_mask
 from nilearn.signal import clean
 from nilearn.image import math_img, mean_img, resample_to_img, index_img
@@ -192,7 +192,7 @@ def filter_args(func, d):
         - args: dict
     """
     keys = inspect.getfullargspec(func).args
-    args = {key: d[key] for key in keys if key!='self'}
+    args = {key: d[key] for key in keys if (key!='self' and key in d.keys())}
     return args
 
 def get_output_name(folder_path, language, subject, model_name, data_name=''):
@@ -224,7 +224,7 @@ def possible_subjects_id(language):
                     72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 86, 87, 88, 89, 91, 92, 93,
                     94, 95, 96, 97, 98, 99, 100, 101, 103, 104, 105, 106, 108, 109, 110, 113, 114, 115]
     elif language=='french':
-        result = [1, 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,29,30] # TO DO
+        result = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22,23,24,25,26,27,29,30] # TO DO #21 was removed issue to investigate
     elif language=='chineese':
         result = [1] # TO DO
     else:

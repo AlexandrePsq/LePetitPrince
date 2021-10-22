@@ -20,8 +20,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from ipywidgets import interact
 
 import scipy
-import hdbscan
-import nistats
+#import hdbscan
 import nilearn
 import nibabel as nib
 from nilearn import plotting
@@ -35,8 +34,12 @@ from sklearn.decomposition import FastICA
 from sklearn import manifold
 from sklearn.neighbors import kneighbors_graph
 from nilearn.regions import RegionExtractor
-from nistats.second_level_model import SecondLevelModel
-from nistats.thresholding import map_threshold
+try:
+    from nistats.second_level_model import SecondLevelModel
+    from nistats.thresholding import map_threshold
+except:
+    from nilearn.glm.second_level import SecondLevelModel
+    from nilearn.glm import threshold_stats_img
 from sklearn.cluster import AgglomerativeClustering, KMeans
 from nilearn.image import load_img, mean_img, index_img, threshold_img, math_img, smooth_img, new_img_like
 from nilearn.input_data import NiftiMasker
@@ -693,7 +696,7 @@ def create_one_sample_t_test(
     else:
         plotting.show()
     # apply fdr to zmap
-    thresholded_zmap, th = map_threshold(stat_img=z_map,
+    thresholded_zmap, th = threshold_stats_img(stat_img=z_map,
                                          alpha=fdr,
                                          height_control='fdr',
                                          cluster_threshold=0)

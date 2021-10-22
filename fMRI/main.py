@@ -29,6 +29,8 @@ if __name__=='__main__':
     subject = get_subject_name(parameters['subject'])
     output_path = get_output_name(output_path_, parameters['language'], subject, parameters['model_name'])
     logs = Logger(get_output_name(output_path_, parameters['language'], subject, parameters['model_name'], 'logs.txt'))
+    output_folder = os.path.join(output_path_, parameters['language'], subject, parameters['model_name'])
+    check_folder(output_folder)
     save_yaml(parameters, output_path + 'config.yml')
 
     logs.info("Fetching maskers...", end='\n')

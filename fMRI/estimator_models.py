@@ -29,7 +29,7 @@ import numpy as np
 
 from scipy.stats import pearsonr
 from sklearn.metrics import r2_score
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import Ridge, LinearRegression
 
 from regressors import B2B_reg
 
@@ -63,7 +63,8 @@ class EstimatorModel(object):
             - Y_train: list (of np.array)
             - alpha: float
         """
-        self.model.set_params(alpha=alpha)
+        if 'Ridge' in str(self.model):
+            self.model.set_params(alpha=alpha)
         dm = np.vstack(X_train)
         fmri = np.vstack(Y_train)
         self.model.fit(dm,fmri)
@@ -96,7 +97,7 @@ class EstimatorModel(object):
         """
         result = {'R2': [],
                     'Pearson_coeff': [],
-                    'alpha': self.alpha_list
+                    'alpha': self.alpha_list if ('Ridge' in str(self.model)) else [1]
                     }
         for alpha in self.alpha_list:
             self.fit(X_train, Y_train, alpha)
@@ -109,24 +110,28 @@ class EstimatorModel(object):
         result['Pearson_coeff'] = np.stack(result['Pearson_coeff'], axis=0)
         return result
         
-    def optimize_alpha(self, data, hyperparameter):
+    def optimize_alpha(self, data, hyperparameter, nb_voxels=None):
         """ Optimize the hyperparameter of a model given a
         list of measures.
         Arguments:
             - data: np.array (3D)
             - hyperparameter: np.array (2D)
+            - nb_voxels: int
         Returns:
             - voxel2alpha: list (of int)
             - alpha2voxel: dict (of list)
         """
-        best_alphas_indexes = np.argmax(np.mean(data, axis=0), axis=0)
-        voxel2alpha = np.array([hyperparameter[i] for i in best_alphas_indexes])
+        if data is None:
+            voxel2alpha = [self.alpha for i in range(nb_voxels)]
+        else:
+            best_alphas_indexes = np.argmax(np.mean(data, axis=0), axis=0)
+            voxel2alpha = np.array([hyperparameter[i] for i in best_alphas_indexes])
         alpha2voxel = {key:[] for key in hyperparameter}
         for index in range(len(voxel2alpha)):
             alpha2voxel[voxel2alpha[index]].append(index)
         return voxel2alpha, alpha2voxel
     
-    def evaluate(self, X_train, X_test, Y_train, Y_test, R2, Pearson_coeff, alpha):
+    def evaluate(self, X_train, X_test, Y_train, Y_test, R2=None, Pearson_coeff=None, alpha=None):
         """ Fit a model for each voxel given the parameter optimizing a measure.
         Arguments:
             - X_train: list (of np.array)
@@ -143,7 +148,7 @@ class EstimatorModel(object):
             - result: dict
         """
         data = R2 if self.optimizing_criteria=='R2' else Pearson_coeff
-        alpha = np.mean(alpha, axis=0)
+        alpha = np.mean(alpha, axis=0) if (alpha is not None) else [self.alpha]
         y_test = np.vstack(Y_test)
         x_test = np.vstack(X_test)
         y_train = np.vstack(Y_train)
@@ -166,7 +171,7 @@ class EstimatorModel(object):
             intercepts = np.zeros((Y_test[0].shape[1]))
             diag_matrix = np.array([])
 
-            voxel2alpha, alpha2voxel = self.optimize_alpha(data, alpha)
+            voxel2alpha, alpha2voxel = self.optimize_alpha(data, alpha, nb_voxels=y_test.shape[-1])
             for alpha_, voxels in alpha2voxel.items():
                 if voxels:
                     y_test_ = y_test[:, voxels]

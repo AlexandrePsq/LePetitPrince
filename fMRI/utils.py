@@ -255,8 +255,7 @@ def fetch_offsets(offset_type, run_index, offset_path, language):
         - vector: np.array
     """
     index = run_index[-1]
-    offset_template_path = os.path.join(offset_path, language, '{offset_type}' + '_run{index}.csv')
-    path = offset_template_path.format(offset_type=offset_type, index=index)
+    path = os.path.join(offset_path, language, f'{offset_type}' + f'_run{index}.csv')
     if not os.path.exists(path):
         raise Exception("Please specify an offset file at: {}".format(path))
     else:
@@ -274,8 +273,7 @@ def fetch_duration(duration_type, run_index, duration_path, default_size=None):
         - vector: np.array
     """
     index = run_index[-1]
-    duration_template_path = os.path.join(duration_path, 'durations', '{duration_type}' + '_run{index}.csv')
-    path = duration_template_path.format(duration_type=duration_type, index=index)
+    path = os.path.join(duration_path, 'durations', f'{duration_type}' + f'_run{index}.csv')
     if not os.path.exists(path):
         duration = np.ones(default_size)
     else:
